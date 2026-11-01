@@ -1,0 +1,141 @@
+stories/gara-gara-kucing/raw/source-manuscript.txt
+  9bb1fdb3cb2edc09 1-55
+stories/gara-gara-kucing/bible/character-bible.json
+  9bb1fdb3cb2edc09 1-24
+scripts/render-thumbnail.ts
+  9bb1fdb3cb2edc09 1-149
+stories/gara-gara-kucing/assets/scene_03_words.json
+  9bb1fdb3cb2edc09 1-180
+src/remotion/components/StoryScene.tsx
+  9bb1fdb3cb2edc09 1-238
+stories/gara-gara-kucing/assets/scene_05_words.json
+  9bb1fdb3cb2edc09 1-212
+skills/storybook-video-generator/references/limitations-and-workarounds.md
+  9bb1fdb3cb2edc09 1-151
+stories/gara-gara-kucing/raw/metadata.json
+  9bb1fdb3cb2edc09 1-14
+src/remotion/Root.tsx
+  9bb1fdb3cb2edc09 1-66
+scripts/render-logo.ts
+  9bb1fdb3cb2edc09 1-116
+stories/gara-gara-kucing/assets/en/scene_01_words.json
+  9bb1fdb3cb2edc09 1-100
+.env.example
+  9bb1fdb3cb2edc09 1-26
+stories/gara-gara-kucing/assets/scene_09_words.json
+  9bb1fdb3cb2edc09 1-52
+skills/storybook-video-generator/references/distribution-upload.md
+  9bb1fdb3cb2edc09 1-200
+stories/gara-gara-kucing/story.json
+  9bb1fdb3cb2edc09 1-496
+scripts/manage-youtube.ts
+  9bb1fdb3cb2edc09 1-109
+stories/gara-gara-kucing/assets/en/scene_07_words.json
+  9bb1fdb3cb2edc09 1-108
+stories/gara-gara-kucing/assets/scene_01_words.json
+  9bb1fdb3cb2edc09 1-84
+tsconfig.json
+  9bb1fdb3cb2edc09 1-22
+stories/gara-gara-kucing/assets/en/scene_03_words.json
+  9bb1fdb3cb2edc09 1-204
+stories/gara-gara-kucing/bible/world-bible.json
+  9bb1fdb3cb2edc09 1-13
+skills/storybook-video-generator/references/remotion-renderer.md
+  9bb1fdb3cb2edc09 1-166
+stories/gara-gara-kucing/raw/user-review-card.md
+  9bb1fdb3cb2edc09 1-29
+src/remotion/components/CoverScene.tsx
+  9bb1fdb3cb2edc09 1-159
+package.json
+  9bb1fdb3cb2edc09 1-33
+.gitignore
+  9bb1fdb3cb2edc09 1-22
+stories/gara-gara-kucing/assets/en/scene_05_words.json
+  9bb1fdb3cb2edc09 1-252
+skills/storybook-video-generator/references/story-sources.md
+  9bb1fdb3cb2edc09 1-113
+stories/gara-gara-kucing/assets/scene_04_words.json
+  9bb1fdb3cb2edc09 1-172
+skills/storybook-video-generator/references/directory-template.md
+  9bb1fdb3cb2edc09 1-461
+stories/branding/logo-concept-2-mascot.svg
+  9bb1fdb3cb2edc09 1-143
+stories/gara-gara-kucing/assets/scene_02_words.json
+  9bb1fdb3cb2edc09 1-124
+stories/gara-gara-kucing/assets/en/scene_09_words.json
+  9bb1fdb3cb2edc09 1-68
+stories/gara-gara-kucing/assets/en/scene_06_words.json
+  9bb1fdb3cb2edc09 1-116
+src/remotion/components/KineticSubtitles.tsx
+  9bb1fdb3cb2edc09 1-154
+stories/gara-gara-kucing/assets/scene_08_words.json
+  9bb1fdb3cb2edc09 1-52
+scripts/upload-youtube.ts
+  9bb1fdb3cb2edc09 1-922
+stories/gara-gara-kucing/assets/en/cover_words.json
+  9bb1fdb3cb2edc09 1-108
+scripts/synthesize-english.ts
+  9bb1fdb3cb2edc09 1-201
+config/.gitkeep
+  9bb1fdb3cb2edc09 1
+README.md
+  9bb1fdb3cb2edc09 1-127
+scripts/manage-story.ts
+  9bb1fdb3cb2edc09 1-198
+stories/gara-gara-kucing/assets/en/scene_04_words.json
+  9bb1fdb3cb2edc09 1-220
+stories/gara-gara-kucing/assets/cover_words.json
+  9bb1fdb3cb2edc09 1-68
+stories/gara-gara-kucing/assets/scene_06_words.json
+  9bb1fdb3cb2edc09 1-124
+src/remotion/components/ThumbnailComposition.tsx
+  9bb1fdb3cb2edc09 1-878
+stories/gara-gara-kucing/assets/scene_07_words.json
+  9bb1fdb3cb2edc09 1-124
+skills/storybook-video-generator/references/voiceover-subtitles.md
+  9bb1fdb3cb2edc09 1-166
+skills/storybook-video-generator/references/prerequisites.md
+  9bb1fdb3cb2edc09 1-82
+scripts/render-book.ts
+  9bb1fdb3cb2edc09 1-134
+stories/gara-gara-kucing/assets/en/scene_02_words.json
+  9bb1fdb3cb2edc09 1-132
+skills/storybook-video-generator/SKILL.md
+  9bb1fdb3cb2edc09 1-245
+src/remotion/index.ts
+  9bb1fdb3cb2edc09 1-4
+stories/gara-gara-kucing/exports/youtube-upload-metadata.md
+  9bb1fdb3cb2edc09 1-252
+stories/branding/logo-concept-1-emblem.svg
+  9bb1fdb3cb2edc09 1-138
+src/remotion/components/StorybookVideoComposition.tsx
+  9bb1fdb3cb2edc09 1-51
+skills/storybook-video-generator/references/cinematography.md
+  9bb1fdb3cb2edc09 1-101
+stories/gara-gara-kucing/assets/en/scene_08_words.json
+  9bb1fdb3cb2edc09 1-68
+skills/storybook-video-generator/references/consistency-bible.md
+  9bb1fdb3cb2edc09 1-110
+LICENSE
+  9bb1fdb3cb2edc09 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "d67f2a432d505c8b281985fab1e8a3bc763c0e97",
+  "prompts": {
+    "9bb1fdb3cb2edc09": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "8cf7b3f1-9b39-4df1-9e53-53df5f08fc48",
+        "model": "unknown"
+      },
+      "human_author": "Ramadhani Musthofa <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 9158,
+      "total_deletions": 0,
+      "accepted_lines": 9158,
+      "overriden_lines": 0
+    }
+  }
+}
