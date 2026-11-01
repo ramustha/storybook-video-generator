@@ -5,7 +5,7 @@ export interface WordTiming {
   word: string;
   start: number;
   end: number;
-  speaker?: "guru" | "budi" | "narator";
+  speaker?: string;
   speakerName?: string;
   speakerColor?: string;
 }
@@ -17,8 +17,14 @@ interface KineticSubtitlesProps {
 
 const SPEAKER_ICONS: Record<string, string> = {
   guru: "👩‍🏫",
+  ibu: "👩",
+  mother: "👩",
   budi: "👦",
+  manu: "👦",
+  anak: "👦",
+  protagonist: "👦",
   narator: "📖",
+  narrator: "📖",
 };
 
 export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVertical }) => {
@@ -40,10 +46,10 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
 
   // Active word details
   const activeWord = words[activeWordIdx] || words[resolvedIdx] || words[0];
-  const activeSpeaker = activeWord?.speaker || "budi";
-  const activeSpeakerName = activeWord?.speakerName || "Budi";
-  const activeSpeakerColor = activeWord?.speakerColor || (activeSpeaker === "guru" ? "#38BDF8" : "#FDE047");
-  const speakerIcon = SPEAKER_ICONS[activeSpeaker] || "💬";
+  const activeSpeaker = activeWord?.speaker || "narator";
+  const activeSpeakerName = activeWord?.speakerName || "Narator";
+  const activeSpeakerColor = activeWord?.speakerColor || "#FDE047";
+  const speakerIcon = SPEAKER_ICONS[activeSpeaker.toLowerCase()] || "💬";
 
   return (
     <div

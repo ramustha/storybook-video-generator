@@ -2,6 +2,7 @@ node_modules/
 .DS_Store
 dist/
 .remotion/
+tmp/
 
 # Credentials, Keys & Secrets (Strictly Ignored)
 config/youtube-credentials.json

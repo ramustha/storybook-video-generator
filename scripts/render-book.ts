@@ -12,47 +12,16 @@ async function main() {
 
   const bookSlug = getArg("--book") || "gara-gara-kucing";
   const requestedFormat = getArg("--format") || "all";
-  const lang = (getArg("--lang") as "id" | "en") || "id";
+  const langArg = (getArg("--lang") || "all") as "id" | "en" | "all";
   const resolution = getArg("--resolution") || "1080p";
 
   const storyDir = path.resolve(`./stories/${bookSlug}`);
   const manifestPath = path.join(storyDir, "story.json");
   const rawManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
 
-  // Deep clone story data for active language
-  const storyData = JSON.parse(JSON.stringify(rawManifest));
-  if (lang === "en") {
-    storyData.title = rawManifest.originalTitle || "It's All the Cat's Fault!";
-    storyData.language = "en-US";
-    for (const scene of storyData.scenes) {
-      if (scene.audio?.en) {
-        scene.audio.text = scene.audio.en.text;
-        scene.audio.audioPath = scene.audio.en.audioPath;
-        scene.audio.wordsPath = scene.audio.en.wordsPath;
-        if (scene.audio.en.durationSeconds) {
-          scene.durationSeconds = scene.audio.en.durationSeconds;
-        }
-      }
-    }
-  }
+  const languages: Array<"id" | "en"> = langArg === "all" ? ["id", "en"] : [langArg];
 
-  // Load words json for active language
-  const wordsMap: Record<string, any[]> = {};
-  for (const scene of storyData.scenes) {
-    const wordsRelPath = scene.audio?.wordsPath;
-    if (wordsRelPath) {
-      const wordsFile = path.join(storyDir, wordsRelPath);
-      try {
-        const raw = await fs.readFile(wordsFile, "utf-8");
-        const parsed = JSON.parse(raw);
-        wordsMap[scene.sceneId] = parsed.words || [];
-      } catch (err) {
-        wordsMap[scene.sceneId] = [];
-      }
-    }
-  }
-
-  console.log(`\n📦 Bundling Remotion video composition for "${storyData.title}" (${lang.toUpperCase()})...`);
+  console.log(`\n📦 Bundling Remotion video composition for "${rawManifest.title}"...`);
   const serveUrl = await bundle({
     entryPoint: path.resolve("./src/remotion/index.ts"),
     publicDir: storyDir,
@@ -63,69 +32,109 @@ async function main() {
       ? ["landscape", "vertical"]
       : [requestedFormat as "landscape" | "vertical"];
 
-  const exportLangDir = lang === "en" ? path.join(storyDir, "exports/en") : path.join(storyDir, "exports/id");
-  await fs.mkdir(exportLangDir, { recursive: true });
+  for (const lang of languages) {
+    // Deep clone story data for active language
+    const storyData = JSON.parse(JSON.stringify(rawManifest));
+    if (lang === "en") {
+      storyData.title = rawManifest.originalTitle || rawManifest.title;
+      storyData.language = "en-US";
+      for (const scene of storyData.scenes) {
+        if (scene.audio?.en) {
+          scene.audio.text = scene.audio.en.text;
+          scene.audio.audioPath = scene.audio.en.audioPath;
+          scene.audio.wordsPath = scene.audio.en.wordsPath;
+          if (scene.audio.en.durationSeconds) {
+            scene.durationSeconds = scene.audio.en.durationSeconds;
+          }
+        }
+      }
+    }
 
-  for (const format of formats) {
-    const compositionId =
-      format === "vertical"
-        ? "StorybookVideoComposition-Vertical"
-        : "StorybookVideoComposition-Landscape";
+    // Load words json for active language
+    const wordsMap: Record<string, any[]> = {};
+    for (const scene of storyData.scenes) {
+      const wordsRelPath = scene.audio?.wordsPath;
+      if (wordsRelPath) {
+        const wordsFile = path.join(storyDir, wordsRelPath);
+        try {
+          const raw = await fs.readFile(wordsFile, "utf-8");
+          const parsed = JSON.parse(raw);
+          wordsMap[scene.sceneId] = parsed.words || [];
+        } catch (err) {
+          wordsMap[scene.sceneId] = [];
+        }
+      }
+    }
 
-    const inputProps = {
-      book: storyData,
-      orientation: format,
-      wordsMap,
-    };
+    const exportLangDir = lang === "en" ? path.join(storyDir, "exports/en") : path.join(storyDir, "exports/id");
+    await fs.mkdir(exportLangDir, { recursive: true });
 
-    console.log(`\n🎬 Selecting composition: ${compositionId}...`);
-    const composition = await selectComposition({
-      serveUrl,
-      id: compositionId,
-      inputProps,
-    });
+    for (const format of formats) {
+      const compositionId =
+        format === "vertical"
+          ? "StorybookVideoComposition-Vertical"
+          : "StorybookVideoComposition-Landscape";
 
-    const is4K = resolution === "4k";
-    const width = is4K ? (format === "vertical" ? 2160 : 3840) : composition.width;
-    const height = is4K ? (format === "vertical" ? 3840 : 2160) : composition.height;
+      const inputProps = {
+        book: storyData,
+        orientation: format,
+        wordsMap,
+      };
 
-    const baseName = lang === "en" ? "its-all-the-cats-fault" : bookSlug;
-    const outputFileName = `${baseName}-${format === "vertical" ? "9x16" : "16x9"}${is4K ? "-4k" : ""}.mp4`;
-    const outputLocation = path.join(exportLangDir, outputFileName);
+      console.log(`\n🎬 Selecting composition: ${compositionId} [${lang.toUpperCase()}]...`);
+      const composition = await selectComposition({
+        serveUrl,
+        id: compositionId,
+        inputProps,
+      });
 
-    console.log(
-      `🚀 Rendering ${lang.toUpperCase()} ${format.toUpperCase()} video (${width}x${height}, ${composition.durationInFrames} frames @ ${composition.fps}fps)...`
-    );
-    const startTime = Date.now();
+      const is4K = resolution === "4k";
+      const width = is4K ? (format === "vertical" ? 2160 : 3840) : composition.width;
+      const height = is4K ? (format === "vertical" ? 3840 : 2160) : composition.height;
 
-    await renderMedia({
-      composition: {
-        ...composition,
-        width,
-        height,
-      },
-      serveUrl,
-      codec: "h264",
-      outputLocation,
-      inputProps,
-      concurrency: 2,
-    });
+      const enSlug = rawManifest.exports?.en?.landscape?.path
+        ? path.basename(rawManifest.exports.en.landscape.path, "-16x9.mp4")
+        : (rawManifest.originalTitle
+            ? rawManifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+            : `${bookSlug}-en`);
+      const baseName = lang === "en" ? enSlug : bookSlug;
+      const outputFileName = `${baseName}-${format === "vertical" ? "9x16" : "16x9"}${is4K ? "-4k" : ""}.mp4`;
+      const outputLocation = path.join(exportLangDir, outputFileName);
 
-    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.log(`✔ Video exported in ${elapsed}s: ${outputLocation}`);
+      console.log(
+        `🚀 Rendering ${lang.toUpperCase()} ${format.toUpperCase()} video (${width}x${height}, ${composition.durationInFrames} frames @ ${composition.fps}fps)...`
+      );
+      const startTime = Date.now();
 
-    if (!rawManifest.exports) rawManifest.exports = {};
-    if (!rawManifest.exports[lang]) rawManifest.exports[lang] = {};
-    rawManifest.exports[lang][format] = {
-      status: "rendered",
-      resolution: `${width}x${height}`,
-      renderedAt: new Date().toISOString(),
-      path: path.relative(storyDir, outputLocation),
-    };
+      await renderMedia({
+        composition: {
+          ...composition,
+          width,
+          height,
+        },
+        serveUrl,
+        codec: "h264",
+        outputLocation,
+        inputProps,
+        concurrency: 2,
+      });
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✔ Video exported in ${elapsed}s: ${outputLocation}`);
+
+      if (!rawManifest.exports) rawManifest.exports = {};
+      if (!rawManifest.exports[lang]) rawManifest.exports[lang] = {};
+      rawManifest.exports[lang][format] = {
+        status: "rendered",
+        resolution: `${width}x${height}`,
+        renderedAt: new Date().toISOString(),
+        path: path.relative(storyDir, outputLocation),
+      };
+    }
   }
 
   await fs.writeFile(manifestPath, JSON.stringify(rawManifest, null, 2));
-  console.log(`\n🎉 All renders completed successfully for "${storyData.title}" (${lang.toUpperCase()})!`);
+  console.log(`\n🎉 All renders completed successfully for "${rawManifest.title}"!`);
 }
 
 main().catch((err) => {

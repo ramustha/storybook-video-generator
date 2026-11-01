@@ -108,3 +108,57 @@ FOOTER:
 - Production notes: "Character Anchor: [CHARACTER ANCHOR SUMMARY] | Palette: [PALETTE HEX CODES] | License: [LICENSE]".
 Clean vector framing, crisp readable typography, high visual contrast, professional children's book video production reference sheet.
 ```
+
+---
+
+## 6. Illustration Quota Limit Detection & Progressive Storyboard Protocol
+
+When generating visual plates via AI image generation APIs (e.g. Gemini Imagen 3) or subagents, API endpoints enforce rate limits and burst quotas (typically 3 to 5 images per burst on free/developer tiers, resetting every ~4 to 5 hours, or daily request limits).
+
+### A. Quota Exhaustion Signatures
+The pipeline actively intercepts the following error signatures during visual synthesis:
+* `429 Too Many Requests`
+* `RESOURCE_EXHAUSTED`
+* `"Quota exceeded for quota metric 'Generate Content API Requests'..."`
+* Google GenAI API status code `8` / `RESOURCE_EXHAUSTED`
+
+### B. Manifest State Tracking (`story.json`)
+Every scene tracks visual plate readiness in `story.json`:
+```json
+"visual": {
+  "imagePath": "assets/scene_04.png",
+  "prompt": "...",
+  "status": "quota_pending",
+  "quotaPausedAt": "2026-11-01T20:25:00.000Z",
+  "estimatedResetAt": "2026-11-02T01:00:00.000Z"
+}
+```
+
+### C. The Interactive Decision Card Protocol
+Whenever a visual quota limit is encountered, the generator MUST NOT fail silently or abort the task. It must pause immediately and present an interactive Decision Card to the user:
+
+```markdown
+### ⚠️ Visual Generation Quota Reached
+
+Generated: Scene 1–3 (3/9 scenes ready).
+Remaining: Scene 4–9 paused due to API quota rate limit (`RESOURCE_EXHAUSTED`).
+Estimated Quota Reset: ~4–5 hours (or next UTC cycle).
+
+| Option | Action | Blast Radius & Flow Impact | Reversibility | Recommendation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Option 1: Wait & Auto-Resume** | Pause workflow and set a timer until quota reset window. | Delays final video completion by ~4–5 hours; 100% final authentic illustrations. | High (can switch options anytime) | **Recommended if final video is needed without interim draft.** |
+| **Option 2: Continue the Rest (Progressive Draft)** | Slot in stylish storyboard placeholder plates for pending scenes, continue voiceover synthesis (ID & EN), kinetic subtitles, and export draft MP4s. | Zero delay: user can review audio, timing, and narrative pacing right away. Final plates slotted in later in <60s via `scripts/manage-story.ts`. | High (single command swaps plates) | **Recommended for active development & review.** |
+| **Option 3: Secondary Key / Source Ingestion** | Provide secondary `GEMINI_API_KEY` or ingest clean open-access plates directly from StoryWeaver / GDL. | Resumes generation immediately without waiting. | Instant | Feasible if backup key exists. |
+```
+
+### D. Progressive Storyboard Placeholder Mode (Option 2)
+If the user selects Option 2 (or in non-interactive pipeline runs):
+1. **Generate Styled Placeholder Plates**: Creates dark-themed 1920×1080 storyboard cards at `assets/scene_XX.png` displaying scene number, scene prompt snippet, and duration badge.
+2. **Mark Status**: Sets `visual.status: "placeholder"` in `story.json`.
+3. **Continue Downstream Pipeline**: Synthesizes all voiceovers (Indonesian and English), extracts `WordBoundary` telemetry, generates audio stems, and renders preview MP4 videos.
+4. **Resuming Later**: Once quota resets, execute:
+   ```bash
+   npx tsx scripts/manage-story.ts --book <book-slug> --asset visual --resume-quota
+   npm run render -- --book <book-slug> --lang all --format all
+   ```
+

@@ -16,6 +16,7 @@ This document provides an exhaustive, engineering-grade catalog of real-world bo
 | **Remotion** | **Headless Chrome WebSocket / CDP** | `connect EPERM 127.0.0.1` inside isolated sandbox environments | Run rendering scripts with sandbox network bypass (`BypassSandbox: true` / elevated socket permissions). |
 | **Remotion** | **High Memory Spikes on 4K Canvas** | Chrome tab crash (`SIGKILL` / OOM) on machines with <8GB available RAM | Standardize on 1080p Full HD (`1920×1080`) by default; reserve 4K for dedicated high-RAM render nodes. |
 | **Remotion** | **Audio Buffer vs Timeline Frame Drift** | Audio clipping or silent tail frames due to fractional frame rounding | Always compute `durationInFrames = Math.ceil(durationInSeconds * fps)` and add 0.1s silence padding to audio stems. |
+| **AI Visuals** | **Image API Quota & Burst Throttle** | `429 / RESOURCE_EXHAUSTED` after 3–5 rapid image generation requests | Pause, present Decision Card (Option 1: Wait & Auto-Resume vs Option 2: Progressive Draft with storyboard placeholders). |
 | **AI Visuals** | **Garbled AI Text Hallucination** | Image models generate distorted pseudo-text on signs, clothes, and book covers | Append negative prompt: `--no text, no watermark, no typography, no letters, no words, no signs`; prioritize authentic source plates. |
 | **AI Visuals** | **Multi-Scene Character Drift** | Protagonist facial structure, attire, or hair color changes across scenes | Lock physical traits in `Character Bible` (`bible/character-bible.json`) and prepend exact descriptor formula to every scene prompt. |
 | **AI Visuals** | **Vertical 9:16 Cropping Blindspot** | Standard `objectFit: cover` chops off >60% of horizontal action and side characters | Use **Ambient Pillarbox Canvas** (blurred backdrop + centered 16:9 plate + lower kinetic subtitles). |
@@ -103,6 +104,17 @@ Even when daily quota remains available, YouTube enforces an unadvertised **burs
 ---
 
 ## 3. Visual Generation & Art Consistency Boundaries
+
+### AI Image Generation Quota Limits & Burst Throttling
+* **Quota Envelope**: Cloud image generation endpoints (Gemini Imagen 3, Google GenAI SDK, or subagents) enforce burst limits (typically 3 to 5 images per burst on free/developer tiers, resetting every ~4 to 5 hours) and daily rate limits.
+* **Error Signatures**: `429 Too Many Requests`, `RESOURCE_EXHAUSTED`, or status code `8`.
+* **Standard Operating Procedure**:
+  1. **Never fail silently or crash the workflow**: Catch the quota exception immediately.
+  2. **Update Manifest**: Tag missing scene visual states as `"status": "quota_pending"`.
+  3. **Present Decision Card**:
+     - **Option 1 (Wait & Auto-Resume)**: Pause and set a resume schedule for when the cooldown resets.
+     - **Option 2 (Progressive Storyboard Mode)**: Generate dark-themed storyboard placeholder plates for pending scenes so Remotion can proceed to render complete audio, subtitles, and preview video drafts without blocking.
+     - **Option 3 (Secondary Key / Source Ingestion)**: Switch to an alternative key or ingest clean H5P plates.
 
 ### Preventing AI Text Hallucination
 * Diffusion and autoregressive image models often try to render text onto storefronts, signs, papers, or clothing, resulting in unreadable gibberish.

@@ -84,6 +84,12 @@ Present the story brief to the user using the review template in [story-sources.
 * **Priority 2 (Source-Fidelity AI Generation)**: When clean authentic artwork is unavailable (e.g. raster scans with baked-in text or plain manuscripts), generate fresh AI illustrations strictly adhering to the character physical traits, attire, species, and environmental setting described in the source manuscript.
 * **3D Cover**: 2.5s opener with embossed gold gilded edges and author credit (`assets/cover.png`).
 * Never reuse low-res scans with baked-in typography. Append negative constraints (`--no text, no watermark, no typography`). Details in [consistency-bible.md](./references/consistency-bible.md).
+* **Quota Interception & Progressive Storyboard Protocol**: If an API rate limit (`429 Too Many Requests` / `RESOURCE_EXHAUSTED` / burst throttle) occurs during plate generation:
+  1. Catch the exception immediately and tag missing scenes in `story.json` as `"status": "quota_pending"`.
+  2. Surface an interactive Decision Card to the user:
+     - **Option 1 (Wait & Auto-Resume)**: Pause pipeline and resume when the quota window resets (~4–5 hours).
+     - **Option 2 (Progressive Draft Mode)**: Generate styled storyboard placeholder cards for pending scenes, continue voiceover synthesis (ID & EN), kinetic subtitles, and export preview video drafts right away. Swap final plates in later in <60s via `npx tsx scripts/manage-story.ts --resume-quota`.
+     - **Option 3 (Secondary Key / Source Ingestion)**: Provide alternate API key or ingest clean H5P plates.
 
 ### 6. Synthesize Dual-Language Voice, Subtitles & Foley (Default)
 * **Indonesian (`id-ID`) Track**: Synthesized via `id-ID-GadisNeural` / `id-ID-ArdiNeural` (pitch: `+20%`, speed: `+5%`). Saved to `assets/id/scene_XX.mp3` & `assets/id/scene_XX_words.json`.
@@ -199,6 +205,7 @@ To modify or fix any scene without re-running the entire pipeline or re-spending
 | **Shorts Thumbnails** | Dynamic auto-frame on mobile feed | 9:16 custom cover shows in library/search, but feed may select frame | Select custom frame in mobile YouTube app if specific frame preview is critical. |
 | **Remotion CDP Socket** | Headless Chrome WebSocket binds to local `127.0.0.1` | `connect EPERM 127.0.0.1` inside isolated sandboxes | Run render scripts with sandbox network bypass (`BypassSandbox: true` / elevated socket permissions). |
 | **4K Memory Spikes** | Chromium worker RAM usage | OOM crashes on systems with <8GB RAM | Default to 1080p Full HD (`1920×1080`); reserve 4K for high-memory machines. |
+| **Image Quota & Burst Throttle** | API rate limits (`429` / `RESOURCE_EXHAUSTED`) | Generation pauses after 3–5 images | Present Decision Card: Wait & Auto-Resume vs Progressive Draft with storyboard placeholders. |
 | **AI Text Hallucination** | Image models generating pseudo-text | Garbled text on posters, books, or clothing | Mandatory negative prompt: `--no text, no watermark, no typography, no letters`; prefer authentic clean plates. |
 | **Character Drift** | Inconsistent facial structure or attire across scenes | Morphological drift across generations | Lock physical traits in `Character Bible` (`bible/character-bible.json`) and prepend exact description to every scene prompt. |
 | **TTS Punctuation** | Azure `WordBoundary` strips lexical punctuation | Subtitles lose pauses, commas, question/exclamation marks | Run `attachPunctuation()` mapping lexical tokens back to original manuscript words. |
@@ -215,6 +222,7 @@ Before delivering or publishing:
 - [ ] **Bilingual Video Deliverables Rendered (Default)**: Verified all 4 video files (ID Landscape & Shorts, EN Landscape & Shorts) with smooth 30fps playback.
 - [ ] **Zero Language Visual Redundancy**: 100% of illustration plates shared across both languages with zero foreign text overlays.
 - [ ] **Artwork Priority Followed**: Authentic clean plates used if present; otherwise source-faithful AI illustrations generated.
+- [ ] **Illustration Quota Handled**: If API limits occurred, Decision Card was surfaced and manifest marked with `quota_pending` / `placeholder`.
 - [ ] **Character Consistency**: Protagonist's clothes, hair, and facial features match across all scenes.
 - [ ] **Punctuation (*Tanda Baca*) Preserved**: Subtitles in both Indonesian and English retain original commas, question marks, and exclamation marks.
 - [ ] **Multi-Speaker Tagging**: Distinct color accents and badges assigned to each persona.
@@ -241,5 +249,6 @@ Before delivering or publishing:
 | **YouTube API 403 on custom thumbnail** | Channel phone verification missing | Visit `https://www.youtube.com/verify` to activate Intermediate Features. |
 | **YouTube thumbnail velocity rate-limit** | Updating >3 thumbnails in rapid burst | Trapped gracefully; wait 15–30m cooldown, then run `--update-thumbnails` for remaining videos. |
 | **Remotion render fails with `EPERM`** | Headless Chrome WebSocket blocked | Run render outside sandbox (`BypassSandbox: true`) for CDP socket communication. |
+| **Image generation quota hit (429 / RESOURCE_EXHAUSTED)** | Free/burst API quota limit reached | Present Decision Card: Wait & Auto-Resume vs Progressive Draft with storyboard placeholders. |
 | **4K render Chrome tab crash (OOM)** | Memory spikes on 4K canvas | Standardize on 1080p Full HD (`1920×1080`); only use 4K on machines with ≥16GB RAM. |
 | **Neural voice mispronounces acronyms ("PR")** | Model interprets acronyms phonetically | Pre-normalize text in manuscript: change "PR" to "P-R" or "tugas sekolah", "ga" to "nggak". |
