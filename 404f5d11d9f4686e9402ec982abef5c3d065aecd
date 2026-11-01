@@ -1,0 +1,49 @@
+scripts/manage-story.ts
+  d705767fae9f1581 276
+skills/storybook-video-generator/references/story-sources.md
+  d705767fae9f1581 69-70,79-87
+src/remotion/components/CoverScene.tsx
+  d705767fae9f1581 26-30,32-48,111,173
+src/remotion/components/StoryScene.tsx
+  d705767fae9f1581 46-48,50,53-54,57,60-61,64
+scripts/upload-youtube.ts
+  d705767fae9f1581 257,265-279,293,446-480,482-498,511-512,546-597,636-658,664-669,671-711,713-714,723,726-746,752-756,809,820-825,836,855-859,913,926-931,942,959-961
+skills/storybook-video-generator/SKILL.md
+  d705767fae9f1581 84-93,136-139,142-143,148,216,248,267
+scripts/render-thumbnail.ts
+  d705767fae9f1581 18,49-51,56-58,104-106,112-114
+scripts/smart-text-inpaint.swift
+  d705767fae9f1581 1-273
+src/remotion/Root.tsx
+  d705767fae9f1581 22,35
+skills/storybook-video-generator/references/directory-template.md
+  d705767fae9f1581 68,70-71,99-126,294,296-301
+scripts/render-logo.ts
+  d705767fae9f1581 60,75,91,106
+src/remotion/components/ThumbnailComposition.tsx
+  d705767fae9f1581 4-15,22,25,27-35,47-79,98-101,103-104,109-146,230,268,285,309-333,350,360,385,514,539,555,557,620,622,733,746-770,788,798,823,837,886,903
+.gitignore
+  d705767fae9f1581 24-30
+skills/storybook-video-generator/references/limitations-and-workarounds.md
+  d705767fae9f1581 19,24-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "404f5d11d9f4686e9402ec982abef5c3d065aecd",
+  "prompts": {
+    "d705767fae9f1581": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "5d758c39-0922-4b08-a272-66d96ec907d5",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 954,
+      "total_deletions": 391,
+      "accepted_lines": 953,
+      "overriden_lines": 0
+    }
+  }
+}
