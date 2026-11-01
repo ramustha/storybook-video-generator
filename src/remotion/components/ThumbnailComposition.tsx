@@ -1,0 +1,878 @@
+import React from "react";
+import { Img, staticFile, useVideoConfig } from "remotion";
+
+export interface ThumbnailProps {
+  book: {
+    title: string;
+    originalTitle?: string;
+    scenes?: any[];
+    source?: {
+      originalAuthor?: string;
+      originalIllustrator?: string;
+    };
+  };
+  lang: "id" | "en";
+  variant: "popular" | "bedtime";
+  orientation?: "landscape" | "vertical";
+  heroImagePath?: string;
+  backdropImagePath?: string;
+  customHeadline?: string;
+  customHook?: string;
+}
+
+export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
+  book,
+  lang = "id",
+  variant = "popular",
+  orientation,
+  heroImagePath,
+  backdropImagePath,
+  customHeadline,
+  customHook,
+}) => {
+  const videoConfig = useVideoConfig();
+  const width = videoConfig?.width || 1920;
+  const height = videoConfig?.height || 1080;
+  const isVertical = orientation === "vertical" || height > width;
+  const isEn = lang === "en";
+
+  // Default images from book
+  const defaultBg = backdropImagePath || "assets/scene_02.png";
+  const defaultHero = heroImagePath || "assets/cover.png";
+
+  const bgSrc = staticFile(defaultBg);
+  const heroSrc = staticFile(defaultHero);
+
+  const authorName = book.source?.originalAuthor || "Anushka Ravishankar";
+  const illustratorName = book.source?.originalIllustrator || "Priya Kuriyan";
+
+  // ==========================================
+  // VERTICAL 9:16 THUMBNAIL (SHORTS / REELS)
+  // ==========================================
+  if (isVertical) {
+    return (
+      <div
+        style={{
+          width: 1080,
+          height: 1920,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#0B0F1A",
+          fontFamily: "'Arial Black', 'Impact', 'Montserrat', -apple-system, sans-serif",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* Ambient Blurred Background Plate */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: "scale(1.15)",
+            filter: "brightness(0.4) saturate(1.5) blur(48px)",
+            zIndex: 1,
+          }}
+        >
+          <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+
+        {/* Dramatic Radial Gradient & Vignette */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0%, rgba(2, 6, 23, 0.9) 100%)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Content Container (Vertical Stack with Safe Zones for Shorts UI) */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "160px 48px 240px 48px",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Top Pill / Badge (Above Action) */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "14px 32px",
+              borderRadius: 20,
+              backgroundColor: "#EF4444",
+              border: "4px solid #FFFFFF",
+              boxShadow: "0 10px 30px rgba(239, 68, 68, 0.7)",
+              transform: "rotate(-2deg)",
+            }}
+          >
+            <span style={{ fontSize: 32 }}>🔥</span>
+            <span
+              style={{
+                color: "#FFFFFF",
+                fontSize: 28,
+                fontWeight: 900,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              {isEn ? "Hilarious Storybook Shorts" : "Cerita Lucu Bergambar!"}
+            </span>
+          </div>
+
+          {/* Centerpiece Hero Artwork with Clean Sticker Border */}
+          <div
+            style={{
+              width: 900,
+              height: 720,
+              position: "relative",
+              borderRadius: 44,
+              overflow: "hidden",
+              border: "10px solid #FFFFFF",
+              boxShadow:
+                "0 35px 90px rgba(0, 0, 0, 0.95), 0 0 60px rgba(253, 224, 71, 0.4)",
+              transform: "rotate(2deg)",
+              backgroundColor: "#1E293B",
+            }}
+          >
+            <Img
+              src={heroSrc}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+
+            {/* Inner Vignette */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                boxShadow: "inset 0 0 50px rgba(0,0,0,0.5)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Comic Floating Reaction Emoji on Artwork */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 24,
+                left: 24,
+                backgroundColor: "#FACC15",
+                color: "#000",
+                fontWeight: 900,
+                fontSize: 26,
+                padding: "10px 24px",
+                borderRadius: 18,
+                border: "4px solid #000",
+                boxShadow: "0 8px 0 #000",
+                transform: "rotate(-5deg)",
+              }}
+            >
+              {isEn ? "Domino Chaos! 💥" : "Alasan Paling Gokil! 😂"}
+            </div>
+          </div>
+
+          {/* Lower Section: Massive Title & Curiosity Hook */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 20,
+              textAlign: "center",
+            }}
+          >
+            {/* Title with 3D Drop Shadow */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: "rotate(-2deg)",
+                filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.95))",
+              }}
+            >
+              {isEn ? (
+                <>
+                  <div
+                    style={{
+                      fontSize: 84,
+                      fontWeight: 900,
+                      lineHeight: 0.95,
+                      color: "#FFFFFF",
+                      WebkitTextStroke: "6px #000000",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    IT'S ALL THE
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 108,
+                      fontWeight: 900,
+                      lineHeight: 0.95,
+                      color: "#FDE047",
+                      WebkitTextStroke: "7px #000000",
+                      letterSpacing: "-0.01em",
+                      textShadow: "0 10px 0 #B45309",
+                    }}
+                  >
+                    CAT'S FAULT! 🐱
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      fontSize: 90,
+                      fontWeight: 900,
+                      lineHeight: 0.95,
+                      color: "#FFFFFF",
+                      WebkitTextStroke: "6px #000000",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    GARA-GARA
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 116,
+                      fontWeight: 900,
+                      lineHeight: 0.95,
+                      color: "#FDE047",
+                      WebkitTextStroke: "7px #000000",
+                      letterSpacing: "-0.01em",
+                      textShadow: "0 10px 0 #B45309",
+                    }}
+                  >
+                    KUCING! 🐱
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Secondary Curiosity Gap Hook Sticker */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 16,
+                padding: "18px 36px",
+                borderRadius: 24,
+                backgroundColor: "#38BDF8",
+                border: "5px solid #000000",
+                boxShadow: "0 12px 0 #0284C7, 0 20px 40px rgba(0,0,0,0.7)",
+                transform: "rotate(1.5deg)",
+              }}
+            >
+              <span style={{ fontSize: 36 }}>🐶😱</span>
+              <span
+                style={{
+                  color: "#000000",
+                  fontSize: 34,
+                  fontWeight: 900,
+                  letterSpacing: "-0.01em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {customHook ||
+                  (isEn ? "The Dog Ate My Homework?!" : "Tugas Dimakan Anjing?!")}
+              </span>
+            </div>
+
+            {/* Sub-Pill Badge */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                marginTop: 8,
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: "rgba(0, 0, 0, 0.75)",
+                  backdropFilter: "blur(8px)",
+                  padding: "10px 22px",
+                  borderRadius: 14,
+                  border: "2px solid rgba(255, 255, 255, 0.25)",
+                  color: "#FCD34D",
+                  fontSize: 22,
+                  fontWeight: 800,
+                }}
+              >
+                ⭐ Pratham Books CC BY 4.0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // LANDSCAPE 16:9 BEDTIME VARIANT
+  // ==========================================
+  if (variant === "bedtime") {
+    return (
+      <div
+        style={{
+          width: 1920,
+          height: 1080,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#060913",
+          fontFamily: "'Segoe UI', 'SF Pro Display', -apple-system, sans-serif",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* Ambient Darkened Background with Magical Glow */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: "scale(1.1)",
+            filter: "blur(32px) brightness(0.35) saturate(1.4)",
+            zIndex: 1,
+          }}
+        >
+          <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+
+        {/* Deep Midnight Blue Gradient & Starfield Lighting */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 75% 35%, rgba(99, 102, 241, 0.25) 0%, rgba(15, 23, 42, 0.7) 60%, rgba(2, 6, 23, 0.95) 100%)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Decorative Golden Ambient Rim */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 24,
+            border: "2px solid rgba(251, 191, 36, 0.25)",
+            borderRadius: 24,
+            pointerEvents: "none",
+            zIndex: 3,
+          }}
+        />
+
+        {/* Content Container (2-Column Balanced Layout) */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            padding: "0 90px",
+            boxSizing: "border-box",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* Left: Elegant Storybook Typography */}
+          <div
+            style={{
+              width: "55%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: 20,
+            }}
+          >
+            {/* Bedtime / Read-Aloud Badge */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "10px 24px",
+                borderRadius: 999,
+                background: "linear-gradient(135deg, rgba(30, 27, 75, 0.9), rgba(67, 56, 202, 0.8))",
+                border: "2px solid rgba(251, 191, 36, 0.8)",
+                boxShadow: "0 0 25px rgba(251, 191, 36, 0.35)",
+              }}
+            >
+              <span style={{ fontSize: 26 }}>🌙</span>
+              <span
+                style={{
+                  color: "#FDE047",
+                  fontSize: 22,
+                  fontWeight: 800,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {isEn ? "Bedtime Read-Aloud" : "Dongeng Sebelum Tidur"}
+              </span>
+            </div>
+
+            {/* Main Storybook Title */}
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 78,
+                fontWeight: 900,
+                lineHeight: 1.08,
+                letterSpacing: "-0.02em",
+                background: "linear-gradient(180deg, #FFFFFF 0%, #FEF08A 50%, #F59E0B 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                filter: "drop-shadow(0 6px 18px rgba(0, 0, 0, 0.85))",
+                maxWidth: 900,
+              }}
+            >
+              {customHeadline || (isEn ? "It's All The Cat's Fault!" : "Gara-Gara Kucing!")}
+            </h1>
+
+            {/* Sub-hook / Emotional Selling Point */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "12px 26px",
+                background: "rgba(15, 23, 42, 0.75)",
+                backdropFilter: "blur(12px)",
+                borderRadius: 16,
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
+            >
+              <span style={{ fontSize: 24 }}>✨</span>
+              <span
+                style={{
+                  color: "#E2E8F0",
+                  fontSize: 26,
+                  fontWeight: 600,
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {customHook ||
+                  (isEn
+                    ? "A Hilarious Bedtime Tale for Kids"
+                    : "Cerita Bergambar Penuh Tawa & Pesan Moral")}
+              </span>
+            </div>
+
+            {/* Credits Tag */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                marginTop: 10,
+                color: "#94A3B8",
+                fontSize: 20,
+                fontWeight: 500,
+              }}
+            >
+              <span>Karya: {authorName}</span>
+              <span>•</span>
+              <span>Ilustrasi: {illustratorName}</span>
+            </div>
+          </div>
+
+          {/* Right: Gilded Storybook Floating Centerpiece */}
+          <div
+            style={{
+              width: "42%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 620,
+                height: 420,
+                position: "relative",
+                borderRadius: 24,
+                overflow: "hidden",
+                boxShadow:
+                  "0 30px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(251, 191, 36, 0.35)",
+                border: "5px solid rgba(251, 191, 36, 0.9)",
+                transform: "rotate(2deg)",
+                backgroundColor: "#0B0F19",
+              }}
+            >
+              <Img
+                src={heroSrc}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+
+              {/* Gold Ribbon Seal on Picture Corner */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 18,
+                  right: 18,
+                  background: "linear-gradient(135deg, #F59E0B, #B45309)",
+                  color: "#FFF",
+                  fontWeight: 800,
+                  fontSize: 16,
+                  letterSpacing: "0.06em",
+                  padding: "6px 14px",
+                  borderRadius: 8,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+                  border: "1px solid rgba(255, 255, 255, 0.4)",
+                  textTransform: "uppercase",
+                }}
+              >
+                {isEn ? "Picture Book" : "Buku Bergambar"}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // POPULAR COMIC ACTION HOOK (HIGH CTR FORMAT)
+  return (
+    <div
+      style={{
+        width: 1920,
+        height: 1080,
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#0B0F1A",
+        fontFamily: "'Arial Black', 'Impact', 'Montserrat', -apple-system, sans-serif",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {/* High Saturation Action Background Plate */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          transform: "scale(1.08)",
+          filter: "brightness(0.55) saturate(1.5) contrast(1.1)",
+          zIndex: 1,
+        }}
+      >
+        <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </div>
+
+      {/* Dramatic Action Radial Lighting & Vignette */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(90deg, rgba(11, 15, 26, 0.95) 0%, rgba(11, 15, 26, 0.8) 50%, rgba(11, 15, 26, 0.25) 100%)",
+          zIndex: 2,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(circle at 80% 50%, rgba(251, 191, 36, 0.25) 0%, transparent 60%)",
+          zIndex: 3,
+        }}
+      />
+
+      {/* Comic Action Sunburst / Radial Accents */}
+      <div
+        style={{
+          position: "absolute",
+          top: -100,
+          right: -100,
+          width: 800,
+          height: 800,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(239, 68, 68, 0.25) 0%, transparent 70%)",
+          zIndex: 4,
+          filter: "blur(50px)",
+        }}
+      />
+
+      {/* Main Container */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 80px",
+          boxSizing: "border-box",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Left Side: Massive High-Energy Headline & Hook */}
+        <div
+          style={{
+            width: "56%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 18,
+          }}
+        >
+          {/* Top Pill / Badge */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 22px",
+              borderRadius: 14,
+              backgroundColor: "#EF4444",
+              border: "3px solid #FFFFFF",
+              boxShadow: "0 8px 24px rgba(239, 68, 68, 0.6)",
+              transform: "rotate(-1.5deg)",
+            }}
+          >
+            <span style={{ fontSize: 24 }}>🔥</span>
+            <span
+              style={{
+                color: "#FFFFFF",
+                fontSize: 22,
+                fontWeight: 900,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+              }}
+            >
+              {isEn ? "Hilarious Kids Storybook" : "Cerita Anak Lucu Banget!"}
+            </span>
+          </div>
+
+          {/* Massive Comic Headline with 3D Drop Shadow & Dark Stroke */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              transform: "rotate(-2deg)",
+              filter: "drop-shadow(0 14px 28px rgba(0, 0, 0, 0.95))",
+            }}
+          >
+            {isEn ? (
+              <>
+                <div
+                  style={{
+                    fontSize: 78,
+                    fontWeight: 900,
+                    lineHeight: 0.95,
+                    color: "#FFFFFF",
+                    WebkitTextStroke: "5px #000000",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  IT'S ALL THE
+                </div>
+                <div
+                  style={{
+                    fontSize: 98,
+                    fontWeight: 900,
+                    lineHeight: 0.95,
+                    color: "#FDE047",
+                    WebkitTextStroke: "6px #000000",
+                    letterSpacing: "-0.01em",
+                    textShadow: "0 8px 0 #B45309",
+                  }}
+                >
+                  CAT'S FAULT! 🐱
+                </div>
+              </>
+            ) : (
+              <>
+                <div
+                  style={{
+                    fontSize: 82,
+                    fontWeight: 900,
+                    lineHeight: 0.95,
+                    color: "#FFFFFF",
+                    WebkitTextStroke: "5px #000000",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  GARA-GARA
+                </div>
+                <div
+                  style={{
+                    fontSize: 104,
+                    fontWeight: 900,
+                    lineHeight: 0.95,
+                    color: "#FDE047",
+                    WebkitTextStroke: "6px #000000",
+                    letterSpacing: "-0.01em",
+                    textShadow: "0 8px 0 #B45309",
+                  }}
+                >
+                  KUCING! 🐱
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Secondary Curiosity Gap Hook Sticker */}
+          <div
+            style={{
+              marginTop: 10,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 14,
+              padding: "16px 28px",
+              borderRadius: 20,
+              backgroundColor: "#38BDF8",
+              border: "4px solid #000000",
+              boxShadow: "0 10px 0 #0284C7, 0 16px 32px rgba(0,0,0,0.6)",
+              transform: "rotate(1.5deg)",
+            }}
+          >
+            <span style={{ fontSize: 32 }}>🐶😱</span>
+            <span
+              style={{
+                color: "#000000",
+                fontSize: 32,
+                fontWeight: 900,
+                letterSpacing: "-0.01em",
+                textTransform: "uppercase",
+              }}
+            >
+              {customHook ||
+                (isEn ? "The Dog Ate My Homework?!" : "Tugas Dimakan Anjing?!")}
+            </span>
+          </div>
+
+          {/* Bottom Trust/Quality Pill */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginTop: 12,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                backdropFilter: "blur(8px)",
+                padding: "8px 18px",
+                borderRadius: 12,
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#F1F5F9",
+                fontSize: 18,
+                fontWeight: 700,
+              }}
+            >
+              🎬 Full Animasi Cerita
+            </div>
+            <div
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                backdropFilter: "blur(8px)",
+                padding: "8px 18px",
+                borderRadius: 12,
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "#FCD34D",
+                fontSize: 18,
+                fontWeight: 700,
+              }}
+            >
+              ⭐ Pratham Books CC BY 4.0
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Comic Character Hero Frame with Sticker Cutout Border */}
+        <div
+          style={{
+            width: "42%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+          }}
+        >
+          {/* Visual Sticker Badge */}
+          <div
+            style={{
+              width: 580,
+              height: 480,
+              position: "relative",
+              borderRadius: 36,
+              overflow: "hidden",
+              border: "8px solid #FFFFFF",
+              boxShadow:
+                "0 24px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(253, 224, 71, 0.4)",
+              transform: "rotate(3deg)",
+              backgroundColor: "#1E293B",
+            }}
+          >
+            <Img
+              src={heroSrc}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+
+            {/* Inner Dramatic Vignette */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                boxShadow: "inset 0 0 40px rgba(0,0,0,0.5)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Comic Floating Reaction Emoji */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 20,
+                left: 20,
+                backgroundColor: "#FACC15",
+                color: "#000",
+                fontWeight: 900,
+                fontSize: 20,
+                padding: "8px 18px",
+                borderRadius: 14,
+                border: "3px solid #000",
+                boxShadow: "0 6px 0 #000",
+                transform: "rotate(-5deg)",
+              }}
+            >
+              {isEn ? "Domino Chaos! 💥" : "Alasan Paling Gokil! 😂"}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

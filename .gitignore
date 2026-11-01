@@ -1,0 +1,22 @@
+node_modules/
+.DS_Store
+dist/
+.remotion/
+
+# Credentials, Keys & Secrets (Strictly Ignored)
+config/youtube-credentials.json
+config/youtube-token.json
+config/*.json
+!config/.gitkeep
+.env
+.env.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.token
+
+# Large Rendered Video Binaries (>100MB / Video Exports)
+exports/**/*.mp4
+stories/**/exports/**/*.mp4
+*.mp4

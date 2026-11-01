@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B" />
+      <stop offset="50%" stop-color="#312E81" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+
+    <!-- Golden Magic Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Book Cover Gradient -->
+    <linearGradient id="bookCoverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+
+    <!-- Book Pages Gradient -->
+    <linearGradient id="pageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FEF3C7" />
+    </linearGradient>
+
+    <!-- Magical Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Circular Outer Frame (Matches YouTube PFP Crop) -->
+  <circle cx="400" cy="400" r="390" fill="url(#bgGrad)" stroke="#4338CA" stroke-width="8" />
+
+  <!-- Ambient Magical Glow Halo -->
+  <circle cx="400" cy="410" r="240" fill="#6366F1" opacity="0.25" filter="url(#glow)" />
+  <circle cx="400" cy="330" r="160" fill="#F59E0B" opacity="0.2" filter="url(#glow)" />
+
+  <!-- Outer Star Ring Orbit -->
+  <circle cx="400" cy="400" r="340" fill="none" stroke="#6366F1" stroke-width="2" stroke-dasharray="8 16" opacity="0.4" />
+
+  <!-- Floating Fairytale Stars -->
+  <!-- Top Left -->
+  <polygon points="190,220 200,240 220,250 200,260 190,280 180,260 160,250 180,240" fill="#FDE047" filter="url(#softGlow)" />
+  <circle cx="270" cy="190" r="6" fill="#FDE047" opacity="0.8" />
+  <circle cx="160" cy="340" r="5" fill="#38BDF8" opacity="0.7" />
+
+  <!-- Top Right -->
+  <polygon points="610,210 620,230 640,240 620,250 610,270 600,250 580,240 600,230" fill="#FDE047" filter="url(#softGlow)" />
+  <circle cx="530" cy="180" r="7" fill="#FDE047" opacity="0.9" />
+  <circle cx="640" cy="330" r="5" fill="#F472B6" opacity="0.8" />
+
+  <!-- Golden Crescent Moon -->
+  <path d="M 400 170 A 90 90 0 0 0 490 260 A 70 70 0 0 1 400 170 Z" fill="url(#goldGrad)" filter="url(#softGlow)" />
+  <polygon points="415,225 422,238 435,245 422,252 415,265 408,252 395,245 408,238" fill="#FFFFFF" />
+
+  <!-- Magic Sparkles & Stardust Trail -->
+  <path d="M 280 430 Q 340 310 420 270" fill="none" stroke="#FDE047" stroke-width="3" stroke-dasharray="4 8" opacity="0.6" />
+  <path d="M 520 430 Q 460 320 400 280" fill="none" stroke="#38BDF8" stroke-width="3" stroke-dasharray="4 8" opacity="0.6" />
+
+  <!-- Open Pop-Up Storybook -->
+  <g transform="translate(0, 40)">
+    <!-- Book Shadow -->
+    <ellipse cx="400" cy="460" rx="260" ry="40" fill="#090D1A" opacity="0.6" />
+
+    <!-- Hardcover Base -->
+    <path d="M 170 410 Q 400 450 630 410 L 620 435 Q 400 475 180 435 Z" fill="url(#bookCoverGrad)" />
+
+    <!-- Left Page Layers (3D Stack) -->
+    <path d="M 190 395 Q 390 425 395 360 L 395 380 Q 390 445 190 415 Z" fill="#E2E8F0" />
+    <path d="M 195 385 Q 390 415 395 350 L 395 370 Q 390 435 195 405 Z" fill="#F1F5F9" />
+    <path d="M 200 375 Q 390 405 395 340 L 395 360 Q 390 425 200 395 Z" fill="url(#pageGrad)" stroke="#E2E8F0" stroke-width="1.5" />
+
+    <!-- Right Page Layers (3D Stack) -->
+    <path d="M 610 395 Q 410 425 405 360 L 405 380 Q 410 445 610 415 Z" fill="#E2E8F0" />
+    <path d="M 605 385 Q 410 415 405 350 L 405 370 Q 410 435 605 405 Z" fill="#F1F5F9" />
+    <path d="M 600 375 Q 410 405 405 340 L 405 360 Q 410 425 600 395 Z" fill="url(#pageGrad)" stroke="#E2E8F0" stroke-width="1.5" />
+
+    <!-- Book Spine Gilded Core -->
+    <path d="M 395 340 L 405 340 L 405 450 L 395 450 Z" fill="url(#goldGrad)" />
+
+    <!-- Fairytale Elements Rising from Pages -->
+    <!-- Mini Mountain / Hill -->
+    <path d="M 270 370 Q 320 310 370 355 Z" fill="#10B981" opacity="0.9" />
+    <path d="M 330 365 Q 365 315 395 350 Z" fill="#059669" opacity="0.8" />
+    
+    <!-- Cute Mini Castle Turret -->
+    <rect x="420" y="315" width="28" height="40" rx="3" fill="#818CF8" />
+    <polygon points="415,315 434,285 453,315" fill="#F43F5E" />
+    <rect x="430" y="335" width="8" height="15" rx="3" fill="#FEF08A" />
+
+    <!-- Tiny Orange Cat Peeking Out -->
+    <ellipse cx="255" cy="365" rx="18" ry="14" fill="#F97316" />
+    <polygon points="242,355 248,342 255,354" fill="#EA580C" />
+    <polygon points="255,354 262,342 268,355" fill="#EA580C" />
+    <!-- Cat Face -->
+    <circle cx="249" cy="364" r="2.5" fill="#1E293B" />
+    <circle cx="261" cy="364" r="2.5" fill="#1E293B" />
+    <ellipse cx="255" cy="368" rx="2" ry="1.5" fill="#FDA4AF" />
+    <!-- Cat Paws resting on book edge -->
+    <ellipse cx="246" cy="376" rx="5" ry="4" fill="#FFFFFF" />
+    <ellipse cx="264" cy="376" rx="5" ry="4" fill="#FFFFFF" />
+  </g>
+
+  <!-- Brand Typography Banner Ribbon -->
+  <g transform="translate(0, 30)">
+    <!-- Ribbon Shadow -->
+    <path d="M 170 575 L 630 575 L 600 645 L 200 645 Z" fill="#0B0F19" opacity="0.5" />
+
+    <!-- Ribbon Base (Golden Edge) -->
+    <path d="M 160 560 L 640 560 L 610 635 L 190 635 Z" fill="url(#goldGrad)" rx="10" />
+    <path d="M 168 566 L 632 566 L 604 629 L 196 629 Z" fill="#1E1B4B" />
+
+    <!-- Brand Name: ZAYN -->
+    <text x="400" y="605" font-family="'Nunito', 'Fredoka', 'Comic Sans MS', sans-serif" font-size="38" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">
+      ZAYN
+    </text>
+
+    <!-- Subtitle: STORYBOOK -->
+    <text x="400" y="622" font-family="'Montserrat', sans-serif" font-size="12" font-weight="800" fill="#FDE047" text-anchor="middle" letter-spacing="6">
+      STORYBOOK
+    </text>
+  </g>
+
+  <!-- Bottom Accent Tag: ADYAN RAMADHAN -->
+  <text x="400" y="700" font-family="'Montserrat', sans-serif" font-size="13" font-weight="700" fill="#94A3B8" text-anchor="middle" letter-spacing="3">
+    ADYAN RAMADHAN
+  </text>
+</svg>

@@ -1,0 +1,33 @@
+{
+  "name": "storybook-video-generator",
+  "version": "1.0.0",
+  "description": "Automated bilingual storybook video engine and AI agent skill with Remotion and Neural TTS",
+  "main": "index.js",
+  "scripts": {
+    "manage": "tsx scripts/manage-story.ts",
+    "render": "tsx scripts/render-book.ts",
+    "thumbnail": "tsx scripts/render-thumbnail.ts",
+    "upload": "tsx scripts/upload-youtube.ts",
+    "clean-duplicates": "tsx scripts/manage-youtube.ts --clean-duplicates"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.244",
+    "@remotion/player": "^4.0.244",
+    "@remotion/renderer": "^4.0.244",
+    "clsx": "^2.1.1",
+    "googleapis": "^189.0.0",
+    "lucide-react": "^1.16.0",
+    "msedge-tts": "^2.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.244",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
