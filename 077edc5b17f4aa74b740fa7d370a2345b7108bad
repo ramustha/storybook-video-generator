@@ -1,0 +1,91 @@
+stories/jas-hujan-merah/raw/metadata.json
+  d705767fae9f1581 1-13
+stories/jas-hujan-merah/assets/id/cover_words.json
+  d705767fae9f1581 1-92
+stories/jas-hujan-merah/raw/source-book.pdf
+  d705767fae9f1581 1
+scripts/extract-pdf-pages.swift
+  d705767fae9f1581 1-39
+stories/jas-hujan-merah/assets/en/scene_07_words.json
+  d705767fae9f1581 1-116
+stories/jas-hujan-merah/assets/en/scene_01_words.json
+  d705767fae9f1581 1-236
+stories/jas-hujan-merah/bible/world-bible.json
+  d705767fae9f1581 1-14
+stories/jas-hujan-merah/assets/id/scene_01_words.json
+  d705767fae9f1581 1-220
+stories/jas-hujan-merah/bible/character-bible.json
+  d705767fae9f1581 1-24
+stories/jas-hujan-merah/assets/en/scene_05_words.json
+  d705767fae9f1581 1-180
+stories/jas-hujan-merah/story.json
+  d705767fae9f1581 1-438
+src/remotion/components/KineticSubtitles.tsx
+  d705767fae9f1581 8,20-21,23-25,27,49-52
+stories/jas-hujan-merah/assets/id/scene_07_words.json
+  d705767fae9f1581 1-116
+stories/jas-hujan-merah/assets/id/scene_06_words.json
+  d705767fae9f1581 1-188
+scripts/manage-story.ts
+  d705767fae9f1581 10,32-33,38-42,45-51,53-54,56,59-74,76-95,98-103,106-114,120,122,124-127,130-134,149,159,174,176,187-200,205,221-270,272-276,278-352,361,363-367,369-371,373-377
+skills/storybook-video-generator/SKILL.md
+  d705767fae9f1581 87-92,208,225,252
+skills/storybook-video-generator/references/consistency-bible.md
+  d705767fae9f1581 111-164
+stories/jas-hujan-merah/assets/en/cover_words.json
+  d705767fae9f1581 1-92
+stories/jas-hujan-merah/assets/id/scene_08_words.json
+  d705767fae9f1581 1-132
+stories/jas-hujan-merah/assets/en/scene_06_words.json
+  d705767fae9f1581 1-180
+.gitignore
+  d705767fae9f1581 5
+scripts/prepare-authentic-plates.swift
+  d705767fae9f1581 1-95
+scripts/render-book.ts
+  d705767fae9f1581 15,22,24,35-133,137
+stories/jas-hujan-merah/assets/en/scene_03_words.json
+  d705767fae9f1581 1-164
+stories/jas-hujan-merah/assets/en/scene_08_words.json
+  d705767fae9f1581 1-156
+stories/jas-hujan-merah/assets/id/scene_02_words.json
+  d705767fae9f1581 1-164
+stories/jas-hujan-merah/assets/en/scene_02_words.json
+  d705767fae9f1581 1-188
+stories/jas-hujan-merah/assets/en/scene_04_words.json
+  d705767fae9f1581 1-172
+stories/jas-hujan-merah/assets/id/scene_04_words.json
+  d705767fae9f1581 1-180
+skills/storybook-video-generator/references/limitations-and-workarounds.md
+  d705767fae9f1581 19,108-117
+stories/jas-hujan-merah/raw/source-manuscript-id.txt
+  d705767fae9f1581 1-26
+stories/jas-hujan-merah/assets/id/scene_03_words.json
+  d705767fae9f1581 1-148
+stories/jas-hujan-merah/raw/user-review-card.md
+  d705767fae9f1581 1-40
+stories/jas-hujan-merah/assets/id/scene_05_words.json
+  d705767fae9f1581 1-172
+stories/jas-hujan-merah/raw/source-manuscript-en.txt
+  d705767fae9f1581 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "077edc5b17f4aa74b740fa7d370a2345b7108bad",
+  "prompts": {
+    "d705767fae9f1581": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "5d758c39-0922-4b08-a272-66d96ec907d5",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 4051,
+      "total_deletions": 161,
+      "accepted_lines": 4051,
+      "overriden_lines": 0
+    }
+  }
+}
