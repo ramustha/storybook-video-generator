@@ -23,9 +23,29 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
   const bgScale = interpolate(frame, [0, 90], [1.1, 1.25], { extrapolateRight: "clamp" });
   const coverImgSrc = staticFile(scene.visual.imagePath);
 
-  // Exact 16:9 aspect ratio for horizontal picture book cover
-  const bookWidth = isVertical ? 920 : 680;
-  const bookHeight = isVertical ? 518 : 382;
+  // Support both portrait (aspect ratio < 1.0) and landscape (aspect ratio > 1.0) picture books
+  const isCoverPortrait =
+    book.coverOrientation === "portrait" ||
+    scene.visual?.isPortrait === true ||
+    (typeof book.coverAspectRatio === "number" && book.coverAspectRatio < 1.0);
+
+  const bookWidth = isCoverPortrait
+    ? isVertical
+      ? 640
+      : 440
+    : isVertical
+      ? 920
+      : 680;
+
+  const bookHeight = isCoverPortrait
+    ? isVertical
+      ? 894
+      : 614
+    : isVertical
+      ? 518
+      : 382;
+
+  const isEn = book.language?.startsWith("en");
 
   return (
     <div
@@ -88,7 +108,7 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
             backgroundColor: "#0B0F19",
           }}
         >
-          <Img src={coverImgSrc} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <Img src={coverImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
 
           {/* Spine crease shadow on left */}
           <div
@@ -150,7 +170,7 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
               boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
             }}
           >
-            Karya {book.source.originalAuthor} • {book.source.license}
+            {isEn ? `By ${book.source.originalAuthor} • ${book.source.license}` : `Karya ${book.source.originalAuthor} • ${book.source.license}`}
           </div>
         </div>
       </div>

@@ -43,25 +43,25 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
   } else {
     // In Landscape (16:9), full-bleed camera scale >= 1.08
     if (motionType === "slow_zoom_in") {
-      const startScale = scene.camera?.scaleStart || 1.08;
-      const endScale = scene.camera?.scaleEnd || 1.20;
-      scale = interpolate(frame, [0, totalSceneFrames], [startScale, endScale], {
+      const startScale = (scene.camera?.scaleStart as number) || 1.08;
+      const endScale = (scene.camera?.scaleEnd as number) || 1.20;
+      scale = (interpolate(frame, [0, totalSceneFrames], [startScale, endScale], {
         extrapolateRight: "clamp",
-      }) + cameraBreath;
+      }) as number) + cameraBreath;
     } else if (motionType === "pan_right") {
       scale = 1.12 + cameraBreath;
-      const startX = scene.camera?.panStart?.x || -45;
-      const endX = scene.camera?.panEnd?.x || 45;
+      const startX = (scene.camera?.panStart?.x as number) || -45;
+      const endX = (scene.camera?.panEnd?.x as number) || 45;
       translateX = interpolate(frame, [0, totalSceneFrames], [startX, endX], {
         extrapolateRight: "clamp",
-      });
+      }) as number;
     } else if (motionType === "tilt_up") {
       scale = 1.12 + cameraBreath;
-      const startY = scene.camera?.panStart?.y || 35;
-      const endY = scene.camera?.panEnd?.y || -35;
+      const startY = (scene.camera?.panStart?.y as number) || 35;
+      const endY = (scene.camera?.panEnd?.y as number) || -35;
       translateY = interpolate(frame, [0, totalSceneFrames], [startY, endY], {
         extrapolateRight: "clamp",
-      });
+      }) as number;
     }
   }
 

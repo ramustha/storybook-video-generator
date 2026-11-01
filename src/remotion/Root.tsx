@@ -19,7 +19,7 @@ export const RemotionRoot: React.FC = () => {
       {/* 16:9 Landscape for Web & YouTube (1920x1080) */}
       <Composition
         id="StorybookVideoComposition-Landscape"
-        component={StorybookVideoComposition}
+        component={StorybookVideoComposition as any}
         durationInFrames={300}
         fps={fps}
         width={1920}
@@ -32,7 +32,7 @@ export const RemotionRoot: React.FC = () => {
       {/* 9:16 Vertical for Shorts & Reels (1080x1920) */}
       <Composition
         id="StorybookVideoComposition-Vertical"
-        component={StorybookVideoComposition}
+        component={StorybookVideoComposition as any}
         durationInFrames={300}
         fps={fps}
         width={1080}

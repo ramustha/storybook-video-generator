@@ -65,7 +65,10 @@ The `story.json` file controls the entire production pipeline. Every script (vis
   "id": "gara-gara-kucing",
   "slug": "gara-gara-kucing",
   "title": "Gara-Gara Kucing",
+  "originalTitle": "It's All the Cat's Fault!",
   "language": "id-ID",
+  "coverOrientation": "landscape",
+  "coverAspectRatio": 1.777,
   "source": {
     "repository": "SIBI Kemendikbud",
     "license": "Creative Commons Attribution-NonCommercial-ShareAlike 4.0",
@@ -93,6 +96,34 @@ The `story.json` file controls the entire production pipeline. Every script (vis
     "lighting": "Warm morning golden hour, soft pastel shadows",
     "colorPalette": ["#FDFBF7", "#C5D8A4", "#539165", "#E28743"]
   },
+  "thumbnailConfig": {
+    "heroImage": "assets/cover.png",
+    "backdropImage": "assets/scene_02.png",
+    "id": {
+      "headlineTop": "GARA-GARA",
+      "headlineBottom": "KUCING! 🐱",
+      "hook": "Tugas Dimakan Anjing?!",
+      "hookEmoji": "🐶😱",
+      "badge": "Cerita Anak Lucu Banget!",
+      "sticker": "Alasan Paling Gokil! 😂",
+      "bedtimeTitle": "Gara-Gara Kucing!",
+      "bedtimeHook": "Cerita Bergambar Penuh Tawa & Pesan Moral"
+    },
+    "en": {
+      "headlineTop": "IT'S ALL THE",
+      "headlineBottom": "CAT'S FAULT! 🐱",
+      "hook": "The Dog Ate My Homework?!",
+      "hookEmoji": "🐶😱",
+      "badge": "Hilarious Kids Storybook",
+      "sticker": "Domino Chaos! 💥",
+      "bedtimeTitle": "It's All the Cat's Fault!",
+      "bedtimeHook": "A Hilarious Bedtime Tale for Kids"
+    }
+  },
+  "pageMappings": [
+    { "sceneId": "cover", "left": "page_01.png" },
+    { "sceneId": "scene_01", "left": "page_04.png", "right": "page_05.png" }
+  ],
   "scenes": [
     {
       "index": 0,
@@ -260,8 +291,14 @@ npx tsx scripts/render-book.ts --book <book-slug> --format all
 ### F. Automated YouTube & Social Publishing
 Publish rendered deliverables, thumbnails, and descriptions directly to YouTube with automated chapters:
 ```bash
-# Upload both formats as 'unlisted' for preview (or 'public')
+# 1. Upload both formats as 'unlisted' by default for QC review
 npm run upload -- --book <book-slug> --format all --privacy unlisted
+
+# 2. Switch existing unlisted videos to public after user approval
+npm run upload -- --book <book-slug> --set-privacy public
+
+# 3. Or schedule publication for a specific date and time
+npm run upload -- --book <book-slug> --schedule "2026-11-03T10:00:00Z"
 ```
 
 ---

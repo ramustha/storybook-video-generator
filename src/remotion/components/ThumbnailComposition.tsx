@@ -1,14 +1,38 @@
 import React from "react";
 import { Img, staticFile, useVideoConfig } from "remotion";
 
+export interface ThumbnailConfig {
+  headlineTop?: string;
+  headlineBottom?: string;
+  headline?: string;
+  hook?: string;
+  hookEmoji?: string;
+  badge?: string;
+  sticker?: string;
+  bedtimeTitle?: string;
+  bedtimeHook?: string;
+}
+
 export interface ThumbnailProps {
   book: {
     title: string;
     originalTitle?: string;
     scenes?: any[];
     source?: {
+      publisher?: string;
       originalAuthor?: string;
       originalIllustrator?: string;
+      license?: string;
+    };
+    thumbnailConfig?: {
+      heroImage?: string;
+      backdropImage?: string;
+      id?: ThumbnailConfig;
+      en?: ThumbnailConfig;
+    };
+    thumbnail?: {
+      id?: ThumbnailConfig;
+      en?: ThumbnailConfig;
     };
   };
   lang: "id" | "en";
@@ -18,6 +42,41 @@ export interface ThumbnailProps {
   backdropImagePath?: string;
   customHeadline?: string;
   customHook?: string;
+}
+
+function deriveEmoji(title: string): string {
+  const lower = title.toLowerCase();
+  if (lower.includes("hujan") || lower.includes("rain")) return "🌧️😱";
+  if (lower.includes("kucing") || lower.includes("cat")) return "🐱😱";
+  if (lower.includes("anjing") || lower.includes("dog")) return "🐶😱";
+  if (lower.includes("kancil") || lower.includes("mousedeer")) return "🦌😱";
+  if (lower.includes("monyet") || lower.includes("monkey")) return "🐒😱";
+  if (lower.includes("buaya") || lower.includes("crocodile")) return "🐊😱";
+  return "⭐✨";
+}
+
+function splitHeadline(
+  fullTitle: string,
+  explicitTop?: string,
+  explicitBottom?: string,
+  emoji?: string
+): [string, string] {
+  if (explicitTop && explicitBottom) return [explicitTop, explicitBottom];
+  const clean = fullTitle.trim().replace(/[!.]+$/, "");
+  const words = clean.split(/\s+/);
+  const suffix = emoji ? ` ${emoji}` : "!";
+
+  if (words.length <= 1) {
+    return [words[0] || "", suffix];
+  }
+  if (words.length === 2) {
+    return [words[0], `${words[1]}${suffix}`];
+  }
+  if (words.length === 3) {
+    return [`${words[0]} ${words[1]}`, `${words[2]}${suffix}`];
+  }
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(" "), `${words.slice(mid).join(" ")}${suffix}`];
 }
 
 export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
@@ -36,15 +95,55 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   const isVertical = orientation === "vertical" || height > width;
   const isEn = lang === "en";
 
-  // Default images from book
-  const defaultBg = backdropImagePath || "assets/scene_02.png";
-  const defaultHero = heroImagePath || "assets/cover.png";
+  // Dynamic book metadata
+  const rawTitle = isEn ? (book.originalTitle || book.title) : book.title;
+  const config: ThumbnailConfig =
+    book.thumbnailConfig?.[lang] || (book as any).thumbnail?.[lang] || {};
+
+  const defaultHero = heroImagePath || book.thumbnailConfig?.heroImage || "assets/cover.png";
+  const defaultBg = backdropImagePath || book.thumbnailConfig?.backdropImage || "assets/scene_02.png";
 
   const bgSrc = staticFile(defaultBg);
   const heroSrc = staticFile(defaultHero);
 
-  const authorName = book.source?.originalAuthor || "Anushka Ravishankar";
-  const illustratorName = book.source?.originalIllustrator || "Priya Kuriyan";
+  const authorName = book.source?.originalAuthor || (isEn ? "Author" : "Penulis");
+  const illustratorName = book.source?.originalIllustrator || (isEn ? "Illustrator" : "Ilustrator");
+
+  const hookEmoji = config.hookEmoji || deriveEmoji(rawTitle);
+  const [headlineTop, headlineBottom] = splitHeadline(
+    customHeadline || config.headline || rawTitle.toUpperCase(),
+    config.headlineTop,
+    config.headlineBottom,
+    config.hookEmoji ? undefined : hookEmoji.slice(0, 2)
+  );
+
+  const hookText =
+    customHook ||
+    config.hook ||
+    (isEn ? `The Story of ${rawTitle}?!` : `Kisah Seru ${rawTitle}?!`);
+
+  const stickerText =
+    config.sticker ||
+    (isEn ? "Must Watch! ✨" : "Wajib Nonton! ✨");
+
+  const badgeText =
+    config.badge ||
+    (isEn ? "Hilarious Kids Storybook" : "Cerita Anak Bergambar!");
+
+  const bedtimeTitle =
+    customHeadline ||
+    config.bedtimeTitle ||
+    config.headline ||
+    rawTitle;
+
+  const bedtimeHook =
+    customHook ||
+    config.bedtimeHook ||
+    (isEn ? "A Heartwarming Bedtime Tale for Kids" : "Dongeng Pengantar Tidur Penuh Makna");
+
+  const publisher = book.source?.publisher || (isEn ? "Storybook Collection" : "Buku Cerita Bergambar");
+  const licenseShort = book.source?.license?.includes("CC BY 4.0") ? "CC BY 4.0" : "";
+  const attributionPill = `⭐ ${publisher}${licenseShort ? ` • ${licenseShort}` : ""}`.trim();
 
   // ==========================================
   // VERTICAL 9:16 THUMBNAIL (SHORTS / REELS)
@@ -128,7 +227,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 textTransform: "uppercase",
               }}
             >
-              {isEn ? "Hilarious Storybook Shorts" : "Cerita Lucu Bergambar!"}
+              {badgeText}
             </span>
           </div>
 
@@ -166,7 +265,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               }}
             />
 
-            {/* Comic Floating Reaction Emoji on Artwork */}
+            {/* Comic Floating Reaction Sticker on Artwork */}
             <div
               style={{
                 position: "absolute",
@@ -183,7 +282,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 transform: "rotate(-5deg)",
               }}
             >
-              {isEn ? "Domino Chaos! 💥" : "Alasan Paling Gokil! 😂"}
+              {stickerText}
             </div>
           </div>
 
@@ -207,63 +306,31 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.95))",
               }}
             >
-              {isEn ? (
-                <>
-                  <div
-                    style={{
-                      fontSize: 84,
-                      fontWeight: 900,
-                      lineHeight: 0.95,
-                      color: "#FFFFFF",
-                      WebkitTextStroke: "6px #000000",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    IT'S ALL THE
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 108,
-                      fontWeight: 900,
-                      lineHeight: 0.95,
-                      color: "#FDE047",
-                      WebkitTextStroke: "7px #000000",
-                      letterSpacing: "-0.01em",
-                      textShadow: "0 10px 0 #B45309",
-                    }}
-                  >
-                    CAT'S FAULT! 🐱
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      fontSize: 90,
-                      fontWeight: 900,
-                      lineHeight: 0.95,
-                      color: "#FFFFFF",
-                      WebkitTextStroke: "6px #000000",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    GARA-GARA
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 116,
-                      fontWeight: 900,
-                      lineHeight: 0.95,
-                      color: "#FDE047",
-                      WebkitTextStroke: "7px #000000",
-                      letterSpacing: "-0.01em",
-                      textShadow: "0 10px 0 #B45309",
-                    }}
-                  >
-                    KUCING! 🐱
-                  </div>
-                </>
-              )}
+              <div
+                style={{
+                  fontSize: 84,
+                  fontWeight: 900,
+                  lineHeight: 0.95,
+                  color: "#FFFFFF",
+                  WebkitTextStroke: "6px #000000",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {headlineTop}
+              </div>
+              <div
+                style={{
+                  fontSize: 104,
+                  fontWeight: 900,
+                  lineHeight: 0.95,
+                  color: "#FDE047",
+                  WebkitTextStroke: "7px #000000",
+                  letterSpacing: "-0.01em",
+                  textShadow: "0 10px 0 #B45309",
+                }}
+              >
+                {headlineBottom}
+              </div>
             </div>
 
             {/* Secondary Curiosity Gap Hook Sticker */}
@@ -280,7 +347,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 transform: "rotate(1.5deg)",
               }}
             >
-              <span style={{ fontSize: 36 }}>🐶😱</span>
+              <span style={{ fontSize: 36 }}>{hookEmoji}</span>
               <span
                 style={{
                   color: "#000000",
@@ -290,8 +357,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                   textTransform: "uppercase",
                 }}
               >
-                {customHook ||
-                  (isEn ? "The Dog Ate My Homework?!" : "Tugas Dimakan Anjing?!")}
+                {hookText}
               </span>
             </div>
 
@@ -316,7 +382,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                   fontWeight: 800,
                 }}
               >
-                ⭐ Pratham Books CC BY 4.0
+                {attributionPill}
               </div>
             </div>
           </div>
@@ -445,7 +511,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 maxWidth: 900,
               }}
             >
-              {customHeadline || (isEn ? "It's All The Cat's Fault!" : "Gara-Gara Kucing!")}
+              {bedtimeTitle}
             </h1>
 
             {/* Sub-hook / Emotional Selling Point */}
@@ -470,10 +536,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                   letterSpacing: "0.01em",
                 }}
               >
-                {customHook ||
-                  (isEn
-                    ? "A Hilarious Bedtime Tale for Kids"
-                    : "Cerita Bergambar Penuh Tawa & Pesan Moral")}
+                {bedtimeHook}
               </span>
             </div>
 
@@ -489,9 +552,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 fontWeight: 500,
               }}
             >
-              <span>Karya: {authorName}</span>
+              <span>{isEn ? "Written by:" : "Karya:"} {authorName}</span>
               <span>•</span>
-              <span>Ilustrasi: {illustratorName}</span>
+              <span>{isEn ? "Illustrated by:" : "Ilustrasi:"} {illustratorName}</span>
             </div>
           </div>
 
@@ -554,7 +617,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
     );
   }
 
+  // ==========================================
   // POPULAR COMIC ACTION HOOK (HIGH CTR FORMAT)
+  // ==========================================
   return (
     <div
       style={{
@@ -665,7 +730,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 textTransform: "uppercase",
               }}
             >
-              {isEn ? "Hilarious Kids Storybook" : "Cerita Anak Lucu Banget!"}
+              {badgeText}
             </span>
           </div>
 
@@ -678,63 +743,31 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               filter: "drop-shadow(0 14px 28px rgba(0, 0, 0, 0.95))",
             }}
           >
-            {isEn ? (
-              <>
-                <div
-                  style={{
-                    fontSize: 78,
-                    fontWeight: 900,
-                    lineHeight: 0.95,
-                    color: "#FFFFFF",
-                    WebkitTextStroke: "5px #000000",
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  IT'S ALL THE
-                </div>
-                <div
-                  style={{
-                    fontSize: 98,
-                    fontWeight: 900,
-                    lineHeight: 0.95,
-                    color: "#FDE047",
-                    WebkitTextStroke: "6px #000000",
-                    letterSpacing: "-0.01em",
-                    textShadow: "0 8px 0 #B45309",
-                  }}
-                >
-                  CAT'S FAULT! 🐱
-                </div>
-              </>
-            ) : (
-              <>
-                <div
-                  style={{
-                    fontSize: 82,
-                    fontWeight: 900,
-                    lineHeight: 0.95,
-                    color: "#FFFFFF",
-                    WebkitTextStroke: "5px #000000",
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  GARA-GARA
-                </div>
-                <div
-                  style={{
-                    fontSize: 104,
-                    fontWeight: 900,
-                    lineHeight: 0.95,
-                    color: "#FDE047",
-                    WebkitTextStroke: "6px #000000",
-                    letterSpacing: "-0.01em",
-                    textShadow: "0 8px 0 #B45309",
-                  }}
-                >
-                  KUCING! 🐱
-                </div>
-              </>
-            )}
+            <div
+              style={{
+                fontSize: 78,
+                fontWeight: 900,
+                lineHeight: 0.95,
+                color: "#FFFFFF",
+                WebkitTextStroke: "5px #000000",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {headlineTop}
+            </div>
+            <div
+              style={{
+                fontSize: 98,
+                fontWeight: 900,
+                lineHeight: 0.95,
+                color: "#FDE047",
+                WebkitTextStroke: "6px #000000",
+                letterSpacing: "-0.01em",
+                textShadow: "0 8px 0 #B45309",
+              }}
+            >
+              {headlineBottom}
+            </div>
           </div>
 
           {/* Secondary Curiosity Gap Hook Sticker */}
@@ -752,7 +785,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               transform: "rotate(1.5deg)",
             }}
           >
-            <span style={{ fontSize: 32 }}>🐶😱</span>
+            <span style={{ fontSize: 32 }}>{hookEmoji}</span>
             <span
               style={{
                 color: "#000000",
@@ -762,8 +795,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 textTransform: "uppercase",
               }}
             >
-              {customHook ||
-                (isEn ? "The Dog Ate My Homework?!" : "Tugas Dimakan Anjing?!")}
+              {hookText}
             </span>
           </div>
 
@@ -788,7 +820,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 fontWeight: 700,
               }}
             >
-              🎬 Full Animasi Cerita
+              {isEn ? "🎬 Full Story Animation" : "🎬 Full Animasi Cerita"}
             </div>
             <div
               style={{
@@ -802,7 +834,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 fontWeight: 700,
               }}
             >
-              ⭐ Pratham Books CC BY 4.0
+              {attributionPill}
             </div>
           </div>
         </div>
@@ -851,7 +883,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               }}
             />
 
-            {/* Comic Floating Reaction Emoji */}
+            {/* Comic Floating Reaction Sticker */}
             <div
               style={{
                 position: "absolute",
@@ -868,7 +900,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 transform: "rotate(-5deg)",
               }}
             >
-              {isEn ? "Domino Chaos! 💥" : "Alasan Paling Gokil! 😂"}
+              {stickerText}
             </div>
           </div>
         </div>

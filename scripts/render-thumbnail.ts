@@ -15,6 +15,7 @@ async function main() {
   const requestedVariant = (getArg("--variant") || "all") as "popular" | "bedtime" | "all";
   const heroImageArg = getArg("--hero");
   const backdropImageArg = getArg("--backdrop");
+  const customHeadlineArg = getArg("--headline");
   const customHookArg = getArg("--hook");
 
   const storyDir = path.resolve(`./stories/${bookSlug}`);
@@ -45,12 +46,16 @@ async function main() {
     const exportLangDir = path.join(storyDir, `exports/${lang}`);
 
     for (const variant of variants) {
+      const resolvedHero = heroImageArg || rawManifest.thumbnailConfig?.heroImage || (variant === "popular" ? "assets/cover.png" : "assets/scene_02.png");
+      const resolvedBackdrop = backdropImageArg || rawManifest.thumbnailConfig?.backdropImage || (variant === "popular" ? "assets/scene_02.png" : "assets/cover.png");
+
       const inputProps = {
         book: rawManifest,
         lang,
         variant,
-        heroImagePath: heroImageArg || (variant === "popular" ? "assets/cover.png" : "assets/scene_02.png"),
-        backdropImagePath: backdropImageArg || (variant === "popular" ? "assets/scene_02.png" : "assets/cover.png"),
+        heroImagePath: resolvedHero,
+        backdropImagePath: resolvedBackdrop,
+        customHeadline: customHeadlineArg,
         customHook: customHookArg,
       };
 
@@ -96,13 +101,17 @@ async function main() {
 
     // Render 9:16 Vertical Thumbnail for Shorts & Reels (1080x1920)
     console.log(`\n📱 Rendering [${lang.toUpperCase()}] Shorts/Reels Vertical Thumbnail (1080x1920)...`);
+    const resolvedHero = heroImageArg || rawManifest.thumbnailConfig?.heroImage || "assets/cover.png";
+    const resolvedBackdrop = backdropImageArg || rawManifest.thumbnailConfig?.backdropImage || "assets/scene_02.png";
+
     const verticalProps = {
       book: rawManifest,
       lang,
       variant: "popular" as const,
       orientation: "vertical" as const,
-      heroImagePath: heroImageArg || "assets/cover.png",
-      backdropImagePath: backdropImageArg || "assets/scene_02.png",
+      heroImagePath: resolvedHero,
+      backdropImagePath: resolvedBackdrop,
+      customHeadline: customHeadlineArg,
       customHook: customHookArg,
     };
 

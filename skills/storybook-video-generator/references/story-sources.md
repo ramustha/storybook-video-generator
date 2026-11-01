@@ -66,7 +66,8 @@ Never confuse **scanned book pages** (which degrade video quality with baked-in 
 flowchart TD
     S["Source Ingestion"] --> Q{"Authentic Clean Plates Available?<br/>(GDL H5P / StoryWeaver Raw Asset)"}
     Q -- "YES (Text-free & Clean)" --> P1["Priority 1: Use Authentic Original Artwork<br/>(100% Artist Fidelity, Zero API Quota)"]
-    Q -- "NO (Scanned PDF or Embedded Text)" --> P2["Priority 2: Generate AI Illustrations<br/>(Strict Source-Fidelity to Character Bible)"]
+    Q -- "PDF with Baked-in Text" --> P1B["Priority 1B: Automated Vision Text-Exclusion<br/>(Vision OCR Bounding Boxes + Smart 16:9 Crop + Ambient Inpainting)"]
+    Q -- "NO (No Artwork / Unsalvageable Scan)" --> P2["Priority 2: Generate AI Illustrations<br/>(Strict Source-Fidelity to Character Bible)"]
 ```
 
 ### Priority 1: Authentic Clean Open Digital Artwork
@@ -74,6 +75,16 @@ Check if the open-license repository hosts clean, text-free illustration plates:
 * **Global Digital Library (GDL) H5P**: Extracts raw illustration plates (`/images/p-*.jpg`) without text overlays.
 * **StoryWeaver Raw Assets**: CC BY 4.0 high-res illustration bundles.
 * **When Found**: Use them directly! Guarantees 100% authentic author and illustrator vision, zero hallucinations, and zero API quota consumption.
+
+### Priority 1B: Automated Vision Text-Exclusion & Inpainting (For PDF Sources)
+When official storybooks are available as high-resolution PDFs with narrative text printed on pages:
+* **Automated 3-Stage Text Exclusion Pipeline (`scripts/smart-text-inpaint.swift`)**:
+  1. **Apple Vision OCR Bounding Box Localization (`VNRecognizeTextRequest`)**: Accurately scans each page or two-page spread to detect the exact normalized coordinates of every text observation.
+  2. **Smart 16:9 Aspect Crop for Spreads**: Since children's picture books place narrative breath groups in an upper or lower margin (e.g. top ~25%), the engine anchors the 16:9 widescreen crop window safely into the pure illustration region below the lowest text boundary across two-page spreads.
+  3. **Portrait Book Cover Preservation Rule**: Never slice or crop a portrait book cover (`aspect ratio < 1.0`) into a 16:9 horizontal strip. Preserve the full portrait illustration plate (`cover.png`) and inpaint title/author/badge text blocks clean. Configure `CoverScene.tsx` with `"coverOrientation": "portrait"` so Remotion's 3D floating hardcover container scales to natural portrait book proportions (`440x614` in landscape, `640x894` in vertical) with zero distortion or black bars.
+  4. **Single-Page Character Centering Rule**: For standalone single pages without a spread partner (`rightPage == nil`), never use a naive bottom-aligned crop (`cropY = 0.0`), which cuts off characters' heads and torsos. Instead, center the 16:9 crop window vertically around character action and faces (detected via `VNDetectFaceRectanglesRequest` or visual center) with ample headroom (~280px) and grounding so all characters, expressions, props, and actions are 100% visible from head to toe.
+  5. **Local Texture Inpainting**: For any remaining text elements (such as page numbers, title headers on the cover, or text intersecting the artwork), the engine samples adjacent ambient watercolor washes and heals the bounding box seamlessly.
+  6. **Programmatic Verification**: Runs a second Vision OCR verification pass over the exported plate to confirm `remainingTextCount == 0` before video compositing.
 
 ### Priority 2: AI Illustration Generation (Source-Fidelity Rule)
 When authentic clean artwork is unavailable (e.g., source only has raster scans with baked-in foreign text or no illustrations):

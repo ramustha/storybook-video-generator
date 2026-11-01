@@ -21,3 +21,10 @@ config/*.json
 exports/**/*.mp4
 stories/**/exports/**/*.mp4
 *.mp4
+
+# Generated Storybook Projects (Audio, High-Res Plates, Raw PDFs, Pages & Exports)
+# Exclude all generated stories to avoid repository bloat; keep only channel branding
+stories/*
+!stories/.gitkeep
+!stories/branding/
+!stories/branding/**

@@ -254,6 +254,7 @@ async function uploadVideo(
     categoryId?: string;
     privacyStatus: "public" | "unlisted" | "private";
     isMadeForKids?: boolean;
+    publishAt?: string;
   }
 ): Promise<string> {
   const fileSize = (await fs.stat(filePath)).size;
@@ -261,7 +262,21 @@ async function uploadVideo(
 
   console.log(`\n🚀 Uploading video: ${path.basename(filePath)} (${fileSizeMB} MB)...`);
   console.log(`   Title: "${metadata.title}"`);
-  console.log(`   Privacy: ${metadata.privacyStatus.toUpperCase()}`);
+  if (metadata.publishAt) {
+    console.log(`   Privacy: PRIVATE (Scheduled for publication at ${metadata.publishAt})`);
+  } else {
+    console.log(`   Privacy: ${metadata.privacyStatus.toUpperCase()}`);
+  }
+
+  const statusBody: any = {
+    selfDeclaredMadeForKids: metadata.isMadeForKids ?? false,
+  };
+  if (metadata.publishAt) {
+    statusBody.privacyStatus = "private";
+    statusBody.publishAt = new Date(metadata.publishAt).toISOString();
+  } else {
+    statusBody.privacyStatus = metadata.privacyStatus;
+  }
 
   const res = await youtube.videos.insert(
     {
@@ -275,10 +290,7 @@ async function uploadVideo(
           defaultLanguage: "id",
           defaultAudioLanguage: "id",
         },
-        status: {
-          privacyStatus: metadata.privacyStatus,
-          selfDeclaredMadeForKids: metadata.isMadeForKids ?? false,
-        },
+        status: statusBody,
       },
       media: {
         body: createReadStream(filePath),
@@ -431,6 +443,61 @@ async function deleteRemoteVideo(youtube: any, videoId: string) {
   }
 }
 
+/**
+ * Updates video visibility status (public, unlisted, private) or schedules publication.
+ */
+async function updateVideoPrivacy(
+  youtube: any,
+  videoId: string,
+  privacyStatus: "public" | "unlisted" | "private",
+  publishAt?: string
+) {
+  console.log(
+    `🔒 Updating privacy status on YouTube for video ${videoId} to [${
+      publishAt ? `PRIVATE (Scheduled: ${publishAt})` : privacyStatus.toUpperCase()
+    }]...`
+  );
+  try {
+    const statusBody: any = {
+      selfDeclaredMadeForKids: false,
+    };
+    if (publishAt) {
+      statusBody.privacyStatus = "private"; // YouTube API requires privacyStatus to be 'private' when publishAt is set
+      statusBody.publishAt = new Date(publishAt).toISOString();
+    } else {
+      statusBody.privacyStatus = privacyStatus;
+    }
+
+    await youtube.videos.update({
+      part: ["status"],
+      requestBody: {
+        id: videoId,
+        status: statusBody,
+      },
+    });
+    console.log(`✔ Video privacy updated successfully for ${videoId}`);
+  } catch (err: any) {
+    console.warn(`⚠️ Video privacy update error: ${err.message}`);
+  }
+}
+
+/**
+ * Parses pre-formatted title and description from exports/youtube-upload-metadata.md
+ */
+function parseMetadataKit(mdContent: string, lang: "id" | "en") {
+  const sectionHeader = lang === "id" ? "Indonesian Edition" : "English Edition";
+  const section = mdContent.split("## 📺 FORMAT").find((s) => s.includes(sectionHeader));
+  if (!section) return null;
+
+  const titleMatch = section.match(/\* \*\*Option 1[^*]*\*\*\s*[\r\n]+\s*`([^`]+)`/);
+  const title = titleMatch ? titleMatch[1].trim() : undefined;
+
+  const descMatch = section.match(/### 2\. Video Description\s*[\r\n]+```(?:markdown)?\s*([\s\S]*?)```/);
+  const desc = descMatch ? descMatch[1].trim() : undefined;
+
+  return { title, desc };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const getArg = (flag: string) => {
@@ -441,6 +508,8 @@ async function main() {
   const bookSlug = getArg("--book") || "gara-gara-kucing";
   const format = (getArg("--format") as "landscape" | "vertical" | "all") || "all";
   const privacy = (getArg("--privacy") as "public" | "unlisted" | "private") || "unlisted";
+  const setPrivacy = getArg("--set-privacy") as "public" | "unlisted" | "private" | undefined;
+  const scheduleTime = getArg("--schedule") || getArg("--publish-at");
   const isMadeForKids = args.includes("--made-for-kids");
   const requestedLang = (getArg("--lang") || "all") as "id" | "en" | "all";
   const isForceReplace = args.includes("--force") || args.includes("--replace");
@@ -473,6 +542,59 @@ async function main() {
 
   const languages: Array<"id" | "en"> =
     requestedLang === "all" ? ["id", "en"] : [requestedLang];
+
+  // If user only wants to update visibility status or schedule publishing
+  if (setPrivacy || scheduleTime) {
+    console.log(`\n======================================================`);
+    console.log(`🔒 Updating YouTube Visibility for [${bookSlug.toUpperCase()}]`);
+    console.log(`   Target Setting: ${scheduleTime ? `Scheduled release at ${scheduleTime}` : setPrivacy?.toUpperCase()}`);
+    console.log(`======================================================`);
+
+    for (const lang of languages) {
+      const isEn = lang === "en";
+      const landscapeId =
+        (manifest as any).publications?.youtube?.[lang]?.landscape?.id ||
+        (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
+        (isEn
+          ? (manifest.exports as any)?.en?.landscape?.youtubeId
+          : (manifest.exports as any)?.landscape?.youtubeId);
+
+      const verticalId =
+        (manifest as any).publications?.youtube?.[lang]?.vertical?.id ||
+        (manifest.exports as any)?.[lang]?.vertical?.youtubeId ||
+        (isEn
+          ? (manifest.exports as any)?.en?.vertical?.youtubeId
+          : (manifest.exports as any)?.vertical?.youtubeId);
+
+      if ((format === "landscape" || format === "all") && landscapeId) {
+        await updateVideoPrivacy(youtube, landscapeId, setPrivacy || "unlisted", scheduleTime);
+        if (!(manifest as any).publications) (manifest as any).publications = {};
+        if (!(manifest as any).publications.youtube) (manifest as any).publications.youtube = {};
+        if (!(manifest as any).publications.youtube[lang]) (manifest as any).publications.youtube[lang] = {};
+        if (!(manifest as any).publications.youtube[lang].landscape) {
+          (manifest as any).publications.youtube[lang].landscape = { id: landscapeId };
+        }
+        (manifest as any).publications.youtube[lang].landscape.privacy = scheduleTime ? "scheduled" : setPrivacy;
+        if (scheduleTime) (manifest as any).publications.youtube[lang].landscape.scheduledAt = scheduleTime;
+      }
+
+      if ((format === "vertical" || format === "all") && verticalId) {
+        await updateVideoPrivacy(youtube, verticalId, setPrivacy || "unlisted", scheduleTime);
+        if (!(manifest as any).publications) (manifest as any).publications = {};
+        if (!(manifest as any).publications.youtube) (manifest as any).publications.youtube = {};
+        if (!(manifest as any).publications.youtube[lang]) (manifest as any).publications.youtube[lang] = {};
+        if (!(manifest as any).publications.youtube[lang].vertical) {
+          (manifest as any).publications.youtube[lang].vertical = { id: verticalId };
+        }
+        (manifest as any).publications.youtube[lang].vertical.privacy = scheduleTime ? "scheduled" : setPrivacy;
+        if (scheduleTime) (manifest as any).publications.youtube[lang].vertical.scheduledAt = scheduleTime;
+      }
+    }
+
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+    console.log(`\n✔ story.json updated with new visibility settings.`);
+    return;
+  }
 
   // If user only wants to update thumbnails across all formats (Landscape + Shorts)
   if (isUpdateThumbnailsOnly && !isUpdateMetadata) {
@@ -511,222 +633,127 @@ async function main() {
 
   for (const lang of languages) {
     const isEn = lang === "en";
-    const exportsDir = isEn ? path.join(storyDir, "exports/en") : path.join(storyDir, "exports");
-    const baseName = isEn ? "its-all-the-cats-fault" : bookSlug;
-    const landscapeVideo = path.join(exportsDir, `${baseName}-16x9.mp4`);
-    const verticalVideo = path.join(exportsDir, `${baseName}-9x16.mp4`);
+    const exportsDir = path.join(storyDir, "exports", lang);
+    const landscapeRel = (manifest.exports as any)?.[lang]?.landscape?.path;
+    const verticalRel = (manifest.exports as any)?.[lang]?.vertical?.path;
+    const landscapeVideo = landscapeRel
+      ? path.join(storyDir, landscapeRel)
+      : path.join(exportsDir, `${bookSlug}-16x9.mp4`);
+    const verticalVideo = verticalRel
+      ? path.join(storyDir, verticalRel)
+      : path.join(exportsDir, `${bookSlug}-9x16.mp4`);
 
-    const langThumbnail = path.join(storyDir, `exports/${lang}/thumbnail.png`);
-    const fallbackThumbnail = path.join(storyDir, "exports/thumbnail.png");
-    const thumbnailPath = existsSync(langThumbnail) ? langThumbnail : fallbackThumbnail;
+    const popularThumbRel =
+      (manifest as any).thumbnails?.[lang]?.popular ||
+      (manifest as any).thumbnails?.[lang]?.primary;
+    const verticalThumbRel = (manifest as any).thumbnails?.[lang]?.vertical;
+    const langLandscapeThumb = popularThumbRel
+      ? path.join(storyDir, popularThumbRel)
+      : path.join(storyDir, `exports/${lang}/thumbnail.png`);
+    const fallbackThumb = path.join(storyDir, "exports/thumbnail.png");
+    const thumbnailPath = existsSync(langLandscapeThumb) ? langLandscapeThumb : fallbackThumb;
+    const langVerticalThumb = verticalThumbRel
+      ? path.join(storyDir, verticalThumbRel)
+      : path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
+    const verticalThumbnailPath = existsSync(langVerticalThumb) ? langVerticalThumb : thumbnailPath;
 
     console.log(`\n======================================================`);
     console.log(`🚀 Uploading [${lang.toUpperCase()}] Edition to YouTube`);
     console.log(`======================================================`);
 
-    let chapters: string;
-    let coreTags: string[];
-    let landscapeTitle: string;
-    let landscapeDesc: string;
-    let shortsTitle: string;
-    let shortsDesc: string;
-
-    if (isEn) {
-      chapters = [
-        "00:00 It's All the Cat's Fault!",
-        "00:05 Budi's Homework Excuse",
-        "00:11 The Cat in the Mango Tree",
-        "00:18 The Broken Ladder & Crying Baby",
-        "00:27 Mischievous Monkey in the Kitchen",
-        "00:37 Spicy Chicken Curry & Father's Bicycle",
-        "00:46 The Village Dog Catches a Scent",
-        "00:53 Oh No! The Dog Ate My Homework!",
-        "00:59 Teacher's Puzzled Face",
-        "01:03 Conclusion: It Was All the Cat's Fault!",
-      ].join("\n");
-
-      coreTags = [
-        "children storybook",
-        "animated bedtime story",
-        "funny kids cartoon",
-        "its all the cats fault",
-        "pratham books",
-        "storyweaver",
-        "english story for children",
-        "read aloud books",
-        "bedtime stories for kids",
-        "priya kuriyan",
-        "anushka ravishankar",
-        "early reader animation",
-        "cat cartoon for kids",
-        "audiobook for children",
-      ];
-
-      landscapeTitle = `IT'S ALL THE CAT'S FAULT! 🐱 Funny Animated Storybook For Kids | Bedtime Stories`;
-      landscapeDesc = [
-        `🐱 Why couldn't Budi turn in his homework? It all started with an orange cat stuck in a mango tree!`,
-        ``,
-        `Enjoy this hilarious animated children's storybook about an unbelievable chain reaction: from a stuck cat, a broken ladder, a crying baby, a mischievous monkey in the kitchen, market chicken curry, to a homework notebook... eaten by a village dog! 😂`,
-        ``,
-        `Original story by Anushka Ravishankar with lively folk illustrations by Priya Kuriyan. Adapted into an animated read-aloud storybook for early readers and bedtime fun.`,
-        ``,
-        `---`,
-        ``,
-        `⏱️ TIMESTAMPS / CHAPTERS:`,
-        chapters,
-        ``,
-        `---`,
-        ``,
-        `💡 MORAL OF THE STORY:`,
-        `A playful, funny exploration of domino effects, cause-and-effect thinking, and children's boundless imagination!`,
-        ``,
-        `---`,
-        ``,
-        `🇮🇩 Versi Bahasa Indonesia: https://youtu.be/Ladb_oJ-1-U`,
-        ``,
-        `---`,
-        ``,
-        `📜 LICENSE & ATTRIBUTION:`,
-        `Adapted from open educational literature under Creative Commons:`,
-        `• Original Title: ${manifest.originalTitle || "It's All the Cat's Fault!"}`,
-        `• Author: ${manifest.source.originalAuthor}`,
-        `• Illustrator: ${manifest.source.originalIllustrator}`,
-        `• Publisher: ${manifest.source.repository}`,
-        `• License: ${manifest.source.license}`,
-        `• Source: ${manifest.source.sourceUrl}`,
-        ``,
-        `---`,
-        ``,
-        `🎬 PRODUCTION CREDITS:`,
-        `• Channel: Zayn Adyan Ramadhan (@ZaynAdyanRamadhan)`,
-        `• Voiceover: Azure Neural Voice (en-US-AnaNeural & Multi-Speaker Tuning)`,
-        `• Animation Engine: Remotion Cinematic Story Engine`,
-        `• Sound & Foley: ASMR Children's Sound Effects`,
-        ``,
-        `🔔 Don't forget to Like, Comment, and Subscribe to @ZaynAdyanRamadhan for more animated storybooks!`,
-        ``,
-        `#KidsStories #BedtimeStory #StoryWeaver #AnimatedStorybook #CatStory #Storytime #PictureBook #ReadAloud #ChildrenBooks`,
-      ].join("\n");
-
-      shortsTitle = `The Funniest Excuse For Not Doing Homework! 😂 It's All The Cat's Fault 🐱 #Shorts #Storybook`;
-      shortsDesc = [
-        `The most believable homework excuse ever! From a stuck cat in a mango tree to a dog eating the notebook! 🐱🐶`,
-        ``,
-        `Author: ${manifest.source.originalAuthor} | Illustrator: ${manifest.source.originalIllustrator}`,
-        `License: Creative Commons CC BY 4.0 (StoryWeaver / Pratham Books)`,
-        ``,
-        `🎬 Watch the full 16:9 Landscape story on our channel: https://youtu.be/6sLTErwRXsk 👆`,
-        `🇮🇩 Tonton versi Bahasa Indonesia: https://youtube.com/shorts/37P1i6JEiwE`,
-        ``,
-        `🔔 Subscribe to @ZaynAdyanRamadhan for more fun storybooks!`,
-        ``,
-        `#Shorts #AnimatedStorybook #KidsStories #Storytime #BedtimeStory #Animation #CatVideo #StoryWeaver #FunnyStories`,
-      ].join("\n");
-    } else {
-      chapters = [
-        "00:00 Pembuka: Gara-Gara Kucing!",
-        "00:06 Alasan Budi di Depan Bu Guru",
-        "00:13 Kucing Terjebak di Pohon Mangga",
-        "00:20 Tangga Rusak & Tangisan Adik Bayi",
-        "00:31 Monyet Nakal Masuk Dapur",
-        "00:42 Kari Ayam Pasar & Sepeda Bapak",
-        "00:54 Anjing Cokelat Mencium Bau Sedap",
-        "01:01 Gawat! Buku PR Dimakan Anjing",
-        "01:07 Reaksi Bu Guru yang Bingung",
-        "01:12 Kesimpulan: Tetap Salah Kucing!",
-      ].join("\n");
-
-      coreTags = [
-        "dongeng anak",
-        "cerita anak bergambar",
-        "gara gara kucing",
-        "cerita anak indonesia",
-        "dongeng sebelum tidur",
-        "animasi anak indonesia",
-        "buku cerita bergambar",
-        "anushka ravishankar",
-        "priya kuriyan",
-        "storyweaver indonesia",
-        "pratham books",
-        "kartun anak lucu",
-        "cerita kucing oranye",
-        "tugas sekolah dimakan anjing",
-        "dongeng lucu anak",
-        "kids storybook animation",
-        "children bedtime story",
-        "audio book anak indonesia",
-      ];
-
-      landscapeTitle = `GARA-GARA KUCING! 🐱 Dongeng Cerita Anak Lucu (Alasan Budi Ga Ngerjain PR) | Animasi Buku Bergambar`;
-      landscapeDesc = [
-        `🐱 Kenapa Budi tidak mengerjakan PR sekolahnya? Ternyata semua berawal dari seekor kucing oranye di atas pohon mangga!`,
-        ``,
-        `Saksikan dongeng anak bergambar yang seru, jenaka, dan penuh kejutan tentang rentetan kejadian tak terduga: dari kucing terjebak, tangga rusak, adik bayi menangis, monyet nakal masuk dapur, kari ayam pasar, hingga buku tugas yang... dimakan anjing! 😂`,
-        ``,
-        `Selamat menikmati cerita animasi bersuara dengan ilustrasi karya Priya Kuriyan dan naskah oleh Anushka Ravishankar. Cocok sebagai tontonan edukatif dan dongeng sebelum tidur untuk si kecil.`,
-        ``,
-        `---`,
-        ``,
-        `⏱️ TIMESTAMPS / CHAPTERS:`,
-        chapters,
-        ``,
-        `---`,
-        ``,
-        `💡 PESAN MORAL:`,
-        `Cerita ini mengajarkan tentang konsep sebab-akibat (domino effect) dengan cara yang jenaka, sekaligus mengajak anak-anak untuk selalu tersenyum, berimajinasi, dan bertanggung jawab dengan tugas sekolahnya.`,
-        ``,
-        `---`,
-        ``,
-        `🇺🇸 English Edition (Watch in English): https://youtu.be/6sLTErwRXsk`,
-        ``,
-        `---`,
-        ``,
-        `📜 LISENSI & ATRIBUSI:`,
-        `Buku ini diadaptasi dari buku cerita terbuka berlisensi Creative Commons:`,
-        `• Judul Asli: It's All the Cat's Fault!`,
-        `• Penulis: ${manifest.source.originalAuthor}`,
-        `• Ilustrator Asli: ${manifest.source.originalIllustrator}`,
-        `• Penerbit Asli: ${manifest.source.repository}`,
-        `• Diterjemahkan dan dialihbahasakan ke dalam Bahasa Indonesia`,
-        `• Lisensi: ${manifest.source.license}`,
-        `  ${manifest.source.sourceUrl}`,
-        ``,
-        `---`,
-        ``,
-        `🎬 KREDIT PRODUKSI:`,
-        `• Channel: Zayn Adyan Ramadhan (@ZaynAdyanRamadhan)`,
-        `• Voiceover: Azure Neural Speech (id-ID-GadisNeural & Multi-Speaker Tuning)`,
-        `• Animasi & Efek Kamera: Remotion Cinematic Story Engine`,
-        `• Tata Suara & Foley: Sound Effects ASMR Children Edition`,
-        ``,
-        `🔔 Jangan lupa LIKE, COMMENT alasan favoritmu, dan SUBSCRIBE ke @ZaynAdyanRamadhan untuk cerita anak bergambar lainnya setiap minggu!`,
-        ``,
-        `#DongengAnak #CeritaAnak #GaraGaraKucing #AnimasiIndonesia #BukuCeritaAnak #StoryWeaver #KartunAnak #BedtimeStory`,
-      ].join("\n");
-
-      shortsTitle = `Alasan Ga Ngerjain PR Paling Masuk Akal! 😂 Gara-Gara Kucing 🐱 #Shorts #DongengAnak`;
-      shortsDesc = [
-        `Budi ga ngerjain tugas sekolah, tapi alasannya bener-bener ga terduga: dari kucing di pohon mangga sampai PR dimakan anjing! 🐱🐶`,
-        ``,
-        `Karya: ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}`,
-        `Lisensi: Creative Commons CC BY 4.0 (StoryWeaver / Pratham Books)`,
-        ``,
-        `🎬 Tonton versi lengkap Landscape (16:9) di channel kami: https://youtu.be/Ladb_oJ-1-U 👆`,
-        `🇺🇸 Watch English version: https://youtube.com/shorts/TRDw6JX8m5M`,
-        ``,
-        `🔔 Subscribe ke @ZaynAdyanRamadhan untuk cerita animasi seru berikutnya!`,
-        ``,
-        `#Shorts #DongengAnak #CeritaAnak #KartunAnak #AnimasiIndonesia #KucingOranye #Lucu #StorybookAnimation #StoryWeaver`,
-      ].join("\n");
+    const metadataKitPath = path.join(storyDir, "exports/youtube-upload-metadata.md");
+    let kitMeta: { title?: string; desc?: string } | null = null;
+    if (existsSync(metadataKitPath)) {
+      const kitContent = await fs.readFile(metadataKitPath, "utf-8");
+      kitMeta = parseMetadataKit(kitContent, lang);
     }
+
+    const displayTitle = isEn ? (manifest.originalTitle || manifest.title) : manifest.title;
+
+    let chapters: string = generateChapters(manifest.scenes);
+    let coreTags: string[] = isEn
+      ? [
+          "children storybook",
+          "animated bedtime story",
+          "funny kids cartoon",
+          displayTitle.toLowerCase(),
+          "pratham books",
+          "storyweaver",
+          "english story for children",
+          "read aloud books",
+          "bedtime stories for kids",
+          "early reader animation",
+          "audiobook for children",
+        ]
+      : [
+          "dongeng anak",
+          "cerita anak bergambar",
+          displayTitle.toLowerCase(),
+          "cerita anak indonesia",
+          "dongeng sebelum tidur",
+          "animasi anak indonesia",
+          "buku cerita bergambar",
+          "storyweaver indonesia",
+          "pratham books",
+          "kartun anak lucu",
+          "audio book anak indonesia",
+        ];
+
+    let landscapeTitle: string =
+      kitMeta?.title ||
+      (isEn
+        ? `${displayTitle.toUpperCase()}! 🌧️ Fun Kids Animated Read-Aloud Storybook`
+        : `${displayTitle.toUpperCase()}! 🌧️ Dongeng Cerita Anak Bergambar`);
+
+    let landscapeDesc: string =
+      kitMeta?.desc ||
+      [
+        `🌧️ ${displayTitle} - Dongeng cerita anak bergambar yang hangat dan mendidik!`,
+        ``,
+        `Karya asli: ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
+        `Diterbitkan oleh: ${manifest.source.repository} under ${manifest.source.license}.`,
+        ``,
+        `---`,
+        ``,
+        `⏱️ TIMESTAMPS / CHAPTERS:`,
+        chapters,
+        ``,
+        `---`,
+        ``,
+        `🔔 Subscribe to @ZaynAdyanRamadhan for more animated storybooks!`,
+      ].join("\n");
+
+    let shortsTitle: string = isEn
+      ? `Kids Animated Storybook: ${displayTitle}! 🌧️ #Shorts #BedtimeStories`
+      : `Buku Cerita Anak: ${displayTitle}! 🌧️ #Shorts #DongengAnak`;
+
+    let shortsDesc: string = isEn
+      ? [
+          `${displayTitle} - Animated children's picture book by ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
+          `License: ${manifest.source.license} (${manifest.source.repository})`,
+          ``,
+          `🔔 Subscribe to @ZaynAdyanRamadhan for more fun storybooks!`,
+          ``,
+          `#Shorts #AnimatedStorybook #KidsStories #Storytime #BedtimeStory`,
+        ].join("\n")
+      : [
+          `${displayTitle} - Cerita dongeng anak bergambar karya ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
+          `Lisensi: ${manifest.source.license} (${manifest.source.repository})`,
+          ``,
+          `🔔 Subscribe ke @ZaynAdyanRamadhan untuk cerita animasi seru lainnya!`,
+          ``,
+          `#Shorts #DongengAnak #CeritaAnak #KartunAnak #AnimasiIndonesia`,
+        ].join("\n");
 
     // 4. Upload Landscape (16:9) with Pre-Upload Deduplication Check
     if ((format === "landscape" || format === "all") && existsSync(landscapeVideo)) {
       console.log(`\n🎬 Checking Landscape (16:9) publication status for ${lang.toUpperCase()}...`);
 
-      let targetVideoId = isEn
-        ? (manifest.exports as any)?.en?.landscape?.youtubeId
-        : (manifest.exports as any)?.landscape?.youtubeId;
+      let targetVideoId =
+        (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
+        (isEn
+          ? (manifest.exports as any)?.en?.landscape?.youtubeId
+          : (manifest.exports as any)?.landscape?.youtubeId);
 
       let remoteCheck = targetVideoId
         ? await checkRemoteVideoStatus(youtube, targetVideoId)
@@ -779,6 +806,7 @@ async function main() {
           tags: coreTags,
           privacyStatus: privacy,
           isMadeForKids,
+          publishAt: scheduleTime,
         });
 
         await uploadThumbnail(youtube, videoId, thumbnailPath);
@@ -789,8 +817,12 @@ async function main() {
 
       if (targetVideoId) {
         if (!manifest.exports) manifest.exports = {};
-        if (isEn) {
-          if (!manifest.exports.en) (manifest.exports as any).en = {};
+        if ((manifest.exports as any)[lang]) {
+          if (!(manifest.exports as any)[lang].landscape) (manifest.exports as any)[lang].landscape = {};
+          (manifest.exports as any)[lang].landscape.youtubeId = targetVideoId;
+          (manifest.exports as any)[lang].landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
+        } else if (isEn) {
+          if (!(manifest.exports as any).en) (manifest.exports as any).en = {};
           if (!(manifest.exports as any).en.landscape) (manifest.exports as any).en.landscape = {};
           (manifest.exports as any).en.landscape.youtubeId = targetVideoId;
           (manifest.exports as any).en.landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
@@ -801,7 +833,7 @@ async function main() {
         }
 
         // Record in unified multi-platform publications registry
-        if (!manifest.publications) (manifest as any).publications = {};
+        if (!(manifest as any).publications) (manifest as any).publications = {};
         if (!(manifest as any).publications.youtube) (manifest as any).publications.youtube = {};
         if (!(manifest as any).publications.youtube[lang]) (manifest as any).publications.youtube[lang] = {};
         (manifest as any).publications.youtube[lang].landscape = {
@@ -820,9 +852,11 @@ async function main() {
     if ((format === "vertical" || format === "all") && existsSync(verticalVideo)) {
       console.log(`\n📱 Checking Shorts (9:16) publication status for ${lang.toUpperCase()}...`);
 
-      let targetShortsId = isEn
-        ? (manifest.exports as any)?.en?.vertical?.youtubeId
-        : (manifest.exports as any)?.vertical?.youtubeId;
+      let targetShortsId =
+        (manifest.exports as any)?.[lang]?.vertical?.youtubeId ||
+        (isEn
+          ? (manifest.exports as any)?.en?.vertical?.youtubeId
+          : (manifest.exports as any)?.vertical?.youtubeId);
 
       let remoteShortsCheck = targetShortsId
         ? await checkRemoteVideoStatus(youtube, targetShortsId)
@@ -876,6 +910,7 @@ async function main() {
           tags: [...coreTags, "shorts", "youtubeshorts"],
           privacyStatus: privacy,
           isMadeForKids,
+          publishAt: scheduleTime,
         });
 
         const langVerticalThumb = path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
@@ -888,8 +923,12 @@ async function main() {
 
       if (targetShortsId) {
         if (!manifest.exports) manifest.exports = {};
-        if (isEn) {
-          if (!manifest.exports.en) (manifest.exports as any).en = {};
+        if ((manifest.exports as any)[lang]) {
+          if (!(manifest.exports as any)[lang].vertical) (manifest.exports as any)[lang].vertical = {};
+          (manifest.exports as any)[lang].vertical.youtubeId = targetShortsId;
+          (manifest.exports as any)[lang].vertical.youtubeUrl = `https://youtube.com/shorts/${targetShortsId}`;
+        } else if (isEn) {
+          if (!(manifest.exports as any).en) (manifest.exports as any).en = {};
           if (!(manifest.exports as any).en.vertical) (manifest.exports as any).en.vertical = {};
           (manifest.exports as any).en.vertical.youtubeId = targetShortsId;
           (manifest.exports as any).en.vertical.youtubeUrl = `https://youtube.com/shorts/${targetShortsId}`;
@@ -900,7 +939,7 @@ async function main() {
         }
 
         // Record in unified multi-platform publications registry
-        if (!manifest.publications) (manifest as any).publications = {};
+        if (!(manifest as any).publications) (manifest as any).publications = {};
         if (!(manifest as any).publications.youtube) (manifest as any).publications.youtube = {};
         if (!(manifest as any).publications.youtube[lang]) (manifest as any).publications.youtube[lang] = {};
         (manifest as any).publications.youtube[lang].vertical = {
@@ -917,6 +956,9 @@ async function main() {
   }
 
   console.log(`\n✔ story.json updated with newly uploaded YouTube video links.`);
+  console.log(`\n💡 Note: Videos are uploaded as [${privacy.toUpperCase()}] by default for review.`);
+  console.log(`   To change visibility to PUBLIC:  npm run upload -- --book ${bookSlug} --set-privacy public`);
+  console.log(`   To SCHEDULE release for later:  npm run upload -- --book ${bookSlug} --schedule "2026-11-03T10:00:00Z"`);
 }
 
 main().catch(console.error);

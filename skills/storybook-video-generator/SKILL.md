@@ -81,6 +81,16 @@ Present the story brief to the user using the review template in [story-sources.
 ### 5. Ingest Artwork (Priority Ladder — 100% Shared Across Languages)
 * **Zero Language Redundancy**: All visual plates (`assets/scene_XX.png`, `cover.png`) are text-free and language-agnostic; they are **100% shared between Indonesian and English video deliverables**.
 * **Priority 1 (Authentic Clean Plates)**: Check if open-access source provides pristine, text-free digital illustration plates (e.g. GDL H5P bundles, StoryWeaver raw assets). If available, ingest directly into `assets/` (zero AI quota, 100% artist vision).
+* **Priority 1B (Automated Vision Text-Exclusion for PDFs)**: When official storybooks are only available as PDFs with narrative text baked into pages, execute the automated text-exclusion pipeline:
+  ```bash
+  swift -module-cache-path tmp/cache scripts/smart-text-inpaint.swift --book <book-slug>
+  ```
+  1. **Apple Vision OCR**: Localizes text bounding boxes via `VNRecognizeTextRequest`.
+  2. **Portrait Cover Rule**: Never crop portrait covers (`aspect ratio < 1.0`) into 16:9 bottom slices. Retain full portrait plate (`cover.png`) and set `"coverOrientation": "portrait"` in `story.json`. `CoverScene.tsx` dynamically adapts 3D floating hardcover container dimensions.
+  3. **Single-Page Character Centering Rule**: For standalone single pages without spread partners, center the 16:9 crop window vertically around character faces and action with ~280px headroom (never a naive bottom-aligned crop that cuts off heads).
+  4. **Two-Page Spread 16:9 Crop**: Anchors 16:9 crop into the bottom ~76% illustration area below text margins.
+  5. **Local Watercolor Inpainting**: Samples adjacent ambient washes to heal text and page numbers seamlessly.
+  6. **Automated Verification**: Runs a second Vision OCR verification pass to confirm `remainingTextCount === 0`.
 * **Priority 2 (Source-Fidelity AI Generation)**: When clean authentic artwork is unavailable (e.g. raster scans with baked-in text or plain manuscripts), generate fresh AI illustrations strictly adhering to the character physical traits, attire, species, and environmental setting described in the source manuscript.
 * **3D Cover**: 2.5s opener with embossed gold gilded edges and author credit (`assets/cover.png`).
 * Never reuse low-res scans with baked-in typography. Append negative constraints (`--no text, no watermark, no typography`). Details in [consistency-bible.md](./references/consistency-bible.md).
@@ -123,15 +133,19 @@ Present the story brief to the user using the review template in [story-sources.
 
 ### 9. Generate High-CTR Bilingual Thumbnails (Popular & Niche Formats)
 * Generate high-CTR 1920x1080 thumbnails for both languages before publishing. YouTube thumbnail CTR determines algorithmic reach.
+* **Dynamic Story-Bound Configuration (`story.json.thumbnailConfig`)**:
+  * Never hardcode story titles, curiosity hooks, or character stickers in thumbnail templates.
+  * Every book defines its own `thumbnailConfig` in `story.json` (with language keys `id` and `en` specifying `headlineTop`, `headlineBottom`, `hook`, `hookEmoji`, `badge`, `sticker`, and `bedtimeHook`).
+  * If omitted, the engine dynamically derives the headline by splitting the active story `title` / `originalTitle` and extracts contextual emojis based on narrative keywords.
 * **Format 1 — Popular Comic Action Hook (`thumbnail-popular.png`)**:
   * Tilted dynamic headline (`rotate(-2deg)`) with heavy dark stroke (`-webkit-text-stroke: 6px #000`) and 3D yellow gradient fill.
-  * Attention-grabbing eyebrow pill: `🔥 CERITA ANAK LUCU BANGET!` / `🔥 HILARIOUS KIDS STORYBOOK`.
-  * Curiosity gap sticker: `🐶😱 TUGAS DIMAKAN ANJING?!` / `THE DOG ATE MY HOMEWORK?!`.
+  * Attention-grabbing eyebrow pill: e.g. `🔥 CERITA ANAK SERU BANGET!` / `🔥 HILARIOUS KIDS STORYBOOK`.
+  * Curiosity gap sticker: Dynamic contextual hook (e.g. `🌧️😱 MANU PENGEN BANGET HUJAN?!` / `MANU CAN'T WAIT FOR RAIN?!`).
   * Sticker-bordered hero artwork with white outline and drop-shadow (`0 24px 60px rgba(0,0,0,0.9)`).
   * Safe-zone compliant: Keeps bottom-right quadrant clear of text/faces where YouTube stamps the video runtime overlay.
 * **Format 2 — Niche Whimsical Bedtime Storybook (`thumbnail-bedtime.png`)**:
   * Ornate golden picture-book frame with warm ambient stardust lighting and midnight blue gradient.
-  * Gold embossed typography, moonlight pill (`🌙 DONGENG SEBELUM TIDUR` / `🌙 BEDTIME READ-ALOUD`), and gentle bedtime subtitle.
+  * Gold embossed typography, moonlight pill (`🌙 DONGENG SEBELUM TIDUR` / `🌙 BEDTIME READ-ALOUD`), dynamic book title, and gentle bedtime subtitle.
 * **Format 3 — Vertical 9:16 Shorts & Reels Cover (`thumbnail-vertical.png`)**:
   * Full-bleed ambient backdrop with dramatic centered character card (10px sticker border, 3D drop shadow).
   * High-contrast title typography + curiosity gap hook sticker, safe-zone compliant (top 150px and bottom 300px clear for native player UI).
@@ -199,6 +213,7 @@ To modify or fix any scene without re-running the entire pipeline or re-spending
 
 | Domain | Boundary / Limitation | Impact & Error Signature | Standard Operating Procedure / Mitigation |
 | :--- | :--- | :--- | :--- |
+| **Publish Visibility & Scheduling** | Videos uploaded as Public prematurely without QC | Unintended notification blast to subscribers with audio/subtitle errors | Always upload as Unlisted by default (`privacyStatus: "unlisted"`); provide preview links and ask user whether to publish immediately (`--set-privacy public`), schedule (`--schedule <time>`), or keep unlisted. |
 | **YouTube Quota** | Default 10,000 units/day quota | 4 video releases = ~6,620 units (max 1 full bilingual title/day) | Use `--resync-all` / `--update-metadata` (51 units/video) for revisions; never re-upload binaries to fix metadata. |
 | **Thumbnail Velocity** | API burst throttle on `thumbnails.set` | `400/429 The user has uploaded too many thumbnails recently` when updating >3 thumbnails rapidly | Wait 15–30 min cooldown, then run `--update-thumbnails` for remaining videos, or drag-and-drop into YouTube Studio. |
 | **Channel Verification** | Phone verification required for custom thumbnails | `403 The authenticated user doesn't have permissions to upload and set custom video thumbnails` | Complete one-time channel verification at `https://www.youtube.com/verify` (Intermediate Features). |
@@ -230,6 +245,7 @@ Before delivering or publishing:
 - [ ] **Bilingual Multi-Platform Metadata Prepared**: `exports/youtube-upload-metadata.md` generated with timestamps, cross-promotion links, and full attribution.
 - [ ] **Bilingual High-CTR Thumbnails Rendered**: Generated 1920x1080 thumbnails in both Popular Comic and Niche Bedtime formats for ID and EN editions with title typography and curiosity hooks.
 - [ ] **Cross-Platform Duplicate Prevention Verified**: Confirmed publication idempotency via local manifest and live platform API checks before video insertion.
+- [ ] **Publish Visibility Unlisted by Default**: All videos uploaded as "unlisted" initially; preview links presented to user to confirm quality before switching to "public" or scheduling via `--set-privacy public` or `--schedule`.
 - [ ] **Automated YouTube Publishing Complete**: Live video URLs for both language editions synced back into `story.json`.
 
 ---
@@ -248,6 +264,7 @@ Before delivering or publishing:
 | **YouTube API 403 / Access Denied** | API disabled or test user missing | Enable YouTube Data API v3 in GCP and add channel email under OAuth Consent Screen Test Users. |
 | **YouTube API 403 on custom thumbnail** | Channel phone verification missing | Visit `https://www.youtube.com/verify` to activate Intermediate Features. |
 | **YouTube thumbnail velocity rate-limit** | Updating >3 thumbnails in rapid burst | Trapped gracefully; wait 15–30m cooldown, then run `--update-thumbnails` for remaining videos. |
+| **Thumbnail displays wrong/previous story title** | Hardcoded text fallbacks in Remotion composition | Define `thumbnailConfig` in `story.json` per book and use dynamic headline splitting and keyword emoji derivation. |
 | **Remotion render fails with `EPERM`** | Headless Chrome WebSocket blocked | Run render outside sandbox (`BypassSandbox: true`) for CDP socket communication. |
 | **Image generation quota hit (429 / RESOURCE_EXHAUSTED)** | Free/burst API quota limit reached | Present Decision Card: Wait & Auto-Resume vs Progressive Draft with storyboard placeholders. |
 | **4K render Chrome tab crash (OOM)** | Memory spikes on 4K canvas | Standardize on 1080p Full HD (`1920×1080`); only use 4K on machines with ≥16GB RAM. |

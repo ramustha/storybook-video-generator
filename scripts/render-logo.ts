@@ -57,7 +57,7 @@ registerRoot(RemotionRoot);
       fps: 30,
       durationInFrames: 1,
       defaultProps: {},
-    },
+    } as any,
     serveUrl,
     output: path.join(brandingDir, "logo-concept-1-emblem.png"),
   });
@@ -72,7 +72,7 @@ registerRoot(RemotionRoot);
       fps: 30,
       durationInFrames: 1,
       defaultProps: {},
-    },
+    } as any,
     serveUrl,
     output: path.join(brandingDir, "logo-concept-2-mascot.png"),
   });
@@ -88,7 +88,7 @@ registerRoot(RemotionRoot);
       fps: 30,
       durationInFrames: 1,
       defaultProps: {},
-    },
+    } as any,
     serveUrl,
     output: path.join(brandingDir, "oauth-consent-logo-120x120.png"),
   });
@@ -103,7 +103,7 @@ registerRoot(RemotionRoot);
       fps: 30,
       durationInFrames: 1,
       defaultProps: {},
-    },
+    } as any,
     serveUrl,
     output: path.join(brandingDir, "oauth-consent-mascot-120x120.png"),
   });

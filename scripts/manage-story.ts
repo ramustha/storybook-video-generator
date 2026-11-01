@@ -273,6 +273,7 @@ async function main() {
   if (args.includes("--generate-placeholders")) {
     console.log(`\n🎨 Generating Storyboard Placeholder Plates for missing visuals in "${story.title}"...`);
     let generated = 0;
+    const force = process.argv.includes("--force");
 
     for (const scene of story.scenes) {
       const imgPath = path.join(storyDir, scene.visual.imagePath);
