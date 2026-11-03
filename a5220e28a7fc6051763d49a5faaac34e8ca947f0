@@ -1,0 +1,31 @@
+scripts/manage-projects.ts
+  698ac31901cd73e0 1-173
+.gitignore
+  698ac31901cd73e0 11
+scripts/quota-rotator.ts
+  698ac31901cd73e0 1-402
+scripts/upload-youtube.ts
+  698ac31901cd73e0 9,627-628,633-637,639-650,975-994,1148-1160,1162-1167
+package.json
+  698ac31901cd73e0 15-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "a5220e28a7fc6051763d49a5faaac34e8ca947f0",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 640,
+      "total_deletions": 12,
+      "accepted_lines": 640,
+      "overriden_lines": 0
+    }
+  }
+}
