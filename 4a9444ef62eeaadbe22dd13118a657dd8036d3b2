@@ -1,0 +1,33 @@
+src/remotion/components/ProceduralIllustration.tsx
+  698ac31901cd73e0 3-5,12,20,23,25-26,28-58,63-65,67-69,72-102,106-204,208-230,232-237,239-246,249-276,278-282,285-289,291-316,319-322,325-354,356-363,366-392,394-398,401-402,404-405,411-414,417-440,443-467,469-476,479-482,484-506,508-513,516-521,524-525,527-549,551,554-559,562-569,572-603
+src/remotion/components/characters/ThinDog.tsx
+  698ac31901cd73e0 1-202
+src/remotion/components/characters/SceneryElements.tsx
+  698ac31901cd73e0 1-231
+src/remotion/components/characters/FatKing.tsx
+  698ac31901cd73e0 1-290
+src/remotion/components/ThumbnailComposition.tsx
+  698ac31901cd73e0 3,270-276,625-631,928-934
+src/remotion/components/OutroScene.tsx
+  698ac31901cd73e0 33,86-107,218-242
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "4a9444ef62eeaadbe22dd13118a657dd8036d3b2",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 1328,
+      "total_deletions": 266,
+      "accepted_lines": 1328,
+      "overriden_lines": 0
+    }
+  }
+}
