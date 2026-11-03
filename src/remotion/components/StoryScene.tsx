@@ -38,19 +38,19 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
         <div
           style={{
             position: "absolute",
-            top: isVertical ? "70px" : "32px",
+            top: isVertical ? "50px" : "22px",
             left: "50%",
             transform: "translateX(-50%)",
             background: "rgba(15, 23, 42, 0.85)",
             backdropFilter: "blur(14px)",
             border: "1.5px solid rgba(251, 191, 36, 0.4)",
             borderRadius: "9999px",
-            padding: isVertical ? "8px 24px" : "6px 20px",
+            padding: isVertical ? "6px 20px" : "5px 18px",
             color: "#FEF08A",
-            fontSize: isVertical ? "20px" : "18px",
+            fontSize: isVertical ? "18px" : "16px",
             fontWeight: 800,
             letterSpacing: "0.6px",
-            zIndex: 30,
+            zIndex: 40,
             boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
             whiteSpace: "nowrap",
           }}
@@ -63,6 +63,21 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
           weather={scene.atmosphere?.weather}
           intensity={scene.atmosphere?.intensity}
           isVertical={isVertical}
+        />
+
+        {/* Subtle Lower-Third Contrast Protection for Subtitles */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: isVertical ? "480px" : "240px",
+            background:
+              "linear-gradient(to top, rgba(2, 6, 23, 0.85) 0%, rgba(2, 6, 23, 0.45) 60%, transparent 100%)",
+            pointerEvents: "none",
+            zIndex: 42,
+          }}
         />
 
         {/* Subtitles */}

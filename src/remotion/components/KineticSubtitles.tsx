@@ -117,11 +117,11 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
         left: 0,
         right: 0,
         // Positioned safely above YouTube Shorts bottom UI (0-220px) and comfortably in Landscape lower third
-        bottom: isVertical ? "260px" : "64px",
+        bottom: isVertical ? "280px" : "28px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: isVertical ? "0 28px" : "0 40px",
+        padding: isVertical ? "0 24px" : "0 40px",
         zIndex: 50,
         pointerEvents: "none",
         gap: "10px",
@@ -136,35 +136,35 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
           background: "rgba(10, 15, 29, 0.92)",
           border: `1.5px solid ${activeSpeakerColor}`,
           borderRadius: "9999px",
-          padding: isVertical ? "5px 18px" : "6px 22px",
+          padding: isVertical ? "5px 18px" : "5px 20px",
           color: activeSpeakerColor,
           fontFamily: "system-ui, -apple-system, sans-serif",
-          fontSize: isVertical ? "18px" : "17px",
+          fontSize: isVertical ? "17px" : "16px",
           fontWeight: 800,
           boxShadow: `0 0 14px ${activeSpeakerColor}40, 0 4px 10px rgba(0,0,0,0.5)`,
           textTransform: "uppercase",
           letterSpacing: "0.8px",
         }}
       >
-        <span style={{ fontSize: isVertical ? "20px" : "19px" }}>{speakerIcon}</span>
+        <span style={{ fontSize: isVertical ? "19px" : "18px" }}>{speakerIcon}</span>
         <span>{activeSpeakerName}</span>
       </div>
 
       {/* Full-Context Subtitle Container */}
       <div
         style={{
-          background: "rgba(9, 14, 28, 0.88)",
+          background: "rgba(9, 14, 28, 0.92)",
           backdropFilter: "blur(20px)",
           border: `1.5px solid ${activeSpeakerColor}55`,
           borderRadius: "22px",
-          padding: isVertical ? "16px 24px" : "16px 36px",
+          padding: isVertical ? "14px 22px" : "14px 34px",
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
           alignItems: "center",
           rowGap: isVertical ? "8px" : "10px",
           columnGap: isVertical ? "10px" : "12px",
-          maxWidth: isVertical ? "94%" : "84%",
+          maxWidth: isVertical ? "92%" : "82%",
           boxShadow: `0 18px 45px rgba(0, 0, 0, 0.75), 0 0 25px ${activeSpeakerColor}15`,
           transition: "border-color 0.25s ease, box-shadow 0.25s ease",
           textAlign: "center",
@@ -204,7 +204,7 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
               key={`${item.word}-${idx}`}
               style={{
                 fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: isVertical ? "27px" : "32px",
+                fontSize: isVertical ? "26px" : "30px",
                 lineHeight: 1.4,
                 fontWeight: isActive ? 900 : isPast ? 750 : 600,
                 color: textColor,

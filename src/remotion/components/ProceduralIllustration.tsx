@@ -37,6 +37,12 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
   const kingScale = isVertical ? 1.05 : 1.15;
   const dogScale = isVertical ? 0.95 : 1.05;
 
+  // Layout baseline: elevated cleanly above the lower-third subtitle & story text band
+  // In Landscape (1080p): Ground line sits at bottom 240px (Y = 840px), subtitle sits at bottom 28px - 180px
+  // In Vertical (1920p): Ground line sits at bottom 700px (Y = 1220px), subtitle sits at bottom 280px - 460px
+  const groundBaseline = isVertical ? "700px" : "240px";
+  const floorHeight = isVertical ? "58%" : "42%";
+
   // =========================================================================
   // SCENE 0: COVER SCENE (Grand Illustrated Storybook Cover)
   // =========================================================================
@@ -59,7 +65,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div
           style={{
             position: "absolute",
-            top: isVertical ? "160px" : "90px",
+            top: isVertical ? "140px" : "80px",
             right: isVertical ? "100px" : "220px",
             width: "160px",
             height: "160px",
@@ -77,7 +83,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
 
         {/* Distant Castle Towers on Hilltop */}
         <svg
-          style={{ position: "absolute", bottom: isVertical ? "380px" : "260px", left: "10%", width: "280px", opacity: 0.7 }}
+          style={{ position: "absolute", bottom: isVertical ? "820px" : "300px", left: "10%", width: "280px", opacity: 0.7 }}
           viewBox="0 0 200 150"
         >
           {/* Castle Base & Towers */}
@@ -91,7 +97,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
 
         {/* Rolling Green Hills Backdrop */}
         <svg
-          style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: isVertical ? "45%" : "40%", pointerEvents: "none" }}
+          style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: isVertical ? "56%" : "44%", pointerEvents: "none" }}
           viewBox="0 0 1440 500"
           preserveAspectRatio="none"
         >
@@ -103,11 +109,13 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? (showTitle ? "160px" : "120px") : (showTitle ? "40px" : "70px"),
+            bottom: isVertical
+              ? (showTitle ? "480px" : "70px")
+              : (showTitle ? "90px" : "60px"),
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
-            gap: isVertical ? "10px" : "40px",
+            gap: isVertical ? "15px" : "40px",
             zIndex: 20,
           }}
         >
@@ -122,7 +130,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
           <div
             style={{
               position: "absolute",
-              top: isVertical ? "110px" : "60px",
+              top: isVertical ? "160px" : "50px",
               zIndex: 30,
               display: "flex",
               flexDirection: "column",
@@ -189,8 +197,8 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Palace Velvet Drapery Curtains (Left & Right) */}
-        <div style={{ position: "absolute", top: 0, left: 0, width: "220px", height: "100%", background: "linear-gradient(90deg, #7F1D1D 0%, #DC2626 70%, transparent 100%)", zIndex: 15 }} />
-        <div style={{ position: "absolute", top: 0, right: 0, width: "220px", height: "100%", background: "linear-gradient(-90deg, #7F1D1D 0%, #DC2626 70%, transparent 100%)", zIndex: 15 }} />
+        <div style={{ position: "absolute", top: 0, left: 0, width: isVertical ? "140px" : "220px", height: "100%", background: "linear-gradient(90deg, #7F1D1D 0%, #DC2626 70%, transparent 100%)", zIndex: 15 }} />
+        <div style={{ position: "absolute", top: 0, right: 0, width: isVertical ? "140px" : "220px", height: "100%", background: "linear-gradient(-90deg, #7F1D1D 0%, #DC2626 70%, transparent 100%)", zIndex: 15 }} />
 
         {/* Checkered Palace Floor */}
         <div
@@ -199,7 +207,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
             bottom: 0,
             left: 0,
             width: "100%",
-            height: isVertical ? "30%" : "35%",
+            height: floorHeight,
             background: "linear-gradient(180deg, #991B1B 0%, #450A0A 100%)",
             borderTop: "6px solid #F59E0B",
           }}
@@ -209,7 +217,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "140px" : "50px",
+            bottom: groundBaseline,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -218,7 +226,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         >
           {/* Throne Behind */}
           <div style={{ position: "absolute", bottom: "10px", zIndex: 1 }}>
-            <RoyalThrone scale={isVertical ? 1.2 : 1.35} />
+            <RoyalThrone scale={isVertical ? 1.15 : 1.35} />
           </div>
           {/* King Sitting on Throne */}
           <div style={{ position: "relative", zIndex: 2, marginBottom: "30px" }}>
@@ -247,16 +255,16 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Floor */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "35%", background: "#431407", borderTop: "6px solid #D97706" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#431407", borderTop: "6px solid #D97706" }} />
 
         {/* King & Dog Happy Encounter */}
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "160px" : "60px",
+            bottom: groundBaseline,
             display: "flex",
             alignItems: "flex-end",
-            gap: isVertical ? "30px" : "80px",
+            gap: isVertical ? "20px" : "80px",
             zIndex: 20,
           }}
         >
@@ -283,16 +291,16 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Sun */}
-        <div style={{ position: "absolute", top: "80px", right: "180px", width: "140px", height: "140px", borderRadius: "50%", background: "#FDE047", boxShadow: "0 0 60px #F59E0B" }} />
+        <div style={{ position: "absolute", top: isVertical ? "150px" : "70px", right: isVertical ? "100px" : "180px", width: "140px", height: "140px", borderRadius: "50%", background: "#FDE047", boxShadow: "0 0 60px #F59E0B" }} />
 
         {/* Green Meadow */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "40%", background: "#16A34A", borderTop: "8px solid #4ADE80" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#16A34A", borderTop: "8px solid #4ADE80" }} />
 
         {/* Strolling Together */}
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "160px" : "60px",
+            bottom: groundBaseline,
             left: "50%",
             transform: `translateX(-50%)`,
             display: "flex",
@@ -323,10 +331,10 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Ground */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "35%", background: "#15803D" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#15803D" }} />
 
         {/* Apple Tree on the Right */}
-        <div style={{ position: "absolute", bottom: "40px", right: isVertical ? "-60px" : "80px", zIndex: 10 }}>
+        <div style={{ position: "absolute", bottom: isVertical ? "660px" : "220px", right: isVertical ? "-60px" : "80px", zIndex: 10, transform: isVertical ? "scale(0.85)" : "none" }}>
           <AppleTreeProp />
           {/* Bird perched on tree branch */}
           <div style={{ position: "absolute", top: "180px", left: "140px", zIndex: 12 }}>
@@ -338,11 +346,11 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "140px" : "50px",
-            left: isVertical ? "50px" : "200px",
+            bottom: groundBaseline,
+            left: isVertical ? "40px" : "200px",
             display: "flex",
             alignItems: "flex-end",
-            gap: "50px",
+            gap: isVertical ? "20px" : "50px",
             zIndex: 20,
           }}
         >
@@ -375,15 +383,15 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div style={{ position: "absolute", top: "35%", left: 0, width: "100%", height: "6px", background: "rgba(255,255,255,0.5)" }} />
 
         {/* Fast Running Ground */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "35%", background: "#16A34A" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#16A34A" }} />
 
         {/* Flying Bird */}
-        <div style={{ position: "absolute", top: "180px", left: `${birdFlightX}px`, zIndex: 15 }}>
+        <div style={{ position: "absolute", top: isVertical ? "260px" : "160px", left: `${birdFlightX}px`, zIndex: 15 }}>
           <BirdProp flying={true} />
         </div>
 
         {/* Dog Galloping at High Speed with Dust Puffs */}
-        <div style={{ position: "absolute", bottom: isVertical ? "160px" : "60px", left: `${dogRunX}px`, zIndex: 20 }}>
+        <div style={{ position: "absolute", bottom: groundBaseline, left: `${dogRunX}px`, zIndex: 20 }}>
           <ThinDog pose="running" scale={dogScale * 1.25} />
           <DustPuffs count={4} />
         </div>
@@ -409,13 +417,13 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Ground */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "35%", background: "#15803D" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#15803D" }} />
 
         {/* Giant Shouting & Running King */}
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "160px" : "50px",
+            bottom: groundBaseline,
             zIndex: 20,
           }}
         >
@@ -427,12 +435,12 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div
           style={{
             position: "absolute",
-            top: isVertical ? "160px" : "120px",
+            top: isVertical ? "260px" : "80px",
             background: "#FFFFFF",
             border: "6px solid #DC2626",
             borderRadius: "36px",
-            padding: "16px 36px",
-            fontSize: isVertical ? "38px" : "48px",
+            padding: isVertical ? "14px 28px" : "16px 36px",
+            fontSize: isVertical ? "32px" : "44px",
             fontWeight: 900,
             color: "#DC2626",
             boxShadow: "0 16px 40px rgba(0,0,0,0.4)",
@@ -462,7 +470,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
       >
         {/* Multi-layered Rolling Hills */}
         <svg
-          style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: "55%", pointerEvents: "none" }}
+          style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: isVertical ? "66%" : "54%", pointerEvents: "none" }}
           viewBox="0 0 1440 600"
           preserveAspectRatio="none"
         >
@@ -471,13 +479,13 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         </svg>
 
         {/* Thin Dog Running on Forward Hill */}
-        <div style={{ position: "absolute", bottom: isVertical ? "260px" : "180px", right: isVertical ? "80px" : "280px", zIndex: 15 }}>
+        <div style={{ position: "absolute", bottom: isVertical ? "820px" : "360px", right: isVertical ? "70px" : "260px", zIndex: 15 }}>
           <ThinDog pose="running" scale={dogScale * 1.15} />
           <DustPuffs count={3} />
         </div>
 
         {/* Fat King Panting & Running Behind */}
-        <div style={{ position: "absolute", bottom: isVertical ? "130px" : "40px", left: isVertical ? "40px" : "220px", zIndex: 20 }}>
+        <div style={{ position: "absolute", bottom: groundBaseline, left: isVertical ? "40px" : "200px", zIndex: 20 }}>
           <FatKing pose="running" isFit={false} scale={kingScale * 1.15} />
           <DustPuffs count={5} />
         </div>
@@ -503,10 +511,10 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Soft Golden Sunset Meadow */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "35%", background: "#431407" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#431407" }} />
 
         {/* Floating Hearts */}
-        <div style={{ position: "absolute", top: "25%", fontSize: "54px", animation: "bounce 2s infinite", zIndex: 25 }}>
+        <div style={{ position: "absolute", top: isVertical ? "300px" : "150px", fontSize: isVertical ? "38px" : "50px", animation: "bounce 2s infinite", zIndex: 25 }}>
           💖 ✨ 🐶 👑 ✨ 💖
         </div>
 
@@ -514,7 +522,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "150px" : "50px",
+            bottom: groundBaseline,
             display: "flex",
             alignItems: "flex-end",
             gap: "20px",
@@ -546,13 +554,13 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
         }}
       >
         {/* Palace Floor */}
-        <div style={{ position: "absolute", bottom: 0, width: "100%", height: "35%", background: "#450A0A", borderTop: "6px solid #F59E0B" }} />
+        <div style={{ position: "absolute", bottom: 0, width: "100%", height: floorHeight, background: "#450A0A", borderTop: "6px solid #F59E0B" }} />
 
         {/* Centerpiece: Palace Mirror & FIT KING Posing Proudly! */}
         <div
           style={{
             position: "absolute",
-            bottom: isVertical ? "150px" : "50px",
+            bottom: groundBaseline,
             display: "flex",
             alignItems: "flex-end",
             gap: isVertical ? "20px" : "60px",
@@ -592,7 +600,7 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
       <div
         style={{
           position: "absolute",
-          bottom: isVertical ? "150px" : "50px",
+          bottom: groundBaseline,
           display: "flex",
           alignItems: "flex-end",
           gap: isVertical ? "20px" : "50px",
