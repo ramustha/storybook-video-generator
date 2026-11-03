@@ -1,0 +1,27 @@
+scripts/quota-rotator.ts
+  698ac31901cd73e0 238-242,246
+scripts/test-quota-rotator.ts
+  698ac31901cd73e0 72
+scripts/manage-projects.ts
+  698ac31901cd73e0 7,77-78,90-91,93,95-97,102,105,112,169,174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "c0323deab35381a274e4244b83afa2f689e16984",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 22,
+      "total_deletions": 10,
+      "accepted_lines": 22,
+      "overriden_lines": 0
+    }
+  }
+}
