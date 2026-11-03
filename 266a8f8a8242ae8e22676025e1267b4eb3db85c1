@@ -1,0 +1,65 @@
+scripts/cleanup-storage.ts
+  698ac31901cd73e0 1-264
+scripts/prepare-hari-cukur-rambut-plates.swift
+  698ac31901cd73e0 1-224
+src/remotion/components/KineticSubtitles.tsx
+  698ac31901cd73e0 1,26-29,34-75,83-92,94-100,102-106,119-120,124,127,136-137,139,142,144,149,153,156-160,165-170,184-187,190,192-195,197,199-200,204,207-209,212,215-220
+src/remotion/components/OutroScene.tsx
+  698ac31901cd73e0 1-465
+.gitignore
+  698ac31901cd73e0 10
+src/remotion/components/StorybookVideoComposition.tsx
+  698ac31901cd73e0 2,4-5,25-28,30-121,125-132,134-141,143,146-156,159,162-165,172-178
+src/remotion/components/AtmosphereOverlay.tsx
+  698ac31901cd73e0 1-355
+scripts/prepare-raja-gemuk-plates.swift
+  698ac31901cd73e0 1-176
+src/remotion/components/StoryScene.tsx
+  698ac31901cd73e0 3,176-183,218-222
+src/remotion/components/CoverScene.tsx
+  698ac31901cd73e0 32,35-36,38-39,43-44,46-47,58,71,78,83-84,89-117,129,135,137-138,151-153,161-163,169,172,182-183,186-187,196-197,199-204,207-209
+scripts/inspect-pages.swift
+  698ac31901cd73e0 1-22
+scripts/generate-raja-gemuk-sfx.py
+  698ac31901cd73e0 1-239
+src/remotion/components/ThumbnailComposition.tsx
+  698ac31901cd73e0 234,237-238,240,242,244,277-279,311,313,323,325,350,354,448,457,465,469,503,505,552,561,564,572-573,575,578-579,685,694,702,706,715-716,719,723,727,743,748,750,752,760,762,764,766,776,780-781,784,788,792,808,813,815,817,819-820,827,829,831,833-834,842,845,855-856,858,860,862-863,881,890-891,895-899
+scripts/youtube-stats.ts
+  698ac31901cd73e0 1-174
+scripts/upgrade-raja-gemuk.ts
+  698ac31901cd73e0 1-122
+package.json
+  698ac31901cd73e0 11-14,34
+scripts/manage-story.ts
+  698ac31901cd73e0 4,46-100,164,166-176,190-194,204,333-355,370,419,423-433,475-478
+scripts/generate-story-audio-fx.py
+  698ac31901cd73e0 1-412
+src/remotion/components/MoralScene.tsx
+  698ac31901cd73e0 1-352
+scripts/upload-youtube.ts
+  698ac31901cd73e0 8,282-297,299-300,303-321,323-324,432,440,504-512,519-534,536-543,545,565-573,585-611,613-624,626-639,715-717,719,722-724,726,758-762,778,815-816,818-820,823,825,840-845,847-897,899-922,926-960,962-976,978-980,982,985-1000,1002-1020,1025,1040-1041,1081-1082,1086-1131,1133-1136,1170-1174,1179-1183
+scripts/playwright-youtube-uploader.ts
+  698ac31901cd73e0 1-433
+scripts/render-book.ts
+  698ac31901cd73e0 50-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "266a8f8a8242ae8e22676025e1267b4eb3db85c1",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 4188,
+      "total_deletions": 350,
+      "accepted_lines": 4187,
+      "overriden_lines": 0
+    }
+  }
+}
