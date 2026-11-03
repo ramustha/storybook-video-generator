@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 
 export interface WordTiming {
@@ -23,9 +23,55 @@ const SPEAKER_ICONS: Record<string, string> = {
   manu: "👦",
   anak: "👦",
   protagonist: "👦",
+  raja: "👑",
+  king: "👑",
+  anjing: "🐕",
+  dog: "🐕",
   narator: "📖",
   narrator: "📖",
 };
+
+/**
+ * Groups words into natural, coherent sentence / thought units.
+ * Never chops sentences arbitrarily into 4-5 word slices.
+ * Displays all context together while maintaining word-by-word voiceover synchronization.
+ */
+function buildContextGroups(words: WordTiming[]): WordTiming[][] {
+  if (!words || words.length === 0) return [];
+  // For standard scenes up to 18 words, show the entire sentence/clause context at once
+  if (words.length <= 18) {
+    return [words];
+  }
+
+  const groups: WordTiming[][] = [];
+  let currentGroup: WordTiming[] = [];
+
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    currentGroup.push(w);
+
+    const isSentenceEnd = /[.!?…]+$/.test(w.word.trim());
+    const isClauseBoundary = /[,;:]+$/.test(w.word.trim());
+    const hasEnoughContext = currentGroup.length >= 8;
+
+    // Split at natural sentence ends or major clause boundaries if long
+    if ((isSentenceEnd && hasEnoughContext) || (isClauseBoundary && currentGroup.length >= 12) || currentGroup.length >= 16) {
+      groups.push(currentGroup);
+      currentGroup = [];
+    }
+  }
+
+  if (currentGroup.length > 0) {
+    if (groups.length > 0 && currentGroup.length <= 4) {
+      // Merge small tail into the preceding group to avoid orphaned single words
+      groups[groups.length - 1].push(...currentGroup);
+    } else {
+      groups.push(currentGroup);
+    }
+  }
+
+  return groups.length > 0 ? groups : [words];
+}
 
 export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVertical }) => {
   const frame = useCurrentFrame();
@@ -34,18 +80,31 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
 
   if (!words || words.length === 0) return null;
 
-  // Group words into chunks of ~4-5 words for comfortable reading
-  const chunkSize = isVertical ? 4 : 5;
-  const activeWordIdx = words.findIndex((w) => currentTime >= w.start && currentTime <= w.end);
-  const currentIdx = activeWordIdx !== -1 ? activeWordIdx : words.findIndex((w) => w.start > currentTime);
-  const resolvedIdx = currentIdx !== -1 ? currentIdx : words.length - 1;
+  // Build context-preserving sentence groups
+  const groups = useMemo(() => buildContextGroups(words), [words]);
 
-  // Split into chunks, but keep sentences/speakers coherent
-  const chunkStartIdx = Math.floor(resolvedIdx / chunkSize) * chunkSize;
-  const visibleWords = words.slice(chunkStartIdx, chunkStartIdx + chunkSize);
+  // Find the active group corresponding to current voiceover playback time
+  let activeGroupIdx = groups.findIndex((g) => {
+    const gStart = g[0].start;
+    const gEnd = g[g.length - 1].end;
+    // Keep group visible until 0.4s after the last word to prevent abrupt disappearing
+    return currentTime >= gStart && currentTime <= gEnd + 0.45;
+  });
 
-  // Active word details
-  const activeWord = words[activeWordIdx] || words[resolvedIdx] || words[0];
+  if (activeGroupIdx === -1) {
+    // If between groups or before/after, find nearest logical group
+    const nextIdx = groups.findIndex((g) => g[0].start > currentTime);
+    activeGroupIdx = nextIdx !== -1 ? (nextIdx > 0 ? nextIdx - 1 : 0) : groups.length - 1;
+  }
+
+  const visibleWords = groups[activeGroupIdx] || words;
+
+  // Identify currently active spoken word for speaker metadata and highlight
+  const activeWord =
+    words.find((w) => currentTime >= w.start && currentTime <= w.end) ||
+    visibleWords.find((w) => currentTime >= w.start && currentTime <= w.end) ||
+    visibleWords[0];
+
   const activeSpeaker = activeWord?.speaker || "narator";
   const activeSpeakerName = activeWord?.speakerName || "Narator";
   const activeSpeakerColor = activeWord?.speakerColor || "#FDE047";
@@ -57,14 +116,15 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
         position: "absolute",
         left: 0,
         right: 0,
-        bottom: isVertical ? "18%" : "8%",
+        // Positioned safely above YouTube Shorts bottom UI (0-220px) and comfortably in Landscape lower third
+        bottom: isVertical ? "260px" : "64px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "0 24px",
+        padding: isVertical ? "0 28px" : "0 40px",
         zIndex: 50,
         pointerEvents: "none",
-        gap: "12px",
+        gap: "10px",
       }}
     >
       {/* Dynamic Speaker Tag Badge */}
@@ -73,39 +133,41 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
           display: "flex",
           alignItems: "center",
           gap: "8px",
-          background: "rgba(15, 23, 42, 0.92)",
-          border: `2px solid ${activeSpeakerColor}`,
+          background: "rgba(10, 15, 29, 0.92)",
+          border: `1.5px solid ${activeSpeakerColor}`,
           borderRadius: "9999px",
-          padding: isVertical ? "6px 20px" : "6px 24px",
+          padding: isVertical ? "5px 18px" : "6px 22px",
           color: activeSpeakerColor,
           fontFamily: "system-ui, -apple-system, sans-serif",
-          fontSize: isVertical ? "20px" : "18px",
+          fontSize: isVertical ? "18px" : "17px",
           fontWeight: 800,
-          boxShadow: `0 0 16px ${activeSpeakerColor}50, 0 4px 12px rgba(0,0,0,0.6)`,
+          boxShadow: `0 0 14px ${activeSpeakerColor}40, 0 4px 10px rgba(0,0,0,0.5)`,
           textTransform: "uppercase",
           letterSpacing: "0.8px",
         }}
       >
-        <span style={{ fontSize: isVertical ? "22px" : "20px" }}>{speakerIcon}</span>
+        <span style={{ fontSize: isVertical ? "20px" : "19px" }}>{speakerIcon}</span>
         <span>{activeSpeakerName}</span>
       </div>
 
-      {/* Glassmorphic Subtitle Bubble with Speaker Tint */}
+      {/* Full-Context Subtitle Container */}
       <div
         style={{
-          background: "rgba(15, 23, 42, 0.88)",
-          backdropFilter: "blur(18px)",
-          border: `2px solid ${activeSpeakerColor}60`,
-          borderRadius: "9999px",
-          padding: isVertical ? "14px 28px" : "16px 36px",
+          background: "rgba(9, 14, 28, 0.88)",
+          backdropFilter: "blur(20px)",
+          border: `1.5px solid ${activeSpeakerColor}55`,
+          borderRadius: "22px",
+          padding: isVertical ? "16px 24px" : "16px 36px",
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
           alignItems: "center",
-          gap: isVertical ? "10px" : "14px",
-          maxWidth: isVertical ? "92%" : "85%",
-          boxShadow: `0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px ${activeSpeakerColor}20`,
-          transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+          rowGap: isVertical ? "8px" : "10px",
+          columnGap: isVertical ? "10px" : "12px",
+          maxWidth: isVertical ? "94%" : "84%",
+          boxShadow: `0 18px 45px rgba(0, 0, 0, 0.75), 0 0 25px ${activeSpeakerColor}15`,
+          transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+          textAlign: "center",
         }}
       >
         {visibleWords.map((item, idx) => {
@@ -119,35 +181,43 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
           if (isActive) {
             const wordDuration = Math.max(0.08, item.end - item.start);
             const progress = Math.min(1, Math.max(0, (currentTime - item.start) / wordDuration));
-            bounceY = -Math.sin(progress * Math.PI) * (isVertical ? 10 : 8);
-            wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.25;
-            tiltDeg = (idx % 2 === 0 ? -2.5 : 2.5) * Math.sin(progress * Math.PI);
+            // Gentle playful spring bounce aligned with speech phonetics
+            bounceY = -Math.sin(progress * Math.PI) * (isVertical ? 6 : 5);
+            wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.16;
+            tiltDeg = (idx % 2 === 0 ? -1.5 : 1.5) * Math.sin(progress * Math.PI);
           }
 
-          // Distinct color per speaker!
-          const itemColor = item.speakerColor || (item.speaker === "guru" ? "#38BDF8" : "#FDE047");
+          const itemColor = item.speakerColor || activeSpeakerColor;
 
+          // Color & Contrast Strategy:
+          // Active word: Vibrant glowing speaker accent color
+          // Past words: Solid, crisp white (full context preserved)
+          // Upcoming words: Soft translucent white (previewable context)
           const textColor = isActive
-            ? itemColor // Highlighted in that specific speaker's signature color!
+            ? itemColor
             : isPast
-            ? "#FFFFFF" // Spoken words: crisp white
-            : "rgba(255, 255, 255, 0.45)"; // Upcoming words: translucent
+            ? "#FFFFFF"
+            : "rgba(255, 255, 255, 0.58)";
 
           return (
             <span
-              key={idx}
+              key={`${item.word}-${idx}`}
               style={{
                 fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: isVertical ? "32px" : "36px",
-                fontWeight: isActive ? 900 : 700,
+                fontSize: isVertical ? "27px" : "32px",
+                lineHeight: 1.4,
+                fontWeight: isActive ? 900 : isPast ? 750 : 600,
                 color: textColor,
                 transform: `translateY(${bounceY}px) scale(${wordScale}) rotate(${tiltDeg}deg)`,
-                transition: "transform 0.04s ease-out",
+                transition: "transform 0.05s ease-out, color 0.1s ease",
                 display: "inline-block",
                 textShadow: isActive
-                  ? `0 0 18px ${itemColor}90, 0 2px 6px rgba(0,0,0,0.9)`
-                  : "0 2px 4px rgba(0,0,0,0.8)",
-                WebkitTextStroke: isActive ? "1px rgba(0,0,0,0.6)" : "none",
+                  ? `0 0 16px ${itemColor}B0, 0 2px 6px rgba(0,0,0,0.95)`
+                  : isPast
+                  ? "0 2px 5px rgba(0,0,0,0.9)"
+                  : "0 1px 3px rgba(0,0,0,0.6)",
+                WebkitTextStroke: isActive ? "0.8px rgba(0,0,0,0.7)" : "none",
+                letterSpacing: "0.2px",
               }}
             >
               {item.word}

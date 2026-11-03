@@ -231,17 +231,17 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             </span>
           </div>
 
-          {/* Centerpiece Hero Artwork with Clean Sticker Border */}
+          {/* Centerpiece Hero Artwork with Clean Sticker Border (Maximized Size & Zero Dead Space) */}
           <div
             style={{
-              width: 900,
-              height: 720,
+              width: 960,
+              height: 800,
               position: "relative",
-              borderRadius: 44,
+              borderRadius: 48,
               overflow: "hidden",
-              border: "10px solid #FFFFFF",
+              border: "12px solid #FFFFFF",
               boxShadow:
-                "0 35px 90px rgba(0, 0, 0, 0.95), 0 0 60px rgba(253, 224, 71, 0.4)",
+                "0 40px 100px rgba(0, 0, 0, 0.95), 0 0 70px rgba(253, 224, 71, 0.45)",
               transform: "rotate(2deg)",
               backgroundColor: "#1E293B",
             }}
@@ -274,9 +274,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 backgroundColor: "#FACC15",
                 color: "#000",
                 fontWeight: 900,
-                fontSize: 26,
-                padding: "10px 24px",
-                borderRadius: 18,
+                fontSize: 28,
+                padding: "12px 28px",
+                borderRadius: 20,
                 border: "4px solid #000",
                 boxShadow: "0 8px 0 #000",
                 transform: "rotate(-5deg)",
@@ -308,9 +308,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             >
               <div
                 style={{
-                  fontSize: 84,
+                  fontSize: 90,
                   fontWeight: 900,
-                  lineHeight: 0.95,
+                  lineHeight: 0.92,
                   color: "#FFFFFF",
                   WebkitTextStroke: "6px #000000",
                   letterSpacing: "-0.01em",
@@ -320,9 +320,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               </div>
               <div
                 style={{
-                  fontSize: 104,
+                  fontSize: 114,
                   fontWeight: 900,
-                  lineHeight: 0.95,
+                  lineHeight: 0.92,
                   color: "#FDE047",
                   WebkitTextStroke: "7px #000000",
                   letterSpacing: "-0.01em",
@@ -347,11 +347,11 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 transform: "rotate(1.5deg)",
               }}
             >
-              <span style={{ fontSize: 36 }}>{hookEmoji}</span>
+              <span style={{ fontSize: 38 }}>{hookEmoji}</span>
               <span
                 style={{
                   color: "#000000",
-                  fontSize: 34,
+                  fontSize: 36,
                   fontWeight: 900,
                   letterSpacing: "-0.01em",
                   textTransform: "uppercase",
@@ -445,7 +445,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           }}
         />
 
-        {/* Content Container (2-Column Balanced Layout) */}
+        {/* Content Container (2-Column Balanced Layout - Edge-to-Edge Fill) */}
         <div
           style={{
             position: "relative",
@@ -454,7 +454,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             height: "100%",
             display: "flex",
             alignItems: "center",
-            padding: "0 90px",
+            padding: "0 54px",
             boxSizing: "border-box",
             justifyContent: "space-between",
           }}
@@ -462,11 +462,11 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           {/* Left: Elegant Storybook Typography */}
           <div
             style={{
-              width: "55%",
+              width: "52%",
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-start",
-              gap: 20,
+              gap: 18,
             }}
           >
             {/* Bedtime / Read-Aloud Badge */}
@@ -500,9 +500,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             <h1
               style={{
                 margin: 0,
-                fontSize: 78,
+                fontSize: 84,
                 fontWeight: 900,
-                lineHeight: 1.08,
+                lineHeight: 1.05,
                 letterSpacing: "-0.02em",
                 background: "linear-gradient(180deg, #FFFFFF 0%, #FEF08A 50%, #F59E0B 100%)",
                 WebkitBackgroundClip: "text",
@@ -549,7 +549,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 marginTop: 10,
                 color: "#94A3B8",
                 fontSize: 20,
-                fontWeight: 500,
+                fontWeight: 600,
               }}
             >
               <span>{isEn ? "Written by:" : "Karya:"} {authorName}</span>
@@ -558,10 +558,10 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             </div>
           </div>
 
-          {/* Right: Gilded Storybook Floating Centerpiece */}
+          {/* Right: Gilded Storybook Floating Centerpiece (Maximized Scale) */}
           <div
             style={{
-              width: "42%",
+              width: "46%",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
@@ -569,14 +569,14 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           >
             <div
               style={{
-                width: 620,
-                height: 420,
+                width: 760,
+                height: 560,
                 position: "relative",
-                borderRadius: 24,
+                borderRadius: 36,
                 overflow: "hidden",
                 boxShadow:
-                  "0 30px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(251, 191, 36, 0.35)",
-                border: "5px solid rgba(251, 191, 36, 0.9)",
+                  "0 35px 95px rgba(0, 0, 0, 0.95), 0 0 65px rgba(251, 191, 36, 0.4)",
+                border: "6px solid rgba(251, 191, 36, 0.9)",
                 transform: "rotate(2deg)",
                 backgroundColor: "#0B0F19",
               }}
@@ -682,7 +682,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
         }}
       />
 
-      {/* Main Container */}
+      {/* Main Container (Edge-to-Edge Composition & Zero Dead Space) */}
       <div
         style={{
           position: "relative",
@@ -691,7 +691,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           height: "100%",
           display: "flex",
           alignItems: "center",
-          padding: "0 80px",
+          padding: "0 48px",
           boxSizing: "border-box",
           justifyContent: "space-between",
         }}
@@ -699,11 +699,11 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
         {/* Left Side: Massive High-Energy Headline & Hook */}
         <div
           style={{
-            width: "56%",
+            width: "50%",
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
-            gap: 18,
+            gap: 16,
           }}
         >
           {/* Top Pill / Badge */}
@@ -712,19 +712,19 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               display: "inline-flex",
               alignItems: "center",
               gap: 10,
-              padding: "10px 22px",
-              borderRadius: 14,
+              padding: "12px 26px",
+              borderRadius: 16,
               backgroundColor: "#EF4444",
               border: "3px solid #FFFFFF",
-              boxShadow: "0 8px 24px rgba(239, 68, 68, 0.6)",
+              boxShadow: "0 8px 24px rgba(239, 68, 68, 0.7)",
               transform: "rotate(-1.5deg)",
             }}
           >
-            <span style={{ fontSize: 24 }}>🔥</span>
+            <span style={{ fontSize: 26 }}>🔥</span>
             <span
               style={{
                 color: "#FFFFFF",
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: 900,
                 letterSpacing: "0.05em",
                 textTransform: "uppercase",
@@ -740,16 +740,16 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               display: "flex",
               flexDirection: "column",
               transform: "rotate(-2deg)",
-              filter: "drop-shadow(0 14px 28px rgba(0, 0, 0, 0.95))",
+              filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.95))",
             }}
           >
             <div
               style={{
-                fontSize: 78,
+                fontSize: 90,
                 fontWeight: 900,
-                lineHeight: 0.95,
+                lineHeight: 0.92,
                 color: "#FFFFFF",
-                WebkitTextStroke: "5px #000000",
+                WebkitTextStroke: "6px #000000",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -757,13 +757,13 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             </div>
             <div
               style={{
-                fontSize: 98,
+                fontSize: 116,
                 fontWeight: 900,
-                lineHeight: 0.95,
+                lineHeight: 0.92,
                 color: "#FDE047",
-                WebkitTextStroke: "6px #000000",
+                WebkitTextStroke: "7px #000000",
                 letterSpacing: "-0.01em",
-                textShadow: "0 8px 0 #B45309",
+                textShadow: "0 10px 0 #B45309",
               }}
             >
               {headlineBottom}
@@ -773,23 +773,23 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           {/* Secondary Curiosity Gap Hook Sticker */}
           <div
             style={{
-              marginTop: 10,
+              marginTop: 6,
               display: "inline-flex",
               alignItems: "center",
               gap: 14,
-              padding: "16px 28px",
-              borderRadius: 20,
+              padding: "16px 32px",
+              borderRadius: 22,
               backgroundColor: "#38BDF8",
               border: "4px solid #000000",
-              boxShadow: "0 10px 0 #0284C7, 0 16px 32px rgba(0,0,0,0.6)",
+              boxShadow: "0 10px 0 #0284C7, 0 18px 36px rgba(0,0,0,0.7)",
               transform: "rotate(1.5deg)",
             }}
           >
-            <span style={{ fontSize: 32 }}>{hookEmoji}</span>
+            <span style={{ fontSize: 36 }}>{hookEmoji}</span>
             <span
               style={{
                 color: "#000000",
-                fontSize: 32,
+                fontSize: 36,
                 fontWeight: 900,
                 letterSpacing: "-0.01em",
                 textTransform: "uppercase",
@@ -805,33 +805,33 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               display: "flex",
               alignItems: "center",
               gap: 12,
-              marginTop: 12,
+              marginTop: 10,
             }}
           >
             <div
               style={{
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
                 backdropFilter: "blur(8px)",
-                padding: "8px 18px",
+                padding: "8px 20px",
                 borderRadius: 12,
-                border: "1px solid rgba(255, 255, 255, 0.2)",
+                border: "1.5px solid rgba(255, 255, 255, 0.25)",
                 color: "#F1F5F9",
-                fontSize: 18,
-                fontWeight: 700,
+                fontSize: 20,
+                fontWeight: 800,
               }}
             >
               {isEn ? "🎬 Full Story Animation" : "🎬 Full Animasi Cerita"}
             </div>
             <div
               style={{
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
                 backdropFilter: "blur(8px)",
-                padding: "8px 18px",
+                padding: "8px 20px",
                 borderRadius: 12,
-                border: "1px solid rgba(255, 255, 255, 0.2)",
+                border: "1.5px solid rgba(255, 255, 255, 0.25)",
                 color: "#FCD34D",
-                fontSize: 18,
-                fontWeight: 700,
+                fontSize: 20,
+                fontWeight: 800,
               }}
             >
               {attributionPill}
@@ -839,10 +839,10 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Comic Character Hero Frame with Sticker Cutout Border */}
+        {/* Right Side: Comic Character Hero Frame with Sticker Cutout Border (Fills Right Half) */}
         <div
           style={{
-            width: "42%",
+            width: "48%",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -852,15 +852,15 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           {/* Visual Sticker Badge */}
           <div
             style={{
-              width: 580,
-              height: 480,
+              width: 780,
+              height: 640,
               position: "relative",
-              borderRadius: 36,
+              borderRadius: 44,
               overflow: "hidden",
-              border: "8px solid #FFFFFF",
+              border: "12px solid #FFFFFF",
               boxShadow:
-                "0 24px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(253, 224, 71, 0.4)",
-              transform: "rotate(3deg)",
+                "0 35px 95px rgba(0, 0, 0, 0.95), 0 0 70px rgba(253, 224, 71, 0.45)",
+              transform: "rotate(2.5deg)",
               backgroundColor: "#1E293B",
             }}
           >
@@ -878,7 +878,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               style={{
                 position: "absolute",
                 inset: 0,
-                boxShadow: "inset 0 0 40px rgba(0,0,0,0.5)",
+                boxShadow: "inset 0 0 45px rgba(0,0,0,0.5)",
                 pointerEvents: "none",
               }}
             />
@@ -887,16 +887,16 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             <div
               style={{
                 position: "absolute",
-                bottom: 20,
-                left: 20,
+                bottom: 24,
+                left: 24,
                 backgroundColor: "#FACC15",
                 color: "#000",
                 fontWeight: 900,
-                fontSize: 20,
-                padding: "8px 18px",
-                borderRadius: 14,
-                border: "3px solid #000",
-                boxShadow: "0 6px 0 #000",
+                fontSize: 26,
+                padding: "10px 24px",
+                borderRadius: 16,
+                border: "3.5px solid #000",
+                boxShadow: "0 7px 0 #000",
                 transform: "rotate(-5deg)",
               }}
             >

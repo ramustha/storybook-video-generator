@@ -1,5 +1,6 @@
 import React from "react";
 import { Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { AtmosphereOverlay, WeatherType } from "./AtmosphereOverlay";
 import { KineticSubtitles, WordTiming } from "./KineticSubtitles";
 
 interface StorySceneProps {
@@ -172,7 +173,14 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
             />
           </div>
 
-          {/* Layer 5: Subtitles safely in the lower section without occluding artwork */}
+          {/* Layer 5: Dynamic Weather & Atmospheric Effects (Rain, Snow, Lightning, Fireflies) */}
+          <AtmosphereOverlay
+            weather={scene.atmosphere?.weather}
+            intensity={scene.atmosphere?.intensity}
+            isVertical={isVertical}
+          />
+
+          {/* Layer 6: Subtitles safely in the lower section without occluding artwork */}
           <KineticSubtitles words={words} isVertical={isVertical} />
         </>
       ) : (
@@ -205,6 +213,13 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
               background: "linear-gradient(to bottom, rgba(2,6,23,0.4) 0%, transparent 15%, transparent 75%, rgba(2,6,23,0.6) 100%)",
               pointerEvents: "none",
             }}
+          />
+
+          {/* Dynamic Weather & Atmospheric Effects (Rain, Snow, Lightning, Fireflies) */}
+          <AtmosphereOverlay
+            weather={scene.atmosphere?.weather}
+            intensity={scene.atmosphere?.intensity}
+            isVertical={isVertical}
           />
 
           {/* Top Badge */}

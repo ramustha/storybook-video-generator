@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
+import { execSync } from "child_process";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 
 export interface WordTiming {
@@ -40,6 +41,61 @@ function assignSpeaker(bookSlug: string, lang: "id" | "en", sceneId: string, wor
       speakerName: lang === "en" ? "Narrator" : "Narator",
       speakerColor: "#34D399",
     };
+  }
+
+  if (sceneId === "moral" || sceneId.startsWith("moral")) {
+    return {
+      speaker: "moral",
+      speakerName: lang === "en" ? "Moral of Story" : "Pesan Moral",
+      speakerColor: "#F59E0B",
+    };
+  }
+
+  if (sceneId === "outro" || sceneId.startsWith("outro")) {
+    return {
+      speaker: "outro",
+      speakerName: lang === "en" ? "Next Story" : "Rekomendasi Cerita",
+      speakerColor: "#38BDF8",
+    };
+  }
+
+  // --- Hari Cukur Rambut Sringeri Srinivas ---
+  if (bookSlug === "hari-cukur-rambut") {
+    const isEn = lang === "en";
+    const sringeriName = "Sringeri";
+    const naratorName = isEn ? "Narrator" : "Narator";
+
+    if (sceneId === "scene_02") {
+      return { speaker: "barber", speakerName: isEn ? "Barber" : "Tukang Cukur", speakerColor: "#38BDF8" };
+    }
+    if (sceneId === "scene_03") {
+      return { speaker: "wife", speakerName: isEn ? "Wife" : "Istri", speakerColor: "#EC4899" };
+    }
+    if (sceneId === "scene_04") {
+      return { speaker: "tailor", speakerName: isEn ? "Tailor" : "Penjahit", speakerColor: "#A855F7" };
+    }
+    if (sceneId === "scene_05") {
+      return { speaker: "carpenter", speakerName: isEn ? "Carpenter" : "Tukang Kayu", speakerColor: "#F97316" };
+    }
+    if (sceneId === "scene_08") {
+      return { speaker: "tiger", speakerName: isEn ? "Tiger" : "Harimau", speakerColor: "#EF4444" };
+    }
+    if (["scene_06", "scene_07", "scene_09", "scene_10"].includes(sceneId)) {
+      return { speaker: "sringeri", speakerName: sringeriName, speakerColor: "#FDE047" };
+    }
+    return { speaker: "narator", speakerName: naratorName, speakerColor: "#34D399" };
+  }
+
+  // --- Raja Gemuk, Anjing Kurus ---
+  if (bookSlug === "raja-gemuk-anjing-kurus" || bookSlug === "raja-gemuk") {
+    const isEn = lang === "en";
+    const kingName = isEn ? "The King" : "Sang Raja";
+    const naratorName = isEn ? "Narrator" : "Narator";
+
+    if (sceneId === "scene_06") {
+      return { speaker: "king", speakerName: kingName, speakerColor: "#F59E0B" };
+    }
+    return { speaker: "narator", speakerName: naratorName, speakerColor: "#34D399" };
   }
 
   // --- Gara-Gara Kucing ---
@@ -105,9 +161,19 @@ function assignSpeaker(bookSlug: string, lang: "id" | "en", sceneId: string, wor
 
 async function synthesizeSceneAudio(bookSlug: string, storyDir: string, scene: any, lang: "id" | "en") {
   const isEn = lang === "en";
-  const voice = isEn ? "en-US-AnaNeural" : "id-ID-GadisNeural";
-  const pitch = isEn ? "+10%" : "+20%";
-  const rate = isEn ? "+3%" : "+5%";
+  const sceneAudioCfg = isEn ? (scene.audio?.en || {}) : (scene.audio?.id || scene.audio || {});
+
+  // High-energy childish, attractive, and funny voiceover tuning:
+  // id-ID-GadisNeural at pitch +30% & rate +6% creates an authentic, cute, high-energy child narrator voice!
+  // id-ID-ArdiNeural at pitch +26% & rate +8% creates a lively, comedic, mischievous boy/cartoon voice!
+  const defaultIdVoice = sceneAudioCfg.voice || (scene.speaker === "boy" || scene.speaker === "king" ? "id-ID-ArdiNeural" : "id-ID-GadisNeural");
+  const voice = isEn ? (sceneAudioCfg.voice || "en-US-AnaNeural") : defaultIdVoice;
+
+  const defaultIdPitch = defaultIdVoice.includes("Ardi") ? "+26%" : "+30%";
+  const defaultIdRate = defaultIdVoice.includes("Ardi") ? "+8%" : "+6%";
+
+  const pitch = sceneAudioCfg.pitch || (isEn ? "+10%" : defaultIdPitch);
+  const rate = sceneAudioCfg.rate || (isEn ? "+3%" : defaultIdRate);
 
   const text = isEn ? (scene.audio.en?.text || scene.audio.text) : scene.audio.text;
   const audioRelPath = isEn ? (scene.audio.en?.audioPath || `assets/en/${scene.sceneId}.mp3`) : scene.audio.audioPath;
@@ -121,6 +187,12 @@ async function synthesizeSceneAudio(bookSlug: string, storyDir: string, scene: a
 
   console.log(`🎙 [${lang.toUpperCase()}] Synthesizing audio for Scene ${scene.index} [${scene.sceneId}]: "${text}"`);
 
+  // Sanitize text for SSML to prevent XML parse errors (e.g. unescaped &)
+  const ssmlText = text
+    .replace(/&/g, isEn ? "and" : "dan")
+    .replace(/</g, "")
+    .replace(/>/g, "");
+
   const tts = new MsEdgeTTS();
   await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
     wordBoundaryEnabled: true,
@@ -129,7 +201,7 @@ async function synthesizeSceneAudio(bookSlug: string, storyDir: string, scene: a
 
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), `storybook-tts-${lang}-`));
 
-  const { audioFilePath, metadataFilePath } = await tts.toFile(tempDir, text, {
+  const { audioFilePath, metadataFilePath } = await tts.toFile(tempDir, ssmlText, {
     pitch,
     rate,
   });
@@ -258,6 +330,29 @@ async function main() {
     }
 
     console.log(`\n📊 Visual Readiness: ${readyVisuals}/${story.scenes.length} plates ready (${pendingVisuals} pending)`);
+
+    const totalDurationSeconds = story.scenes.reduce((acc: number, s: any) => acc + (s.durationSeconds || 0), 0);
+    let durationTier = "tier3";
+    let strategyBadge = "DUAL_HYBRID";
+    let strategyDesc = "Standard Storybook (60s–180s) -> Dual-Format (16:9 Long-Form & 9:16 Shorts)";
+
+    if (totalDurationSeconds < 20) {
+      durationTier = "tier1";
+      strategyBadge = "SHORT_ONLY";
+      strategyDesc = "Tier 1: Micro-Story (<20s) -> Short-Form Exclusive (Shorts/TikTok/Reels ONLY). Suppress 16:9 standalone.";
+    } else if (totalDurationSeconds < 60) {
+      durationTier = "tier2";
+      strategyBadge = "SHORT_PRIMARY";
+      strategyDesc = "Tier 2: Snackable Mini-Story (20s–60s) -> Short-Primary (Shorts/TikTok/Reels); 16:9 optional compilation.";
+    } else if (totalDurationSeconds > 180) {
+      durationTier = "tier4";
+      strategyBadge = "LONG_PRIMARY";
+      strategyDesc = "Tier 4: Extended Storybook (>180s) -> Long-Primary (16:9 Master Video + 30-45s Teaser Hook).";
+    }
+
+    console.log(`⏱️ Total Runtime: ${totalDurationSeconds.toFixed(1)}s | Platform Strategy: [${strategyBadge}]`);
+    console.log(`   Policy: ${strategyDesc}`);
+
     if (pendingVisuals > 0) {
       console.log(`\n⚠️ ${pendingVisuals} scenes are waiting for visual plates:`);
       for (const p of pendingScenes) {
@@ -272,6 +367,7 @@ async function main() {
   // 2. Generate Storyboard Placeholder Plates (Progressive Draft Mode)
   if (args.includes("--generate-placeholders")) {
     console.log(`\n🎨 Generating Storyboard Placeholder Plates for missing visuals in "${story.title}"...`);
+    console.log(`   ⚠️ Progressive Draft Mode: Ensure user confirmation has been obtained before rendering video drafts.`);
     let generated = 0;
     const force = process.argv.includes("--force");
 
@@ -320,12 +416,21 @@ async function main() {
   </text>
 </svg>`.trim();
 
-        // Save as SVG plate so Remotion can render immediately
+        // Save as SVG plate
         const svgPath = imgPath.replace(/\.png$/, ".svg");
         await fs.mkdir(path.dirname(imgPath), { recursive: true });
         await fs.writeFile(svgPath, svgContent);
-        // Also write SVG as PNG path if Remotion expects png (or update imagePath)
-        await fs.writeFile(imgPath, svgContent);
+
+        // Convert to valid raster PNG so Chromium image decoder does not throw EncodingError
+        try {
+          if (os.platform() === "darwin") {
+            execSync(`sips -s format png "${svgPath}" -o "${imgPath}"`, { stdio: "ignore" });
+          } else {
+            await fs.writeFile(imgPath, svgContent);
+          }
+        } catch {
+          await fs.writeFile(imgPath, svgContent);
+        }
 
         scene.visual.status = "placeholder";
         scene.visual.placeholderPath = svgPath;
@@ -367,7 +472,10 @@ async function main() {
         continue;
       }
 
-      const audioPathRel = lang === "en" ? (scene.audio.en?.audioPath || `assets/en/${scene.sceneId}.mp3`) : scene.audio.audioPath;
+      const audioPathRel =
+        lang === "en"
+          ? (scene.audio?.en?.audioPath || `assets/en/${scene.sceneId}.mp3`)
+          : (scene.audio?.audioPath || scene.audio?.id?.audioPath || `assets/id/${scene.sceneId}.mp3`);
       const audioPath = path.join(storyDir, audioPathRel);
       const audioExists = await fs.access(audioPath).then(() => true).catch(() => false);
 
