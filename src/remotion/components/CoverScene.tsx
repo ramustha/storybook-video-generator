@@ -29,21 +29,22 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
     scene.visual?.isPortrait === true ||
     (typeof book.coverAspectRatio === "number" && book.coverAspectRatio < 1.0);
 
+  // Scaled up to maximize screen presence and minimize empty space (Best practice: 65-75% screen fill)
   const bookWidth = isCoverPortrait
     ? isVertical
-      ? 640
-      : 440
+      ? 860
+      : 560
     : isVertical
-      ? 920
-      : 680;
+      ? 1000
+      : 1160;
 
   const bookHeight = isCoverPortrait
     ? isVertical
-      ? 894
-      : 614
+      ? 1180
+      : 760
     : isVertical
-      ? 518
-      : 382;
+      ? 562
+      : 652;
 
   const isEn = book.language?.startsWith("en");
 
@@ -54,7 +55,7 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
         height,
         position: "relative",
         overflow: "hidden",
-        backgroundColor: "#090D16",
+        backgroundColor: "#070B14",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -67,22 +68,52 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
           position: "absolute",
           inset: 0,
           transform: `scale(${bgScale})`,
-          filter: "blur(48px) brightness(0.38) saturate(1.3)",
+          filter: "blur(40px) brightness(0.42) saturate(1.4)",
           zIndex: 1,
         }}
       >
         <Img src={coverImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
-      {/* Dark Vignette Overlay */}
+      {/* Warm Golden Fairytale Glow & Vignette */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(circle at center, rgba(15,23,42,0.15) 0%, rgba(2,6,23,0.85) 100%)",
+          background:
+            "radial-gradient(circle at center, rgba(254, 240, 138, 0.12) 0%, rgba(15, 23, 42, 0.5) 60%, rgba(2, 6, 23, 0.92) 100%)",
           zIndex: 2,
         }}
       />
+
+      {/* Floating Sparkles & Magical Fairytale Particles */}
+      {[
+        { x: isVertical ? 90 : 160, y: isVertical ? 240 : 140, size: 30, delay: 0, icon: "⭐" },
+        { x: isVertical ? 960 : 1740, y: isVertical ? 320 : 180, size: 36, delay: 10, icon: "✨" },
+        { x: isVertical ? 140 : 220, y: isVertical ? 1550 : 880, size: 32, delay: 20, icon: "🌟" },
+        { x: isVertical ? 940 : 1700, y: isVertical ? 1580 : 860, size: 34, delay: 15, icon: "✨" },
+      ].map((star, idx) => {
+        const starFloat = Math.sin((frame + star.delay * 4) / 16) * 8;
+        const starScale = 1.0 + Math.sin((frame + star.delay * 3) / 20) * 0.15;
+        return (
+          <div
+            key={idx}
+            style={{
+              position: "absolute",
+              left: `${star.x}px`,
+              top: `${star.y}px`,
+              transform: `translateY(${starFloat}px) scale(${starScale})`,
+              fontSize: `${star.size}px`,
+              zIndex: 4,
+              opacity: 0.85,
+              pointerEvents: "none",
+              filter: "drop-shadow(0 0 12px rgba(254, 240, 138, 0.9))",
+            }}
+          >
+            {star.icon}
+          </div>
+        );
+      })}
 
       {/* 3D Floating Book Container */}
       <div
@@ -95,16 +126,16 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
           alignItems: "center",
         }}
       >
-        {/* 16:9 Widescreen Picture Book Cover Frame (Zero Crop) */}
+        {/* 3D Picture Book Cover Frame (Zero Crop) */}
         <div
           style={{
             width: `${bookWidth}px`,
             height: `${bookHeight}px`,
             position: "relative",
-            borderRadius: "18px",
+            borderRadius: "24px",
             overflow: "hidden",
-            boxShadow: "0 30px 70px rgba(0,0,0,0.85), 0 0 45px rgba(251, 191, 36, 0.25)",
-            border: "4px solid rgba(251, 191, 36, 0.75)",
+            boxShadow:
+              "0 35px 85px rgba(0,0,0,0.92), 0 0 60px rgba(251, 191, 36, 0.35), 0 0 0 4px rgba(251, 191, 36, 0.8)",
             backgroundColor: "#0B0F19",
           }}
         >
@@ -117,8 +148,9 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
               left: 0,
               top: 0,
               bottom: 0,
-              width: "42px",
-              background: "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(255,255,255,0.15) 25%, transparent 100%)",
+              width: "48px",
+              background:
+                "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(255,255,255,0.18) 25%, transparent 100%)",
             }}
           />
 
@@ -126,18 +158,18 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
           <div
             style={{
               position: "absolute",
-              inset: "8px",
-              border: "1.5px solid rgba(254, 240, 138, 0.5)",
-              borderRadius: "12px",
+              inset: "10px",
+              border: "2px solid rgba(254, 240, 138, 0.6)",
+              borderRadius: "16px",
               pointerEvents: "none",
             }}
           />
         </div>
 
-        {/* Title and Attribution Badge */}
+        {/* Title and Attribution Badge (Scaled up for instant mobile readability) */}
         <div
           style={{
-            marginTop: isVertical ? "36px" : "24px",
+            marginTop: isVertical ? "32px" : "20px",
             textAlign: "center",
             display: "flex",
             flexDirection: "column",
@@ -147,11 +179,12 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
         >
           <h1
             style={{
-              fontFamily: "system-ui, -apple-system, sans-serif",
-              fontSize: isVertical ? "46px" : "40px",
+              fontFamily: "'Fredoka', 'Quicksand', system-ui, -apple-system, sans-serif",
+              fontSize: isVertical ? "56px" : "46px",
               fontWeight: 900,
               color: "#FEF08A",
-              textShadow: "0 4px 16px rgba(0,0,0,0.9), 0 0 20px rgba(251, 191, 36, 0.6)",
+              textShadow:
+                "0 4px 18px rgba(0,0,0,0.95), 0 0 24px rgba(251, 191, 36, 0.7), 0 2px 4px #78350F",
               margin: 0,
               letterSpacing: "0.5px",
             }}
@@ -160,17 +193,20 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
           </h1>
           <div
             style={{
-              background: "rgba(15, 23, 42, 0.88)",
-              border: "1.5px solid rgba(251, 191, 36, 0.35)",
+              background: "rgba(15, 23, 42, 0.92)",
+              border: "2px solid rgba(251, 191, 36, 0.5)",
               borderRadius: "9999px",
-              padding: "8px 24px",
-              color: "#E2E8F0",
-              fontSize: isVertical ? "20px" : "18px",
-              fontWeight: 600,
-              boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
+              padding: isVertical ? "8px 28px" : "8px 24px",
+              color: "#FEF9C3",
+              fontSize: isVertical ? "22px" : "20px",
+              fontWeight: 700,
+              boxShadow: "0 6px 18px rgba(0,0,0,0.6)",
+              letterSpacing: "0.2px",
             }}
           >
-            {isEn ? `By ${book.source.originalAuthor} • ${book.source.license}` : `Karya ${book.source.originalAuthor} • ${book.source.license}`}
+            {isEn
+              ? `By ${book.source.originalAuthor} • ${book.source.license}`
+              : `Karya ${book.source.originalAuthor} • ${book.source.license}`}
           </div>
         </div>
       </div>

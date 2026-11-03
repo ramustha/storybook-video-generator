@@ -47,6 +47,9 @@ async function main() {
             scene.durationSeconds = scene.audio.en.durationSeconds;
           }
         }
+        if (scene.moralHeadlineEn) {
+          scene.moralHeadline = scene.moralHeadlineEn;
+        }
       }
     }
 

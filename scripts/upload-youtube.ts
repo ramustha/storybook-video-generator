@@ -5,6 +5,7 @@ import http from "http";
 import url from "url";
 import readline from "readline";
 import { google } from "googleapis";
+import { uploadVideoViaBrowser, launchInteractiveLogin } from "./playwright-youtube-uploader";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
@@ -278,31 +279,49 @@ async function uploadVideo(
     statusBody.privacyStatus = metadata.privacyStatus;
   }
 
-  const res = await youtube.videos.insert(
-    {
-      part: ["snippet", "status"],
-      requestBody: {
-        snippet: {
-          title: metadata.title,
-          description: metadata.description,
-          tags: metadata.tags,
-          categoryId: metadata.categoryId || "1", // 1 = Film & Animation, 27 = Education
-          defaultLanguage: "id",
-          defaultAudioLanguage: "id",
+  const safeTitle = sanitizeTitle(metadata.title, 95);
+  let res: any;
+  try {
+    res = await youtube.videos.insert(
+      {
+        part: ["snippet", "status"],
+        requestBody: {
+          snippet: {
+            title: safeTitle,
+            description: metadata.description,
+            tags: metadata.tags,
+            categoryId: metadata.categoryId || "1", // 1 = Film & Animation, 27 = Education
+            defaultLanguage: "id",
+            defaultAudioLanguage: "id",
+          },
+          status: statusBody,
         },
-        status: statusBody,
+        media: {
+          body: createReadStream(filePath),
+        },
       },
-      media: {
-        body: createReadStream(filePath),
-      },
-    },
-    {
-      onUploadProgress: (evt: any) => {
-        const progress = Math.round((evt.bytesRead / fileSize) * 100);
-        process.stdout.write(`   Uploading... ${progress}%\r`);
-      },
+      {
+        onUploadProgress: (evt: any) => {
+          const progress = Math.round((evt.bytesRead / fileSize) * 100);
+          process.stdout.write(`   Uploading... ${progress}%\r`);
+        },
+      }
+    );
+  } catch (err: any) {
+    const errMsg = err?.message || err?.cause?.message || String(err);
+    if (errMsg.includes("exceeded the number of videos") || errMsg.includes("uploadLimitExceeded")) {
+      console.error(`\n\n🛑 YOUTUBE UPLOAD VELOCITY CAP REACHED:`);
+      console.error(`   The channel has reached YouTube's rolling 24-hour video creation limit.`);
+      console.error(`   Local file is safely exported at: ${filePath}`);
+      console.error(`   Stopping pipeline for user confirmation / decision card.\n`);
+      throw new Error(`[DAILY_UPLOAD_CAP] YouTube daily upload limit exceeded: ${errMsg}`);
+    } else if (errMsg.includes("quotaExceeded")) {
+      console.error(`\n\n🛑 YOUTUBE GCP API QUOTA EXCEEDED (10,000 units):`);
+      console.error(`   Daily GCP project quota depleted. Resets at midnight Pacific Time.`);
+      throw new Error(`[GCP_QUOTA_EXCEEDED] YouTube API daily quota exceeded: ${errMsg}`);
     }
-  );
+    throw err;
+  }
 
   const videoId = res.data.id;
   console.log(`\n✔ Upload complete! Video ID: ${videoId}`);
@@ -410,6 +429,7 @@ async function updateVideoMetadata(
     categoryId?: string;
   }
 ) {
+  const safeTitle = sanitizeTitle(metadata.title, 95);
   console.log(`📝 Updating metadata on YouTube for video ${videoId}...`);
   try {
     await youtube.videos.update({
@@ -417,7 +437,7 @@ async function updateVideoMetadata(
       requestBody: {
         id: videoId,
         snippet: {
-          title: metadata.title,
+          title: safeTitle,
           description: metadata.description,
           tags: metadata.tags,
           categoryId: metadata.categoryId || "1",
@@ -482,20 +502,47 @@ async function updateVideoPrivacy(
 }
 
 /**
+ * Sanitizes and truncates video titles to strictly comply with YouTube API's 100-character ceiling.
+ */
+function sanitizeTitle(title: string, maxLength = 95): string {
+  const trimmed = title.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  const sliced = trimmed.slice(0, maxLength - 3);
+  const lastSpace = sliced.lastIndexOf(" ");
+  return (lastSpace > 40 ? sliced.slice(0, lastSpace) : sliced) + "...";
+}
+
+/**
  * Parses pre-formatted title and description from exports/youtube-upload-metadata.md
  */
 function parseMetadataKit(mdContent: string, lang: "id" | "en") {
-  const sectionHeader = lang === "id" ? "Indonesian Edition" : "English Edition";
-  const section = mdContent.split("## 📺 FORMAT").find((s) => s.includes(sectionHeader));
-  if (!section) return null;
+  const isEn = lang === "en";
+  const landscapeHeader = isEn ? "English Edition - 16:9" : "Indonesian Edition - 16:9";
+  const shortsHeader = isEn ? "English Edition - 9:16" : "Indonesian Edition - 9:16";
 
-  const titleMatch = section.match(/\* \*\*Option 1[^*]*\*\*\s*[\r\n]+\s*`([^`]+)`/);
-  const title = titleMatch ? titleMatch[1].trim() : undefined;
+  const sections = mdContent.split(/## .*?FORMAT/u);
+  const landscapeSec = sections.find((s) => s.includes(landscapeHeader));
+  const shortsSec = sections.find((s) => s.includes(shortsHeader));
 
-  const descMatch = section.match(/### 2\. Video Description\s*[\r\n]+```(?:markdown)?\s*([\s\S]*?)```/);
-  const desc = descMatch ? descMatch[1].trim() : undefined;
+  let landscapeTitle: string | undefined;
+  let landscapeDesc: string | undefined;
+  if (landscapeSec) {
+    const titleMatch = landscapeSec.match(/\* \*\*Option 1[^*]*\*\*\s*[\r\n]+\s*`([^`]+)`/);
+    landscapeTitle = titleMatch ? sanitizeTitle(titleMatch[1].trim()) : undefined;
+    const descMatch = landscapeSec.match(/### 2\. Video Description[^\n]*\s*[\r\n]+```(?:markdown)?\s*([\s\S]*?)```/);
+    landscapeDesc = descMatch ? descMatch[1].trim() : undefined;
+  }
 
-  return { title, desc };
+  let shortsTitle: string | undefined;
+  let shortsDesc: string | undefined;
+  if (shortsSec) {
+    const shortsTitleMatch = shortsSec.match(/### 1\. Title[^\n]*\s*[\r\n]+\s*`([^`]+)`/);
+    shortsTitle = shortsTitleMatch ? sanitizeTitle(shortsTitleMatch[1].trim()) : undefined;
+    const shortsDescMatch = shortsSec.match(/### 2\. Description[^\n]*\s*[\r\n]+```(?:markdown)?\s*([\s\S]*?)```/);
+    shortsDesc = shortsDescMatch ? shortsDescMatch[1].trim() : undefined;
+  }
+
+  return { landscapeTitle, landscapeDesc, shortsTitle, shortsDesc };
 }
 
 async function main() {
@@ -515,6 +562,15 @@ async function main() {
   const isForceReplace = args.includes("--force") || args.includes("--replace");
   const isUpdateMetadata = args.includes("--update-metadata") || args.includes("--resync-all");
   const isUpdateThumbnailsOnly = args.includes("--update-thumbnails") || args.includes("--thumbnail-only");
+  const allowShortLandscape = args.includes("--allow-short-landscape") || args.includes("--force-landscape");
+  const autoCleanup = args.includes("--auto-cleanup") || args.includes("--cleanup");
+  const engine = (getArg("--engine") as "auto" | "playwright" | "api") || "api";
+  const isHeadful = args.includes("--headful") || args.includes("--headed");
+
+  if (args.includes("--login") || args.includes("--auth-browser")) {
+    const loginOk = await launchInteractiveLogin();
+    process.exit(loginOk ? 0 : 1);
+  }
 
   const storyDir = path.resolve(`./stories/${bookSlug}`);
   const manifestPath = path.join(storyDir, "story.json");
@@ -526,13 +582,61 @@ async function main() {
 
   const manifest: StoryManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
 
-  // 1. Authorize YouTube API Client
-  const oauth2Client = await getOAuth2Client();
-  await authorizeClient(oauth2Client);
-  const youtube = google.youtube({ version: "v3", auth: oauth2Client });
+  // Calculate total story duration & determine 4-tier publication strategy
+  let totalDurationSeconds = 0;
+  if (manifest.scenes && manifest.scenes.length > 0) {
+    totalDurationSeconds = manifest.scenes.reduce((acc, s) => acc + (s.durationSeconds || 0), 0);
+  }
 
-  // 2. Verify Channel Ownership
-  await verifyChannel(youtube);
+  let durationTier: "tier1" | "tier2" | "tier3" | "tier4" = "tier3";
+  let strategyCode = "dual-hybrid";
+  let strategyDescription = "Standard Storybook (Dual Format: 16:9 Long-Form & 9:16 Shorts)";
+
+  if (totalDurationSeconds > 0 && totalDurationSeconds < 20) {
+    durationTier = "tier1";
+    strategyCode = "short-only";
+    strategyDescription = "Tier 1: Micro-Story / Teaser (<20s) -> Short-Form Exclusive (Shorts/TikTok/Reels ONLY)";
+  } else if (totalDurationSeconds >= 20 && totalDurationSeconds < 60) {
+    durationTier = "tier2";
+    strategyCode = "short-primary";
+    strategyDescription = "Tier 2: Snackable Mini-Story (20-60s) -> Short-Primary (Shorts/TikTok/Reels)";
+  } else if (totalDurationSeconds >= 60 && totalDurationSeconds <= 180) {
+    durationTier = "tier3";
+    strategyCode = "dual-hybrid";
+    strategyDescription = "Tier 3: Standard Storybook (60-180s) -> Dual-Format (16:9 Widescreen & 9:16 Shorts)";
+  } else if (totalDurationSeconds > 180) {
+    durationTier = "tier4";
+    strategyCode = "long-primary";
+    strategyDescription = "Tier 4: Extended Storybook (>180s) -> Long-Primary (16:9 Widescreen Master + Teaser Hook)";
+  }
+
+  console.log(`\n⏱️ Total Story Duration: ${totalDurationSeconds.toFixed(1)}s`);
+  console.log(`🎯 Strategy Classification: ${strategyDescription}`);
+
+  // Automatically enforce short-only for Tier 1 (<20s) if format is "all"
+  let effectiveFormat = format;
+  if (durationTier === "tier1" && format === "all" && !allowShortLandscape) {
+    console.log(`\n💡 DURATION POLICY APPLIED: Storybook is <20s (${totalDurationSeconds.toFixed(1)}s).`);
+    console.log(`   Automatically routing to Short-Form Exclusive (format: "vertical").`);
+    console.log(`   Standalone 16:9 upload suppressed to protect channel watch time.`);
+    console.log(`   (Use --allow-short-landscape to override).`);
+    effectiveFormat = "vertical";
+  }
+
+  // 1. Authorize YouTube API Client (Official Google API Client)
+  let oauth2Client: any = null;
+  let youtube: any = null;
+  if (engine !== "playwright") {
+    try {
+      oauth2Client = await getOAuth2Client();
+      await authorizeClient(oauth2Client);
+      youtube = google.youtube({ version: "v3", auth: oauth2Client });
+      await verifyChannel(youtube);
+    } catch (apiAuthErr: any) {
+      if (engine === "api") throw apiAuthErr;
+      console.warn(`⚠️ Official Google API credentials not configured: ${apiAuthErr.message}. Operating in Playwright browser mode.`);
+    }
+  }
 
   // If user only wanted to authenticate
   if (args.includes("--auth-only")) {
@@ -608,14 +712,18 @@ async function main() {
       const verticalThumbPath = existsSync(langVerticalThumb) ? langVerticalThumb : landscapeThumbPath;
 
       const landscapeId =
-        lang === "en"
+        (manifest as any).publications?.youtube?.[lang]?.landscape?.id ||
+        (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
+        (lang === "en"
           ? (manifest as any).exports?.en?.landscape?.youtubeId
-          : (manifest as any).exports?.landscape?.youtubeId;
+          : (manifest as any).exports?.landscape?.youtubeId);
 
       const verticalId =
-        lang === "en"
+        (manifest as any).publications?.youtube?.[lang]?.vertical?.id ||
+        (manifest.exports as any)?.[lang]?.vertical?.youtubeId ||
+        (lang === "en"
           ? (manifest as any).exports?.en?.vertical?.youtubeId
-          : (manifest as any).exports?.vertical?.youtubeId;
+          : (manifest as any).exports?.vertical?.youtubeId);
 
       if (landscapeId && existsSync(landscapeThumbPath)) {
         console.log(`Setting 16:9 Landscape thumbnail for ${lang.toUpperCase()} (${landscapeId})...`);
@@ -647,6 +755,11 @@ async function main() {
       (manifest as any).thumbnails?.[lang]?.popular ||
       (manifest as any).thumbnails?.[lang]?.primary;
     const verticalThumbRel = (manifest as any).thumbnails?.[lang]?.vertical;
+    const currentLandscapeId =
+      (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
+      (isEn
+        ? (manifest.exports as any)?.en?.landscape?.youtubeId
+        : (manifest.exports as any)?.landscape?.youtubeId);
     const langLandscapeThumb = popularThumbRel
       ? path.join(storyDir, popularThumbRel)
       : path.join(storyDir, `exports/${lang}/thumbnail.png`);
@@ -662,7 +775,7 @@ async function main() {
     console.log(`======================================================`);
 
     const metadataKitPath = path.join(storyDir, "exports/youtube-upload-metadata.md");
-    let kitMeta: { title?: string; desc?: string } | null = null;
+    let kitMeta: ReturnType<typeof parseMetadataKit> = null;
     if (existsSync(metadataKitPath)) {
       const kitContent = await fs.readFile(metadataKitPath, "utf-8");
       kitMeta = parseMetadataKit(kitContent, lang);
@@ -699,16 +812,17 @@ async function main() {
           "audio book anak indonesia",
         ];
 
-    let landscapeTitle: string =
-      kitMeta?.title ||
+    let landscapeTitle: string = sanitizeTitle(
+      kitMeta?.landscapeTitle ||
       (isEn
-        ? `${displayTitle.toUpperCase()}! 🌧️ Fun Kids Animated Read-Aloud Storybook`
-        : `${displayTitle.toUpperCase()}! 🌧️ Dongeng Cerita Anak Bergambar`);
+        ? `${displayTitle.toUpperCase()}! 📖 Fun Kids Animated Read-Aloud Storybook`
+        : `${displayTitle.toUpperCase()}! 📖 Dongeng Cerita Anak Bergambar`)
+    );
 
     let landscapeDesc: string =
-      kitMeta?.desc ||
+      kitMeta?.landscapeDesc ||
       [
-        `🌧️ ${displayTitle} - Dongeng cerita anak bergambar yang hangat dan mendidik!`,
+        `📖 ${displayTitle} - Dongeng cerita anak bergambar yang hangat dan mendidik!`,
         ``,
         `Karya asli: ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
         `Diterbitkan oleh: ${manifest.source.repository} under ${manifest.source.license}.`,
@@ -723,133 +837,192 @@ async function main() {
         `🔔 Subscribe to @ZaynAdyanRamadhan for more animated storybooks!`,
       ].join("\n");
 
-    let shortsTitle: string = isEn
-      ? `Kids Animated Storybook: ${displayTitle}! 🌧️ #Shorts #BedtimeStories`
-      : `Buku Cerita Anak: ${displayTitle}! 🌧️ #Shorts #DongengAnak`;
+    let shortsTitle: string = sanitizeTitle(
+      kitMeta?.shortsTitle ||
+      (isEn
+        ? `Kids Animated Storybook: ${displayTitle}! 📖 #Shorts #BedtimeStories`
+        : `Buku Cerita Anak: ${displayTitle}! 📖 #Shorts #DongengAnak`)
+    );
 
-    let shortsDesc: string = isEn
-      ? [
-          `${displayTitle} - Animated children's picture book by ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
-          `License: ${manifest.source.license} (${manifest.source.repository})`,
-          ``,
-          `🔔 Subscribe to @ZaynAdyanRamadhan for more fun storybooks!`,
-          ``,
-          `#Shorts #AnimatedStorybook #KidsStories #Storytime #BedtimeStory`,
-        ].join("\n")
-      : [
-          `${displayTitle} - Cerita dongeng anak bergambar karya ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
-          `Lisensi: ${manifest.source.license} (${manifest.source.repository})`,
-          ``,
-          `🔔 Subscribe ke @ZaynAdyanRamadhan untuk cerita animasi seru lainnya!`,
-          ``,
-          `#Shorts #DongengAnak #CeritaAnak #KartunAnak #AnimasiIndonesia`,
-        ].join("\n");
+    let shortsDesc: string =
+      kitMeta?.shortsDesc ||
+      (isEn
+        ? [
+            `${displayTitle} - Animated children's picture book by ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
+            `License: ${manifest.source.license} (${manifest.source.repository})`,
+            ``,
+            `🔔 Subscribe to @ZaynAdyanRamadhan for more fun storybooks!`,
+            ``,
+            `#Shorts #AnimatedStorybook #KidsStories #Storytime #BedtimeStory`,
+          ].join("\n")
+        : [
+            `${displayTitle} - Cerita dongeng anak bergambar karya ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
+            `Lisensi: ${manifest.source.license} (${manifest.source.repository})`,
+            ``,
+            `🔔 Subscribe ke @ZaynAdyanRamadhan untuk cerita animasi seru lainnya!`,
+            ``,
+            `#Shorts #DongengAnak #CeritaAnak #KartunAnak #AnimasiIndonesia`,
+          ].join("\n"));
 
-    // 4. Upload Landscape (16:9) with Pre-Upload Deduplication Check
-    if ((format === "landscape" || format === "all") && existsSync(landscapeVideo)) {
-      console.log(`\n🎬 Checking Landscape (16:9) publication status for ${lang.toUpperCase()}...`);
+    // 4. Upload Landscape (16:9) with Duration Policy & Pre-Upload Deduplication Check
+    if ((effectiveFormat === "landscape" || effectiveFormat === "all") && existsSync(landscapeVideo)) {
+      if (durationTier === "tier1" && !allowShortLandscape) {
+        console.log(`\n🛑 DURATION POLICY: Total duration is ${totalDurationSeconds.toFixed(1)}s (< 20s).`);
+        console.log(`   Best practices recommend publishing <20s videos ONLY as YouTube Shorts / Reels / TikTok (9:16).`);
+        console.log(`   Standalone horizontal 16:9 upload is SUPPRESSED to protect channel watch time and retention.`);
+        console.log(`   💡 Tip: Pass --allow-short-landscape to override this policy if standalone 16:9 is truly desired.`);
+      } else {
+        console.log(`\n🎬 Checking Landscape (16:9) publication status for ${lang.toUpperCase()}...`);
 
-      let targetVideoId =
-        (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
-        (isEn
-          ? (manifest.exports as any)?.en?.landscape?.youtubeId
-          : (manifest.exports as any)?.landscape?.youtubeId);
+        let targetVideoId =
+          (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
+          (isEn
+            ? (manifest.exports as any)?.en?.landscape?.youtubeId
+            : (manifest.exports as any)?.landscape?.youtubeId);
 
-      let remoteCheck = targetVideoId
-        ? await checkRemoteVideoStatus(youtube, targetVideoId)
-        : { exists: false };
+        let remoteCheck = targetVideoId
+          ? await checkRemoteVideoStatus(youtube, targetVideoId)
+          : { exists: false };
 
-      // Fallback search across channel to detect unindexed remote duplicate
-      if (!remoteCheck.exists) {
-        const duplicateOnChannel = await searchChannelForDuplicate(youtube, landscapeTitle);
-        if (duplicateOnChannel) {
-          const verifyStatus = await checkRemoteVideoStatus(youtube, duplicateOnChannel.videoId);
-          if (verifyStatus.exists) {
-            targetVideoId = duplicateOnChannel.videoId;
-            remoteCheck = verifyStatus;
+        // Fallback search across channel to detect unindexed remote duplicate
+        if (!remoteCheck.exists) {
+          const duplicateOnChannel = await searchChannelForDuplicate(youtube, landscapeTitle);
+          if (duplicateOnChannel) {
+            const verifyStatus = await checkRemoteVideoStatus(youtube, duplicateOnChannel.videoId);
+            if (verifyStatus.exists) {
+              targetVideoId = duplicateOnChannel.videoId;
+              remoteCheck = verifyStatus;
+            }
           }
         }
-      }
 
-      if (remoteCheck.exists && targetVideoId) {
-        console.log(`\n🛑 DUPLICATE DETECTED: [${lang.toUpperCase()}] Landscape video is ALREADY LIVE on YouTube!`);
-        console.log(`   • Video ID: \x1b[33m${targetVideoId}\x1b[0m`);
-        console.log(`   • Title: "${remoteCheck.title}"`);
-        console.log(`   • Live URL: https://youtu.be/${targetVideoId}`);
-        console.log(`   • Status: ${remoteCheck.status} (${remoteCheck.privacy})`);
+        if (remoteCheck.exists && targetVideoId) {
+          console.log(`\n🛑 DUPLICATE DETECTED: [${lang.toUpperCase()}] Landscape video is ALREADY LIVE on YouTube!`);
+          console.log(`   • Video ID: \x1b[33m${targetVideoId}\x1b[0m`);
+          console.log(`   • Title: "${remoteCheck.title}"`);
+          console.log(`   • Live URL: https://youtu.be/${targetVideoId}`);
+          console.log(`   • Status: ${remoteCheck.status} (${remoteCheck.privacy})`);
 
-        if (isForceReplace) {
-          console.log(`⚠️ --force / --replace flag active! Deleting remote video ${targetVideoId} first...`);
-          await deleteRemoteVideo(youtube, targetVideoId);
-          targetVideoId = undefined; // Proceed to upload fresh video
-        } else if (isUpdateMetadata) {
-          console.log(`ℹ️ --update-metadata flag active. Updating metadata & thumbnail only...`);
-          await updateVideoMetadata(youtube, targetVideoId, {
+          if (isForceReplace) {
+            console.log(`⚠️ --force / --replace flag active! Deleting remote video ${targetVideoId} first...`);
+            await deleteRemoteVideo(youtube, targetVideoId);
+            targetVideoId = undefined; // Proceed to upload fresh video
+          } else if (isUpdateMetadata) {
+            console.log(`ℹ️ --update-metadata flag active. Updating metadata & thumbnail only...`);
+            await updateVideoMetadata(youtube, targetVideoId, {
+              title: landscapeTitle,
+              description: landscapeDesc,
+              tags: coreTags,
+            });
+            await uploadThumbnail(youtube, targetVideoId, thumbnailPath);
+          } else {
+            console.log(`⏭️  SKIPPING VIDEO UPLOAD to prevent duplicate content on channel.`);
+            console.log(`   💡 Tip: Use --force to replace, or --update-metadata to update title/description.`);
+            // Sync thumbnail just in case
+            await uploadThumbnail(youtube, targetVideoId, thumbnailPath);
+          }
+        }
+
+        // Upload if no remote video exists or if old one was deleted via --force
+        if (!remoteCheck.exists || (isForceReplace && !targetVideoId)) {
+          let videoId: string | undefined;
+          let videoUrl: string | undefined;
+
+          // Strategy 1: Attempt Zero-Quota Playwright Browser Upload
+          if (engine === "playwright" || engine === "auto") {
+            try {
+              console.log(`\n🌐 [${lang.toUpperCase()}] Attempting Playwright Zero-Quota Browser Upload...`);
+              const browserRes = await uploadVideoViaBrowser({
+                videoPath: landscapeVideo,
+                title: landscapeTitle,
+                description: landscapeDesc,
+                thumbnailPath,
+                isMadeForKids,
+                privacy,
+                headless: !isHeadful,
+              });
+
+              if (browserRes.success) {
+                videoId = browserRes.videoId;
+                videoUrl = browserRes.videoUrl || (videoId ? `https://youtu.be/${videoId}` : undefined);
+                console.log(`🎉 Playwright Browser Upload Successful! Link: ${videoUrl || "Live in YouTube Studio"}`);
+              } else {
+                console.warn(`⚠️ Playwright browser upload: ${browserRes.error}`);
+                if (engine === "playwright") {
+                  throw new Error(browserRes.error);
+                }
+                console.log(`🔄 Falling back to official YouTube Data API v3...`);
+              }
+            } catch (pErr: any) {
+              if (engine === "playwright") throw pErr;
+              console.warn(`⚠️ Playwright error (${pErr.message}). Falling back to official YouTube Data API v3...`);
+            }
+          }
+
+          // Strategy 2: Official YouTube Data API v3 (Fallback or Primary)
+          if (!videoId && youtube) {
+            videoId = await uploadVideo(youtube, landscapeVideo, {
+              title: landscapeTitle,
+              description: landscapeDesc,
+              tags: coreTags,
+              privacyStatus: privacy,
+              isMadeForKids,
+              publishAt: scheduleTime,
+            });
+
+            await uploadThumbnail(youtube, videoId, thumbnailPath);
+            videoUrl = `https://youtu.be/${videoId}`;
+            console.log(`\n🎉 Landscape Video (${lang.toUpperCase()}) Live at: \x1b[36m${videoUrl}\x1b[0m`);
+          }
+
+          if (!videoId) {
+            throw new Error(`Failed to upload landscape video via both Playwright and YouTube API v3.`);
+          }
+
+          targetVideoId = videoId;
+        }
+
+        if (targetVideoId) {
+          if (!manifest.exports) manifest.exports = {};
+          if ((manifest.exports as any)[lang]) {
+            if (!(manifest.exports as any)[lang].landscape) (manifest.exports as any)[lang].landscape = {};
+            (manifest.exports as any)[lang].landscape.youtubeId = targetVideoId;
+            (manifest.exports as any)[lang].landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
+          } else if (isEn) {
+            if (!(manifest.exports as any).en) (manifest.exports as any).en = {};
+            if (!(manifest.exports as any).en.landscape) (manifest.exports as any).en.landscape = {};
+            (manifest.exports as any).en.landscape.youtubeId = targetVideoId;
+            (manifest.exports as any).en.landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
+          } else {
+            if (!manifest.exports.landscape) manifest.exports.landscape = {};
+            manifest.exports.landscape.youtubeId = targetVideoId;
+            manifest.exports.landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
+          }
+
+          // Record in unified multi-platform publications registry
+          if (!(manifest as any).publications) (manifest as any).publications = {};
+          if (!(manifest as any).publications.youtube) (manifest as any).publications.youtube = {};
+          if (!(manifest as any).publications.youtube[lang]) (manifest as any).publications.youtube[lang] = {};
+          (manifest as any).publications.youtube[lang].landscape = {
+            id: targetVideoId,
+            url: `https://youtu.be/${targetVideoId}`,
+            publishedAt: new Date().toISOString(),
             title: landscapeTitle,
-            description: landscapeDesc,
-            tags: coreTags,
-          });
-          await uploadThumbnail(youtube, targetVideoId, thumbnailPath);
-        } else {
-          console.log(`⏭️  SKIPPING VIDEO UPLOAD to prevent duplicate content on channel.`);
-          console.log(`   💡 Tip: Use --force to replace, or --update-metadata to update title/description.`);
-          // Sync thumbnail just in case
-          await uploadThumbnail(youtube, targetVideoId, thumbnailPath);
+            status: "published",
+          };
+
+          await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+          if (autoCleanup && existsSync(landscapeVideo)) {
+            await fs.unlink(landscapeVideo);
+            console.log(`   🧹 Auto-cleanup: Removed local 16:9 MP4 (${path.basename(landscapeVideo)}) after verified upload.`);
+          }
         }
-      }
-
-      // Upload if no remote video exists or if old one was deleted via --force
-      if (!remoteCheck.exists || (isForceReplace && !targetVideoId)) {
-        const videoId = await uploadVideo(youtube, landscapeVideo, {
-          title: landscapeTitle,
-          description: landscapeDesc,
-          tags: coreTags,
-          privacyStatus: privacy,
-          isMadeForKids,
-          publishAt: scheduleTime,
-        });
-
-        await uploadThumbnail(youtube, videoId, thumbnailPath);
-
-        console.log(`\n🎉 Landscape Video (${lang.toUpperCase()}) Live at: \x1b[36mhttps://youtu.be/${videoId}\x1b[0m`);
-        targetVideoId = videoId;
-      }
-
-      if (targetVideoId) {
-        if (!manifest.exports) manifest.exports = {};
-        if ((manifest.exports as any)[lang]) {
-          if (!(manifest.exports as any)[lang].landscape) (manifest.exports as any)[lang].landscape = {};
-          (manifest.exports as any)[lang].landscape.youtubeId = targetVideoId;
-          (manifest.exports as any)[lang].landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
-        } else if (isEn) {
-          if (!(manifest.exports as any).en) (manifest.exports as any).en = {};
-          if (!(manifest.exports as any).en.landscape) (manifest.exports as any).en.landscape = {};
-          (manifest.exports as any).en.landscape.youtubeId = targetVideoId;
-          (manifest.exports as any).en.landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
-        } else {
-          if (!manifest.exports.landscape) manifest.exports.landscape = {};
-          manifest.exports.landscape.youtubeId = targetVideoId;
-          manifest.exports.landscape.youtubeUrl = `https://youtu.be/${targetVideoId}`;
-        }
-
-        // Record in unified multi-platform publications registry
-        if (!(manifest as any).publications) (manifest as any).publications = {};
-        if (!(manifest as any).publications.youtube) (manifest as any).publications.youtube = {};
-        if (!(manifest as any).publications.youtube[lang]) (manifest as any).publications.youtube[lang] = {};
-        (manifest as any).publications.youtube[lang].landscape = {
-          id: targetVideoId,
-          url: `https://youtu.be/${targetVideoId}`,
-          publishedAt: new Date().toISOString(),
-          title: landscapeTitle,
-          status: "published",
-        };
-
-        await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
       }
     }
 
     // 5. Upload Vertical Shorts (9:16) with Pre-Upload Deduplication Check
-    if ((format === "vertical" || format === "all") && existsSync(verticalVideo)) {
+    if ((effectiveFormat === "vertical" || effectiveFormat === "all") && existsSync(verticalVideo)) {
       console.log(`\n📱 Checking Shorts (9:16) publication status for ${lang.toUpperCase()}...`);
 
       let targetShortsId =
@@ -864,7 +1037,8 @@ async function main() {
 
       if (!remoteShortsCheck.exists) {
         const duplicateShorts = await searchChannelForDuplicate(youtube, shortsTitle);
-        if (duplicateShorts) {
+        // Ensure the duplicate detected is NOT the landscape video that was just uploaded
+        if (duplicateShorts && duplicateShorts.videoId !== currentLandscapeId) {
           const verifyStatus = await checkRemoteVideoStatus(youtube, duplicateShorts.videoId);
           if (verifyStatus.exists) {
             targetShortsId = duplicateShorts.videoId;
@@ -904,20 +1078,62 @@ async function main() {
       }
 
       if (!remoteShortsCheck.exists || (isForceReplace && !targetShortsId)) {
-        const shortsVideoId = await uploadVideo(youtube, verticalVideo, {
-          title: shortsTitle,
-          description: shortsDesc,
-          tags: [...coreTags, "shorts", "youtubeshorts"],
-          privacyStatus: privacy,
-          isMadeForKids,
-          publishAt: scheduleTime,
-        });
-
+        let shortsVideoId: string | undefined;
+        let shortsUrl: string | undefined;
         const langVerticalThumb = path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
         const verticalThumbnailPath = existsSync(langVerticalThumb) ? langVerticalThumb : thumbnailPath;
-        await uploadThumbnail(youtube, shortsVideoId, verticalThumbnailPath);
 
-        console.log(`\n🎉 Shorts Video (${lang.toUpperCase()}) Live at: \x1b[36mhttps://youtube.com/shorts/${shortsVideoId}\x1b[0m`);
+        // Strategy 1: Attempt Zero-Quota Playwright Browser Upload
+        if (engine === "playwright" || engine === "auto") {
+          try {
+            console.log(`\n🌐 [${lang.toUpperCase()}] Attempting Playwright Zero-Quota Shorts Upload...`);
+            const browserRes = await uploadVideoViaBrowser({
+              videoPath: verticalVideo,
+              title: shortsTitle,
+              description: shortsDesc,
+              thumbnailPath: verticalThumbnailPath,
+              isMadeForKids,
+              privacy,
+              headless: !isHeadful,
+            });
+
+            if (browserRes.success) {
+              shortsVideoId = browserRes.videoId;
+              shortsUrl = browserRes.videoUrl || (shortsVideoId ? `https://youtube.com/shorts/${shortsVideoId}` : undefined);
+              console.log(`🎉 Playwright Shorts Upload Successful! Link: ${shortsUrl || "Live in YouTube Studio"}`);
+            } else {
+              console.warn(`⚠️ Playwright browser upload: ${browserRes.error}`);
+              if (engine === "playwright") {
+                throw new Error(browserRes.error);
+              }
+              console.log(`🔄 Falling back to official YouTube Data API v3...`);
+            }
+          } catch (pErr: any) {
+            if (engine === "playwright") throw pErr;
+            console.warn(`⚠️ Playwright error (${pErr.message}). Falling back to official YouTube Data API v3...`);
+          }
+        }
+
+        // Strategy 2: Official YouTube Data API v3 (Fallback or Primary)
+        if (!shortsVideoId && youtube) {
+          shortsVideoId = await uploadVideo(youtube, verticalVideo, {
+            title: shortsTitle,
+            description: shortsDesc,
+            tags: [...coreTags, "shorts", "youtubeshorts"],
+            privacyStatus: privacy,
+            isMadeForKids,
+            publishAt: scheduleTime,
+          });
+
+          await uploadThumbnail(youtube, shortsVideoId, verticalThumbnailPath);
+          shortsUrl = `https://youtube.com/shorts/${shortsVideoId}`;
+          console.log(`\n🎉 Shorts Video (${lang.toUpperCase()}) Live at: \x1b[36m${shortsUrl}\x1b[0m`);
+        }
+
+        if (!shortsVideoId) {
+          throw new Error(`Failed to upload Shorts video via both Playwright and YouTube API v3.`);
+        }
+
         targetShortsId = shortsVideoId;
       }
 
@@ -951,7 +1167,20 @@ async function main() {
         };
 
         await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+        if (autoCleanup && existsSync(verticalVideo)) {
+          await fs.unlink(verticalVideo);
+          console.log(`   🧹 Auto-cleanup: Removed local 9:16 Shorts MP4 (${path.basename(verticalVideo)}) after verified upload.`);
+        }
       }
+    }
+  }
+
+  if (autoCleanup) {
+    const rawPagesDir = path.join(storyDir, "raw/pages");
+    if (existsSync(rawPagesDir)) {
+      await fs.rm(rawPagesDir, { recursive: true, force: true });
+      console.log(`🧹 Auto-cleanup: Removed intermediate raw PDF pages folder.`);
     }
   }
 
