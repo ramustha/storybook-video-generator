@@ -4,6 +4,7 @@ import path from "path";
 import http from "http";
 import url from "url";
 import readline from "readline";
+import { exec } from "child_process";
 import { google } from "googleapis";
 import { QuotaRotator, getTimeUntilResetPT } from "./quota-rotator";
 
@@ -73,7 +74,8 @@ async function authorizeProject(projectName: string, credsPath: string) {
     throw new Error("Invalid Google Cloud credentials JSON format.");
   }
 
-  const redirectUri = creds.redirect_uris?.[0] || "http://localhost:3000/oauth2callback";
+  const hasSpecificCallback = creds.redirect_uris?.some((u: string) => u.includes("3000/oauth2callback"));
+  const redirectUri = hasSpecificCallback ? "http://localhost:3000/oauth2callback" : "http://localhost:3000";
   const oauth2Client = new google.auth.OAuth2(creds.client_id, creds.client_secret, redirectUri);
 
   const authUrl = oauth2Client.generateAuthUrl({
@@ -85,25 +87,29 @@ async function authorizeProject(projectName: string, credsPath: string) {
   console.log("\n========================================================");
   console.log(`🔐 Authorizing Google Cloud Project: \x1b[36m${projectName.toUpperCase()}\x1b[0m`);
   console.log("========================================================");
-  console.log("1. Open the following authorization URL in your browser:\n");
+  console.log("Opening Google authorization page in your default browser...");
+  console.log("If it does not open automatically, visit this URL:\n");
   console.log(`   👉 \x1b[36m${authUrl}\x1b[0m\n`);
-  console.log("2. Sign in with the Google Account managing @ZaynAdyanRamadhan.");
-  console.log("3. Grant permissions to YouTube.\n");
+  console.log("Please select your Google Account managing @ZaynAdyanRamadhan and click Allow.\n");
+
+  if (process.platform === "darwin") {
+    exec(`open "${authUrl}"`);
+  }
 
   const code = await new Promise<string>((resolve) => {
     const server = http.createServer((req, res) => {
       const parsedUrl = url.parse(req.url || "", true);
-      if (parsedUrl.pathname === "/oauth2callback" && parsedUrl.query.code) {
+      if (parsedUrl.query && parsedUrl.query.code) {
         const authCode = parsedUrl.query.code as string;
         res.writeHead(200, { "Content-Type": "text/html" });
-        res.end("<h1>Authentication Successful!</h1><p>You can close this tab now.</p>");
+        res.end("<h1>Authentication Successful!</h1><p>Project is now connected. You can close this tab.</p>");
         server.close();
         resolve(authCode);
       }
     });
 
     server.listen(3000, () => {
-      console.log("⏳ Waiting for browser callback on http://localhost:3000/oauth2callback ...");
+      console.log(`⏳ Waiting for browser callback on ${redirectUri} ...`);
     });
 
     server.on("error", () => {
@@ -160,11 +166,12 @@ async function main() {
     // Refresh rotator
     await rotator.init();
     await printProjectList(rotator);
-    return;
+    process.exit(0);
   }
 
   // Default: list all projects
   await printProjectList(rotator);
+  process.exit(0);
 }
 
 main().catch((err) => {

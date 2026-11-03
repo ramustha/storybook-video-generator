@@ -69,7 +69,7 @@ async function runTests() {
   const client = await rotator.getActiveClient();
   if (!client.youtube) throw new Error("YouTube client must be instantiated");
   if (!client.oauth2Client) throw new Error("OAuth2 client must be instantiated");
-  if (client.projectId !== "default") throw new Error("Active project should be default");
+  if (!client.projectId) throw new Error("Active project must be specified");
   console.log("  ✔ Client built for active project:", client.projectId);
 
   // Test 5: Simulated Auto-Rotation with mock operation

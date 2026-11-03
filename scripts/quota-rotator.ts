@@ -235,10 +235,15 @@ export class QuotaRotator {
       throw new Error(`Invalid credentials format in ${proj.credentialsPath}`);
     }
 
+    const hasSpecificCallback = creds.redirect_uris?.some((u: string) => u.includes("3000/oauth2callback"));
+    const redirectUri = hasSpecificCallback
+      ? "http://localhost:3000/oauth2callback"
+      : (creds.redirect_uris?.[0] || "http://localhost:3000");
+
     const oauth2Client = new google.auth.OAuth2(
       creds.client_id,
       creds.client_secret,
-      creds.redirect_uris?.[0] || "http://localhost:3000/oauth2callback"
+      redirectUri
     );
 
     const tokenRaw = JSON.parse(await fs.readFile(proj.tokenPath, "utf-8"));
