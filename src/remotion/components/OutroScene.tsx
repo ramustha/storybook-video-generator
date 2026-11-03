@@ -30,7 +30,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
 
   const bgImgSrc = scene.visual?.imagePath
     ? staticFile(scene.visual.imagePath)
-    : staticFile("assets/cover.png");
+    : null;
 
   // Next story recommendation details (Fully Dynamic & General)
   const rec = scene.recommendation || book.nextStory || {};
@@ -83,17 +83,28 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
       }}
     >
       {/* Layer 1: Ambient Blurred Backdrop Plate */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          transform: `scale(${bgScale})`,
-          filter: "blur(42px) brightness(0.38) saturate(1.4)",
-          zIndex: 1,
-        }}
-      >
-        <Img src={bgImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      </div>
+      {bgImgSrc ? (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: `scale(${bgScale})`,
+            filter: "blur(42px) brightness(0.38) saturate(1.4)",
+            zIndex: 1,
+          }}
+        >
+          <Img src={bgImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(180deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%)",
+            zIndex: 1,
+          }}
+        />
+      )}
 
       {/* Layer 2: Radial Fairytale Gradient */}
       <div
@@ -204,15 +215,31 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
                 backgroundColor: "#0B0F19",
               }}
             >
-              <Img
-                src={nextImgSrc}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  filter: hasCustomRecImage ? "none" : "brightness(0.85) saturate(1.2)",
-                }}
-              />
+              {nextImgSrc ? (
+                <Img
+                  src={nextImgSrc}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    filter: hasCustomRecImage ? "none" : "brightness(0.85) saturate(1.2)",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "72px",
+                    background: "linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)",
+                  }}
+                >
+                  🎬
+                </div>
+              )}
 
               {/* Play Badge Overlay */}
               <div

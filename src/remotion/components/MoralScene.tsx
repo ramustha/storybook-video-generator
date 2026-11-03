@@ -38,8 +38,6 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
   // Source illustration for the hero vignette
   const heroImgSrc = scene.visual?.imagePath
     ? staticFile(scene.visual.imagePath)
-    : book.thumbnailConfig?.heroImage
-    ? staticFile(book.thumbnailConfig.heroImage)
     : null;
 
   // Moral title / headline from scene metadata or default

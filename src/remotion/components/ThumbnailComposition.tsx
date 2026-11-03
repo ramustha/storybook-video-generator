@@ -1,5 +1,6 @@
 import React from "react";
 import { Img, staticFile, useVideoConfig } from "remotion";
+import { ProceduralIllustration } from "./ProceduralIllustration";
 
 export interface ThumbnailConfig {
   headlineTop?: string;
@@ -266,19 +267,13 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 }}
               />
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "180px",
-                  background: "radial-gradient(circle, #FDE047 0%, #F59E0B 100%)",
-                }}
-              >
-                {hookEmoji.slice(0, 2) || "📖"}
-              </div>
+              <ProceduralIllustration
+                scene={{ index: 0, type: "cover" }}
+                book={book}
+                isVertical={false}
+                isCover={true}
+                showTitle={false}
+              />
             )}
 
             {/* Inner Vignette */}
@@ -627,19 +622,13 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                   }}
                 />
               ) : (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "180px",
-                    background: "radial-gradient(circle, #FDE047 0%, #F59E0B 100%)",
-                  }}
-                >
-                  {hookEmoji.slice(0, 2) || "📖"}
-                </div>
+                <ProceduralIllustration
+                  scene={{ index: 0, type: "cover" }}
+                  book={book}
+                  isVertical={false}
+                  isCover={true}
+                  showTitle={false}
+                />
               )}
 
               {/* Gold Ribbon Seal on Picture Corner */}
@@ -936,19 +925,13 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 }}
               />
             ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "180px",
-                  background: "radial-gradient(circle, #FDE047 0%, #F59E0B 100%)",
-                }}
-              >
-                {hookEmoji.slice(0, 2) || "📖"}
-              </div>
+              <ProceduralIllustration
+                scene={{ index: 0, type: "cover" }}
+                book={book}
+                isVertical={true}
+                isCover={true}
+                showTitle={false}
+              />
             )}
 
             {/* Inner Dramatic Vignette */}
