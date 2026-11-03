@@ -1,0 +1,27 @@
+src/remotion/components/StoryScene.tsx
+  698ac31901cd73e0 41,48,50,53,68-80
+src/remotion/components/ProceduralIllustration.tsx
+  698ac31901cd73e0 40-45,68,86,100,112-114,118,133,200-201,210,220,229,258,264,267,294,297,303,334,337,349-350,353,386,389,394,420,426,438,442-443,473,482,488,514,517,525,557,563,603
+src/remotion/components/KineticSubtitles.tsx
+  698ac31901cd73e0 120,124,139,142,149,156,160,167,207
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "789e6fae9c67a9fded4f97d5e37a76c76dafcdc1",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 75,
+      "total_deletions": 52,
+      "accepted_lines": 75,
+      "overriden_lines": 0
+    }
+  }
+}
