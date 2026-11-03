@@ -100,11 +100,11 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   const config: ThumbnailConfig =
     book.thumbnailConfig?.[lang] || (book as any).thumbnail?.[lang] || {};
 
-  const defaultHero = heroImagePath || book.thumbnailConfig?.heroImage || "assets/cover.png";
-  const defaultBg = backdropImagePath || book.thumbnailConfig?.backdropImage || "assets/scene_02.png";
+  const hasHero = Boolean(heroImagePath);
+  const hasBg = Boolean(backdropImagePath);
 
-  const bgSrc = staticFile(defaultBg);
-  const heroSrc = staticFile(defaultHero);
+  const bgSrc = hasBg ? staticFile(backdropImagePath!) : null;
+  const heroSrc = hasHero ? staticFile(heroImagePath!) : null;
 
   const authorName = book.source?.originalAuthor || (isEn ? "Author" : "Penulis");
   const illustratorName = book.source?.originalIllustrator || (isEn ? "Illustrator" : "Ilustrator");
@@ -174,7 +174,17 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             zIndex: 1,
           }}
         >
-          <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {bgSrc ? (
+            <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 40%, #0F172A 100%)",
+              }}
+            />
+          )}
         </div>
 
         {/* Dramatic Radial Gradient & Vignette */}
@@ -246,14 +256,30 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               backgroundColor: "#1E293B",
             }}
           >
-            <Img
-              src={heroSrc}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            {heroSrc ? (
+              <Img
+                src={heroSrc}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "180px",
+                  background: "radial-gradient(circle, #FDE047 0%, #F59E0B 100%)",
+                }}
+              >
+                {hookEmoji.slice(0, 2) || "📖"}
+              </div>
+            )}
 
             {/* Inner Vignette */}
             <div
@@ -419,7 +445,17 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             zIndex: 1,
           }}
         >
-          <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {bgSrc ? (
+            <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 40%, #0F172A 100%)",
+              }}
+            />
+          )}
         </div>
 
         {/* Deep Midnight Blue Gradient & Starfield Lighting */}
@@ -581,14 +617,30 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 backgroundColor: "#0B0F19",
               }}
             >
-              <Img
-                src={heroSrc}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
+              {heroSrc ? (
+                <Img
+                  src={heroSrc}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "180px",
+                    background: "radial-gradient(circle, #FDE047 0%, #F59E0B 100%)",
+                  }}
+                >
+                  {hookEmoji.slice(0, 2) || "📖"}
+                </div>
+              )}
 
               {/* Gold Ribbon Seal on Picture Corner */}
               <div
@@ -644,7 +696,17 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           zIndex: 1,
         }}
       >
-        <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        {bgSrc ? (
+          <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 40%, #0F172A 100%)",
+            }}
+          />
+        )}
       </div>
 
       {/* Dramatic Action Radial Lighting & Vignette */}
@@ -864,14 +926,30 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               backgroundColor: "#1E293B",
             }}
           >
-            <Img
-              src={heroSrc}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            {heroSrc ? (
+              <Img
+                src={heroSrc}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "180px",
+                  background: "radial-gradient(circle, #FDE047 0%, #F59E0B 100%)",
+                }}
+              >
+                {hookEmoji.slice(0, 2) || "📖"}
+              </div>
+            )}
 
             {/* Inner Dramatic Vignette */}
             <div

@@ -2,6 +2,7 @@ import React from "react";
 import { Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { AtmosphereOverlay, WeatherType } from "./AtmosphereOverlay";
 import { KineticSubtitles, WordTiming } from "./KineticSubtitles";
+import { ProceduralIllustration } from "./ProceduralIllustration";
 
 interface StorySceneProps {
   scene: any;
@@ -17,6 +18,58 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
 
   // Bang Motion Law 2: Continuous Camera Breathing
   const cameraBreath = Math.sin(frame * 0.035) * 0.012;
+
+  // Fallback to procedural illustration if no image plate is provided
+  const hasImage = Boolean(scene.visual?.imagePath);
+  if (!hasImage) {
+    return (
+      <div
+        style={{
+          width,
+          height,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#080C14",
+        }}
+      >
+        <ProceduralIllustration scene={scene} book={book} isVertical={isVertical} />
+
+        {/* Top Story & Scene Badge */}
+        <div
+          style={{
+            position: "absolute",
+            top: isVertical ? "70px" : "32px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(15, 23, 42, 0.85)",
+            backdropFilter: "blur(14px)",
+            border: "1.5px solid rgba(251, 191, 36, 0.4)",
+            borderRadius: "9999px",
+            padding: isVertical ? "8px 24px" : "6px 20px",
+            color: "#FEF08A",
+            fontSize: isVertical ? "20px" : "18px",
+            fontWeight: 800,
+            letterSpacing: "0.6px",
+            zIndex: 30,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {book.title} • Adegan {scene.index || 1}
+        </div>
+
+        {/* Dynamic Weather & Atmospheric Effects */}
+        <AtmosphereOverlay
+          weather={scene.atmosphere?.weather}
+          intensity={scene.atmosphere?.intensity}
+          isVertical={isVertical}
+        />
+
+        {/* Subtitles */}
+        <KineticSubtitles words={words} isVertical={isVertical} />
+      </div>
+    );
+  }
 
   // Bang Motion Law 3: Alternating Motions
   const motionType = scene.camera?.motion || "slow_zoom_in";

@@ -40,7 +40,7 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
     ? staticFile(scene.visual.imagePath)
     : book.thumbnailConfig?.heroImage
     ? staticFile(book.thumbnailConfig.heroImage)
-    : staticFile("assets/cover.png");
+    : null;
 
   // Moral title / headline from scene metadata or default
   const moralBadge = isEn ? "✨ MORAL OF THE STORY ✨" : "✨ PESAN MORAL CERITA ✨";
@@ -73,17 +73,28 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
       }}
     >
       {/* Layer 1: Ambient Blurred Storybook Backdrop */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          transform: `scale(${bgScale})`,
-          filter: "blur(44px) brightness(0.35) saturate(1.4)",
-          zIndex: 1,
-        }}
-      >
-        <Img src={heroImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-      </div>
+      {heroImgSrc ? (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: `scale(${bgScale})`,
+            filter: "blur(44px) brightness(0.35) saturate(1.4)",
+            zIndex: 1,
+          }}
+        >
+          <Img src={heroImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+      ) : (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(180deg, #1E1B4B 0%, #312E81 50%, #0F172A 100%)",
+            zIndex: 1,
+          }}
+        />
+      )}
 
       {/* Layer 2: Warm Playful Stardust & Vignette Overlay */}
       <div
@@ -202,16 +213,23 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
                 border: "5px solid #F59E0B",
                 boxShadow: "0 12px 30px rgba(245, 158, 11, 0.35), 0 4px 10px rgba(0,0,0,0.15)",
                 background: "#FEF08A",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Img
-                src={heroImgSrc}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
+              {heroImgSrc ? (
+                <Img
+                  src={heroImgSrc}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: isVertical ? "75px" : "95px" }}>⭐</span>
+              )}
             </div>
             {/* Sparkle badge on corner of avatar */}
             <div
