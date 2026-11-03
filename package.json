@@ -12,7 +12,11 @@
     "upload:browser": "tsx scripts/upload-youtube.ts --engine playwright",
     "stats": "tsx scripts/youtube-stats.ts",
     "cleanup": "tsx scripts/cleanup-storage.ts",
-    "clean-duplicates": "tsx scripts/manage-youtube.ts --clean-duplicates"
+    "clean-duplicates": "tsx scripts/manage-youtube.ts --clean-duplicates",
+    "project:list": "tsx scripts/manage-projects.ts --list",
+    "project:add": "tsx scripts/manage-projects.ts --add",
+    "project:reset": "tsx scripts/manage-projects.ts --reset",
+    "test": "tsx scripts/test-quota-rotator.ts"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.244",

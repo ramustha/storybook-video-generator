@@ -8,6 +8,7 @@ tmp/
 config/youtube-credentials.json
 config/youtube-token.json
 config/youtube-browser-session/
+config/projects/
 config/*.json
 !config/.gitkeep
 .env

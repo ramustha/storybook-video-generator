@@ -96,6 +96,20 @@ npm run upload -- --book <book-slug> --lang all --force
 npx tsx scripts/upload-youtube.ts --book <book-slug> --lang all --update-thumbnails
 ```
 
+### 5. Multi-Project Google Cloud Quota Pool
+Scale YouTube upload capacity indefinitely (+10,000 units/day per GCP project):
+```bash
+# View active projects, quota status, and countdown to midnight PT reset:
+npm run project:list
+
+# Add a new Google Cloud project to the rotation pool:
+npm run project:add project-3 ~/Downloads/client_secret_xxx.json
+
+# Run unit tests for quota rotator engine:
+npm test
+```
+*For the complete 60-second step-by-step setup guide with direct Google Cloud Console links, see [`docs/GOOGLE_CLOUD_PROJECT_SETUP.md`](docs/GOOGLE_CLOUD_PROJECT_SETUP.md).*
+
 ---
 
 ## 🤖 Using as an AI Coding Skill

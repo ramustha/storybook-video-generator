@@ -2,6 +2,7 @@ import { bundle } from "@remotion/bundler";
 import { renderStill, selectComposition } from "@remotion/renderer";
 import path from "path";
 import fs from "fs/promises";
+import { existsSync } from "fs";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -46,8 +47,11 @@ async function main() {
     const exportLangDir = path.join(storyDir, `exports/${lang}`);
 
     for (const variant of variants) {
-      const resolvedHero = heroImageArg || rawManifest.thumbnailConfig?.heroImage || (variant === "popular" ? "assets/cover.png" : "assets/scene_02.png");
-      const resolvedBackdrop = backdropImageArg || rawManifest.thumbnailConfig?.backdropImage || (variant === "popular" ? "assets/scene_02.png" : "assets/cover.png");
+      const candidateHero = heroImageArg || rawManifest.thumbnailConfig?.heroImage || (variant === "popular" ? "assets/cover.png" : "assets/scene_02.png");
+      const resolvedHero = candidateHero && existsSync(path.join(storyDir, candidateHero)) ? candidateHero : undefined;
+
+      const candidateBg = backdropImageArg || rawManifest.thumbnailConfig?.backdropImage || (variant === "popular" ? "assets/scene_02.png" : "assets/cover.png");
+      const resolvedBackdrop = candidateBg && existsSync(path.join(storyDir, candidateBg)) ? candidateBg : undefined;
 
       const inputProps = {
         book: rawManifest,
@@ -101,8 +105,11 @@ async function main() {
 
     // Render 9:16 Vertical Thumbnail for Shorts & Reels (1080x1920)
     console.log(`\n📱 Rendering [${lang.toUpperCase()}] Shorts/Reels Vertical Thumbnail (1080x1920)...`);
-    const resolvedHero = heroImageArg || rawManifest.thumbnailConfig?.heroImage || "assets/cover.png";
-    const resolvedBackdrop = backdropImageArg || rawManifest.thumbnailConfig?.backdropImage || "assets/scene_02.png";
+    const candidateHeroVert = heroImageArg || rawManifest.thumbnailConfig?.heroImage || "assets/cover.png";
+    const resolvedHero = candidateHeroVert && existsSync(path.join(storyDir, candidateHeroVert)) ? candidateHeroVert : undefined;
+
+    const candidateBgVert = backdropImageArg || rawManifest.thumbnailConfig?.backdropImage || "assets/scene_02.png";
+    const resolvedBackdrop = candidateBgVert && existsSync(path.join(storyDir, candidateBgVert)) ? candidateBgVert : undefined;
 
     const verticalProps = {
       book: rawManifest,

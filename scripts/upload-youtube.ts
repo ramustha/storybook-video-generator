@@ -6,6 +6,7 @@ import url from "url";
 import readline from "readline";
 import { google } from "googleapis";
 import { uploadVideoViaBrowser, launchInteractiveLogin } from "./playwright-youtube-uploader";
+import { QuotaRotator } from "./quota-rotator";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
@@ -623,18 +624,30 @@ async function main() {
     effectiveFormat = "vertical";
   }
 
-  // 1. Authorize YouTube API Client (Official Google API Client)
+  // 1. Authorize YouTube API Client (Multi-Project Quota Rotator or Fallback)
+  let rotator: QuotaRotator | null = null;
   let oauth2Client: any = null;
   let youtube: any = null;
   if (engine !== "playwright") {
     try {
-      oauth2Client = await getOAuth2Client();
-      await authorizeClient(oauth2Client);
-      youtube = google.youtube({ version: "v3", auth: oauth2Client });
+      rotator = new QuotaRotator();
+      await rotator.init();
+      const client = await rotator.getActiveClient();
+      youtube = client.youtube;
+      oauth2Client = client.oauth2Client;
       await verifyChannel(youtube);
-    } catch (apiAuthErr: any) {
-      if (engine === "api") throw apiAuthErr;
-      console.warn(`⚠️ Official Google API credentials not configured: ${apiAuthErr.message}. Operating in Playwright browser mode.`);
+      const report = rotator.getStatusReport();
+      console.log(`🌐 Google Cloud Multi-Project Pool: ${report.availableCount}/${report.configuredCount} available (Active: [${client.projectId.toUpperCase()}])`);
+    } catch (rotatorErr: any) {
+      try {
+        oauth2Client = await getOAuth2Client();
+        await authorizeClient(oauth2Client);
+        youtube = google.youtube({ version: "v3", auth: oauth2Client });
+        await verifyChannel(youtube);
+      } catch (apiAuthErr: any) {
+        if (engine === "api") throw apiAuthErr;
+        console.warn(`⚠️ Official Google API credentials not configured: ${apiAuthErr.message}. Operating in Playwright browser mode.`);
+      }
     }
   }
 
@@ -959,8 +972,26 @@ async function main() {
             }
           }
 
-          // Strategy 2: Official YouTube Data API v3 (Fallback or Primary)
-          if (!videoId && youtube) {
+          // Strategy 2: Official YouTube Data API v3 (Multi-Project Auto-Rotation)
+          if (!videoId && rotator) {
+            await rotator.executeWithAutoRotation(
+              `Upload Landscape (${lang.toUpperCase()})`,
+              async (client) => {
+                videoId = await uploadVideo(client.youtube, landscapeVideo, {
+                  title: landscapeTitle,
+                  description: landscapeDesc,
+                  tags: coreTags,
+                  privacyStatus: privacy,
+                  isMadeForKids,
+                  publishAt: scheduleTime,
+                });
+
+                await uploadThumbnail(client.youtube, videoId, thumbnailPath);
+              }
+            );
+            videoUrl = `https://youtu.be/${videoId}`;
+            console.log(`\n🎉 Landscape Video (${lang.toUpperCase()}) Live at: \x1b[36m${videoUrl}\x1b[0m`);
+          } else if (!videoId && youtube) {
             videoId = await uploadVideo(youtube, landscapeVideo, {
               title: landscapeTitle,
               description: landscapeDesc,
@@ -1114,8 +1145,26 @@ async function main() {
           }
         }
 
-        // Strategy 2: Official YouTube Data API v3 (Fallback or Primary)
-        if (!shortsVideoId && youtube) {
+        // Strategy 2: Official YouTube Data API v3 (Multi-Project Auto-Rotation)
+        if (!shortsVideoId && rotator) {
+          await rotator.executeWithAutoRotation(
+            `Upload Shorts (${lang.toUpperCase()})`,
+            async (client) => {
+              shortsVideoId = await uploadVideo(client.youtube, verticalVideo, {
+                title: shortsTitle,
+                description: shortsDesc,
+                tags: [...coreTags, "shorts", "youtubeshorts"],
+                privacyStatus: privacy,
+                isMadeForKids,
+                publishAt: scheduleTime,
+              });
+
+              await uploadThumbnail(client.youtube, shortsVideoId, verticalThumbnailPath);
+            }
+          );
+          shortsUrl = `https://youtube.com/shorts/${shortsVideoId}`;
+          console.log(`\n🎉 Shorts Video (${lang.toUpperCase()}) Live at: \x1b[36m${shortsUrl}\x1b[0m`);
+        } else if (!shortsVideoId && youtube) {
           shortsVideoId = await uploadVideo(youtube, verticalVideo, {
             title: shortsTitle,
             description: shortsDesc,

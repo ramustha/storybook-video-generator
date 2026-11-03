@@ -1,5 +1,6 @@
 import React from "react";
 import { Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { ProceduralIllustration } from "./ProceduralIllustration";
 
 interface CoverSceneProps {
   scene: any;
@@ -21,6 +22,28 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
   const floatRotate = Math.sin(frame / 24) * 1.5;
 
   const bgScale = interpolate(frame, [0, 90], [1.1, 1.25], { extrapolateRight: "clamp" });
+
+  const hasImage = Boolean(scene.visual?.imagePath);
+  if (!hasImage) {
+    return (
+      <div
+        style={{
+          width,
+          height,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#070B14",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ProceduralIllustration scene={scene} book={book} isVertical={isVertical} isCover={true} />
+      </div>
+    );
+  }
+
   const coverImgSrc = staticFile(scene.visual.imagePath);
 
   // Support both portrait (aspect ratio < 1.0) and landscape (aspect ratio > 1.0) picture books
