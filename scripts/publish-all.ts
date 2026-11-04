@@ -9,6 +9,7 @@ interface PublishAllOptions {
   dryRun: boolean;
   skipYoutube: boolean;
   skipMeta: boolean;
+  skipTiktok: boolean;
 }
 
 function parseArgs(): PublishAllOptions {
@@ -19,6 +20,7 @@ function parseArgs(): PublishAllOptions {
     dryRun: false,
     skipYoutube: false,
     skipMeta: false,
+    skipTiktok: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -33,6 +35,8 @@ function parseArgs(): PublishAllOptions {
       options.skipYoutube = true;
     } else if (arg === "--skip-meta") {
       options.skipMeta = true;
+    } else if (arg === "--skip-tiktok") {
+      options.skipTiktok = true;
     }
   }
 
@@ -145,6 +149,46 @@ async function main() {
       }
     } else {
       console.log(`⏩ Skipping Meta per --skip-meta`);
+    }
+
+    // 3. TikTok Distribution (API v2 or Puppeteer Headless Browser Fallback)
+    if (!options.skipTiktok) {
+      const hasApiToken = existsSync(path.resolve("./config/tiktok-token.json"));
+      const hasBrowserSession = existsSync(path.resolve("./config/tiktok-browser-session"));
+
+      if (hasApiToken) {
+        console.log(`\n--- [3/3] PUBLISHING TO TIKTOK (OFFICIAL CONTENT POSTING API) ---`);
+        const tiktokArgs = ["scripts/upload-tiktok.ts", "--book", options.bookSlug, "--lang", currentLang];
+        if (options.dryRun) tiktokArgs.push("--dry-run");
+
+        try {
+          await runCommand("npx", ["tsx", ...tiktokArgs]);
+        } catch (err: any) {
+          console.error("⚠️ TikTok API upload warning:", err.message);
+        }
+      } else if (hasBrowserSession) {
+        console.log(`\n--- [3/3] PUBLISHING TO TIKTOK (PUPPETEER HEADLESS BROWSER) ---`);
+        const tiktokBrowserArgs = [
+          "scripts/upload-tiktok-browser.ts",
+          "--book",
+          options.bookSlug,
+          "--lang",
+          currentLang,
+          "--headless",
+        ];
+        if (options.dryRun) tiktokBrowserArgs.push("--dry-run");
+
+        try {
+          await runCommand("npx", ["tsx", ...tiktokBrowserArgs]);
+        } catch (err: any) {
+          console.error("⚠️ TikTok Puppeteer browser upload warning:", err.message);
+        }
+      } else {
+        console.log(`\n--- [3/3] TIKTOK STATUS ---`);
+        console.log(`ℹ️ TikTok publishing paused: neither API token nor browser session connected.`);
+        console.log(`👉 To activate Puppeteer: npm run upload:tiktok:browser -- --login`);
+        console.log(`👉 To activate Official API: npm run upload:tiktok -- --login`);
+      }
     }
   }
 

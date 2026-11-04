@@ -2,6 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 import { StorybookVideoComposition } from "./components/StorybookVideoComposition";
 import { StorybookThumbnailComposition } from "./components/ThumbnailComposition";
+import { TikTokDemoComposition } from "./components/TikTokDemoComposition";
 
 export function calculateTotalFrames(story: any, fps: number = 30): number {
   if (!story || !story.scenes) return 300;
@@ -60,6 +61,16 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+
+      {/* TikTok Developer Review Demo Video (Landscape 1920x1080 @ 30fps, 750 frames = 25s) */}
+      <Composition
+        id="TikTokPublisherDemo"
+        component={TikTokDemoComposition as any}
+        durationInFrames={750}
+        fps={30}
+        width={1920}
+        height={1080}
       />
     </>
   );

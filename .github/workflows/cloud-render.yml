@@ -1,0 +1,107 @@
+name: Cloud Video Renderer (Remotion)
+
+on:
+  workflow_dispatch:
+    inputs:
+      book:
+        description: 'Storybook Slug to Render'
+        required: true
+        type: choice
+        options:
+          - 'gara-gara-kucing'
+          - 'hari-cukur-rambut'
+          - 'jas-hujan-merah'
+          - 'raja-gemuk-anjing-kurus'
+        default: 'jas-hujan-merah'
+      lang:
+        description: 'Target Language'
+        required: true
+        type: choice
+        options:
+          - 'all'
+          - 'id'
+          - 'en'
+        default: 'all'
+      format:
+        description: 'Video Format / Orientation'
+        required: true
+        type: choice
+        options:
+          - 'both'
+          - 'landscape'
+          - 'vertical'
+        default: 'both'
+      resolution:
+        description: 'Resolution'
+        required: true
+        type: choice
+        options:
+          - '1080p'
+          - '4k'
+        default: '1080p'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    name: Render Storybook Video (${{ inputs.book }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install System Dependencies (Chromium & FFmpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      - name: 🌐 Ensure Remotion Headless Browser
+        run: npx remotion browser ensure
+
+      - name: 🎬 Render Storybook Video
+        run: |
+          echo "Rendering ${{ inputs.book }} [${{ inputs.lang }}] in ${{ inputs.format }} format..."
+          npx tsx scripts/render-book.ts --book "${{ inputs.book }}" --lang "${{ inputs.lang }}" --format "${{ inputs.format }}" --resolution "${{ inputs.resolution }}"
+
+      - name: 💾 Save Render Metadata to Repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "stories/${{ inputs.book }}/story.json"
+          if git diff --staged --quiet; then
+            echo "No story metadata changed."
+          else
+            git commit -m "chore(render): update render metadata for ${{ inputs.book }} [skip ci]"
+            git push
+          fi
+
+      - name: 📤 Upload Rendered Videos as GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.book }}-rendered-videos
+          path: stories/${{ inputs.book }}/exports/**/*.mp4
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: 📊 Post Job Summary
+        run: |
+          echo "### 🎬 Video Render Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Book**: \`${{ inputs.book }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Language**: \`${{ inputs.lang }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Format**: \`${{ inputs.format }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Resolution**: \`${{ inputs.resolution }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Artifacts are retained for 7 days in the summary tab." >> $GITHUB_STEP_SUMMARY

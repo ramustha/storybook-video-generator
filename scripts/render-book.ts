@@ -2,6 +2,7 @@ import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import path from "path";
 import fs from "fs/promises";
+import { existsSync } from "fs";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -65,6 +66,22 @@ async function main() {
           wordsMap[scene.sceneId] = parsed.words || [];
         } catch (err) {
           wordsMap[scene.sceneId] = [];
+        }
+      }
+    }
+
+    // Sanitize missing audio / sfx assets to prevent 404 in Remotion
+    for (const scene of storyData.scenes) {
+      if (scene.audio?.sfxPath) {
+        const fullSfx = path.join(storyDir, scene.audio.sfxPath);
+        if (!existsSync(fullSfx)) {
+          delete scene.audio.sfxPath;
+        }
+      }
+      if (scene.audio?.audioPath) {
+        const fullAudio = path.join(storyDir, scene.audio.audioPath);
+        if (!existsSync(fullAudio)) {
+          console.warn(`⚠️ Warning: Voiceover audio missing for scene ${scene.sceneId}: ${fullAudio}`);
         }
       }
     }

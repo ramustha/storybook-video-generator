@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { existsSync, createReadStream } from "fs";
+import { existsSync, createReadStream, readdirSync } from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
@@ -73,9 +73,38 @@ function parseArgs(): UploadOptions {
 }
 
 /**
- * Loads and validates Meta credentials from config/meta-config.json.
+ * Loads and validates Meta credentials from config/meta-config.json and .env.
  */
 async function loadMetaConfig(): Promise<MetaConfig> {
+  const envFiles = [
+    path.resolve(".env"),
+    path.join(process.env.HOME || "", ".zshenv"),
+  ];
+
+  for (const envPath of envFiles) {
+    if (existsSync(envPath)) {
+      try {
+        const envContent = await fs.readFile(envPath, "utf-8");
+        envContent.split("\n").forEach((line) => {
+          const match = line.match(/^\s*(?:export\s+)?([\w.-]+)\s*=\s*(.*)?\s*$/);
+          if (match) {
+            const key = match[1];
+            let val = (match[2] || "").trim();
+            if (
+              (val.startsWith('"') && val.endsWith('"')) ||
+              (val.startsWith("'") && val.endsWith("'"))
+            ) {
+              val = val.slice(1, -1);
+            }
+            if (!process.env[key]) {
+              process.env[key] = val;
+            }
+          }
+        });
+      } catch {}
+    }
+  }
+
   const configPath = path.resolve("./config/meta-config.json");
   if (!existsSync(configPath)) {
     throw new Error(
@@ -85,6 +114,14 @@ async function loadMetaConfig(): Promise<MetaConfig> {
 
   const raw = await fs.readFile(configPath, "utf-8");
   const config: MetaConfig = JSON.parse(raw);
+
+  if (process.env.PERSONAL_META_ACCESS_TOKEN) config.pageAccessToken = process.env.PERSONAL_META_ACCESS_TOKEN;
+  if (process.env.META_PAGE_ACCESS_TOKEN) config.pageAccessToken = process.env.META_PAGE_ACCESS_TOKEN;
+  if (process.env.PAGE_ACCESS_TOKEN) config.pageAccessToken = process.env.PAGE_ACCESS_TOKEN;
+  if (process.env.PERSONAL_META_APP_ID) config.appId = process.env.PERSONAL_META_APP_ID;
+  if (process.env.META_APP_ID) config.appId = process.env.META_APP_ID;
+  if (process.env.FACEBOOK_PAGE_ID) config.facebookPageId = process.env.FACEBOOK_PAGE_ID;
+  if (process.env.INSTAGRAM_USER_ID) config.instagramUserId = process.env.INSTAGRAM_USER_ID;
 
   if (!config.pageAccessToken || !config.instagramUserId || !config.facebookPageId) {
     throw new Error(
@@ -562,19 +599,38 @@ async function main() {
   const rawStory = await fs.readFile(storyJsonPath, "utf-8");
   const story = JSON.parse(rawStory);
 
-  // Target video path
+  // Target video path resolution (checks story.json exports map first, then falls back to file conventions)
   const isLandscape = options.format === "landscape";
   const targetExtension = isLandscape ? "16x9.mp4" : "9x16.mp4";
+  const formatKey = isLandscape ? "landscape" : "vertical";
 
-  let videoPath = path.join(
-    storyDir,
-    "exports",
-    options.lang,
-    `${options.bookSlug}-${targetExtension}`
-  );
+  const manifestPathRel =
+    story.exports?.[options.lang]?.[formatKey]?.path ||
+    story.exports?.[formatKey]?.path;
+  let videoPath = manifestPathRel ? path.join(storyDir, manifestPathRel) : "";
+
+  if (!videoPath || !existsSync(videoPath)) {
+    videoPath = path.join(
+      storyDir,
+      "exports",
+      options.lang,
+      `${options.bookSlug}-${targetExtension}`
+    );
+  }
+
+  if (!existsSync(videoPath) && options.lang === "id") {
+    videoPath = path.join(storyDir, "exports", `${options.bookSlug}-${targetExtension}`);
+  }
 
   if (!existsSync(videoPath)) {
-    videoPath = path.join(storyDir, "exports", `${options.bookSlug}-${targetExtension}`);
+    const langExportDir = path.join(storyDir, "exports", options.lang);
+    if (existsSync(langExportDir)) {
+      const files = readdirSync(langExportDir);
+      const matched = files.find((f) => f.endsWith(targetExtension));
+      if (matched) {
+        videoPath = path.join(langExportDir, matched);
+      }
+    }
   }
 
   if (!existsSync(videoPath)) {
@@ -583,8 +639,15 @@ async function main() {
     );
   }
 
-  // Thumbnail path (for 16:9 Landscape videos)
-  let thumbnailPath = path.join(storyDir, "exports", options.lang, "thumbnail.png");
+  // Thumbnail path resolution (for 16:9 Landscape videos)
+  const popularThumbRel =
+    story.thumbnails?.[options.lang]?.popular ||
+    story.thumbnails?.[options.lang]?.primary;
+  let thumbnailPath = popularThumbRel ? path.join(storyDir, popularThumbRel) : "";
+
+  if (!thumbnailPath || !existsSync(thumbnailPath)) {
+    thumbnailPath = path.join(storyDir, "exports", options.lang, "thumbnail.png");
+  }
   if (!existsSync(thumbnailPath)) {
     thumbnailPath = path.join(storyDir, "exports", "thumbnail.png");
   }
@@ -594,7 +657,8 @@ async function main() {
 
   // Generate caption and title
   const caption = buildCaption(story, options.lang, options.format as "vertical" | "landscape");
-  const title = (story.title || "Cerita Anak").replace(/\(.*\)/, "").trim();
+  const rawTitle = options.lang === "en" ? (story.originalTitle || story.title) : story.title;
+  const title = (rawTitle || "Cerita Anak").replace(/\(.*\)/, "").trim();
 
   console.log("\n📝 GENERATED METADATA:");
   console.log(`📌 Title      : ${title}`);
@@ -620,6 +684,9 @@ async function main() {
     console.log(`======================================================`);
     const { publicVideoUrl, cleanup } = await uploadVideoToR2(videoPath, options.bookSlug, options.lang);
 
+    let fbError: Error | null = null;
+    let igError: Error | null = null;
+
     try {
       // 1. Facebook Page Video / Reel Ingestion via R2 URL
       try {
@@ -643,6 +710,7 @@ async function main() {
           status: "published",
         };
       } catch (err: any) {
+        fbError = err;
         console.error("\n❌ Facebook Upload Failed:", err.message);
       }
 
@@ -666,11 +734,21 @@ async function main() {
           status: "published",
         };
       } catch (err: any) {
+        igError = err;
         console.error("\n❌ Instagram Reels Upload Failed:", err.message);
       }
     } finally {
       // Always cleanup R2 buffer object immediately after both finish
       await cleanup();
+    }
+
+    if (fbError || igError) {
+      await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2) + "\n", "utf-8");
+      throw new Error(
+        `Upload incomplete for platform 'both'. Facebook: ${fbError ? fbError.message : "OK"}, Instagram: ${
+          igError ? igError.message : "OK"
+        }`
+      );
     }
   } else if (options.platform === "facebook") {
     // Standalone Facebook upload

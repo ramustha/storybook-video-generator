@@ -1,0 +1,55 @@
+name: Weekly Performance Analytics (Meta & Video Stats)
+
+on:
+  schedule:
+    # 00:00 UTC = 07:00 WIB Every Monday
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  analytics:
+    name: Fetch Live Video Analytics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      - name: 🔑 Configure Meta Credentials
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.PERSONAL_META_ACCESS_TOKEN }}
+          META_PAGE_ID: ${{ secrets.PERSONAL_META_FACEBOOK_PAGE_ID }}
+          META_IG_ID: ${{ secrets.PERSONAL_META_INSTAGRAM_USER_ID }}
+        run: |
+          mkdir -p config
+          cat <<EOF > config/meta-config.json
+          {
+            "appId": "1099494459651856",
+            "facebookPageId": "${META_PAGE_ID:-1473240609201601}",
+            "facebookPageName": "Zayn Storybook",
+            "instagramUserId": "${META_IG_ID:-17841477003917879}",
+            "instagramUsername": "zayn.storybook",
+            "pageAccessToken": "${META_ACCESS_TOKEN}"
+          }
+          EOF
+
+      - name: 📊 Fetch Live Performance Stats
+        run: |
+          npx tsx scripts/meta-stats.ts | tee /tmp/stats-output.txt
+
+      - name: 📝 Post Step Summary
+        run: |
+          echo "### 📈 Weekly Zayn Storybook Performance Report" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/stats-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
