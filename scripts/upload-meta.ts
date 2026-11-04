@@ -1,0 +1,654 @@
+import fs from "fs/promises";
+import { existsSync, createReadStream } from "fs";
+import path from "path";
+import { spawn } from "child_process";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+
+interface MetaConfig {
+  appId: string;
+  facebookPageId: string;
+  facebookPageName?: string;
+  instagramUserId: string;
+  instagramUsername?: string;
+  pageAccessToken: string;
+}
+
+interface R2Config {
+  accountId: string;
+  endpoint: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucketName: string;
+  publicDomain: string;
+}
+
+interface UploadOptions {
+  bookSlug: string;
+  lang: "id" | "en";
+  platform: "instagram" | "facebook" | "both";
+  format: "vertical" | "landscape" | "auto";
+  dryRun: boolean;
+  shareToFeed: boolean;
+}
+
+/**
+ * Parses CLI arguments.
+ */
+function parseArgs(): UploadOptions {
+  const args = process.argv.slice(2);
+  const options: UploadOptions = {
+    bookSlug: "gara-gara-kucing",
+    lang: "id",
+    platform: "instagram",
+    format: "auto",
+    dryRun: false,
+    shareToFeed: true,
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--book" && args[i + 1]) {
+      options.bookSlug = args[++i].replace(/^stories\//, "").replace(/\/$/, "");
+    } else if (arg === "--lang" && args[i + 1]) {
+      options.lang = args[++i] as "id" | "en";
+    } else if (arg === "--platform" && args[i + 1]) {
+      options.platform = args[++i] as "instagram" | "facebook" | "both";
+    } else if (arg === "--format" && args[i + 1]) {
+      options.format = args[++i] as "vertical" | "landscape" | "auto";
+    } else if (arg === "--dry-run") {
+      options.dryRun = true;
+    } else if (arg === "--no-feed") {
+      options.shareToFeed = false;
+    }
+  }
+
+  // Default format behavior:
+  // If platform is instagram, format defaults to vertical (Instagram Reels)
+  // If format is auto and platform is facebook, can be either landscape or vertical
+  if (options.format === "auto") {
+    options.format = options.platform === "instagram" ? "vertical" : "vertical";
+  }
+
+  return options;
+}
+
+/**
+ * Loads and validates Meta credentials from config/meta-config.json.
+ */
+async function loadMetaConfig(): Promise<MetaConfig> {
+  const configPath = path.resolve("./config/meta-config.json");
+  if (!existsSync(configPath)) {
+    throw new Error(
+      `Meta configuration not found at ${configPath}. Please check config/meta-config.json.`
+    );
+  }
+
+  const raw = await fs.readFile(configPath, "utf-8");
+  const config: MetaConfig = JSON.parse(raw);
+
+  if (!config.pageAccessToken || !config.instagramUserId || !config.facebookPageId) {
+    throw new Error(
+      "Incomplete Meta config. Missing pageAccessToken, instagramUserId, or facebookPageId."
+    );
+  }
+
+  return config;
+}
+
+/**
+ * Loads Cloudflare R2 configuration from config/r2-config.json.
+ */
+async function loadR2Config(): Promise<R2Config> {
+  const configPath = path.resolve("./config/r2-config.json");
+  if (!existsSync(configPath)) {
+    throw new Error(
+      `R2 configuration not found at ${configPath}. Please check config/r2-config.json.`
+    );
+  }
+
+  const raw = await fs.readFile(configPath, "utf-8");
+  const config: R2Config = JSON.parse(raw);
+
+  if (!config.accessKeyId || !config.secretAccessKey || !config.bucketName || !config.publicDomain) {
+    throw new Error(
+      "Incomplete R2 config. Missing accessKeyId, secretAccessKey, bucketName, or publicDomain."
+    );
+  }
+
+  return config;
+}
+
+/**
+ * Builds rich, engaging caption adapted to any story.
+ */
+function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "landscape"): string {
+  const isLandscape = format === "landscape";
+  if (lang === "id") {
+    const rawTitle = (story.title || "Cerita Anak Bergambar").replace(/\(.*\)/, "").trim();
+    const hook = story.thumbnailConfig?.id?.hook || story.thumbnailConfig?.id?.headlineTop || "Kisah seru dan penuh tawa!";
+    const badge = story.thumbnailConfig?.id?.badge || "Dongeng Animasi Anak";
+    const sticker = story.thumbnailConfig?.id?.sticker || "";
+    const bedtimeHook = story.thumbnailConfig?.id?.bedtimeHook || "Cerita edukatif untuk menemani si kecil belajar nilai kebaikan.";
+    const hashtags = isLandscape
+      ? "#CeritaAnak #DongengAnak #Storybook #BukuAnak #AnimasiAnak #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook #FacebookWatch #VideoAnak"
+      : "#CeritaAnak #DongengAnak #Storybook #KidsStory #AnimasiAnak #Reels #FacebookReels #InstagramReels #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook";
+
+    return `${rawTitle} 🐱📚\n\n${hook} ${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Seri Cerita & Dongeng Anak Bergambar Zayn Storybook\n✨ Nilai Moral: Selalu jujur, berbuat baik, dan bertanggung jawab atas tugas kita!\n\n${hashtags}`;
+  } else {
+    const rawTitle = story.originalTitle || story.title || "Kids Storybook";
+    const hook = story.thumbnailConfig?.en?.hook || story.thumbnailConfig?.en?.headlineTop || "A wonderful story for kids!";
+    const badge = story.thumbnailConfig?.en?.badge || "Animated Children's Book";
+    const bedtimeHook = story.thumbnailConfig?.en?.bedtimeHook || "A delightful bedtime tale for children.";
+    const hashtags = isLandscape
+      ? "#KidsBooks #Storytime #BedtimeStory #Animation #ChildrensBook #KidsAnimation #ZaynStorybook #FacebookWatch #ReadAloud"
+      : "#KidsBooks #Storytime #BedtimeStory #Animation #Reels #InstagramReels #FacebookReels #ChildrensBook #KidsAnimation #ZaynStorybook";
+
+    return `${rawTitle} 🐱📚\n\n${hook}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Zayn Storybook Children's Animated Picture Book Series\n✨ Moral: Honesty, kindness, and taking responsibility bring true happiness!\n\n${hashtags}`;
+  }
+}
+
+/**
+ * Uploads video to Cloudflare R2 object storage to provide a high-speed direct public HTTPS URL.
+ */
+async function uploadVideoToR2(
+  videoPath: string,
+  bookSlug: string,
+  lang: string
+): Promise<{ publicVideoUrl: string; cleanup: () => Promise<void> }> {
+  const r2 = await loadR2Config();
+  const stats = await fs.stat(videoPath);
+  const fileSize = stats.size;
+
+  console.log(`\n☁️ Uploading video to Cloudflare R2 bucket [${r2.bucketName}]...`);
+  console.log(`📦 File Size : ${(fileSize / (1024 * 1024)).toFixed(2)} MB (${fileSize} bytes)`);
+
+  const s3 = new S3Client({
+    region: "auto",
+    endpoint: r2.endpoint,
+    credentials: {
+      accessKeyId: r2.accessKeyId,
+      secretAccessKey: r2.secretAccessKey,
+    },
+  });
+
+  const fileStream = createReadStream(videoPath);
+  const key = `reels/${bookSlug}-${lang}-${Date.now()}.mp4`;
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: r2.bucketName,
+      Key: key,
+      Body: fileStream,
+      ContentType: "video/mp4",
+      ContentLength: fileSize,
+    })
+  );
+
+  const publicVideoUrl = `${r2.publicDomain.replace(/\/$/, "")}/${key}`;
+  console.log(`   ✔ Video uploaded to Cloudflare R2 successfully!`);
+  console.log(`   🌐 Public CDN URL: ${publicVideoUrl}`);
+
+  const cleanup = async () => {
+    try {
+      console.log(`🧹 Cleaning up temporary video from Cloudflare R2...`);
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: r2.bucketName,
+          Key: key,
+        })
+      );
+      console.log(`   ✔ R2 temporary object removed.`);
+    } catch (err: any) {
+      console.warn("   ⚠️ R2 cleanup warning:", err.message);
+    }
+  };
+
+  return { publicVideoUrl, cleanup };
+}
+
+/**
+ * Polls Instagram media container status until FINISHED or ERROR.
+ */
+async function pollInstagramContainer(
+  containerId: string,
+  pageAccessToken: string,
+  timeoutMs = 300000
+): Promise<void> {
+  const start = Date.now();
+  const pollInterval = 5000;
+
+  process.stdout.write("   ⏳ Waiting for Meta server download & transcoding: ");
+  while (Date.now() - start < timeoutMs) {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${containerId}?fields=status_code,status&access_token=${pageAccessToken}`
+    );
+    const data = await res.json();
+
+    if (data.error) {
+      process.stdout.write("\n");
+      throw new Error(`Failed to check container status: ${JSON.stringify(data.error)}`);
+    }
+
+    const statusCode = data.status_code;
+    if (statusCode === "FINISHED" || statusCode === "READY") {
+      process.stdout.write(" [READY!]\n");
+      return;
+    }
+
+    if (statusCode === "ERROR" || statusCode === "EXPIRED") {
+      process.stdout.write("\n");
+      throw new Error(
+        `Instagram container failed with status: ${statusCode} (${data.status || "Unknown error"})`
+      );
+    }
+
+    process.stdout.write(".");
+    await new Promise((r) => setTimeout(r, pollInterval));
+  }
+
+  process.stdout.write("\n");
+  throw new Error(`Instagram video processing timed out after ${timeoutMs / 1000} seconds.`);
+}
+
+/**
+ * Uploads vertical video to Instagram Reels via Cloudflare R2 CDN URL.
+ */
+async function uploadToInstagramReels(
+  videoPath: string,
+  caption: string,
+  config: MetaConfig,
+  shareToFeed: boolean,
+  bookSlug: string,
+  lang: string
+): Promise<{ mediaId: string; permalink: string }> {
+  console.log(`\n==================================================`);
+  console.log(`📸 STARTING INSTAGRAM REELS UPLOAD (CLOUDFLARE R2)`);
+  console.log(`==================================================`);
+  console.log(`👤 Target Account : @${config.instagramUsername || config.instagramUserId}`);
+  console.log(`📁 Local File     : ${videoPath}`);
+
+  // Step 1: Upload to Cloudflare R2 high-speed storage
+  const { publicVideoUrl, cleanup } = await uploadVideoToR2(videoPath, bookSlug, lang);
+
+  let containerId: string;
+  try {
+    // Step 2: Initialize Instagram Reels container using video_url
+    console.log(`\n📡 Step 2: Registering Instagram Reels container with Meta Graph API...`);
+    const initRes = await fetch(`https://graph.facebook.com/v21.0/${config.instagramUserId}/media`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        media_type: "REELS",
+        video_url: publicVideoUrl,
+        caption,
+        share_to_feed: shareToFeed,
+        access_token: config.pageAccessToken,
+      }),
+    });
+
+    const initData = await initRes.json();
+    if (initData.error) {
+      throw new Error(`Failed to initialize Instagram Reels container: ${JSON.stringify(initData.error)}`);
+    }
+
+    containerId = initData.id;
+    console.log(`   ✔ Container ID: ${containerId}`);
+
+    // Step 3: Wait for Meta to fetch video from Cloudflare CDN and transcode
+    console.log(`\n⚙️ Step 3: Waiting for Meta ingestion & transcoding...`);
+    await pollInstagramContainer(containerId, config.pageAccessToken);
+  } finally {
+    // Cleanup temporary R2 video object
+    await cleanup();
+  }
+
+  // Step 4: Publish Media Container
+  console.log(`\n📢 Step 4: Publishing Reel to Instagram feed...`);
+  const pubRes = await fetch(`https://graph.facebook.com/v21.0/${config.instagramUserId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      creation_id: containerId,
+      access_token: config.pageAccessToken,
+    }),
+  });
+
+  const pubData = await pubRes.json();
+  if (pubData.error) {
+    throw new Error(`Failed to publish Instagram Reel: ${JSON.stringify(pubData.error)}`);
+  }
+
+  const mediaId = pubData.id;
+  console.log(`   ✔ Published Media ID: ${mediaId}`);
+
+  // Step 5: Query Live Reel Details
+  let permalink = `https://www.instagram.com/reel/`;
+  try {
+    const detailRes = await fetch(
+      `https://graph.facebook.com/v21.0/${mediaId}?fields=id,permalink,shortcode&access_token=${config.pageAccessToken}`
+    );
+    const detailData = await detailRes.json();
+    if (detailData.permalink) {
+      permalink = detailData.permalink;
+    } else if (detailData.shortcode) {
+      permalink = `https://www.instagram.com/reel/${detailData.shortcode}/`;
+    }
+  } catch (err) {
+    console.warn("   ⚠️ Could not fetch live permalink immediately:", err);
+  }
+
+  console.log(`\n🎉 INSTAGRAM REEL LIVE!`);
+  console.log(`🔗 Link: ${permalink}`);
+
+  return { mediaId, permalink };
+}
+
+/**
+ * Uploads a custom thumbnail to a Facebook video.
+ */
+async function uploadThumbnailToFacebook(
+  videoId: string,
+  thumbnailPath: string,
+  pageAccessToken: string
+): Promise<void> {
+  const uploadUrl = `https://graph.facebook.com/v21.0/${videoId}/thumbnails`;
+  await new Promise<void>((resolve, reject) => {
+    const curlArgs = [
+      "-s",
+      "-S",
+      "-w",
+      "\n%{http_code}",
+      "-X",
+      "POST",
+      uploadUrl,
+      "-F",
+      `access_token=${pageAccessToken}`,
+      "-F",
+      "is_preferred=true",
+      "-F",
+      `source=@${thumbnailPath}`,
+    ];
+
+    const proc = spawn("curl", curlArgs);
+    let stdout = "";
+    proc.stdout.on("data", (d) => (stdout += d.toString()));
+    proc.on("close", (code) => {
+      const lines = stdout.trim().split("\n");
+      const httpCode = lines.pop()?.trim();
+      if (httpCode === "200") {
+        resolve();
+      } else {
+        reject(new Error(`Failed with HTTP ${httpCode}: ${lines.join("\n")}`));
+      }
+    });
+  });
+}
+
+/**
+ * Uploads video directly to Facebook Page feed using multipart form-data.
+ * Handles both Normal Videos (16:9 Landscape) and Reels (9:16 Vertical).
+ */
+async function uploadToFacebookPage(
+  videoPath: string,
+  title: string,
+  caption: string,
+  config: MetaConfig,
+  format: "vertical" | "landscape",
+  thumbnailPath?: string
+): Promise<{ videoId: string; permalink: string }> {
+  const isLandscape = format === "landscape";
+  const postTypeLabel = isLandscape ? "NORMAL VIDEO (16:9 LANDSCAPE / WATCH)" : "FACEBOOK REEL (9:16 VERTICAL)";
+
+  console.log(`\n==================================================`);
+  console.log(`📘 STARTING FACEBOOK ${postTypeLabel} UPLOAD`);
+  console.log(`==================================================`);
+  console.log(`📄 Target Page   : ${config.facebookPageName || config.facebookPageId}`);
+  console.log(`📁 Video File    : ${videoPath}`);
+
+  const stats = await fs.stat(videoPath);
+  console.log(`📦 Payload Size  : ${(stats.size / (1024 * 1024)).toFixed(2)} MB (${stats.size} bytes)`);
+
+  const uploadUrl = `https://graph.facebook.com/v21.0/${config.facebookPageId}/videos`;
+  console.log(`\n🚀 Uploading video directly to Facebook Page [${config.facebookPageId}]...`);
+
+  const result = await new Promise<{ id: string }>((resolve, reject) => {
+    const curlArgs = [
+      "-s",
+      "-S",
+      "-w",
+      "\n%{http_code}",
+      "-X",
+      "POST",
+      uploadUrl,
+      "-F",
+      `access_token=${config.pageAccessToken}`,
+      "-F",
+      `title=${title}`,
+      "-F",
+      `description=${caption}`,
+      "-F",
+      `source=@${videoPath}`,
+    ];
+
+    const proc = spawn("curl", curlArgs);
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (data) => {
+      stdout += data.toString();
+    });
+
+    proc.stderr.on("data", (data) => {
+      stderr += data.toString();
+    });
+
+    proc.on("close", (code) => {
+      const lines = stdout.trim().split("\n");
+      const httpCode = lines.pop()?.trim();
+      const body = lines.join("\n");
+
+      if (code !== 0) {
+        return reject(new Error(`curl failed with exit code ${code}: ${stderr}`));
+      }
+
+      let parsed: any;
+      try {
+        parsed = JSON.parse(body);
+      } catch {
+        parsed = { text: body };
+      }
+
+      if (httpCode !== "200" || parsed.error) {
+        return reject(
+          new Error(
+            `Facebook Page upload failed [HTTP ${httpCode}]: ${JSON.stringify(parsed.error || parsed)}`
+          )
+        );
+      }
+
+      resolve(parsed);
+    });
+  });
+
+  const videoId = result.id;
+  console.log(`   ✔ Published Video ID: ${videoId}`);
+
+  // Attach custom thumbnail for normal landscape videos if available
+  if (isLandscape && thumbnailPath && existsSync(thumbnailPath)) {
+    console.log(`\n🖼️ Attaching custom landscape thumbnail: ${thumbnailPath}...`);
+    try {
+      await uploadThumbnailToFacebook(videoId, thumbnailPath, config.pageAccessToken);
+      console.log(`   ✔ Custom thumbnail attached as preferred poster!`);
+    } catch (err: any) {
+      console.warn(`   ⚠️ Thumbnail attachment warning:`, err.message);
+    }
+  }
+
+  // Construct absolute permalink
+  let permalink = isLandscape
+    ? `https://www.facebook.com/watch/?v=${videoId}`
+    : `https://www.facebook.com/reel/${videoId}`;
+
+  try {
+    const detailRes = await fetch(
+      `https://graph.facebook.com/v21.0/${videoId}?fields=id,permalink_url&access_token=${config.pageAccessToken}`
+    );
+    const detailData = await detailRes.json();
+    if (detailData.permalink_url) {
+      permalink = detailData.permalink_url.startsWith("http")
+        ? detailData.permalink_url
+        : `https://www.facebook.com${detailData.permalink_url}`;
+    }
+  } catch (err) {
+    console.warn("   ⚠️ Could not fetch permalink immediately:", err);
+  }
+
+  console.log(`\n🎉 FACEBOOK ${isLandscape ? "NORMAL VIDEO" : "REEL"} LIVE!`);
+  console.log(`🔗 Link: ${permalink}`);
+
+  return { videoId, permalink };
+}
+
+/**
+ * Main execution routine.
+ */
+async function main() {
+  const options = parseArgs();
+  console.log("\n=======================================================");
+  console.log("🎬 STORYBOOK META UPLOADER (INSTAGRAM & FACEBOOK)");
+  console.log("=======================================================");
+  console.log(`📖 Book Slug  : ${options.bookSlug}`);
+  console.log(`🌐 Language   : ${options.lang}`);
+  console.log(`📱 Platform   : ${options.platform}`);
+  console.log(`📐 Format     : ${options.format.toUpperCase()}`);
+  console.log(`🧪 Dry Run    : ${options.dryRun ? "YES (Preview Only)" : "NO (Live Post)"}`);
+
+  // Load config
+  const config = await loadMetaConfig();
+
+  // Load story manifest
+  const storyDir = path.resolve("./stories", options.bookSlug);
+  const storyJsonPath = path.join(storyDir, "story.json");
+  if (!existsSync(storyJsonPath)) {
+    throw new Error(`Story manifest not found at ${storyJsonPath}`);
+  }
+
+  const rawStory = await fs.readFile(storyJsonPath, "utf-8");
+  const story = JSON.parse(rawStory);
+
+  // Target video path
+  const isLandscape = options.format === "landscape";
+  const targetExtension = isLandscape ? "16x9.mp4" : "9x16.mp4";
+
+  let videoPath = path.join(
+    storyDir,
+    "exports",
+    options.lang,
+    `${options.bookSlug}-${targetExtension}`
+  );
+
+  if (!existsSync(videoPath)) {
+    videoPath = path.join(storyDir, "exports", `${options.bookSlug}-${targetExtension}`);
+  }
+
+  if (!existsSync(videoPath)) {
+    throw new Error(
+      `Video with format ${targetExtension} not found for ${options.bookSlug} under exports/`
+    );
+  }
+
+  // Thumbnail path (for 16:9 Landscape videos)
+  let thumbnailPath = path.join(storyDir, "exports", options.lang, "thumbnail.png");
+  if (!existsSync(thumbnailPath)) {
+    thumbnailPath = path.join(storyDir, "exports", "thumbnail.png");
+  }
+  if (!existsSync(thumbnailPath)) {
+    thumbnailPath = path.join(storyDir, "assets", "cover.png");
+  }
+
+  // Generate caption and title
+  const caption = buildCaption(story, options.lang, options.format as "vertical" | "landscape");
+  const title = (story.title || "Cerita Anak").replace(/\(.*\)/, "").trim();
+
+  console.log("\n📝 GENERATED METADATA:");
+  console.log(`📌 Title      : ${title}`);
+  console.log(`📁 Video File : ${videoPath}`);
+  if (isLandscape) console.log(`🖼️ Thumbnail  : ${thumbnailPath}`);
+  console.log("-------------------------------------------------------");
+  console.log(caption);
+  console.log("-------------------------------------------------------\n");
+
+  if (options.dryRun) {
+    console.log("✔ DRY RUN COMPLETED! Payload, files, and config verified.");
+    return;
+  }
+
+  if (!story.publications) {
+    story.publications = {};
+  }
+
+  // 1. Facebook Page Video Upload (Reel or Normal 16:9 Video)
+  if (options.platform === "facebook" || options.platform === "both") {
+    try {
+      const fbResult = await uploadToFacebookPage(
+        videoPath,
+        title,
+        caption,
+        config,
+        options.format as "vertical" | "landscape",
+        thumbnailPath
+      );
+
+      if (!story.publications.facebook) story.publications.facebook = {};
+      if (!story.publications.facebook[options.lang]) story.publications.facebook[options.lang] = {};
+
+      story.publications.facebook[options.lang][options.format] = {
+        id: fbResult.videoId,
+        url: fbResult.permalink,
+        publishedAt: new Date().toISOString(),
+        title: story.title,
+        status: "published",
+      };
+    } catch (err: any) {
+      console.error("\n❌ Facebook Upload Failed:", err.message);
+      if (options.platform === "facebook") throw err;
+    }
+  }
+
+  // 2. Instagram Reels Upload (via Cloudflare R2 Edge CDN URL)
+  if (options.platform === "instagram" || options.platform === "both") {
+    try {
+      const igResult = await uploadToInstagramReels(
+        videoPath,
+        caption,
+        config,
+        options.shareToFeed,
+        options.bookSlug,
+        options.lang
+      );
+
+      if (!story.publications.instagram) story.publications.instagram = {};
+      story.publications.instagram[options.lang] = {
+        id: igResult.mediaId,
+        url: igResult.permalink,
+        publishedAt: new Date().toISOString(),
+        title: story.title,
+        status: "published",
+      };
+    } catch (err: any) {
+      console.error("\n❌ Instagram Reels Upload Failed:", err.message);
+      if (options.platform === "instagram") throw err;
+    }
+  }
+
+  // Save publications update to story.json
+  await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2) + "\n", "utf-8");
+  console.log(`\n💾 Saved publication metadata to ${storyJsonPath}`);
+
+  console.log("\n✨ ALL COMPLETED SUCCESSFULLY! ✨\n");
+}
+
+main().catch((err) => {
+  console.error("\n❌ Fatal error in Meta Uploader:", err);
+  process.exit(1);
+});
