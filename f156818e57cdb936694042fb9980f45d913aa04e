@@ -1,0 +1,27 @@
+docs/META_DEVELOPER_REGISTRATION_GUIDE.md
+  698ac31901cd73e0 1-179
+package.json
+  698ac31901cd73e0 19-20
+scripts/test-meta-connection.ts
+  698ac31901cd73e0 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "f156818e57cdb936694042fb9980f45d913aa04e",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 257,
+      "total_deletions": 1,
+      "accepted_lines": 257,
+      "overriden_lines": 0
+    }
+  }
+}
