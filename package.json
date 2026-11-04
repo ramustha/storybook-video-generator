@@ -16,7 +16,8 @@
     "project:list": "tsx scripts/manage-projects.ts --list",
     "project:add": "tsx scripts/manage-projects.ts --add",
     "project:reset": "tsx scripts/manage-projects.ts --reset",
-    "test": "tsx scripts/test-quota-rotator.ts"
+    "test": "tsx scripts/test-quota-rotator.ts",
+    "test:meta": "tsx scripts/test-meta-connection.ts"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.244",
