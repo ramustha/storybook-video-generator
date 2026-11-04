@@ -8,6 +8,7 @@ tmp/
 config/youtube-credentials.json
 config/youtube-token.json
 config/youtube-browser-session/
+config/tiktok-browser-session/
 config/projects/
 config/*.json
 !config/.gitkeep
@@ -30,3 +31,4 @@ stories/*
 !stories/.gitkeep
 !stories/branding/
 !stories/branding/**
+stories/branding/*.mp4

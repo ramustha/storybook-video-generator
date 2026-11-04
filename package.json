@@ -16,9 +16,25 @@
     "project:list": "tsx scripts/manage-projects.ts --list",
     "project:add": "tsx scripts/manage-projects.ts --add",
     "project:reset": "tsx scripts/manage-projects.ts --reset",
-    "test": "tsx scripts/test-quota-rotator.ts"
+    "test": "tsx scripts/test-quota-rotator.ts",
+    "test:meta": "tsx scripts/test-meta-connection.ts",
+    "refresh:meta": "tsx scripts/refresh-meta-token.ts",
+    "upload:meta": "tsx scripts/upload-meta.ts",
+    "stats:meta": "tsx scripts/meta-stats.ts",
+    "sync:meta": "tsx scripts/sync-platforms.ts",
+    "publish:all": "tsx scripts/publish-all.ts",
+    "schedule:today": "tsx scripts/content-calendar.ts",
+    "schedule:calendar": "tsx scripts/content-calendar.ts --calendar",
+    "schedule:remind": "tsx scripts/content-calendar.ts --remind",
+    "schedule:cron": "tsx scripts/content-calendar.ts --cron",
+    "secrets:github": "tsx scripts/sync-github-secrets.ts",
+    "render:tiktok-demo": "tsx scripts/render-tiktok-demo.ts",
+    "upload:tiktok": "tsx scripts/upload-tiktok.ts",
+    "upload:tiktok:browser": "tsx scripts/upload-tiktok-browser.ts",
+    "status:tiktok": "tsx scripts/upload-tiktok.ts --status"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1161.0",
     "@remotion/bundler": "^4.0.244",
     "@remotion/player": "^4.0.244",
     "@remotion/renderer": "^4.0.244",
@@ -36,6 +52,9 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "playwright": "^1.64.1",
+    "puppeteer": "^25.16.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   }

@@ -1,0 +1,155 @@
+name: Zayn Storybook Daily Broadcast Scheduler
+
+on:
+  schedule:
+    # 12:00 UTC = 19:00 WIB (Daily Prime Bedtime Slot)
+    - cron: '0 12 * * *'
+    # 01:30 UTC = 08:30 WIB (Saturday Morning Energy Short Slot)
+    - cron: '30 1 * * 6'
+  workflow_dispatch:
+    inputs:
+      book:
+        description: 'Target Book Slug (or "auto" from calendar)'
+        required: true
+        default: 'auto'
+      lang:
+        description: 'Language'
+        required: true
+        type: choice
+        options:
+          - 'auto'
+          - 'id'
+          - 'en'
+        default: 'auto'
+      dry_run:
+        description: 'Dry Run Mode (Test without publishing)'
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  broadcast:
+    name: Execute Daily Multi-Platform Broadcast
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install System Dependencies (Chromium & FFmpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      - name: 🌐 Ensure Remotion Headless Browser
+        run: npx remotion browser ensure
+
+      - name: 🔑 Configure Secrets & Credentials
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.PERSONAL_META_ACCESS_TOKEN }}
+          META_APP_ID: ${{ secrets.PERSONAL_META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.PERSONAL_META_APP_SECRET }}
+          META_PAGE_ID: ${{ secrets.PERSONAL_META_FACEBOOK_PAGE_ID }}
+          META_IG_ID: ${{ secrets.PERSONAL_META_INSTAGRAM_USER_ID }}
+          R2_ACCOUNT_ID: ${{ secrets.PERSONAL_R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.PERSONAL_R2_ACCESS_KEY_ID }}
+          R2_SECRET_KEY: ${{ secrets.PERSONAL_R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          mkdir -p config
+
+          # 1. Setup .env
+          cat <<EOF > .env
+          PERSONAL_META_ACCESS_TOKEN="${META_ACCESS_TOKEN}"
+          PERSONAL_META_APP_ID="${META_APP_ID}"
+          PERSONAL_META_APP_SECRET="${META_APP_SECRET}"
+          PERSONAL_META_FACEBOOK_PAGE_ID="${META_PAGE_ID}"
+          PERSONAL_META_INSTAGRAM_USER_ID="${META_IG_ID}"
+          YOUTUBE_CLIENT_ID="${YOUTUBE_CLIENT_ID}"
+          YOUTUBE_CLIENT_SECRET="${YOUTUBE_CLIENT_SECRET}"
+          YOUTUBE_REFRESH_TOKEN="${YOUTUBE_REFRESH_TOKEN}"
+          EOF
+
+          # 2. Setup config/meta-config.json
+          cat <<EOF > config/meta-config.json
+          {
+            "appId": "${META_APP_ID}",
+            "facebookPageId": "${META_PAGE_ID:-1473240609201601}",
+            "facebookPageName": "Zayn Storybook",
+            "instagramUserId": "${META_IG_ID:-17841477003917879}",
+            "instagramUsername": "zayn.storybook",
+            "pageAccessToken": "${META_ACCESS_TOKEN}"
+          }
+          EOF
+
+          # 3. Setup config/r2-config.json
+          cat <<EOF > config/r2-config.json
+          {
+            "accountId": "${R2_ACCOUNT_ID}",
+            "accessKeyId": "${R2_ACCESS_KEY_ID}",
+            "secretAccessKey": "${R2_SECRET_KEY}",
+            "bucketName": "zayn-storybook",
+            "publicDomain": "${R2_PUBLIC_DOMAIN:-https://pub-f2786231e5e34f19a6860d7fe9ddd569.r2.dev}"
+          }
+          EOF
+
+      - name: 🚀 Execute Scheduled Daily Broadcast
+        id: run_broadcast
+        env:
+          INPUT_BOOK: ${{ inputs.book || 'auto' }}
+          INPUT_LANG: ${{ inputs.lang || 'auto' }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run || false }}
+        run: |
+          ARGS="--publish-today"
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            ARGS="${ARGS} --dry-run"
+          fi
+          if [ "${INPUT_BOOK}" != "auto" ]; then
+            ARGS="${ARGS} --book ${INPUT_BOOK}"
+          fi
+          if [ "${INPUT_LANG}" != "auto" ]; then
+            ARGS="${ARGS} --lang ${INPUT_LANG}"
+          fi
+
+          echo "Running: npx tsx scripts/content-calendar.ts ${ARGS}"
+          npx tsx scripts/content-calendar.ts ${ARGS}
+
+      - name: 💾 Commit & Push Updated Story Metadata
+        if: ${{ !(inputs.dry_run) }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add stories/*/story.json config/project-rotation-state.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No story publication metadata changed."
+          else
+            git commit -m "chore(broadcast): update publication metadata [skip ci]"
+            git push
+          fi
+
+      - name: 📊 Post Job Summary
+        run: |
+          echo "### 🌟 Zayn Storybook Broadcast Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target**: ${{ inputs.book || 'Auto (from Calendar)' }} [${{ inputs.lang || 'Auto' }}]" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run**: ${{ inputs.dry_run || false }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u) UTC" >> $GITHUB_STEP_SUMMARY
+          echo "✔ Daily broadcast automation completed!" >> $GITHUB_STEP_SUMMARY
