@@ -18,7 +18,9 @@
     "project:reset": "tsx scripts/manage-projects.ts --reset",
     "test": "tsx scripts/test-quota-rotator.ts",
     "test:meta": "tsx scripts/test-meta-connection.ts",
-    "upload:meta": "tsx scripts/upload-meta.ts"
+    "upload:meta": "tsx scripts/upload-meta.ts",
+    "stats:meta": "tsx scripts/meta-stats.ts",
+    "publish:all": "tsx scripts/publish-all.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",
