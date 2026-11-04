@@ -1,0 +1,61 @@
+.gitignore
+  698ac31901cd73e0 11,34
+.github/workflows/weekly-analytics.yml
+  698ac31901cd73e0 1-55
+scripts/upload-meta.ts
+  698ac31901cd73e0 2,76,79-107,118-125,602,605-619,621-623,626-633,642-650,660-661,687-689,713,737,744-751
+scripts/upload-tiktok-browser.ts
+  698ac31901cd73e0 1-113
+scripts/puppeteer-tiktok-uploader.ts
+  698ac31901cd73e0 1-378
+scripts/upload-tiktok.ts
+  698ac31901cd73e0 1-599
+.github/workflows/cloud-render.yml
+  698ac31901cd73e0 1-107
+scripts/test-meta-connection.ts
+  698ac31901cd73e0 2,17-45,56-62,66-67,75,88,103,112-114
+scripts/render-book.ts
+  698ac31901cd73e0 5,73-84
+src/remotion/components/TikTokDemoComposition.tsx
+  698ac31901cd73e0 1-1159
+scripts/publish-all.ts
+  698ac31901cd73e0 12,23,38-39,153-191
+scripts/sync-platforms.ts
+  698ac31901cd73e0 1-366
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 1-155
+scripts/sync-github-secrets.ts
+  698ac31901cd73e0 1-102
+src/remotion/Root.tsx
+  698ac31901cd73e0 5,65-73
+scripts/render-tiktok-demo.ts
+  698ac31901cd73e0 1-57
+package.json
+  698ac31901cd73e0 21,24-34,55-57
+scripts/content-calendar.ts
+  698ac31901cd73e0 1-355
+scripts/refresh-meta-token.ts
+  698ac31901cd73e0 1-204
+scripts/test-tiktok-connection.ts
+  698ac31901cd73e0 1-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "2021acfc5a271d546c819662e6df28583d68d871",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 3963,
+      "total_deletions": 14,
+      "accepted_lines": 3963,
+      "overriden_lines": 0
+    }
+  }
+}
