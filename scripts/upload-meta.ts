@@ -606,7 +606,10 @@ async function main() {
       throw new Error(`Compilation video not found at ${videoPath}`);
     }
 
-    let title = "Kumpulan Dongeng Pengantar Tidur Anak 🌙✨";
+    const isEn = options.lang === "en";
+    let title = isEn
+      ? "Bedtime Stories Marathon for Kids (12 Mins Non-Stop) | Calming Animated Picture Books 🌙✨"
+      : "Kumpulan Dongeng Pengantar Tidur Anak 🌙✨";
     let caption = "Kompilasi dongeng anak bergambar non-stop...";
     if (existsSync(metaPath)) {
       const metaContent = await fs.readFile(metaPath, "utf-8");
@@ -616,19 +619,22 @@ async function main() {
       const descPart = descMatch ? descMatch[1].trim() : "";
       const timestampsMatch = metaContent.match(/(⏳ TIMESTAMPS[\s\S]+?)(?=\n===|$)/);
       const timestampsPart = timestampsMatch ? timestampsMatch[1].trim() : "";
-      caption = `${title}\n\n${descPart}\n\n${timestampsPart}\n\n#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak`;
+      const hashtags = isEn
+        ? "#BedtimeStories #KidsStories #StorybookAnimation #ChildrenBooks #ZaynStorybook #PictureBooks #FacebookWatch #KidsAnimation"
+        : "#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak";
+      caption = `${title}\n\n${descPart}\n\n${timestampsPart}\n\n${hashtags}`;
     }
 
     const thumbnailCandidates = [
       path.join(outDir, `thumbnail-compilation-${options.compilationTheme}-${options.lang}.png`),
-      path.resolve("./stories/pisang-terlalu-banyak/exports/id/thumbnail-bedtime.png"),
-      path.resolve("./stories/hari-cukur-rambut/exports/id/thumbnail-bedtime.png"),
-      path.resolve("./stories/jas-hujan-merah/exports/id/thumbnail-popular.png"),
+      path.resolve(`./stories/pisang-terlalu-banyak/exports/${options.lang}/thumbnail-bedtime.png`),
+      path.resolve(`./stories/hari-cukur-rambut/exports/${options.lang}/thumbnail-bedtime.png`),
+      path.resolve(`./stories/jas-hujan-merah/exports/${options.lang}/thumbnail-popular.png`),
     ];
     const thumbnailPath = thumbnailCandidates.find((p) => existsSync(p));
 
     console.log(`\n=======================================================`);
-    console.log(`🎬 COMPILATION FACEBOOK WATCH UPLOADER`);
+    console.log(`🎬 COMPILATION FACEBOOK WATCH UPLOADER [${options.lang.toUpperCase()}]`);
     console.log(`=======================================================`);
     console.log(`🏷️ Theme      : ${options.compilationTheme}`);
     console.log(`🌐 Language   : ${options.lang}`);
@@ -640,7 +646,7 @@ async function main() {
     console.log("-------------------------------------------------------\n");
 
     if (options.dryRun) {
-      console.log("✔ DRY RUN COMPLETED! Compilation payload and metadata verified.");
+      console.log(`✔ DRY RUN [${options.lang.toUpperCase()}] COMPLETED! Compilation payload and metadata verified.`);
       return;
     }
 
@@ -660,7 +666,7 @@ async function main() {
         thumbnailPath
       );
 
-      console.log(`\n🎉 COMPILATION VIDEO LIVE ON FACEBOOK WATCH!`);
+      console.log(`\n🎉 COMPILATION VIDEO [${options.lang.toUpperCase()}] LIVE ON FACEBOOK WATCH!`);
       console.log(`🔗 Link: ${fbResult.permalink}`);
 
       // Save compilation publication metadata
@@ -671,13 +677,13 @@ async function main() {
           pubRecord = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
         } catch {}
       }
-      pubRecord[`${options.compilationTheme}-${options.lang}`] = {
+      const key = `${options.compilationTheme}-${options.lang}`;
+      pubRecord[key] = {
+        ...(pubRecord[key] || {}),
         title,
         videoId: fbResult.videoId,
         permalink: fbResult.permalink,
-        publishedAt: new Date().toISOString(),
-        durationFrames: 19928,
-        durationMinutes: 11.1,
+        facebookPublishedAt: new Date().toISOString(),
       };
       await fs.writeFile(pubRecordPath, JSON.stringify(pubRecord, null, 2), "utf-8");
     } finally {
