@@ -20,6 +20,7 @@
     "test": "tsx scripts/test-quota-rotator.ts",
     "test:meta": "tsx scripts/test-meta-connection.ts",
     "refresh:meta": "tsx scripts/refresh-meta-token.ts",
+    "resync:facebook:thumbnails": "tsx scripts/resync-facebook-thumbnails.ts",
     "upload:meta": "tsx scripts/upload-meta.ts",
     "stats:meta": "tsx scripts/meta-stats.ts",
     "sync:meta": "tsx scripts/sync-platforms.ts",
