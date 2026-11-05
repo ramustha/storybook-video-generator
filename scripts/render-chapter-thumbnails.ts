@@ -17,14 +17,15 @@ const COMPILATION_PRESETS: Record<string, CompilationPreset> = {
     id: "bedtime",
     name: "Dongeng Pengantar Tidur (Tenang & Budi Pekerti)",
     storySlugs: [
-      "pisang-terlalu-banyak",
+      "gara-gara-kucing",
       "hari-cukur-rambut",
       "jas-hujan-merah",
-      "gara-gara-kucing",
+      "pisang-terlalu-banyak",
       "raja-gemuk-anjing-kurus",
+      "bulan-dan-topi-biru",
     ],
-    suggestedTitleId: "Kumpulan 5 Dongeng Pengantar Tidur Anak Penuh Pesan Moral 🌙💤 | Non-Stop Cerita Bergambar",
-    suggestedTitleEn: "5 Calming Bedtime Stories for Kids Marathon 🌙💤 | Heartwarming Animated Children's Book",
+    suggestedTitleId: "Kumpulan 6 Dongeng Pengantar Tidur Anak Penuh Pesan Moral 🌙💤 | Non-Stop Cerita Bergambar",
+    suggestedTitleEn: "6 Calming Bedtime Stories for Kids Marathon 🌙💤 | Heartwarming Animated Children's Book",
   },
 };
 

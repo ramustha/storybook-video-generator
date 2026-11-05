@@ -626,6 +626,14 @@ async function main() {
       console.log(`   (Use --allow-short-landscape to override).`);
       effectiveFormat = "vertical";
     }
+
+    // Automatically enforce landscape-only for Tier 4 (>180s) because YouTube Shorts hard ceiling is 180s (3 minutes)
+    if (durationTier === "tier4" && (effectiveFormat === "all" || effectiveFormat === "vertical")) {
+      console.log(`\n💡 DURATION POLICY APPLIED: Storybook is >180s (${totalDurationSeconds.toFixed(1)}s).`);
+      console.log(`   YouTube Shorts strictly limits vertical videos to <=180s (anything longer is forced into Long Video section).`);
+      console.log(`   Automatically routing to Landscape-Only (format: "landscape") to prevent channel video duplication.`);
+      effectiveFormat = "landscape";
+    }
   }
 
   // 1. Authorize YouTube API Client (Multi-Project Quota Rotator or Fallback)
@@ -865,7 +873,10 @@ async function main() {
   if (isUpdateThumbnailsOnly && !isUpdateMetadata) {
     for (const lang of languages) {
       console.log(`\n🖼️ Updating YouTube thumbnails for [${lang.toUpperCase()}] videos & shorts...`);
-      const langLandscapeThumb = path.join(storyDir, `exports/${lang}/thumbnail.png`);
+      const langPopularThumb = path.join(storyDir, `exports/${lang}/thumbnail-popular.png`);
+      const langLandscapeThumb = existsSync(langPopularThumb)
+        ? langPopularThumb
+        : path.join(storyDir, `exports/${lang}/thumbnail.png`);
       const langVerticalThumb = path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
       const fallbackThumb = path.join(storyDir, "exports/thumbnail.png");
 
@@ -921,7 +932,10 @@ async function main() {
       (isEn
         ? (manifest.exports as any)?.en?.landscape?.youtubeId
         : (manifest.exports as any)?.landscape?.youtubeId);
-    const langLandscapeThumb = popularThumbRel
+    const langDirectPopularThumb = path.join(storyDir, `exports/${lang}/thumbnail-popular.png`);
+    const langLandscapeThumb = existsSync(langDirectPopularThumb)
+      ? langDirectPopularThumb
+      : popularThumbRel
       ? path.join(storyDir, popularThumbRel)
       : path.join(storyDir, `exports/${lang}/thumbnail.png`);
     const fallbackThumb = path.join(storyDir, "exports/thumbnail.png");
