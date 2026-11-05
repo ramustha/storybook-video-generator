@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { createReadStream, existsSync } from "fs";
 import path from "path";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { generateBilingualSocialKit } from "./generate-social-promo.js";
 
 const META_CONFIG_PATH = path.resolve("./config/meta-config.json");
 const R2_CONFIG_PATH = path.resolve("./config/r2-config.json");
@@ -365,14 +366,48 @@ async function main() {
 
   const isDryRun = args.includes("--dry-run");
   const isCarousel = args.includes("--carousel");
-  const customImagePath = getArg("--image") || path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png");
+  const bookSlug = getArg("--book");
 
-  if (!existsSync(customImagePath) && !isCarousel) {
-    throw new Error(`Image not found: ${customImagePath}`);
+  let customImagePath = getArg("--image") || path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png");
+  let captionText = DEFAULT_LAUNCH_CAPTION;
+  let carouselSlides: string[] = [];
+
+  if (bookSlug) {
+    const storyJsonPath = path.resolve(`./stories/${bookSlug}/story.json`);
+    if (existsSync(storyJsonPath)) {
+      const story = JSON.parse(await fs.readFile(storyJsonPath, "utf-8"));
+      const kit = generateBilingualSocialKit(story);
+      const igMatch = kit.match(/## 📸 1\. INSTAGRAM[\s\S]*?```text\n([\s\S]*?)```/);
+      if (igMatch && igMatch[1]) {
+        captionText = igMatch[1].trim();
+      }
+
+      // Check candidate single photo
+      const candidateSingle = [
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-popular.png`),
+        path.resolve(`./stories/${bookSlug}/exports/thumbnail.png`),
+        path.resolve(`./stories/${bookSlug}/assets/cover.png`),
+      ];
+      for (const p of candidateSingle) {
+        if (existsSync(p)) {
+          customImagePath = p;
+          break;
+        }
+      }
+
+      // Candidates for carousel (cover + key scenes)
+      carouselSlides = [
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-popular.png`),
+        path.resolve(`./stories/${bookSlug}/assets/scene_01.png`),
+        path.resolve(`./stories/${bookSlug}/assets/scene_02.png`),
+        path.resolve(`./stories/${bookSlug}/assets/scene_03.png`),
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-bedtime.png`),
+      ].filter((p) => existsSync(p));
+    }
   }
 
   if (isCarousel) {
-    const defaultSlides = [
+    const slidesToUse = carouselSlides.length > 0 ? carouselSlides : [
       path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png"),
       path.resolve("./exports/compilations/chapters/bedtime-id/chapter-04-gara-gara-kucing.png"),
       path.resolve("./exports/compilations/chapters/bedtime-id/chapter-02-hari-cukur-rambut.png"),
@@ -383,12 +418,18 @@ async function main() {
     ].filter((p) => existsSync(p));
 
     await publishInstagramCarousel({
-      imagePaths: defaultSlides,
+      imagePaths: slidesToUse,
+      caption: captionText,
       dryRun: isDryRun,
     });
   } else {
+    if (!existsSync(customImagePath)) {
+      throw new Error(`Image not found: ${customImagePath}`);
+    }
+
     await publishInstagramFeedPhoto({
       imagePath: customImagePath,
+      caption: captionText,
       dryRun: isDryRun,
     });
   }

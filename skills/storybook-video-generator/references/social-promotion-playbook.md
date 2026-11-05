@@ -86,7 +86,11 @@ Every social promotion post must follow this 7-step architecture:
 * **Copy Focus**: Focus on family values, screen-time peace of mind, and the moral takeaway.
 * **Discussion Question**: Ask open-ended questions: e.g. *"Bagaimana cara Ayah & Bunda menanamkan rasa ikhlas/kejujuran kepada si kecil di rumah? Tulis tips terbaik Anda di komentar ya! 👇"*.
 
-### 🔴 C. YouTube Community Tab (Interactive Poll & Announcement)
+### 🔴 C. YouTube Community Tab (Interactive Poll & Announcement) — SKIPPED FROM AUTOMATED API
+* **API Boundary & Limitation**:
+  * **Google YouTube Data API v3 does NOT offer a public endpoint for the Community Tab** (no official API exists for creating text updates, polls, or image posts).
+  * **Automation Rule**: Automated publishing pipelines (`npm run publish:all`) **strictly SKIP YouTube Community posting** without throwing errors or halting the agent.
+  * **Manual Post Option**: Pre-generated, high-converting copy is preserved in `stories/<book-slug>/exports/social-promotion-posts.md` for optional manual posting via YouTube Studio.
 * **Format**: Image Poll featuring 4 scene stills or single 16:9 Widescreen Announcement Card.
 * **Copy**:
   ```text
@@ -107,21 +111,26 @@ Every social promotion post must follow this 7-step architecture:
 
 ---
 
-## 5. Automated Generation via CLI
+## 5. Automated Generation & Live API Distribution
 
-The project provides an automated generator that parses `story.json` (title, original title, moral scene text, thumbnail hooks, and live publication URLs) to produce a copy-paste ready package:
+The project provides an automated pipeline for generating and publishing promotion across all platforms that support official APIs:
 
 ```bash
-# Generate bilingual social promotion package for a specific story:
+# 1. Generate bilingual social promotion copy kit:
 npm run promo:social -- <book-slug>
 
-# Outputs to:
-stories/<book-slug>/exports/social-promotion-posts.md
-```
+# 2. Publish Promotional Post to Facebook Page (via Meta Graph API):
+npm run promo:launch -- --book <book-slug>
 
-### Automatic Pipeline Integration:
-When running the master distribution command:
-```bash
+# 3. Publish Promotional Photo or Carousel to Instagram Feed (via Meta Graph API + Cloudflare R2):
+npm run promo:instagram -- --book <book-slug>            # Single Photo
+npm run promo:instagram -- --book <book-slug> --carousel # 5-7 Slide Story Carousel
+
+# 4. Master One-Shot Publishing (Videos + Meta Reels + Facebook Page Post + Instagram Carousel):
 npm run publish:all -- --book <book-slug>
 ```
-The pipeline automatically invokes `generate-social-promo.ts` upon publication, ensuring creators immediately have social copy ready for deployment.
+
+### Automation & API Rules:
+1. **Facebook Page**: Fully automated via Meta Graph API `/photos` endpoint with high-CTR 16:9 artwork and cheerful bilingual copy.
+2. **Instagram Feed**: Fully automated via Meta Graph API `/media` + `/media_publish` using Cloudflare R2 edge buffer for seamless multi-slide carousel ingestion.
+3. **YouTube Community**: **SKIPPED from automated API pipelines**. Google does not offer a Community Tab API endpoint. The pipeline skips this step cleanly and stores the formatted text in `exports/social-promotion-posts.md` for manual posting if desired.
