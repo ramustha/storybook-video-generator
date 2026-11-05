@@ -31,12 +31,16 @@ flowchart LR
 ```
 
 ### Key Automated Capabilities:
-1. **Cross-Platform Pre-Upload Deduplication**: Probes local manifests (`story.json.publications`) and remote APIs before every upload. If a video is already live on the channel, skips re-uploading automatically to eliminate duplicate content.
+1. **Cross-Platform Pre-Upload Deduplication & Clean Channel Policy**:
+   - **YouTube is 16:9 Landscape by Default**: Prevents channel clutter and watch-time cannibalization by uploading 16:9 widescreen master videos to YouTube, while routing 9:16 vertical cuts to Meta (IG Reels & Facebook Reels) and TikTok.
+   - **Tier 4 (>180s) Short Prohibition**: YouTube rejects vertical videos >180s from Shorts and demotes them into the "Videos" tab with black letterbox bars. `upload-youtube.ts` strictly blocks vertical uploads if duration >180s.
+   - Probes local manifests (`story.json.publications`) and remote APIs before every upload. If a video is already live on the channel, skips re-uploading automatically.
 2. **Safe Replacement & In-Place Metadata Updates**:
    - `--update-metadata`: Updates title, description, tags, and custom thumbnails without re-uploading the video file or changing the video URL.
    - `--force` / `--replace`: Safely deletes the old remote video first (`youtube.videos.delete`) before inserting the replacement, maintaining a clean 1-video-per-format channel feed.
 3. **Dynamic Chapter Generation**: Calculates cumulative scene durations from `story.scenes` and formats exact YouTube description chapters (`00:00 Opening`, `00:06 Scene 1`, etc.).
-4. **Automated Thumbnail Upload**: Automatically uploads and pairs `exports/<lang>/thumbnail.png` to the widescreen video.
+4. **Automated Thumbnail Upload (High-CTR Priority)**:
+   - Automatically prioritizes `thumbnail-popular.png` (high-CTR 1920x1080) for 16:9 Landscape videos, falling back to `thumbnail-bedtime.png` and then `thumbnail.png`.
 5. **Headless Persistent OAuth**: Uses Google OAuth 2.0 with offline refresh tokens stored in `config/youtube-token.json`. Once authenticated, runs headlessly in terminal or CI/CD pipelines without browser prompts.
 6. **Bidirectional Multi-Platform Sync**: Writes returned platform video IDs, URLs, and publication timestamps into `story.json.publications[platform]`.
 
@@ -45,17 +49,21 @@ flowchart LR
 # 1. First-time authorization check
 npm run upload -- --auth-only
 
-# 2. Idempotent upload for both languages (Safe: skips if already published)
-npm run upload -- --book <book-slug> --lang all --format all --privacy unlisted
+# 2. Idempotent upload for both languages (Safe: default format is landscape only to avoid duplicates)
+npm run upload -- --book <book-slug> --lang all --format landscape --privacy unlisted
 
-# 3. Update metadata, description & custom thumbnail only (zero re-upload)
+# 3. Update metadata, description & custom high-CTR popular thumbnail only (zero re-upload)
 npm run upload -- --book <book-slug> --lang all --update-metadata
 
 # 4. Force replace (safely deletes old remote video first before uploading new file)
 npm run upload -- --book <book-slug> --lang all --force
 
-# 5. Clean up duplicate videos from channel
-npx tsx scripts/manage-youtube.ts --clean-duplicates
+# 5. Audit all channel videos, aspect ratios, durations & check for duplicate titles:
+npx tsx scripts/list-channel-videos.ts
+
+# 6. Channel maintenance & remedy (re-upload popular thumbnails & purge vertical duplicates):
+npx tsx scripts/remedy-youtube-duplicates-and-thumbnails.ts --dry-run
+npx tsx scripts/remedy-youtube-duplicates-and-thumbnails.ts
 ```
 
 ### Dual-Language Publishing Strategy:
@@ -188,7 +196,7 @@ Each short-form platform handles covers differently. The pipeline enforces platf
 | Platform | Format / API Parameter | Behavior & Guarantee |
 | :--- | :--- | :--- |
 | **YouTube Shorts** | `youtube.thumbnails.set` & Video Frame 0 | **Desktop & Search**: API attaches `thumbnail-vertical.png`.<br>**Mobile Shorts Feed**: YouTube auto-selects a video frame from 0:00–1:00s. Since `CoverScene` initializes at `bookScale >= 0.94`, the mobile feed preview automatically displays the full 3D storybook cover. |
-| **Instagram Reels** | `cover_url` (Container creation) | `scripts/upload-meta.ts` temporarily uploads `thumbnail-vertical.png` to Cloudflare R2, passes `cover_url` to Meta Graph API, and deletes the temporary R2 file once registered. The Instagram Profile Grid and Reels tab display the custom cover. |
+| **Instagram Reels** | `cover_url` (Container creation) | `scripts/upload-meta.ts` stages `thumbnail-vertical.png` on Cloudflare R2, passes `cover_url` to Meta Graph API, and preserves the R2 object until `POST /media_publish` completes before running `coverCleanup()`. The Instagram Profile Grid and Reels tab display the custom cover without 404 fallback. |
 | **Facebook Reels** | `POST /{video-id}/thumbnails` | Attached via Meta Graph API multipart upload with `is_preferred=true` using `thumbnail-vertical.png`. |
 | **TikTok** | `video_cover_timestamp_ms: 1000` | TikTok Content Posting API selects the video frame at 1000ms (1.0s), which displays the full-bloom `CoverScene`. |
 

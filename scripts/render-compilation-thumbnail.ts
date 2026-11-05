@@ -38,22 +38,23 @@ async function main() {
     return `data:image/png;base64,${buf.toString("base64")}`;
   };
 
-  const cover0 = await loadBase64("stories/pisang-terlalu-banyak/assets/cover.png");
-  const cover1 = await loadBase64("stories/hari-cukur-rambut/assets/cover.png");
-  const cover2 = await loadBase64("stories/jas-hujan-merah/assets/cover.png");
-  const cover3 = await loadBase64("stories/gara-gara-kucing/assets/cover.png");
+  const cover0 = await loadBase64("stories/bulan-dan-topi-biru/assets/cover.png");
+  const cover1 = await loadBase64("stories/pisang-terlalu-banyak/assets/cover.png");
+  const cover2 = await loadBase64("stories/hari-cukur-rambut/assets/cover.png");
+  const cover3 = await loadBase64("stories/jas-hujan-merah/assets/cover.png");
+  const cover4 = await loadBase64("stories/gara-gara-kucing/assets/cover.png");
 
   for (const lang of targetLangs) {
     const isEn = lang === "en";
     const inputProps = {
       badge: isEn ? "🌙 BEDTIME STORIES MARATHON" : "🌙 DONGENG PENGANTAR TIDUR",
-      headlineTop: isEn ? "5 MAGICAL BEDTIME TALES" : "KUMPULAN 5 CERITA",
+      headlineTop: isEn ? "6 MAGICAL BEDTIME TALES" : "KUMPULAN 6 CERITA",
       headlineMain: isEn ? "BEDTIME MARATHON" : "DONG-EN-G ANAK",
-      marathonPill: isEn ? "⏱️ 12 MINS NON-STOP MARATHON" : "⏱️ 12 MENIT NON-STOP MARATHON",
+      marathonPill: isEn ? "⏱️ 13 MINS NON-STOP MARATHON" : "⏱️ 13 MENIT NON-STOP MARATHON",
       subHook: isEn
         ? "Calming, Delightful Bedtime Stories for Sweet Dreams & Warm Smiles 💤✨"
         : "Bikin Si Kecil Tertidur Nyenyak, Tenang & Penuh Pesan Moral 💤✨",
-      storyCovers: [cover0, cover1, cover2, cover3],
+      storyCovers: [cover0, cover1, cover2, cover3, cover4],
       lang,
       theme,
     };

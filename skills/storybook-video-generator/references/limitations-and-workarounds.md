@@ -9,9 +9,11 @@ This document provides an exhaustive, engineering-grade catalog of real-world bo
 | Domain | Limitation / Platform Barrier | Impact & Error Signature | Proven Workaround / Mitigation |
 | :--- | :--- | :--- | :--- |
 | **YouTube API** | **10,000 Units/Day Quota** | `403 quotaExceeded` after ~1.5 full bilingual books (4 videos = 6,600 units) | Use `--resync-all` / `--update-metadata` (51 units/video) for revisions; stagger full uploads over calendar days. |
+| **YouTube API** | **Shorts 180s Ceiling & Videos Section Duplication** | Uploading vertical (9:16) video >180s forces it into Long "Videos" tab with letterbox, creating exact duplicates | Restrict YouTube uploads to 16:9 Landscape by default (`--format landscape`); enforce Tier 4 block; route 9:16 to IG/FB Reels & TikTok. |
 | **YouTube API** | **Thumbnail Velocity / Burst Rate-Limit** | `400/429 The user has uploaded too many thumbnails recently` when updating >3 thumbnails rapidly | Wait 15–30 min cooldown, then run `--update-thumbnails` for remaining videos, or drag-and-drop into YouTube Studio. |
 | **YouTube API** | **Phone Verification Requirement** | `403 The authenticated user doesn't have permissions to upload and set custom video thumbnails` | Complete one-time channel verification at `https://www.youtube.com/verify` (Intermediate Features). |
 | **YouTube API** | **Shorts Vertical Thumbnail UI Behavior** | API sets 9:16 thumbnail in library, but mobile Shorts feed dynamically grabs an animated video frame | Thumbnail displays on desktop, search, and channel playlists; choose primary frame during mobile upload if needed. |
+| **Meta Graph API** | **Instagram Reels Cover Premature R2 Deletion** | Deleting Cloudflare R2 cover image during transcoding polling causes HTTP 404, resulting in missing Reels cover | Enforce R2 cover lifecycle: `coverCleanup()` runs strictly in `finally` AFTER `POST /media_publish` returns success. |
 | **YouTube API** | **Processing Latency & SD Preview** | Newly published videos default to 360p/480p SD playback for the first 5–15 minutes | Switch player gear ⚙️ to 1080p HD; optional 4K triggers VP9/AV1 codec allocation for maximum clarity. |
 | **Remotion** | **Headless Chrome WebSocket / CDP** | `connect EPERM 127.0.0.1` inside isolated sandbox environments | Run rendering scripts with sandbox network bypass (`BypassSandbox: true` / elevated socket permissions). |
 | **Remotion** | **High Memory Spikes on 4K Canvas** | Chrome tab crash (`SIGKILL` / OOM) on machines with <8GB available RAM | Standardize on 1080p Full HD (`1920×1080`) by default; reserve 4K for dedicated high-RAM render nodes. |
@@ -85,6 +87,27 @@ Even when daily quota remains available, YouTube enforces an unadvertised **burs
   403 The authenticated user doesn't have permissions to upload and set custom video thumbnails
   ```
 * **One-Time Fix**: The channel owner must visit [https://www.youtube.com/verify](https://www.youtube.com/verify) and complete standard SMS or voice verification.
+
+---
+
+### YouTube Shorts 180s Ceiling & Channel Videos Section Duplication
+* **Hard Platform Constraint**: YouTube officially limits vertical (9:16) Shorts to a maximum duration of **180 seconds (3 minutes)**.
+* **Failure Mode & Duplicate Trap**: If a vertical 9:16 video exceeding 180 seconds is uploaded to YouTube:
+  1. YouTube's ingestion pipeline rejects it from the Shorts shelf.
+  2. YouTube reclassifies the video as a standard **Long Video**, rendering it with ugly pillarbox/letterbox black bars on desktop and TV.
+  3. The video appears directly in the channel's public **"Videos" tab**, creating an exact title and content duplicate right next to the 16:9 widescreen master video.
+* **Engineering Policy & Standard Operating Procedure**:
+  - **YouTube is Landscape-Only by Default**: The automated distribution pipeline (`publish-all.ts`) MUST always pass `--format landscape` to `upload-youtube.ts`.
+  - **Tier 4 (>180s) Automatic Guardrail**: `upload-youtube.ts` automatically rejects vertical uploads if `durationTier === "tier4"` (>180s), routing execution exclusively to 16:9 Landscape.
+  - **Vertical Distribution Boundary**: Vertical 9:16 storybook renders belong on **Instagram Reels, Facebook Reels, and TikTok**, which natively support long vertical viewing without channel duplication.
+  - **Channel Audit & Cleanup**: Run `scripts/list-channel-videos.ts` to detect duplicate titles, and `scripts/remedy-youtube-duplicates-and-thumbnails.ts` to safely purge vertical duplicates from YouTube while preserving Meta (IG/FB) records in `story.json`.
+
+---
+
+### Meta Graph API Instagram Reels Cloudflare R2 Cover Lifecycle
+* **Asynchronous Cover Ingestion**: In the Meta Graph API container workflow, passing a public `cover_url` stages the cover image for download. However, Meta's media crawler downloads the image asynchronously during or right before the `POST /{ig-user-id}/media_publish` call.
+* **Failure Mode (HTTP 404 Cover Fetch)**: If the Cloudflare R2 temporary cover object is deleted during container transcoding polling (`pollInstagramContainer()`), Meta encounters an HTTP 404 error when attempting to fetch the cover file and quietly falls back to an uncurated, random video frame.
+* **Engineering Policy**: The cleanup routine (`coverCleanup()`) MUST strictly execute in the `finally` block **after** `media_publish` completes and returns a valid `mediaId`.
 
 ---
 

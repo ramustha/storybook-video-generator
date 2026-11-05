@@ -35,9 +35,10 @@ const THEME_PRESETS: CompilationPreset[] = [
       "jas-hujan-merah",
       "pisang-terlalu-banyak",
       "raja-gemuk-anjing-kurus",
+      "bulan-dan-topi-biru",
     ],
-    suggestedTitleId: "Kumpulan Dongeng Anak Sebelum Tidur (12 Menit Non-Stop) | Cerita Bergambar Penuh Pesan Moral 🌙✨",
-    suggestedTitleEn: "Bedtime Stories Marathon for Kids (12 Mins Non-Stop) | Calming Animated Picture Books 🌙✨",
+    suggestedTitleId: "Kumpulan Dongeng Anak Sebelum Tidur (14 Menit Non-Stop) | Cerita Bergambar Penuh Pesan Moral 🌙✨",
+    suggestedTitleEn: "Bedtime Stories Marathon for Kids (14 Mins Non-Stop) | Calming Animated Picture Books 🌙✨",
   },
   {
     id: "sringeri",
@@ -217,10 +218,11 @@ async function renderCompilation() {
 
   let serveUrl: string | undefined;
   if (!dryRun) {
-    console.log("📦 Bundling Remotion video composition dari project root (Shared bundle)...");
+    console.log("📦 Bundling Remotion video composition dari project root (Shared bundle, instant symlink)...");
     serveUrl = await bundle({
       entryPoint: path.resolve("./src/remotion/index.ts"),
       publicDir: path.resolve("."), // Root allows accessing stories/<slug>/assets/...
+      symlinkPublicDir: true,
     });
   }
 

@@ -422,6 +422,46 @@ async function uploadToInstagramReels(
     // Step 3: Wait for Meta to fetch video from Cloudflare CDN and transcode
     console.log(`\n⚙️ Step 3: Waiting for Meta ingestion & transcoding...`);
     await pollInstagramContainer(containerId, config.pageAccessToken);
+
+    // Step 4: Publish Media Container (MUST happen while cover_url and video_url are still live on R2 CDN)
+    console.log(`\n📢 Step 4: Publishing Reel to Instagram feed...`);
+    const pubRes = await fetch(`https://graph.facebook.com/v21.0/${config.instagramUserId}/media_publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        creation_id: containerId,
+        access_token: config.pageAccessToken,
+      }),
+    });
+
+    const pubData = await pubRes.json();
+    if (pubData.error) {
+      throw new Error(`Failed to publish Instagram Reel: ${JSON.stringify(pubData.error)}`);
+    }
+
+    const mediaId = pubData.id;
+    console.log(`   ✔ Published Media ID: ${mediaId}`);
+
+    // Step 5: Query Live Reel Details
+    let permalink = `https://www.instagram.com/reel/`;
+    try {
+      const detailRes = await fetch(
+        `https://graph.facebook.com/v21.0/${mediaId}?fields=id,permalink,shortcode&access_token=${config.pageAccessToken}`
+      );
+      const detailData = await detailRes.json();
+      if (detailData.permalink) {
+        permalink = detailData.permalink;
+      } else if (detailData.shortcode) {
+        permalink = `https://www.instagram.com/reel/${detailData.shortcode}/`;
+      }
+    } catch (err) {
+      console.warn("   ⚠️ Could not fetch live permalink immediately:", err);
+    }
+
+    console.log(`\n🎉 INSTAGRAM REEL LIVE!`);
+    console.log(`🔗 Link: ${permalink}`);
+
+    return { mediaId, permalink };
   } finally {
     if (localCleanup) {
       await localCleanup();
@@ -430,46 +470,6 @@ async function uploadToInstagramReels(
       await coverCleanup();
     }
   }
-
-  // Step 4: Publish Media Container
-  console.log(`\n📢 Step 4: Publishing Reel to Instagram feed...`);
-  const pubRes = await fetch(`https://graph.facebook.com/v21.0/${config.instagramUserId}/media_publish`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      creation_id: containerId,
-      access_token: config.pageAccessToken,
-    }),
-  });
-
-  const pubData = await pubRes.json();
-  if (pubData.error) {
-    throw new Error(`Failed to publish Instagram Reel: ${JSON.stringify(pubData.error)}`);
-  }
-
-  const mediaId = pubData.id;
-  console.log(`   ✔ Published Media ID: ${mediaId}`);
-
-  // Step 5: Query Live Reel Details
-  let permalink = `https://www.instagram.com/reel/`;
-  try {
-    const detailRes = await fetch(
-      `https://graph.facebook.com/v21.0/${mediaId}?fields=id,permalink,shortcode&access_token=${config.pageAccessToken}`
-    );
-    const detailData = await detailRes.json();
-    if (detailData.permalink) {
-      permalink = detailData.permalink;
-    } else if (detailData.shortcode) {
-      permalink = `https://www.instagram.com/reel/${detailData.shortcode}/`;
-    }
-  } catch (err) {
-    console.warn("   ⚠️ Could not fetch live permalink immediately:", err);
-  }
-
-  console.log(`\n🎉 INSTAGRAM REEL LIVE!`);
-  console.log(`🔗 Link: ${permalink}`);
-
-  return { mediaId, permalink };
 }
 
 /**

@@ -87,10 +87,18 @@ async function main() {
     console.log(`📍 PROCESSING LANGUAGE: [${currentLang.toUpperCase()}]`);
     console.log(`======================================================`);
 
-    // 1. YouTube Distribution (16:9 Landscape & 9:16 Shorts)
+    // 1. YouTube Distribution (16:9 Landscape Video - Prevents duplicate vertical entries in Videos section)
     if (!options.skipYoutube) {
-      console.log(`\n--- [1/2] PUBLISHING TO YOUTUBE (16:9 & SHORTS) ---`);
-      const ytArgs = ["scripts/upload-youtube.ts", "--book", options.bookSlug, "--lang", currentLang];
+      console.log(`\n--- [1/2] PUBLISHING TO YOUTUBE (16:9 LANDSCAPE HERO) ---`);
+      const ytArgs = [
+        "scripts/upload-youtube.ts",
+        "--book",
+        options.bookSlug,
+        "--lang",
+        currentLang,
+        "--format",
+        "landscape",
+      ];
       if (options.dryRun) ytArgs.push("--dry-run");
 
       try {

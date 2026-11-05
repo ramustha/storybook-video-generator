@@ -30,29 +30,6 @@
     "category": "Standalone Story",
     "platform": "YouTube",
     "platformIcon": "youtube",
-    "language": "id",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Buku Cerita Anak: Bulan dan Topi Biru! 📖 #Shorts #DongengAnak",
-    "videoId": "kOBICbv0mx0",
-    "videoUrl": "https://youtube.com/shorts/kOBICbv0mx0",
-    "publishedAt": "2026-11-05T10:03:41.389Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/kOBICbv0mx0/hqdefault.jpg",
-    "author": "Rohini Nilekani (Noni)",
-    "illustrator": "Angie & Upesh (The Other Design Studio)",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
-  },
-  {
-    "id": "AUD-003",
-    "storySlug": "bulan-dan-topi-biru",
-    "storyTitleId": "Bulan dan Topi Biru",
-    "storyTitleEn": "The Moon and the Cap",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
     "language": "en",
     "format": "Landscape (16:9)",
     "aspectRatio": "16:9",
@@ -69,30 +46,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-004",
-    "storySlug": "bulan-dan-topi-biru",
-    "storyTitleId": "Bulan dan Topi Biru",
-    "storyTitleEn": "The Moon and the Cap",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "en",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Kids Animated Storybook: The Moon and the Cap! 📖 #Shorts #BedtimeStories",
-    "videoId": "OSd7PKZJZW8",
-    "videoUrl": "https://youtube.com/shorts/OSd7PKZJZW8",
-    "publishedAt": "2026-11-05T10:08:59.464Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/OSd7PKZJZW8/hqdefault.jpg",
-    "author": "Rohini Nilekani (Noni)",
-    "illustrator": "Angie & Upesh (The Other Design Studio)",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
-  },
-  {
-    "id": "AUD-005",
+    "id": "AUD-003",
     "storySlug": "bulan-dan-topi-biru",
     "storyTitleId": "Bulan dan Topi Biru",
     "storyTitleEn": "The Moon and the Cap",
@@ -115,7 +69,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-006",
+    "id": "AUD-004",
     "storySlug": "bulan-dan-topi-biru",
     "storyTitleId": "Bulan dan Topi Biru",
     "storyTitleEn": "The Moon and the Cap",
@@ -131,14 +85,13 @@
     "publishedAt": "2026-11-05T10:05:07.293Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/kOBICbv0mx0/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-007",
+    "id": "AUD-005",
     "storySlug": "bulan-dan-topi-biru",
     "storyTitleId": "Bulan dan Topi Biru",
     "storyTitleEn": "The Moon and the Cap",
@@ -161,7 +114,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-008",
+    "id": "AUD-006",
     "storySlug": "bulan-dan-topi-biru",
     "storyTitleId": "Bulan dan Topi Biru",
     "storyTitleEn": "The Moon and the Cap",
@@ -177,14 +130,13 @@
     "publishedAt": "2026-11-05T10:11:33.029Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/OSd7PKZJZW8/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-009",
+    "id": "AUD-007",
     "storySlug": "bulan-dan-topi-biru",
     "storyTitleId": "Bulan dan Topi Biru",
     "storyTitleEn": "The Moon and the Cap",
@@ -200,14 +152,13 @@
     "publishedAt": "2026-11-05T10:06:22.159Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/kOBICbv0mx0/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-010",
+    "id": "AUD-008",
     "storySlug": "bulan-dan-topi-biru",
     "storyTitleId": "Bulan dan Topi Biru",
     "storyTitleEn": "The Moon and the Cap",
@@ -223,14 +174,13 @@
     "publishedAt": "2026-11-05T10:13:02.581Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/OSd7PKZJZW8/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
   },
   {
-    "id": "AUD-011",
+    "id": "AUD-009",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -253,30 +203,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-012",
-    "storySlug": "gara-gara-kucing",
-    "storyTitleId": "Gara-Gara Kucing!",
-    "storyTitleEn": "It's All the Cat's Fault!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "id",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Alasan Ga Ngerjain PR Paling Masuk Akal! 😂 Gara-Gara Kucing 🐱 #Shorts #DongengAnak",
-    "videoId": "37P1i6JEiwE",
-    "videoUrl": "https://youtube.com/shorts/37P1i6JEiwE",
-    "publishedAt": "2026-11-01T12:17:11.090Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/37P1i6JEiwE/hqdefault.jpg",
-    "author": "Anushka Ravishankar",
-    "illustrator": "Priya Kuriyan",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
-  },
-  {
-    "id": "AUD-013",
+    "id": "AUD-010",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -299,30 +226,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-014",
-    "storySlug": "gara-gara-kucing",
-    "storyTitleId": "Gara-Gara Kucing!",
-    "storyTitleEn": "It's All the Cat's Fault!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "en",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "The Funniest Excuse For Not Doing Homework! 😂 It's All The Cat's Fault 🐱 #Shorts #Storybook",
-    "videoId": "TRDw6JX8m5M",
-    "videoUrl": "https://youtube.com/shorts/TRDw6JX8m5M",
-    "publishedAt": "2026-11-01T12:40:13.053Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/TRDw6JX8m5M/hqdefault.jpg",
-    "author": "Anushka Ravishankar",
-    "illustrator": "Priya Kuriyan",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
-  },
-  {
-    "id": "AUD-015",
+    "id": "AUD-011",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -345,7 +249,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-016",
+    "id": "AUD-012",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -368,7 +272,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-017",
+    "id": "AUD-013",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -384,14 +288,13 @@
     "publishedAt": "2026-11-04T22:25:23.020Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/TRDw6JX8m5M/hqdefault.jpg",
     "author": "Anushka Ravishankar",
     "illustrator": "Priya Kuriyan",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-018",
+    "id": "AUD-014",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -407,14 +310,13 @@
     "publishedAt": "2026-11-04T04:07:55.393Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/37P1i6JEiwE/hqdefault.jpg",
     "author": "Anushka Ravishankar",
     "illustrator": "Priya Kuriyan",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-019",
+    "id": "AUD-015",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -430,14 +332,13 @@
     "publishedAt": "2026-11-04T22:26:11.778Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/TRDw6JX8m5M/hqdefault.jpg",
     "author": "Anushka Ravishankar",
     "illustrator": "Priya Kuriyan",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/1281-it-s-all-the-cat-s-fault"
   },
   {
-    "id": "AUD-020",
+    "id": "AUD-016",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -460,30 +361,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-021",
-    "storySlug": "hari-cukur-rambut",
-    "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
-    "storyTitleEn": "Annual Haircut Day!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "id",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Kaget Liat Harimau Sampe Rambut Rontok Botak Licin?! 😂🦁 Hari Cukur Rambut #Shorts...",
-    "videoId": "Mqhho21zGRo",
-    "videoUrl": "https://youtube.com/shorts/Mqhho21zGRo",
-    "publishedAt": "2026-11-02T19:38:15.629Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/Mqhho21zGRo/hqdefault.jpg",
-    "author": "Rohini Nilekani (Noni)",
-    "illustrator": "Angie & Upesh (The Other Design Studio)",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
-  },
-  {
-    "id": "AUD-022",
+    "id": "AUD-017",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -506,30 +384,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-023",
-    "storySlug": "hari-cukur-rambut",
-    "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
-    "storyTitleEn": "Annual Haircut Day!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "en",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Scared by a Tiger Till All Hair Flew Off?! 😂🦁 Annual Haircut Day #Shorts #KidsStories",
-    "videoId": "xm6ZotvEl6A",
-    "videoUrl": "https://youtube.com/shorts/xm6ZotvEl6A",
-    "publishedAt": "2026-11-02T19:40:45.220Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/xm6ZotvEl6A/hqdefault.jpg",
-    "author": "Rohini Nilekani (Noni)",
-    "illustrator": "Angie & Upesh (The Other Design Studio)",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
-  },
-  {
-    "id": "AUD-024",
+    "id": "AUD-018",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -552,7 +407,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-025",
+    "id": "AUD-019",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -568,14 +423,13 @@
     "publishedAt": "2026-11-04T21:32:11.111Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/Mqhho21zGRo/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-026",
+    "id": "AUD-020",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -598,7 +452,7 @@
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-027",
+    "id": "AUD-021",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -614,14 +468,13 @@
     "publishedAt": "2026-11-04T21:34:48.708Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/xm6ZotvEl6A/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-028",
+    "id": "AUD-022",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -637,14 +490,13 @@
     "publishedAt": "2026-11-04T21:33:38.246Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/Mqhho21zGRo/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-029",
+    "id": "AUD-023",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -660,14 +512,13 @@
     "publishedAt": "2026-11-04T21:35:59.281Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/xm6ZotvEl6A/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
   },
   {
-    "id": "AUD-030",
+    "id": "AUD-024",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -690,30 +541,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-031",
-    "storySlug": "jas-hujan-merah",
-    "storyTitleId": "Jas Hujan Merah",
-    "storyTitleEn": "The Red Raincoat",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "id",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Buku Cerita Anak: Jas Hujan Merah! 🌧️ #Shorts #DongengAnak",
-    "videoId": "F9oaEO7KTmE",
-    "videoUrl": "https://youtube.com/shorts/F9oaEO7KTmE",
-    "publishedAt": "2026-11-01T14:59:45.668Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/F9oaEO7KTmE/hqdefault.jpg",
-    "author": "Kiran Kasturia",
-    "illustrator": "Zainab Tambawalla",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
-  },
-  {
-    "id": "AUD-032",
+    "id": "AUD-025",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -736,30 +564,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-033",
-    "storySlug": "jas-hujan-merah",
-    "storyTitleId": "Jas Hujan Merah",
-    "storyTitleEn": "The Red Raincoat",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "en",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Kids Animated Storybook: The Red Raincoat! 🌧️ #Shorts #BedtimeStories",
-    "videoId": "j0S4YN46j9g",
-    "videoUrl": "https://youtube.com/shorts/j0S4YN46j9g",
-    "publishedAt": "2026-11-02T13:20:50.962Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/j0S4YN46j9g/hqdefault.jpg",
-    "author": "Kiran Kasturia",
-    "illustrator": "Zainab Tambawalla",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
-  },
-  {
-    "id": "AUD-034",
+    "id": "AUD-026",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -782,7 +587,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-035",
+    "id": "AUD-027",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -798,14 +603,13 @@
     "publishedAt": "2026-11-04T22:27:17.732Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/F9oaEO7KTmE/hqdefault.jpg",
     "author": "Kiran Kasturia",
     "illustrator": "Zainab Tambawalla",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-036",
+    "id": "AUD-028",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -828,7 +632,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-037",
+    "id": "AUD-029",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -844,14 +648,13 @@
     "publishedAt": "2026-11-04T21:37:09.486Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/j0S4YN46j9g/hqdefault.jpg",
     "author": "Kiran Kasturia",
     "illustrator": "Zainab Tambawalla",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-038",
+    "id": "AUD-030",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -867,14 +670,13 @@
     "publishedAt": "2026-11-04T22:28:35.628Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/F9oaEO7KTmE/hqdefault.jpg",
     "author": "Kiran Kasturia",
     "illustrator": "Zainab Tambawalla",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-039",
+    "id": "AUD-031",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -890,14 +692,13 @@
     "publishedAt": "2026-11-04T21:38:37.297Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/j0S4YN46j9g/hqdefault.jpg",
     "author": "Kiran Kasturia",
     "illustrator": "Zainab Tambawalla",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/18-the-red-raincoat"
   },
   {
-    "id": "AUD-040",
+    "id": "AUD-032",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -920,30 +721,7 @@
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-041",
-    "storySlug": "pisang-terlalu-banyak",
-    "storyTitleId": "Pisang Terlalu Banyak!",
-    "storyTitleEn": "Too Many Bananas!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "id",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Buku Cerita Anak: Pisang Terlalu Banyak!! 📖 #Shorts #DongengAnak",
-    "videoId": "rcVd_13TeKQ",
-    "videoUrl": "https://youtube.com/shorts/rcVd_13TeKQ",
-    "publishedAt": "2026-11-05T05:42:23.996Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/rcVd_13TeKQ/hqdefault.jpg",
-    "author": "Rohini Nilekani (Noni)",
-    "illustrator": "Angie & Upesh (The Other Design Studio)",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
-  },
-  {
-    "id": "AUD-042",
+    "id": "AUD-033",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -966,30 +744,7 @@
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-043",
-    "storySlug": "pisang-terlalu-banyak",
-    "storyTitleId": "Pisang Terlalu Banyak!",
-    "storyTitleEn": "Too Many Bananas!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "en",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Kids Animated Storybook: Too Many Bananas!! 📖 #Shorts #BedtimeStories",
-    "videoId": "_EzyLwNqz90",
-    "videoUrl": "https://youtube.com/shorts/_EzyLwNqz90",
-    "publishedAt": "2026-11-05T05:40:45.286Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/_EzyLwNqz90/hqdefault.jpg",
-    "author": "Rohini Nilekani (Noni)",
-    "illustrator": "Angie & Upesh (The Other Design Studio)",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
-  },
-  {
-    "id": "AUD-044",
+    "id": "AUD-034",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1012,7 +767,7 @@
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-045",
+    "id": "AUD-035",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1028,14 +783,13 @@
     "publishedAt": "2026-11-05T01:55:39.682Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/rcVd_13TeKQ/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-046",
+    "id": "AUD-036",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1058,7 +812,7 @@
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-047",
+    "id": "AUD-037",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1074,14 +828,13 @@
     "publishedAt": "2026-11-05T01:58:28.453Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/_EzyLwNqz90/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-048",
+    "id": "AUD-038",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1097,14 +850,13 @@
     "publishedAt": "2026-11-05T01:57:13.387Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/rcVd_13TeKQ/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-049",
+    "id": "AUD-039",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1120,14 +872,13 @@
     "publishedAt": "2026-11-05T01:59:44.437Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/_EzyLwNqz90/hqdefault.jpg",
     "author": "Rohini Nilekani (Noni)",
     "illustrator": "Angie & Upesh (The Other Design Studio)",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
   },
   {
-    "id": "AUD-050",
+    "id": "AUD-040",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1150,30 +901,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-051",
-    "storySlug": "raja-gemuk-anjing-kurus",
-    "storyTitleId": "Raja Gemuk, Anjing Kurus!",
-    "storyTitleEn": "Fat King, Thin Dog!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "id",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "Ngejar Anjing Sampe Langsing?! 😂 Cerita Lucu Raja Gemuk & Anjing Kurus 👑🐕 #Shorts...",
-    "videoId": "8RY5_4BF52E",
-    "videoUrl": "https://youtube.com/shorts/8RY5_4BF52E",
-    "publishedAt": "2026-11-03T05:10:59.061Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/8RY5_4BF52E/hqdefault.jpg",
-    "author": "Parismita Singh",
-    "illustrator": "Parismita Singh",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
-  },
-  {
-    "id": "AUD-052",
+    "id": "AUD-041",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1196,30 +924,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-053",
-    "storySlug": "raja-gemuk-anjing-kurus",
-    "storyTitleId": "Raja Gemuk, Anjing Kurus!",
-    "storyTitleEn": "Fat King, Thin Dog!",
-    "category": "Standalone Story",
-    "platform": "YouTube",
-    "platformIcon": "youtube",
-    "language": "en",
-    "format": "Shorts (9:16)",
-    "aspectRatio": "9:16",
-    "videoTitle": "He Chased His Dog For Days And Got Fit! 😂👑🐕 Fat King, Thin Dog #Shorts #KidsBooks...",
-    "videoId": "J_w2XX_yOHY",
-    "videoUrl": "https://youtube.com/shorts/J_w2XX_yOHY",
-    "publishedAt": "2026-11-03T05:11:38.322Z",
-    "status": "published",
-    "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/J_w2XX_yOHY/hqdefault.jpg",
-    "author": "Parismita Singh",
-    "illustrator": "Parismita Singh",
-    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
-    "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
-  },
-  {
-    "id": "AUD-054",
+    "id": "AUD-042",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1242,7 +947,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-055",
+    "id": "AUD-043",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1258,14 +963,13 @@
     "publishedAt": "2026-11-04T21:39:36.039Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/8RY5_4BF52E/hqdefault.jpg",
     "author": "Parismita Singh",
     "illustrator": "Parismita Singh",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-056",
+    "id": "AUD-044",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1288,7 +992,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-057",
+    "id": "AUD-045",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1304,14 +1008,13 @@
     "publishedAt": "2026-11-04T21:41:27.359Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/J_w2XX_yOHY/hqdefault.jpg",
     "author": "Parismita Singh",
     "illustrator": "Parismita Singh",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-058",
+    "id": "AUD-046",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1327,14 +1030,13 @@
     "publishedAt": "2026-11-04T21:40:31.344Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/8RY5_4BF52E/hqdefault.jpg",
     "author": "Parismita Singh",
     "illustrator": "Parismita Singh",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-059",
+    "id": "AUD-047",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1350,14 +1052,13 @@
     "publishedAt": "2026-11-04T21:42:43.011Z",
     "status": "published",
     "privacy": "public",
-    "thumbnailUrl": "https://img.youtube.com/vi/J_w2XX_yOHY/hqdefault.jpg",
     "author": "Parismita Singh",
     "illustrator": "Parismita Singh",
     "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-060",
+    "id": "AUD-048",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1380,7 +1081,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-061",
+    "id": "AUD-049",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1403,7 +1104,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-062",
+    "id": "AUD-050",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1426,7 +1127,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-063",
+    "id": "AUD-051",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1449,7 +1150,7 @@
     "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
   },
   {
-    "id": "AUD-064",
+    "id": "AUD-052",
     "storySlug": "bedtime-id",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
@@ -1473,7 +1174,7 @@
     "sourceUrl": "https://storyweaver.org.in"
   },
   {
-    "id": "AUD-065",
+    "id": "AUD-053",
     "storySlug": "bedtime-id",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
@@ -1497,7 +1198,7 @@
     "sourceUrl": "https://storyweaver.org.in"
   },
   {
-    "id": "AUD-066",
+    "id": "AUD-054",
     "storySlug": "bedtime-en",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
@@ -1521,7 +1222,7 @@
     "sourceUrl": "https://storyweaver.org.in"
   },
   {
-    "id": "AUD-067",
+    "id": "AUD-055",
     "storySlug": "bedtime-en",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
