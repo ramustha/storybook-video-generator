@@ -10,6 +10,7 @@ interface PublishAllOptions {
   skipYoutube: boolean;
   skipMeta: boolean;
   skipTiktok: boolean;
+  skipPromo: boolean;
 }
 
 function parseArgs(): PublishAllOptions {
@@ -21,6 +22,7 @@ function parseArgs(): PublishAllOptions {
     skipYoutube: false,
     skipMeta: false,
     skipTiktok: false,
+    skipPromo: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -37,6 +39,8 @@ function parseArgs(): PublishAllOptions {
       options.skipMeta = true;
     } else if (arg === "--skip-tiktok") {
       options.skipTiktok = true;
+    } else if (arg === "--skip-promo") {
+      options.skipPromo = true;
     }
   }
 
@@ -212,6 +216,40 @@ async function main() {
     console.log(`✔ Social promotion kit saved to stories/${options.bookSlug}/exports/social-promotion-posts.md`);
   } catch (promoErr: any) {
     console.warn("⚠️ Warning: could not generate social promotion kit:", promoErr.message);
+  }
+
+  // 4. Automated Multi-Platform Social Promotion (Facebook Page & Instagram Feed/Carousel)
+  if (!options.skipPromo) {
+    console.log(`\n==================================================================`);
+    console.log(`📢 AUTOMATED SOCIAL PROMOTION DISTRIBUTION`);
+    console.log(`==================================================================`);
+
+    // 4A. Facebook Page Promotional Post
+    try {
+      console.log(`\n📘 Publishing Promotional Post to Facebook Page...`);
+      const fbArgs = ["scripts/publish-launch-posts.ts", "--book", options.bookSlug];
+      if (options.dryRun) fbArgs.push("--dry-run");
+      await runCommand("npx", ["tsx", ...fbArgs]);
+    } catch (fbErr: any) {
+      console.warn("⚠️ Facebook promotion post warning:", fbErr.message);
+    }
+
+    // 4B. Instagram Feed / Carousel Post
+    try {
+      console.log(`\n📸 Publishing Promotional Carousel to Instagram Feed...`);
+      const igArgs = ["scripts/publish-instagram-post.ts", "--book", options.bookSlug, "--carousel"];
+      if (options.dryRun) igArgs.push("--dry-run");
+      await runCommand("npx", ["tsx", ...igArgs]);
+    } catch (igErr: any) {
+      console.warn("⚠️ Instagram promotion post warning:", igErr.message);
+    }
+
+    // 4C. YouTube Community Tab (Explicit Skip Policy)
+    console.log(`\n▶️ YouTube Community Tab:`);
+    console.log(`ℹ️ SKIPPED from automated API distribution (Google YouTube Data API v3 does not provide an official Community Tab endpoint).`);
+    console.log(`👉 Copy-paste text is preserved in stories/${options.bookSlug}/exports/social-promotion-posts.md for optional manual use.`);
+  } else {
+    console.log(`\n⏩ Skipping Automated Social Promotion per --skip-promo`);
   }
 
   if (!options.dryRun) {

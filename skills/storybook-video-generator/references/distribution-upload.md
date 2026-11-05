@@ -241,3 +241,14 @@ To maintain an un-siloed, auditable index of all published video assets across p
   * **One-Click CSV Export**: Auditors can click `📥 Export CSV` to instantly download `zayn-storybook-multi-platform-audit-catalog.csv` formatted with complete metadata and license columns.
   * **One-Click JSON Export**: Download programmatic audit records.
   * **ID Copy Shortcuts**: One-click copy for video IDs and audit tracking numbers (`AUD-xxx`).
+
+---
+
+## 8. Automated Social Promotion & Official API Boundaries
+
+* **Fully Automated via Official API**:
+  * **Facebook Page Posts**: Automated via Meta Graph API (`POST /{pageId}/photos`) with 16:9 MAXRES artwork and cheerful bilingual copy (`npm run promo:launch`).
+  * **Instagram Feed & Carousel Posts**: Automated via Meta Graph API (`POST /{igUserId}/media` + `media_publish`) using Cloudflare R2 temporary buffer (`npm run promo:instagram`).
+* **YouTube Community Tab (Official API Skip Policy)**:
+  * **Official Limitation**: Google YouTube Data API v3 strictly lacks public endpoints for creating, reading, or managing the Community Tab.
+  * **Pipeline Rule**: Automated distribution (`npm run publish:all`) **strictly SKIPS YouTube Community Tab posting** without error. Formatted text is saved to `stories/<book-slug>/exports/social-promotion-posts.md` for optional manual posting via YouTube Studio.

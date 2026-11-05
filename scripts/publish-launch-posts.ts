@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { createReadStream, existsSync } from "fs";
 import path from "path";
 import FormData from "form-data";
+import { generateBilingualSocialKit } from "./generate-social-promo.js";
 
 const CONFIG_PATH = path.resolve("./config/meta-config.json");
 
@@ -12,12 +13,12 @@ interface MetaConfig {
   pageAccessToken: string;
 }
 
-async function loadMetaConfig(): Promise<MetaConfig> {
+export async function loadMetaConfig(): Promise<MetaConfig> {
   const raw = await fs.readFile(CONFIG_PATH, "utf-8");
   return JSON.parse(raw);
 }
 
-const LAUNCH_POST_TEXT = `🎉 HOREEE! SELAMAT DATANG DI RUMAH DONGENG ZAYN STORYBOOK! 🎈✨
+export const INAUGURAL_LAUNCH_POST_TEXT = `🎉 HOREEE! SELAMAT DATANG DI RUMAH DONGENG ZAYN STORYBOOK! 🎈✨
 Tempat Petualangan Ceria & Pengantar Tidur Nyenyak Buat Si Kecil! 🌙💤
 
 Halo Ayah, Bunda, dan adik-adik tersayang di seluruh Indonesia dan dunia! 🥰👋
@@ -75,25 +76,39 @@ Jangan lupa klik LIKE, SHARE ke grup keluarga atau sesama orang tua, dan IKUTI h
 
 #ZaynStorybook #DongengAnak #CeritaAnakBergambar #DongengLucu #ParentingCeria #PendidikanKarakterAnak #BukuCeritaBergambar #DongengSebelumTidur`;
 
-async function main() {
-  console.log("\n=======================================================");
-  console.log("📢 PUBLISHING INAUGURAL GRAND LAUNCH POST TO FACEBOOK PAGE");
-  console.log("=======================================================\n");
-
+export async function publishFacebookPhotoPost(options: {
+  photoPath: string;
+  caption: string;
+  dryRun?: boolean;
+}): Promise<{
+  success: boolean;
+  photoId?: string;
+  postId?: string;
+  permalink?: string;
+  dryRun?: boolean;
+}> {
   const config = await loadMetaConfig();
-  const photoPath = path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png");
 
-  if (!existsSync(photoPath)) {
-    throw new Error(`Photo asset not found: ${photoPath}`);
+  console.log("\n=======================================================");
+  console.log("📢 FACEBOOK PAGE PHOTO POST PUBLISHER (API)");
+  console.log("=======================================================");
+  console.log(`📄 Facebook Page : ${config.facebookPageName || config.facebookPageId}`);
+  console.log(`🖼️ Attached Photo: ${options.photoPath}`);
+  console.log(`🧪 Dry Run       : ${options.dryRun ? "YES (Preview Only)" : "NO (Live Post)"}`);
+
+  if (options.dryRun) {
+    console.log("\n[DRY RUN] Caption Preview:\n", options.caption);
+    return { success: true, dryRun: true };
   }
 
-  console.log(`📄 Facebook Page : ${config.facebookPageName || config.facebookPageId}`);
-  console.log(`🖼️ Attached Photo: ${photoPath}`);
+  if (!existsSync(options.photoPath)) {
+    throw new Error(`Photo asset not found: ${options.photoPath}`);
+  }
 
   const form = new FormData();
-  form.append("caption", LAUNCH_POST_TEXT);
+  form.append("caption", options.caption);
   form.append("access_token", config.pageAccessToken);
-  form.append("source", createReadStream(photoPath));
+  form.append("source", createReadStream(options.photoPath));
 
   const url = `https://graph.facebook.com/v21.0/${config.facebookPageId}/photos`;
 
@@ -121,10 +136,62 @@ async function main() {
   const postId = res.data.post_id || photoId;
   const permalink = `https://www.facebook.com/${config.facebookPageId}/posts/${postId}`;
 
-  console.log(`\n🎉 SUCCESS! GRAND LAUNCH POST PUBLISHED TO FACEBOOK PAGE!`);
+  console.log(`\n🎉 SUCCESS! PHOTO POST PUBLISHED TO FACEBOOK PAGE!`);
   console.log(`📸 Photo ID : ${photoId}`);
   console.log(`📌 Post ID  : ${postId}`);
   console.log(`🔗 Link     : ${permalink}\n`);
+
+  return { success: true, photoId, postId, permalink };
 }
 
-main().catch(console.error);
+async function main() {
+  const args = process.argv.slice(2);
+  const getArg = (flag: string) => {
+    const idx = args.indexOf(flag);
+    return idx !== -1 ? args[idx + 1] : undefined;
+  };
+
+  const isDryRun = args.includes("--dry-run");
+  const bookSlug = getArg("--book");
+
+  let photoPath = path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png");
+  let captionText = INAUGURAL_LAUNCH_POST_TEXT;
+
+  if (bookSlug) {
+    const storyJsonPath = path.resolve(`./stories/${bookSlug}/story.json`);
+    if (existsSync(storyJsonPath)) {
+      const story = JSON.parse(await fs.readFile(storyJsonPath, "utf-8"));
+      const kit = generateBilingualSocialKit(story);
+      const fbMatch = kit.match(/## 📘 2\. FACEBOOK PAGE[\s\S]*?```text\n([\s\S]*?)```/);
+      if (fbMatch && fbMatch[1]) {
+        captionText = fbMatch[1].trim();
+      }
+
+      // Check candidate photos
+      const candidatePaths = [
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-popular.png`),
+        path.resolve(`./stories/${bookSlug}/exports/thumbnail.png`),
+        path.resolve(`./stories/${bookSlug}/assets/cover.png`),
+      ];
+      for (const p of candidatePaths) {
+        if (existsSync(p)) {
+          photoPath = p;
+          break;
+        }
+      }
+    }
+  }
+
+  await publishFacebookPhotoPost({
+    photoPath,
+    caption: captionText,
+    dryRun: isDryRun,
+  });
+}
+
+if (process.argv[1] && process.argv[1].endsWith("publish-launch-posts.ts")) {
+  main().catch((err) => {
+    console.error("❌ Facebook publishing failed:", err);
+    process.exit(1);
+  });
+}

@@ -352,16 +352,26 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
     * 💬 **Interactive Question for Comments**: Relatable prompt asking parents about their child's funny bedtime excuses or silly habits to trigger algorithm-boosting comment velocity.
     * 💾 **"Save for Bedtime" CTA**: Maximizes bookmark/save count (the #1 ranking signal on Instagram & TikTok).
 * **Multi-Platform Deployment Package (`exports/social-promotion-posts.md`)**:
-  * **Instagram Feed Carousel (5 Slides)**: Cover + 2 Scene Stills + Moral Card + YouTube CTA.
-  * **Facebook Page Feed Post**: High-CTR thumbnail (`thumbnail-popular.png`) + full bilingual story overview + parenting community discussion question.
-  * **YouTube Community Tab**: Interactive 4-option Image Poll + bilingual announcement.
+  * **Instagram Feed Carousel (5–7 Slides)**: Cover + Story Stills + Moral Card + YouTube CTA (Published automatically via Meta Graph API).
+  * **Facebook Page Feed Post**: High-CTR thumbnail (`thumbnail-popular.png`) + full bilingual story overview + parenting community discussion question (Published automatically via Meta Graph API).
+  * **YouTube Community Tab (SKIPPED FROM AUTOMATED API)**: Google YouTube Data API v3 has no Community Tab endpoint. Automated pipelines skip this step cleanly and preserve the formatted text for optional manual posting via YouTube Studio.
   * **TikTok & Reels**: Snappy curiosity teaser (<150 chars).
-* **Automated Generation CLI**:
+* **Automated Generation & Publishing CLI**:
   ```bash
-  # Generate bilingual social promotion package for a storybook:
+  # Generate bilingual social promotion copy kit:
   npm run promo:social -- <book-slug>
+
+  # Publish promotional post to Facebook Page (via Meta Graph API):
+  npm run promo:launch -- --book <book-slug>
+
+  # Publish promotional photo or multi-slide carousel to Instagram Feed (via Meta Graph API + Cloudflare R2):
+  npm run promo:instagram -- --book <book-slug>            # Single Photo
+  npm run promo:instagram -- --book <book-slug> --carousel # Multi-Slide Story Carousel
+
+  # Master one-shot pipeline (Videos + Meta Reels + Facebook Page Post + Instagram Carousel):
+  npm run publish:all -- --book <book-slug>
   ```
-  *(Note: `npm run publish:all` automatically invokes this generator upon video publication).*
+  *(Note: `npm run publish:all` automatically publishes the video deliverables, then publishes the promotional post to Facebook Page and Instagram Feed, while cleanly skipping YouTube Community Tab without halting).*
 
 ### 12. Compilation Video & Marathon Packaging (Auto-Recommendation & Retention Architecture)
 * **The Long-Form Monetization Engine**: Individual storybooks (1–3 mins) excel for short-form reach, but compilations (10–30+ mins) unlock **YouTube Mid-Roll Ads (>8 mins)** and serve parent viewing behavior (*"Set-and-Forget"* screen time for bedtime, playtime, and car rides).
