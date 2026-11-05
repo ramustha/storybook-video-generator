@@ -1,0 +1,35 @@
+docs/audit-data.json
+  698ac31901cd73e0 33-55,72-95,118,134,141,164,180,187,203,210,226,233,256-279,302-325,348,371,387,394,410,417,433,440,463,486,491-509,532,554,577,593,600,622,638,645,668-691,714-737,760,776,783,806,822,829,845,852,868,875,898,921-944,967,989,1012,1028,1035,1057,1073,1080,1103-1126,1149,1154-1172,1195,1211,1218,1241,1257,1264,1280,1287,1303,1310,1333,1356,1379,1402,1426,1450,1474
+docs/index.html
+  698ac31901cd73e0 1051
+scripts/publish-shorts.ts
+  698ac31901cd73e0 1-219
+scripts/publish-all.ts
+  698ac31901cd73e0 94,96,104
+scripts/upload-youtube.ts
+  698ac31901cd73e0 597-604,637-638,943-961,1256-1269
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 249-251,253-254
+package.json
+  698ac31901cd73e0 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "64382502a7fc3ab93143ce82bf21f1092da635ca",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 574,
+      "total_deletions": 71,
+      "accepted_lines": 574,
+      "overriden_lines": 0
+    }
+  }
+}
