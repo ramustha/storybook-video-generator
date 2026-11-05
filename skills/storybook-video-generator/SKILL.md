@@ -210,18 +210,20 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   * >75% of YouTube watch time originates on mobile devices where thumbnails are displayed at ~140px wide. Centered tiny elements or vast empty borders kill CTR.
   * The hero asset and bold typography must occupy **≥85% of total thumbnail canvas area**.
 * **Format 1 — Popular Comic Action Hook (`thumbnail-popular.png`)**:
-  * **Giant 2-Line Headline**: Line 1 `fontSize: 90px`, Line 2 `fontSize: 114px` with thick black stroke (`-webkit-text-stroke: 6px–7px #000`), 3D amber extrusion shadow (`0 10px 0 #B45309`), and tight line height (`0.92`) to eliminate vertical dead space.
-  * **Massive Hero Artwork Frame**: Expanded to `780px × 640px` (was 580×480), filling the entire right half of the frame with a dynamic `rotate(2.5deg)` angle, thick `12px solid #FFFFFF` sticker border, and 3D yellow ambient drop shadow.
+  * **Giant 2-Line Headline**: Line 1 `fontSize: 90px`, Line 2 `fontSize: 116px` with thick black stroke (`-webkit-text-stroke: 6px–7px #000`), 3D amber extrusion shadow (`0 10px 0 #B45309`), and tight line height (`0.92`) to eliminate vertical dead space.
+  * **Massive Hero Artwork Frame**: Expanded to `860px × 720px` (was 780×640), filling the entire right half of the frame with a dynamic `rotate(2.2deg)` angle, thick `14px solid #FFFFFF` sticker border, and 3D yellow ambient drop shadow (`0 40px 105px rgba(0,0,0,0.95)`).
   * **Curiosity Gap Hook Sticker**: `fontSize: 36px` on punchy cyan badge (`#38BDF8`) with dark 3D bevel.
   * **Narrow Edge Padding**: Reduced to `48px` horizontally to utilize the full widescreen canvas.
   * **Safe-Zone Compliant**: Bottom-right corner reserved for YouTube's video duration timestamp pill.
 * **Format 2 — Niche Whimsical Bedtime Storybook (`thumbnail-bedtime.png`)**:
-  * Expanded storybook frame (`760px × 560px`) with ornate golden rim (`border: 6px solid rgba(251, 191, 36, 0.9)`).
+  * Expanded storybook frame (`860px × 680px`) with ornate golden rim (`border: 8px solid rgba(251, 191, 36, 0.95)`).
   * Gold embossed typography (`fontSize: 84px`), moonlight pill (`🌙 DONGENG SEBELUM TIDUR` / `🌙 BEDTIME READ-ALOUD`), and gentle bedtime subtitle.
 * **Format 3 — Vertical 9:16 Shorts & Reels Cover (`thumbnail-vertical.png`)**:
-  * Hero card scaled to `960px × 800px` with thick 12px sticker border and reaction sticker.
+  * Centerpiece hero card enlarged to `1000px × 980px` (was 960×800) with thick 14px sticker border and reaction sticker.
   * Stacked headline scaled to `90px` and `114px`, filling the vertical canvas without dead space.
-  * High-contrast title typography + curiosity gap hook sticker, safe-zone compliant (top 150px and bottom 300px clear for native player UI).
+  * High-contrast title typography + curiosity gap hook sticker, safe-zone compliant (top 110px and bottom 190px clear for native player UI).
+* **Format 4 — Fanned Compilation Marathon Cover (`StorybookCompilationThumbnail`)**:
+  * 4 fanned storybook covers scaled up with hero cover at `620px × 440px` (was 450×320) and supporting covers at 570px, 540px, and 520px, filling ≥80% of the right column with zero dead margins.
 * **Automated Remotion Still Rendering**:
   ```bash
   # Render all thumbnail variants (Landscape & Vertical Shorts, ID & EN) in <1s:
@@ -355,6 +357,9 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
 
   # Render distinct high-CTR compilation thumbnails (both languages):
   npm run compilation:thumbnail -- --theme bedtime --lang all
+
+  # Render high-resolution standalone chapter preview thumbnails (ID & EN):
+  npm run compilation:chapters -- --theme bedtime --lang all
 
   # Publish compilation to Facebook Watch:
   npx tsx scripts/upload-meta.ts --compilation bedtime --lang id

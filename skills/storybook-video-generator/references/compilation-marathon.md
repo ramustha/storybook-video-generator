@@ -174,14 +174,40 @@ npm run compilation:render -- --theme bedtime --lang en
 # 5. Render custom story sequence:
 npm run compilation:render -- --books gara-gara-kucing,jas-hujan-merah,raja-gemuk-anjing-kurus --lang all
 
-# 6. Render distinct high-CTR compilation thumbnails (both languages):
+# 6. Render distinct high-CTR compilation thumbnails (both languages, enlarged edge-to-edge):
 npm run compilation:thumbnail -- --theme bedtime --lang all
 
-# 7. Publish compilation to Facebook Watch:
+# 7. Render high-resolution standalone chapter preview thumbnails (ID & EN):
+npm run compilation:chapters -- --theme bedtime --lang all
+
+# 8. Publish compilation to Facebook Watch:
 npx tsx scripts/upload-meta.ts --compilation bedtime --lang id
 npx tsx scripts/upload-meta.ts --compilation bedtime --lang en
 
-# 8. Publish compilation to YouTube Public:
+# 9. Publish compilation to YouTube Public:
 npx tsx scripts/upload-youtube.ts --compilation bedtime --lang id --privacy public
 npx tsx scripts/upload-youtube.ts --compilation bedtime --lang en --privacy public
 ```
+
+---
+
+## 9. Chapter Thumbnails & YouTube Scrubber Previews
+
+### How YouTube Chapter Thumbnails Function
+1. **Dynamic Video Frame Extraction**: YouTube does **not** provide an API to upload separate static image files for chapters. Instead, YouTube's desktop player, mobile scrubber, and chapters drawer automatically capture a frame from the video stream at the exact timestamp specified in the description (`00:00`, `01:54`, `03:45`, etc.).
+2. **Frame 0 Guarantee**:
+   * Previously, spring animations in `CoverScene` and `ChapterBumper` started at scale `0.0`, resulting in a blank or tiny card if YouTube sampled the very first frame of a chapter.
+   * `CoverScene` and `ChapterBumper` now initialize with `cardScale = interpolate(entrance, [0, 1], [0.94, 1.0])`.
+   * Frame 0 is guaranteed to display a crisp, full-scale 3D storybook cover and title badge, ensuring maximum impact in YouTube scrubbers and mobile chapter cards.
+3. **Standalone Chapter Thumbnail Export**:
+   * Run `npm run compilation:chapters -- --theme <theme> --lang all`.
+   * Renders dedicated 1920×1080 still cards for every story in the compilation (`exports/compilations/chapters/<theme>-<lang>/chapter-XX-<slug>.png`).
+   * Generates `chapters-manifest.json` containing exact timestamps, chapter indices, story titles, and image paths for use in YouTube Community Posts, social media carousels (Instagram, Facebook), and external embeds.
+
+### Edge-to-Edge Thumbnail Sizing (Zero Dead Space)
+To maximize mobile click-through rates (CTR) and eliminate empty margins:
+* **Fanned Compilation Hero**: The foreground hero book card is enlarged to **620×440px** (from 450×320px) with background supporting cards scaled at 570px, 540px, and 520px, occupying ≥80% of the right canvas half.
+* **Single-Story Popular Variant**: Enlarged hero frame to **860×720px** with high-contrast sticker border.
+* **Single-Story Bedtime Variant**: Enlarged gilded frame to **860×680px**.
+* **9:16 Shorts/Reels Variant**: Centerpiece hero card enlarged to **1000×980px** with reduced top/bottom padding to dominate vertical smartphone feeds.
+

@@ -210,7 +210,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "160px 48px 240px 48px",
+            padding: "110px 36px 190px 36px",
             boxSizing: "border-box",
           }}
         >
@@ -245,12 +245,12 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           {/* Centerpiece Hero Artwork with Clean Sticker Border (Maximized Size & Zero Dead Space) */}
           <div
             style={{
-              width: 960,
-              height: 800,
+              width: 1000,
+              height: 980,
               position: "relative",
               borderRadius: 48,
               overflow: "hidden",
-              border: "12px solid #FFFFFF",
+              border: "14px solid #FFFFFF",
               boxShadow:
                 "0 40px 100px rgba(0, 0, 0, 0.95), 0 0 70px rgba(253, 224, 71, 0.45)",
               transform: "rotate(2deg)",
@@ -295,9 +295,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 backgroundColor: "#FACC15",
                 color: "#000",
                 fontWeight: 900,
-                fontSize: 28,
-                padding: "12px 28px",
-                borderRadius: 20,
+                fontSize: 30,
+                padding: "12px 30px",
+                borderRadius: 22,
                 border: "4px solid #000",
                 boxShadow: "0 8px 0 #000",
                 transform: "rotate(-5deg)",
@@ -592,7 +592,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           {/* Right: Gilded Storybook Floating Centerpiece (Maximized Scale) */}
           <div
             style={{
-              width: "46%",
+              width: "48%",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
@@ -600,14 +600,14 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           >
             <div
               style={{
-                width: 760,
-                height: 560,
+                width: 860,
+                height: 680,
                 position: "relative",
-                borderRadius: 36,
+                borderRadius: 40,
                 overflow: "hidden",
                 boxShadow:
-                  "0 35px 95px rgba(0, 0, 0, 0.95), 0 0 65px rgba(251, 191, 36, 0.4)",
-                border: "6px solid rgba(251, 191, 36, 0.9)",
+                  "0 40px 105px rgba(0, 0, 0, 0.95), 0 0 75px rgba(251, 191, 36, 0.5)",
+                border: "8px solid rgba(251, 191, 36, 0.95)",
                 transform: "rotate(2deg)",
                 backgroundColor: "#0B0F19",
               }}
@@ -635,15 +635,15 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               <div
                 style={{
                   position: "absolute",
-                  top: 18,
-                  right: 18,
+                  top: 20,
+                  right: 20,
                   background: "linear-gradient(135deg, #F59E0B, #B45309)",
                   color: "#FFF",
                   fontWeight: 800,
-                  fontSize: 16,
+                  fontSize: 18,
                   letterSpacing: "0.06em",
-                  padding: "6px 14px",
-                  borderRadius: 8,
+                  padding: "8px 18px",
+                  borderRadius: 10,
                   boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
                   border: "1px solid rgba(255, 255, 255, 0.4)",
                   textTransform: "uppercase",
@@ -893,7 +893,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
         {/* Right Side: Comic Character Hero Frame with Sticker Cutout Border (Fills Right Half) */}
         <div
           style={{
-            width: "48%",
+            width: "50%",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
@@ -903,15 +903,15 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           {/* Visual Sticker Badge */}
           <div
             style={{
-              width: 780,
-              height: 640,
+              width: 860,
+              height: 720,
               position: "relative",
-              borderRadius: 44,
+              borderRadius: 48,
               overflow: "hidden",
-              border: "12px solid #FFFFFF",
+              border: "14px solid #FFFFFF",
               boxShadow:
-                "0 35px 95px rgba(0, 0, 0, 0.95), 0 0 70px rgba(253, 224, 71, 0.45)",
-              transform: "rotate(2.5deg)",
+                "0 40px 105px rgba(0, 0, 0, 0.95), 0 0 80px rgba(253, 224, 71, 0.5)",
+              transform: "rotate(2.2deg)",
               backgroundColor: "#1E293B",
             }}
           >
@@ -953,11 +953,11 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
                 backgroundColor: "#FACC15",
                 color: "#000",
                 fontWeight: 900,
-                fontSize: 26,
-                padding: "10px 24px",
-                borderRadius: 16,
-                border: "3.5px solid #000",
-                boxShadow: "0 7px 0 #000",
+                fontSize: 28,
+                padding: "12px 28px",
+                borderRadius: 18,
+                border: "4px solid #000",
+                boxShadow: "0 8px 0 #000",
                 transform: "rotate(-5deg)",
               }}
             >

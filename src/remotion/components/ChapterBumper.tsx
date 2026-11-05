@@ -42,6 +42,11 @@ export const ChapterBumper: React.FC<ChapterBumperProps> = ({
     config: { damping: 14, stiffness: 100 },
   });
 
+  // Keep frame 0 at >=0.94 scale so YouTube chapter scrubber previews show a complete, crisp visual card
+  const cardScale = interpolate(entrance, [0, 1], [0.94, 1.0]);
+  const badgeScale = interpolate(badgeEntrance, [0, 1], [0.94, 1.0]);
+  const titleScale = interpolate(titleEntrance, [0, 1], [0.94, 1.0]);
+
   // Floating gentle motion
   const floatY = Math.sin(frame / 16) * 8;
   const floatRotate = Math.sin(frame / 22) * 1.8;
@@ -63,7 +68,11 @@ export const ChapterBumper: React.FC<ChapterBumperProps> = ({
     ? "Get ready for the next fun adventure! 📖✨"
     : "Yuk bersiap mendengarkan cerita seru berikutnya! 📖✨";
 
-  const coverSrc = nextStoryCover ? staticFile(nextStoryCover) : null;
+  const coverSrc = nextStoryCover
+    ? nextStoryCover.startsWith("data:") || nextStoryCover.startsWith("http")
+      ? nextStoryCover
+      : staticFile(nextStoryCover)
+    : null;
 
   // Floating ambient sparkles
   const sparkles = [
@@ -143,7 +152,7 @@ export const ChapterBumper: React.FC<ChapterBumperProps> = ({
         {/* Top Chapter Pill Badge */}
         <div
           style={{
-            transform: `scale(${badgeEntrance})`,
+            transform: `scale(${badgeScale})`,
             background: "linear-gradient(135deg, #F59E0B, #D97706)",
             color: "#FFFFFF",
             fontSize: isVertical ? "20px" : "24px",
@@ -165,15 +174,15 @@ export const ChapterBumper: React.FC<ChapterBumperProps> = ({
         {/* 3D Floating Book Preview Card */}
         <div
           style={{
-            transform: `scale(${entrance}) translateY(${floatY}px) rotate(${floatRotate}deg)`,
+            transform: `scale(${cardScale}) translateY(${floatY}px) rotate(${floatRotate}deg)`,
             marginBottom: isVertical ? "24px" : "28px",
             perspective: "1000px",
           }}
         >
           <div
             style={{
-              width: isVertical ? "460px" : "480px",
-              height: isVertical ? "320px" : "300px",
+              width: isVertical ? "520px" : "600px",
+              height: isVertical ? "360px" : "380px",
               borderRadius: "28px",
               overflow: "hidden",
               border: "6px solid #FEF08A",
@@ -223,7 +232,7 @@ export const ChapterBumper: React.FC<ChapterBumperProps> = ({
         {/* Next Story Title */}
         <div
           style={{
-            transform: `scale(${titleEntrance})`,
+            transform: `scale(${titleScale})`,
             marginBottom: "12px",
           }}
         >
