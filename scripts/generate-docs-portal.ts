@@ -1,0 +1,1582 @@
+import fs from "fs";
+import path from "path";
+
+interface AuditRecord {
+  id: string; // unique audit id e.g. "AUD-001"
+  storySlug: string;
+  storyTitleId: string;
+  storyTitleEn: string;
+  category: "Standalone Story" | "Compilation Marathon";
+  platform: "YouTube" | "Facebook" | "Instagram";
+  platformIcon: "youtube" | "facebook" | "instagram";
+  language: "id" | "en";
+  format: "Landscape (16:9)" | "Shorts (9:16)" | "Watch Video (16:9)" | "Facebook Reel (9:16)" | "Instagram Reel (9:16)" | "Marathon Video (16:9)";
+  aspectRatio: "16:9" | "9:16";
+  videoTitle: string;
+  videoId: string;
+  videoUrl: string;
+  publishedAt: string;
+  status: string;
+  privacy: string;
+  duration?: string;
+  thumbnailUrl?: string;
+  author: string;
+  illustrator: string;
+  license: string;
+  sourceUrl: string;
+}
+
+const workspaceRoot = path.resolve(__dirname, "..");
+const storiesDir = path.join(workspaceRoot, "stories");
+const docsDir = path.join(workspaceRoot, "docs");
+
+if (!fs.existsSync(docsDir)) {
+  fs.mkdirSync(docsDir, { recursive: true });
+}
+
+const stories = [
+  "gara-gara-kucing",
+  "hari-cukur-rambut",
+  "jas-hujan-merah",
+  "raja-gemuk-anjing-kurus",
+  "pisang-terlalu-banyak"
+];
+
+const auditRecords: AuditRecord[] = [];
+let counter = 1;
+
+function padId(n: number): string {
+  return "AUD-" + String(n).padStart(3, "0");
+}
+
+for (const s of stories) {
+  const jsonPath = path.join(storiesDir, s, "story.json");
+  if (!fs.existsSync(jsonPath)) continue;
+  const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+
+  const titleId = typeof data.title === "object" ? data.title.id : data.title;
+  const titleEn = data.originalTitle || (typeof data.title === "object" ? data.title.en : "");
+  const author = data.source?.originalAuthor || "Pratham Books Community";
+  const illustrator = data.source?.originalIllustrator || "Various Illustrators";
+  const license = data.source?.license || "Creative Commons Attribution 4.0 International (CC BY 4.0)";
+  const sourceUrl = data.source?.sourceUrl || "https://storyweaver.org.in";
+
+  // 1. YouTube Publications
+  const yt = data.publications?.youtube || {};
+  for (const lang of ["id", "en"] as const) {
+    if (!yt[lang]) continue;
+    for (const fmt of ["landscape", "vertical"] as const) {
+      const item = yt[lang][fmt];
+      if (item && item.url) {
+        auditRecords.push({
+          id: padId(counter++),
+          storySlug: s,
+          storyTitleId: titleId,
+          storyTitleEn: titleEn,
+          category: "Standalone Story",
+          platform: "YouTube",
+          platformIcon: "youtube",
+          language: lang,
+          format: fmt === "landscape" ? "Landscape (16:9)" : "Shorts (9:16)",
+          aspectRatio: fmt === "landscape" ? "16:9" : "9:16",
+          videoTitle: item.title || (lang === "id" ? titleId : titleEn),
+          videoId: item.id,
+          videoUrl: item.url,
+          publishedAt: item.publishedAt || "2026-11-01T00:00:00.000Z",
+          status: item.status || "published",
+          privacy: item.privacy || "public",
+          thumbnailUrl: `https://img.youtube.com/vi/${item.id}/hqdefault.jpg`,
+          author,
+          illustrator,
+          license,
+          sourceUrl
+        });
+      }
+    }
+  }
+
+  // 2. Facebook Publications
+  const fb = data.publications?.facebook || {};
+  for (const lang of ["id", "en"] as const) {
+    if (!fb[lang]) continue;
+    for (const fmt of ["landscape", "vertical"] as const) {
+      const item = fb[lang][fmt];
+      if (item && item.url) {
+        // Find corresponding youtube thumbnail for visual preview if available
+        const fallbackYt = yt[lang]?.[fmt]?.id;
+        auditRecords.push({
+          id: padId(counter++),
+          storySlug: s,
+          storyTitleId: titleId,
+          storyTitleEn: titleEn,
+          category: "Standalone Story",
+          platform: "Facebook",
+          platformIcon: "facebook",
+          language: lang,
+          format: fmt === "landscape" ? "Watch Video (16:9)" : "Facebook Reel (9:16)",
+          aspectRatio: fmt === "landscape" ? "16:9" : "9:16",
+          videoTitle: item.title || (lang === "id" ? titleId : titleEn),
+          videoId: item.id,
+          videoUrl: item.url,
+          publishedAt: item.publishedAt || "2026-11-04T00:00:00.000Z",
+          status: item.status || "published",
+          privacy: "public",
+          thumbnailUrl: fallbackYt ? `https://img.youtube.com/vi/${fallbackYt}/hqdefault.jpg` : undefined,
+          author,
+          illustrator,
+          license,
+          sourceUrl
+        });
+      }
+    }
+  }
+
+  // 3. Instagram Publications
+  const ig = data.publications?.instagram || {};
+  for (const lang of ["id", "en"] as const) {
+    const item = ig[lang];
+    if (item && item.url) {
+      const fallbackYt = yt[lang]?.vertical?.id;
+      auditRecords.push({
+        id: padId(counter++),
+        storySlug: s,
+        storyTitleId: titleId,
+        storyTitleEn: titleEn,
+        category: "Standalone Story",
+        platform: "Instagram",
+        platformIcon: "instagram",
+        language: lang,
+        format: "Instagram Reel (9:16)",
+        aspectRatio: "9:16",
+        videoTitle: item.title || (lang === "id" ? titleId : titleEn),
+        videoId: item.id,
+        videoUrl: item.url,
+        publishedAt: item.publishedAt || "2026-11-04T00:00:00.000Z",
+        status: item.status || "published",
+        privacy: "public",
+        thumbnailUrl: fallbackYt ? `https://img.youtube.com/vi/${fallbackYt}/hqdefault.jpg` : undefined,
+        author,
+        illustrator,
+        license,
+        sourceUrl
+      });
+    }
+  }
+}
+
+// 4. Compilation Marathons
+const compPath = path.join(workspaceRoot, "exports/compilations/publication-status.json");
+if (fs.existsSync(compPath)) {
+  const comps = JSON.parse(fs.readFileSync(compPath, "utf-8"));
+  for (const [key, comp] of Object.entries(comps) as [string, any][]) {
+    const lang: "id" | "en" = key.includes("-en") ? "en" : "id";
+    const title = comp.title;
+
+    // Facebook Marathon
+    if (comp.permalink && comp.videoId) {
+      auditRecords.push({
+        id: padId(counter++),
+        storySlug: key,
+        storyTitleId: "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
+        storyTitleEn: "Bedtime Stories Marathon (5 Stories Non-Stop)",
+        category: "Compilation Marathon",
+        platform: "Facebook",
+        platformIcon: "facebook",
+        language: lang,
+        format: "Watch Video (16:9)",
+        aspectRatio: "16:9",
+        videoTitle: title,
+        videoId: comp.videoId,
+        videoUrl: comp.permalink,
+        publishedAt: comp.publishedAt || comp.facebookPublishedAt || "2026-11-05T02:00:00.000Z",
+        status: "published",
+        privacy: "public",
+        duration: "11m 06s (19,928 frames)",
+        thumbnailUrl: comp.youtube?.videoId ? `https://img.youtube.com/vi/${comp.youtube.videoId}/hqdefault.jpg` : undefined,
+        author: "Pratham Books Authors (Various)",
+        illustrator: "Pratham Books Illustrators (Various)",
+        license: "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        sourceUrl: "https://storyweaver.org.in"
+      });
+    }
+
+    // YouTube Marathon
+    if (comp.youtube && comp.youtube.url) {
+      auditRecords.push({
+        id: padId(counter++),
+        storySlug: key,
+        storyTitleId: "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
+        storyTitleEn: "Bedtime Stories Marathon (5 Stories Non-Stop)",
+        category: "Compilation Marathon",
+        platform: "YouTube",
+        platformIcon: "youtube",
+        language: lang,
+        format: "Marathon Video (16:9)",
+        aspectRatio: "16:9",
+        videoTitle: title,
+        videoId: comp.youtube.videoId,
+        videoUrl: comp.youtube.url,
+        publishedAt: comp.youtube.publishedAt || "2026-11-05T02:00:00.000Z",
+        status: "published",
+        privacy: comp.youtube.privacy || "public",
+        duration: "11m 06s (19,928 frames)",
+        thumbnailUrl: `https://img.youtube.com/vi/${comp.youtube.videoId}/hqdefault.jpg`,
+        author: "Pratham Books Authors (Various)",
+        illustrator: "Pratham Books Illustrators (Various)",
+        license: "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        sourceUrl: "https://storyweaver.org.in"
+      });
+    }
+  }
+}
+
+// Write audit-data.json
+const auditJsonPath = path.join(docsDir, "audit-data.json");
+fs.writeFileSync(auditJsonPath, JSON.stringify(auditRecords, null, 2));
+console.log(`Saved ${auditRecords.length} audit records to ${auditJsonPath}`);
+
+// Generate docs/index.html
+const indexHtmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zayn Storybook — Multi-Platform Publication & Compliance Audit Catalog</title>
+  <meta name="description" content="Comprehensive audit directory, live catalog, and licensing tracker of all published storybook videos across YouTube, Facebook, and Instagram by Zayn Storybook.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1f2937;
+      --card-bg: rgba(26, 34, 52, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(37, 48, 73, 0.9);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --accent-primary: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --yt-color: #ef4444;
+      --fb-color: #3b82f6;
+      --ig-color: #ec4899;
+      --success-green: #10b981;
+      --gold: #f59e0b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.35);
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-border: rgba(0, 0, 0, 0.08);
+      --card-hover: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --accent-primary: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.18);
+      --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header styling */
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 2rem;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+    }
+
+    .brand-logo {
+      font-size: 2.25rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.4));
+    }
+
+    .brand-heading h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    [data-theme="light"] .brand-heading h1 {
+      background: linear-gradient(135deg, #0f172a 40%, #0369a1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-heading p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 0.25rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--success-green);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-verified::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--success-green);
+      box-shadow: 0 0 8px var(--success-green);
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.95rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .btn-action:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border: none;
+      color: #ffffff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .btn-accent:hover {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+
+    /* Channel badges */
+    .channel-strip {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--card-border);
+    }
+
+    .channel-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+    }
+
+    .channel-pill:hover {
+      color: var(--text-main);
+      border-color: currentColor;
+      transform: translateY(-1px);
+    }
+
+    .channel-pill.yt { border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+    .channel-pill.fb { border-color: rgba(59, 130, 246, 0.4); color: #60a5fa; }
+    .channel-pill.ig { border-color: rgba(236, 72, 153, 0.4); color: #f472b6; }
+    .channel-pill.gh { border-color: rgba(156, 163, 175, 0.4); color: #d1d5db; }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 1.15rem 1.25rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--accent-primary);
+      opacity: 0.6;
+    }
+
+    .stat-card.yt::after { background: var(--yt-color); }
+    .stat-card.fb::after { background: var(--fb-color); }
+    .stat-card.ig::after { background: var(--ig-color); }
+    .stat-card.cc::after { background: var(--success-green); }
+
+    .stat-title {
+      font-size: 0.775rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    .stat-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-top: 0.25rem;
+    }
+
+    /* Filter & Controls Toolbar */
+    .toolbar {
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.6rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 0.925rem;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+
+    .view-toggles {
+      display: inline-flex;
+      background: var(--bg-primary);
+      padding: 0.25rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
+    }
+
+    .view-btn {
+      padding: 0.5rem 0.9rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+    }
+
+    .view-btn.active {
+      background: var(--bg-tertiary);
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .filter-chips-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-size: 0.775rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-dim);
+      margin-right: 0.25rem;
+    }
+
+    .filter-chip {
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-full);
+      background: var(--bg-primary);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-chip:hover {
+      color: var(--text-main);
+      border-color: var(--accent-primary);
+    }
+
+    .filter-chip.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #0b0f19;
+      font-weight: 700;
+    }
+
+    [data-theme="light"] .filter-chip.active {
+      color: #ffffff;
+    }
+
+    /* Filter dropdowns */
+    .filter-select {
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 0.82rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    /* Results Header */
+    .results-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding: 0 0.25rem;
+    }
+
+    .results-count {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .results-count strong {
+      color: var(--text-main);
+    }
+
+    /* Card Grid View */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .video-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      box-shadow: var(--shadow-card);
+    }
+
+    .video-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .card-thumb-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 ratio */
+      background: #111827;
+      overflow: hidden;
+    }
+
+    .card-thumb-wrapper.ratio-vertical {
+      padding-top: 60%; /* Compact representation */
+    }
+
+    .card-thumb-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .video-card:hover .card-thumb-img {
+      transform: scale(1.04);
+    }
+
+    .thumb-overlay-badge {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      display: flex;
+      gap: 0.4rem;
+      z-index: 2;
+    }
+
+    .thumb-duration-badge {
+      position: absolute;
+      bottom: 0.75rem;
+      right: 0.75rem;
+      background: rgba(0, 0, 0, 0.85);
+      color: #ffffff;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      z-index: 2;
+    }
+
+    .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .platform-badge.yt { background: #ef4444; color: #ffffff; }
+    .platform-badge.fb { background: #2563eb; color: #ffffff; }
+    .platform-badge.ig { background: #ec4899; color: #ffffff; }
+
+    .lang-badge {
+      padding: 0.25rem 0.55rem;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .format-badge {
+      padding: 0.25rem 0.55rem;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      color: #38bdf8;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .card-content {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-story-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-video-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-main);
+      margin-bottom: 0.85rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-meta-list {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+      padding-top: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .meta-id-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      padding: 0.15rem 0.45rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .meta-id-tag:hover {
+      color: var(--accent-primary);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-card {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: var(--radius-md);
+      font-size: 0.825rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      color: var(--text-main);
+    }
+
+    .btn-card:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+    }
+
+    .btn-card.primary {
+      background: var(--accent-primary);
+      color: #0b0f19;
+      border: none;
+      font-weight: 700;
+    }
+
+    [data-theme="light"] .btn-card.primary {
+      color: #ffffff;
+      background: #0284c7;
+    }
+
+    .btn-card.primary:hover {
+      filter: brightness(1.1);
+    }
+
+    /* Table View */
+    .table-container {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: var(--shadow-card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      text-align: left;
+    }
+
+    thead th {
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.775rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 1rem 1.15rem;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--card-border);
+      transition: background 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background: var(--card-hover);
+    }
+
+    tbody td {
+      padding: 1rem 1.15rem;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .table-cell-title {
+      font-weight: 600;
+      max-width: 320px;
+    }
+
+    .table-cell-title small {
+      display: block;
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.775rem;
+      margin-top: 0.15rem;
+    }
+
+    .table-link {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .table-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Modal Player */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-window {
+      background: var(--bg-secondary);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      max-width: 900px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.25rem;
+    }
+
+    .modal-close:hover {
+      color: var(--text-main);
+    }
+
+    .modal-player-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 */
+      background: #000000;
+    }
+
+    .modal-player-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      z-index: 1100;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--card-border);
+      padding: 2.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .brand-heading h1 { font-size: 1.45rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .toolbar { padding: 1rem; }
+      .search-box { min-width: 100%; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="header-top">
+        <div class="brand-title">
+          <div class="brand-logo">📚</div>
+          <div class="brand-heading">
+            <h1>Zayn Storybook Catalog & Audit</h1>
+            <p>Official Multi-Platform Publication Registry & Creative Commons Compliance Tracker</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <span class="badge-verified">100% Audit Verified</span>
+          <button class="btn-action" id="themeToggleBtn" onclick="toggleTheme()">🌓 Theme</button>
+          <button class="btn-action" onclick="exportToCsv()">📥 Export CSV</button>
+          <button class="btn-action btn-accent" onclick="exportToJson()">📋 Export JSON</button>
+        </div>
+      </div>
+
+      <div class="channel-strip">
+        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Official Channels:</span>
+        <a href="https://www.youtube.com/@zayn.storybook" target="_blank" rel="noopener noreferrer" class="channel-pill yt">
+          <span>📺</span> YouTube (@zayn.storybook)
+        </a>
+        <a href="https://www.facebook.com/1473240609201601" target="_blank" rel="noopener noreferrer" class="channel-pill fb">
+          <span>📘</span> Facebook Page (Zayn Storybook)
+        </a>
+        <a href="https://www.instagram.com/zayn.storybook" target="_blank" rel="noopener noreferrer" class="channel-pill ig">
+          <span>📸</span> Instagram (@zayn.storybook)
+        </a>
+        <a href="https://github.com/ramustha/storybook-video-generator" target="_blank" rel="noopener noreferrer" class="channel-pill gh">
+          <span>💻</span> GitHub Repository
+        </a>
+      </div>
+    </header>
+
+    <!-- Stats KPI Section -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Total Publications</div>
+        <div class="stat-value" id="kpiTotal">53</div>
+        <div class="stat-desc">Published & verified assets</div>
+      </div>
+      <div class="stat-card yt">
+        <div class="stat-title">YouTube Videos</div>
+        <div class="stat-value" id="kpiYt">22</div>
+        <div class="stat-desc">10 Landscape · 10 Shorts · 2 Marathons</div>
+      </div>
+      <div class="stat-card fb">
+        <div class="stat-title">Facebook Videos</div>
+        <div class="stat-value" id="kpiFb">21</div>
+        <div class="stat-desc">10 Watch · 9 Reels · 2 Specials</div>
+      </div>
+      <div class="stat-card ig">
+        <div class="stat-title">Instagram Reels</div>
+        <div class="stat-value" id="kpiIg">10</div>
+        <div class="stat-desc">5 ID Reels · 5 EN Reels (9:16)</div>
+      </div>
+      <div class="stat-card cc">
+        <div class="stat-title">License & Rights</div>
+        <div class="stat-value" style="font-size: 1.35rem; color: var(--success-green);">CC BY 4.0</div>
+        <div class="stat-desc">StoryWeaver / Pratham Books</div>
+      </div>
+    </section>
+
+    <!-- Toolbar Filters -->
+    <section class="toolbar">
+      <div class="search-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by story, video title, ID, author, or keyword..." oninput="handleSearch()">
+        </div>
+        <div class="view-toggles">
+          <button id="viewCardBtn" class="view-btn active" onclick="setViewMode('card')">
+            <span>⊞</span> Card Grid
+          </button>
+          <button id="viewTableBtn" class="view-btn" onclick="setViewMode('table')">
+            <span>☰</span> Audit Table
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-chips-row">
+        <span class="filter-label">Platform:</span>
+        <button class="filter-chip active" data-filter="platform" data-value="all" onclick="setPlatformFilter('all', this)">All (53)</button>
+        <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">YouTube (22)</button>
+        <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">Facebook (21)</button>
+        <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">Instagram (10)</button>
+
+        <span class="filter-label" style="margin-left: 0.75rem;">Language:</span>
+        <button class="filter-chip active" data-filter="lang" data-value="all" onclick="setLangFilter('all', this)">All</button>
+        <button class="filter-chip" data-filter="lang" data-value="id" onclick="setLangFilter('id', this)">🇮🇩 Indonesian (ID)</button>
+        <button class="filter-chip" data-filter="lang" data-value="en" onclick="setLangFilter('en', this)">🇬🇧 English (EN)</button>
+
+        <span class="filter-label" style="margin-left: 0.75rem;">Story:</span>
+        <select id="storySelect" class="filter-select" onchange="handleStoryChange()">
+          <option value="all">All Stories & Marathons</option>
+          <option value="pisang-terlalu-banyak">🍌 Pisang Terlalu Banyak! / Too Many Bananas!</option>
+          <option value="gara-gara-kucing">🐱 Gara-Gara Kucing! / It's All the Cat's Fault!</option>
+          <option value="hari-cukur-rambut">✂️ Hari Cukur Rambut / Annual Haircut Day</option>
+          <option value="jas-hujan-merah">🌧️ Jas Hujan Merah / The Red Raincoat</option>
+          <option value="raja-gemuk-anjing-kurus">👑 Raja Gemuk, Anjing Kurus / Fat King, Thin Dog</option>
+          <option value="compilation">🌙 Bedtime Story Marathons (Compilations)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Results Status Bar -->
+    <div class="results-bar">
+      <div class="results-count">
+        Showing <strong id="visibleCount">53</strong> of <strong>53</strong> verified video assets
+      </div>
+    </div>
+
+    <!-- Card Grid View Container -->
+    <div id="cardViewContainer" class="cards-grid">
+      <!-- Injected by JavaScript -->
+    </div>
+
+    <!-- Table View Container -->
+    <div id="tableViewContainer" class="table-container" style="display: none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Audit ID</th>
+            <th>Platform</th>
+            <th>Lang</th>
+            <th>Format</th>
+            <th>Story Title</th>
+            <th>Published Video Title</th>
+            <th>Video ID</th>
+            <th>Date Published (UTC)</th>
+            <th>Status</th>
+            <th>Direct Link</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Injected by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Video Modal Preview -->
+    <div id="videoModal" class="modal-backdrop" onclick="closeModal(event)">
+      <div class="modal-window" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title" id="modalVideoTitle">Video Player Preview</div>
+          <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-player-container" id="modalPlayerFrame">
+          <!-- Iframe injected dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Copied to clipboard!</div>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <strong>Zayn Storybook</strong> &copy; 2026. Automated Production Engine for Children's Literature.
+        <div style="font-size: 0.775rem; color: var(--text-dim); margin-top: 0.25rem;">
+          All stories adapted under Creative Commons Attribution 4.0 International (CC BY 4.0) from Pratham Books / StoryWeaver.
+        </div>
+      </div>
+      <div class="footer-links">
+        <a href="COPYRIGHT_AND_ATTRIBUTION_GUIDE.md" target="_blank">Attribution Guide</a>
+        <a href="PRIVACY_POLICY.md" target="_blank">Privacy Policy</a>
+        <a href="TERMS_OF_SERVICE.md" target="_blank">Terms of Service</a>
+        <a href="https://github.com/ramustha/storybook-video-generator" target="_blank">GitHub Repo</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Embedded Complete Audit Dataset
+    const RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
+
+    let state = {
+      searchQuery: '',
+      platformFilter: 'all',
+      langFilter: 'all',
+      storyFilter: 'all',
+      viewMode: 'card'
+    };
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('zayn_theme', target);
+    }
+
+    // Initialize Theme
+    const savedTheme = localStorage.getItem('zayn_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function copyToClipboard(text, label) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied ' + (label || text) + ' to clipboard!');
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+
+    function setViewMode(mode) {
+      state.viewMode = mode;
+      document.getElementById('viewCardBtn').classList.toggle('active', mode === 'card');
+      document.getElementById('viewTableBtn').classList.toggle('active', mode === 'table');
+      document.getElementById('cardViewContainer').style.display = mode === 'card' ? 'grid' : 'none';
+      document.getElementById('tableViewContainer').style.display = mode === 'table' ? 'block' : 'none';
+    }
+
+    function setPlatformFilter(val, btn) {
+      state.platformFilter = val;
+      document.querySelectorAll('[data-filter="platform"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function setLangFilter(val, btn) {
+      state.langFilter = val;
+      document.querySelectorAll('[data-filter="lang"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function handleStoryChange() {
+      state.storyFilter = document.getElementById('storySelect').value;
+      render();
+    }
+
+    function handleSearch() {
+      state.searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+      render();
+    }
+
+    function getFilteredData() {
+      return RAW_AUDIT_DATA.filter(item => {
+        // Platform filter
+        if (state.platformFilter !== 'all' && item.platform !== state.platformFilter) {
+          return false;
+        }
+
+        // Language filter
+        if (state.langFilter !== 'all' && item.language !== state.langFilter) {
+          return false;
+        }
+
+        // Story filter
+        if (state.storyFilter !== 'all') {
+          if (state.storyFilter === 'compilation') {
+            if (item.category !== 'Compilation Marathon') return false;
+          } else if (item.storySlug !== state.storyFilter) {
+            return false;
+          }
+        }
+
+        // Search query
+        if (state.searchQuery) {
+          const q = state.searchQuery;
+          const searchStr = [
+            item.id,
+            item.storyTitleId,
+            item.storyTitleEn,
+            item.videoTitle,
+            item.videoId,
+            item.platform,
+            item.format,
+            item.author,
+            item.illustrator
+          ].join(' ').toLowerCase();
+
+          if (!searchStr.includes(q)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function formatDate(isoStr) {
+      if (!isoStr || isoStr === 'N/A') return 'Published';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    function renderCard(item) {
+      const isYt = item.platform === 'YouTube';
+      const isFb = item.platform === 'Facebook';
+      const isIg = item.platform === 'Instagram';
+
+      const platClass = isYt ? 'yt' : isFb ? 'fb' : 'ig';
+      const platIcon = isYt ? '📺' : isFb ? '📘' : '📸';
+      const isVertical = item.aspectRatio === '9:16';
+
+      // Fallback poster image if no thumbnail
+      const thumbSrc = item.thumbnailUrl || 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80';
+
+      return \`
+        <div class="video-card">
+          <div class="card-thumb-wrapper \${isVertical ? 'ratio-vertical' : ''}">
+            <img src="\${thumbSrc}" alt="\${item.videoTitle}" class="card-thumb-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80'">
+            <div class="thumb-overlay-badge">
+              <span class="platform-badge \${platClass}">\${platIcon} \${item.platform}</span>
+              <span class="lang-badge">\${item.language.toUpperCase()}</span>
+              <span class="format-badge">\${item.format}</span>
+            </div>
+            \${item.duration ? \`<span class="thumb-duration-badge">\${item.duration.split(' ')[0]}</span>\` : ''}
+          </div>
+
+          <div class="card-content">
+            <div class="card-story-title">\${item.storyTitleId}</div>
+            <h3 class="card-video-title" title="\${item.videoTitle}">\${item.videoTitle}</h3>
+
+            <div class="card-meta-list">
+              <div class="card-meta-row">
+                <span>Audit ID:</span>
+                <span class="meta-id-tag" onclick="copyToClipboard('\${item.id}', 'Audit ID')">\${item.id} 📋</span>
+              </div>
+              <div class="card-meta-row">
+                <span>Video ID:</span>
+                <span class="meta-id-tag" onclick="copyToClipboard('\${item.videoId}', 'Video ID')">\${item.videoId} 📋</span>
+              </div>
+              <div class="card-meta-row">
+                <span>Published:</span>
+                <span>\${formatDate(item.publishedAt)}</span>
+              </div>
+              <div class="card-meta-row">
+                <span>License:</span>
+                <span style="color: var(--success-green); font-size: 0.75rem;">CC BY 4.0</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              \${isYt ? \`
+                <button class="btn-card" onclick="openYoutubeModal('\${item.videoId}', '\${item.videoTitle.replace(/'/g, "\\\\'")}')">
+                  ▶ Preview
+                </button>
+              \` : ''}
+              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary">
+                Open \${item.platform} ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      \`;
+    }
+
+    function renderTableRow(item) {
+      const platClass = item.platform === 'YouTube' ? 'yt' : item.platform === 'Facebook' ? 'fb' : 'ig';
+      return \`
+        <tr>
+          <td><span class="meta-id-tag" onclick="copyToClipboard('\${item.id}', 'Audit ID')">\${item.id}</span></td>
+          <td><span class="platform-badge \${platClass}">\${item.platform}</span></td>
+          <td><span class="lang-badge">\${item.language.toUpperCase()}</span></td>
+          <td><span class="format-badge">\${item.format}</span></td>
+          <td><strong>\${item.storyTitleId}</strong></td>
+          <td class="table-cell-title">
+            \${item.videoTitle}
+            <small>By \${item.author}</small>
+          </td>
+          <td><span class="meta-id-tag" onclick="copyToClipboard('\${item.videoId}', 'Video ID')">\${item.videoId}</span></td>
+          <td style="white-space: nowrap; font-size: 0.8rem;">\${formatDate(item.publishedAt)}</td>
+          <td><span style="color: var(--success-green); font-weight: 600;">\${item.status.toUpperCase()}</span></td>
+          <td>
+            <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="table-link">
+              View ↗
+            </a>
+          </td>
+        </tr>
+      \`;
+    }
+
+    function render() {
+      const data = getFilteredData();
+      document.getElementById('visibleCount').textContent = data.length;
+
+      // Card Grid
+      const cardsHtml = data.map(renderCard).join('');
+      document.getElementById('cardViewContainer').innerHTML = cardsHtml || '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-dim);">No published videos match your filter.</div>';
+
+      // Table View
+      const rowsHtml = data.map(renderTableRow).join('');
+      document.getElementById('tableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 2rem;">No published videos match your filter.</td></tr>';
+    }
+
+    function openYoutubeModal(videoId, title) {
+      const modal = document.getElementById('videoModal');
+      const frame = document.getElementById('modalPlayerFrame');
+      document.getElementById('modalVideoTitle').textContent = title;
+      frame.innerHTML = \`<iframe src="https://www.youtube-nocookie.com/embed/\${videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('videoModal');
+      const frame = document.getElementById('modalPlayerFrame');
+      frame.innerHTML = '';
+      modal.classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // CSV Export for Compliance Audit
+    function exportToCsv() {
+      const headers = ['Audit ID', 'Category', 'Platform', 'Language', 'Format', 'Story Title (ID)', 'Story Title (EN)', 'Published Video Title', 'Platform Video ID', 'Published Date UTC', 'Direct Video URL', 'Status', 'License', 'Author', 'Illustrator', 'Source URL'];
+      
+      const rows = RAW_AUDIT_DATA.map(item => [
+        item.id,
+        item.category,
+        item.platform,
+        item.language.toUpperCase(),
+        item.format,
+        \`"\${(item.storyTitleId || '').replace(/"/g, '""')}"\`,
+        \`"\${(item.storyTitleEn || '').replace(/"/g, '""')}"\`,
+        \`"\${(item.videoTitle || '').replace(/"/g, '""')}"\`,
+        \`"\${item.videoId}"\`,
+        \`"\${item.publishedAt}"\`,
+        \`"\${item.videoUrl}"\`,
+        item.status,
+        \`"\${item.license}"\`,
+        \`"\${item.author}"\`,
+        \`"\${item.illustrator}"\`,
+        \`"\${item.sourceUrl}"\`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'zayn-storybook-multi-platform-audit-catalog.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported CSV audit file!');
+    }
+
+    function exportToJson() {
+      const jsonContent = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(RAW_AUDIT_DATA, null, 2));
+      const link = document.createElement('a');
+      link.setAttribute('href', jsonContent);
+      link.setAttribute('download', 'zayn-storybook-audit-records.json');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported JSON audit records!');
+    }
+
+    // Initial render
+    render();
+  </script>
+</body>
+</html>
+`;
+
+fs.writeFileSync(path.join(docsDir, "index.html"), indexHtmlContent);
+console.log(`Successfully generated docs/index.html with ${auditRecords.length} records!`);

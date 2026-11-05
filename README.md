@@ -112,6 +112,15 @@ npm test
 
 ---
 
+## 📋 Live Publication Catalog & Audit Portal
+
+View the interactive, filterable multi-platform catalog and Creative Commons compliance audit directory for all published video assets across YouTube, Facebook, and Instagram:
+* 🌐 **Live GitHub Pages Portal**: [https://ramustha.github.io/storybook-video-generator/](https://ramustha.github.io/storybook-video-generator/)
+* 📁 **Source & Audit Data**: [`docs/index.html`](./docs/index.html) and [`docs/audit-data.json`](./docs/audit-data.json)
+* ⚡ **Rebuild Portal**: `npm run docs:portal`
+
+---
+
 ## 🤖 Using as an AI Coding Skill
 
 This repository includes a universal agent skill definition in [`skills/storybook-video-generator/`](./skills/storybook-video-generator/) compatible with:
