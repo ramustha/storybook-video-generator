@@ -91,9 +91,9 @@ async function main() {
     console.log(`📍 PROCESSING LANGUAGE: [${currentLang.toUpperCase()}]`);
     console.log(`======================================================`);
 
-    // 1. YouTube Distribution (16:9 Landscape Video - Prevents duplicate vertical entries in Videos section)
+    // 1. YouTube Distribution (Dual-Format: 16:9 Landscape Video & 9:16 Shorts if <= 180s per policy)
     if (!options.skipYoutube) {
-      console.log(`\n--- [1/2] PUBLISHING TO YOUTUBE (16:9 LANDSCAPE HERO) ---`);
+      console.log(`\n--- [1/2] PUBLISHING TO YOUTUBE (DUAL-FORMAT: 16:9 VIDEO & SHORTS IF <=180s) ---`);
       const ytArgs = [
         "scripts/upload-youtube.ts",
         "--book",
@@ -101,7 +101,7 @@ async function main() {
         "--lang",
         currentLang,
         "--format",
-        "landscape",
+        "all",
       ];
       if (options.dryRun) ytArgs.push("--dry-run");
 

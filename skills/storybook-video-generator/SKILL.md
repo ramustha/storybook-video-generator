@@ -246,11 +246,12 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
 * **Shorts Mobile Feed Reality**: Note that YouTube mobile Shorts feed auto-picks a video frame from 0.0s–1.0s. `thumbnail-vertical.png` attaches to YouTube API for desktop/playlists and serves as the curated cover for Instagram Reels and Facebook Reels.
 
 ### 10. Multi-Platform Idempotent Publishing & Duplicate Prevention
-* **YouTube Single-Format & Anti-Duplication Policy**:
-  * **Landscape-Only YouTube Default**: YouTube is strictly a 16:9 widescreen channel for storybooks and compilations. All multi-platform publishing (`npm run publish:all`) defaults to `--format landscape` for YouTube to prevent channel clutter and split watch-time.
-  * **Shorts >180s Limit Guardrail**: YouTube strictly limits Shorts to 180s (3m). Any vertical video >180s is automatically rejected by YouTube as a Short and demoted into the channel's standard "Videos" tab with letterbox black bars, creating an exact content duplicate next to the 16:9 master video. The upload engine automatically blocks vertical uploads if duration >180s (Tier 4).
+* **YouTube Dual-Format Intentional Strategy & Shorts Duration Policy**:
+  * **Intentional Dual-Format Policy**: Having both a 16:9 widescreen master video (in YouTube "Videos" tab) and a 9:16 vertical video (in YouTube "Shorts" tab) is fully intentional and supported for dual-feed algorithmic discovery.
+  * **Strict <=180s Shorts Limit Guardrail**: YouTube strictly limits Shorts to 180s (3m). Any vertical video >180s is automatically rejected by YouTube as a Short and demoted into the channel's standard "Videos" tab with letterbox black bars, creating an undesirable horizontal letterboxed duplicate. The upload engine automatically allows dual-format for <=180s (Tier 2 & Tier 3), and suppresses vertical only when duration >180s (Tier 4).
   * **Platform Division of Labor**:
-    * **YouTube**: 16:9 Landscape Widescreen Storybooks & Compilations.
+    * **YouTube Videos Tab**: 16:9 Landscape Widescreen Master Storybooks & Compilations.
+    * **YouTube Shorts Tab**: 9:16 Vertical Shorts (strictly $\le 180$ seconds).
     * **Instagram & Facebook Reels**: 9:16 Vertical Video (with R2-protected custom cover).
     * **TikTok**: 9:16 Vertical Video / Teasers.
 * **Instagram Reels Cloudflare R2 Cover Lifecycle**:
