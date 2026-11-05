@@ -729,15 +729,16 @@ async function main() {
         continue;
       }
 
+      const pubRecordPath = path.join(outDir, "publication-status.json");
+      let existingId: string | undefined;
+      if (existsSync(pubRecordPath)) {
+        try {
+          const pubData = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
+          existingId = pubData[`${compilationTheme}-${lang}`]?.youtube?.videoId;
+        } catch {}
+      }
+
       if (isUpdateThumbnailsOnly) {
-        const pubRecordPath = path.join(outDir, "publication-status.json");
-        let existingId: string | undefined;
-        if (existsSync(pubRecordPath)) {
-          try {
-            const pubData = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
-            existingId = pubData[`${compilationTheme}-${lang}`]?.youtube?.videoId;
-          } catch {}
-        }
         if (existingId && thumbnailPath) {
           console.log(`🖼️ Updating YouTube thumbnail for compilation [${lang.toUpperCase()}] (${existingId})...`);
           await uploadThumbnail(youtube, existingId, thumbnailPath);
@@ -746,6 +747,23 @@ async function main() {
           console.warn(`⚠️ Could not find live YouTube videoId for ${compilationTheme}-${lang} in publication-status.json`);
         }
         continue;
+      }
+
+      if (existingId) {
+        if (isForceReplace) {
+          console.log(`⚠️ --force / --replace active! Deleting older compilation video ${existingId} from YouTube first...`);
+          try {
+            await deleteRemoteVideo(youtube, existingId);
+            console.log(`✔ Successfully deleted old compilation video ${existingId}!`);
+          } catch (delErr: any) {
+            console.warn(`⚠️ Warning when deleting old compilation video: ${delErr.message}`);
+          }
+        } else {
+          console.log(`🛑 DUPLICATE DETECTED: Compilation [${lang.toUpperCase()}] is ALREADY LIVE on YouTube (${existingId})!`);
+          console.log(`   • Live URL: https://youtu.be/${existingId}`);
+          console.log(`   💡 Tip: Use --force to replace with the new extended marathon.`);
+          continue;
+        }
       }
 
       const compilationTags = isEn
@@ -787,7 +805,6 @@ async function main() {
         await uploadThumbnail(youtube, videoId, thumbnailPath);
       }
 
-      const pubRecordPath = path.join(outDir, "publication-status.json");
       let pubRecord: Record<string, any> = {};
       if (existsSync(pubRecordPath)) {
         try {

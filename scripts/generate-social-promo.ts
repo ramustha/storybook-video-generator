@@ -81,91 +81,91 @@ export function generateBilingualSocialKit(manifest: StoryManifest): string {
   const hookId = manifest.thumbnailConfig?.id?.hook || `${titleId}! Kisah seru penuh tawa dan pesan moral untuk si kecil!`;
   const hookEn = manifest.thumbnailConfig?.en?.hook || `${titleEn}! A delightful, funny storybook that kids will fall in love with!`;
 
-  return `# 🚀 Bilingual Multi-Platform Social Promotion Kit: ${titleId} / ${titleEn}
+  return `# 🎈 Bilingual Kid-Friendly Social Promotion Kit: ${titleId} / ${titleEn}
 
-> **Target Audience**: Parents, educators, bilingual families, diaspora, and early-childhood reading enthusiasts.  
-> **Core Strategy**: "Single Post, Dual Language" — capturing Indonesian & international English discovery in every post to maximize watch time, comments, and saves.
+> **Tone of Voice**: Playful, Cheerful, Whimsical & Family-Friendly (Gaya Kakak Pendongeng Ceria).  
+> **Core Strategy**: "Single Post, Dual Language" — energetic hooks, giggles, bedtime hugs, and comment sparks.
 
 ---
 
 ## 📸 1. INSTAGRAM (Feed Carousel & Reel Caption)
 
 ### Visual Asset Recommendation:
-- **Slide 1**: Hero Cover with Hook Sticker (\`thumbnail-popular.png\` or 1:1 square crop).
+- **Slide 1**: Hero Cover with Playful Hook Badge (\`thumbnail-popular.png\` or 1:1 crop).
 - **Slide 2**: Climactic / Funny Scene Still (e.g. Scene 4/5).
-- **Slide 3**: Emotional / Solution Scene Still (e.g. Scene 7/8).
+- **Slide 3**: Warm / Happy Ending Scene Still (e.g. Scene 7/8).
 - **Slide 4**: Dedicated Moral Card (\`type: "moral"\` frame).
 - **Slide 5**: CTA Slide: *"Tonton Dongeng Lengkapnya di YouTube @ZaynStorybook! 🔔 Link di Bio!"*.
 
-### Single-Post Bilingual Caption (Copy-Paste Ready):
+### Single-Post Bilingual Caption (Playful & Joyful):
 \`\`\`text
-✨ DONGENG CERITA ANAK BARU! 📖 / NEW ANIMATED STORYBOOK! ✨
+HOREEE! YEEAY! 🎈🎉 Ada Cerita Seru Baru Nih! 📖✨ / NEW STORYBOOK IS HERE!
 ------------------------------------------------------------
 🇮🇩 BAHASA INDONESIA:
 "${hookId}" 🌙✨
 
-Wah, ada cerita seru apa ya di "${titleId}"? Si kecil diajak berpetualang dalam kisah yang penuh tawa, imajinasi, dan kehangatan keluarga. Cocok banget ditonton bersama sebelum tidur atau saat santai di rumah!
+Wah, ada petualangan apa ya di "${titleId}"? Si kecil pasti bakal tertawa gemas melihat ceritanya yang super seru dan penuh kejutan! Cocok banget ditonton santai sore bareng keluarga atau jadi dongeng pengantar tidur nyenyak! 🧸💤
 
-💡 Pesan Moral:
+💡 Pesan Manis Cerita:
 "${moralId}"
 
-💬 PERTANYAAN UNTUK BUNDA & AYAH:
-Siapa si kecil yang punya pengalaman mirip dengan cerita ini? Atau apa dongeng favorit si kecil sebelum tidur? Cerita di kolom komentar ya! 👇🥰
+💬 TEBAK-TEBAKAN & CERITA SERU:
+Siapa si kecil di rumah yang karakternya mirip dengan tokoh di cerita ini? Atau ada yang punya pengalaman lucu serupa? Cerita di kolom komentar yuk, Ayah Bunda! 👇🥰
 
 ------------------------------------------------------------
 🇺🇸 ENGLISH:
 "${hookEn}" 🌙✨
 
-Join the adventure in "${titleEn}"! A heartwarming, delightful tale packed with giggles, imagination, and positive lessons. Perfect for calm bedtime screen-time or early English learning!
+Hop on board for a super fun adventure in "${titleEn}"! Full of giggles, delightful characters, and warm bedtime cuddles. Perfect for a cozy evening routine or boosting early English vocabulary in a natural, joyful way! 🎈🧸
 
-💡 Moral of the Story:
+💡 Sweet Moral of the Story:
 "${moralEn}"
 
-💬 QUESTION FOR PARENTS & EDUCATORS:
-Does your child also love bedtime stories with a funny twist? What's your family's favorite evening routine? Share with us below! 👇✨
+💬 FUN QUESTION FOR PARENTS:
+Does your little one love funny characters or magical bedtime tales best? Let's chat in the comments below! 👇💖
 
 ------------------------------------------------------------
-🎬 WATCH THE FULL WIDESCREEN VIDEO:
-📺 YouTube: Link in Bio (@zayn.storybook)
-⭐ Don't forget to SAVE this post for tonight's bedtime story! 💾✨
+🍿 YUK NONTON BARENG:
+📺 YouTube: Link in Bio (@zayn.storybook) untuk video layar lebar 16:9 yang jernih!
+⭐ Ayah Bunda, jangan lupa SIMPAN (SAVE) postingan ini buat dongeng bobo nanti malam ya! 💾✨
 
-#DongengAnak #CeritaAnak #CeritaBergambar #DongengSebelumTidur #BukuAnak #PendidikanAnakUsiaDini #BilingualKids #KidsBedtimeStory #PictureBookReading #ReadAloud #BedtimeStoriesForKids #ZaynStorybook
+#ZaynStorybook #DongengAnakLucu #CeritaAnakBergambar #DongengSebelumTidur #BukuCeritaAnak #KartunAnakIndonesia #BilingualKids #KidsBedtimeStories #ReadAloud #BedtimeStoriesForKids #FunnyStorybook #ChildrenBooks
 \`\`\`
 
 ---
 
-## 📘 2. FACEBOOK PAGE (Community Feed & Discussion Post)
+## 📘 2. FACEBOOK PAGE (Community Feed & Family Post)
 
 ### Visual Asset:
 - Attach \`thumbnail-popular.png\` (1920x1080) directly or share the 16:9 Landscape Video upload.
 
-### Bilingual Post Copy (Copy-Paste Ready):
+### Bilingual Post Copy (Hangat & Menyenangkan):
 \`\`\`text
-📖 DONGENG BARU HARI INI: "${titleId}" / "${titleEn}" 🌙✨
+🎉 HOREEE! KABAR GEMBIRA BUAT ADIK-ADIK DAN AYAH BUNDA! 🎈✨
+Dongeng baru "${titleId}" (${titleEn}) sudah resmi tayang di Zayn Storybook! 🌙💤
 
-Halo Ayah, Bunda, dan Sobat Pendidik! ✨
-Koleksi dongeng animasi anak bergambar terbaru dari Zayn Storybook sudah resmi tayang!
-
-🇮🇩 Rangkuman Cerita:
+🇮🇩 Keseruan Cerita Hari Ini:
 ${hookId}
-Kisah ini mengajarkan anak-anak tentang empati, keceriaan, dan rasa syukur melalui visual animasi yang ramah anak, suara anak alami yang menyenangkan, serta musik lembut pengantar tidur.
+Di dongeng kali ini, si kecil diajak belajar nilai kebaikan dengan cara yang super asyik, penuh tawa, dan tanpa bising. Musik marimbanya yang lembut siap menemani si kecil relaksasi hingga tertidur pulas!
 
-💡 Pesan Budi Pekerti:
+💡 Pesan Kebaikan Cerita:
 "${moralId}"
 
-🇺🇸 English Edition Available:
-Looking for a calming, joyful read-aloud in English? "${titleEn}" is also live with native child voiceover, helping children develop dual-language listening skills naturally!
+🇺🇸 English Edition for Dual-Language Fun:
+Looking for a fun, calming bedtime story in English? "${titleEn}" is also live with sweet child voiceovers and soothing melodies!
 "${moralEn}"
 
 ------------------------------------------------------------
-🎬 TONTON VIDEO LENGKAPNYA:
+🎬 YUK NONTON VIDEO LENGKAPNYA DI YOUTUBE:
 ▶️ Versi Bahasa Indonesia: ${ytIdUrl}
 ▶️ English Edition       : ${ytEnUrl}
 
-💬 Diskusi Hari Ini:
-Bagaimana cara Ayah & Bunda menanamkan pesan moral kepada si kecil tanpa terkesan menggurui? Tulis tips terbaik Anda di kolom komentar agar bisa saling menginspirasi sesama orang tua! 👇❤️
+💬 Obrolan Seru Keluarga:
+Paling suka bagian mana nih saat mendongeng bareng si kecil? Yuk saling berbagi cerita di kolom komentar! 👇❤️
 
-#ParentingIndonesia #DongengAnakSholeh #CeritaAnakBergambar #BilingualStorybook #ZaynStorybook #PendidikanKarakter
+Jangan lupa klik LIKE & SHARE ke sesama Ayah Bunda ya! Selamat mendengarkan dongeng dan selamat tidur nyenyak adik-adik! 🌙🧸✨
+
+#ZaynStorybook #DongengAnak #CeritaAnakBergambar #DongengLucu #ParentingCeria #PendidikanKarakterAnak #BukuCeritaBergambar #DongengSebelumTidur
 \`\`\`
 
 ---
@@ -174,21 +174,21 @@ Bagaimana cara Ayah & Bunda menanamkan pesan moral kepada si kecil tanpa terkesa
 
 ### Post Format: Image Poll or Single Widescreen Card
 \`\`\`text
-🎉 CERITA BARU SUDAH TAYANG! / NEW STORYBOOK IS LIVE! 📖✨
+🎉 CERITA SERU BARU SUDAH TAYANG! / NEW STORYBOOK IS LIVE! 🎈✨
 
-Halo sahabat Zayn Storybook! Video dongeng "${titleId}" (The Moon and the Cap) sudah bisa kalian tonton di channel kami! 🥳
+Halo teman-teman kecil tersayang! 🥳 Video dongeng "${titleId}" sudah bisa kalian tonton bersama Ayah Bunda di YouTube Zayn Storybook! 📺💖
 
-Kira-kira, adegan mana yang paling bikin kalian penasaran atau tertawa?
-1. 🧢 Saat topi tertiup angin kencang
-2. 🌙 Waktu bulan tiba-tiba memakai topi
-3. 💖 Saat senyuman kembali merekah bersama keluarga
-4. ✨ Semua adegannya lucu dan bikin gemas!
+Kira-kira, adegan mana yang paling bikin kalian tertawa atau penasaran?
+1. 🌟 Bagian awal yang penuh kejutan seru!
+2. 🤣 Adegan lucu di tengah cerita yang bikin ngakak!
+3. 💖 Saat semuanya berakhir dengan senyuman bahagia!
+4. ✨ Semua adegannya asyik dan menggemaskan!
 
-Tulis alasanmu di komentar ya! Jangan lupa tonton video lengkapnya di sini:
-👉 Versi Indonesia : ${ytIdUrl}
-👉 English Edition : ${ytEnUrl}
+Pilih jawabanmu dan tulis di komentar ya! Jangan lupa klik SUBSCRIBE dan bunyikan loncengnya 🔔!
+👉 Tonton Versi Indonesia : ${ytIdUrl}
+👉 Watch English Edition : ${ytEnUrl}
 
-Selamat menonton dan selamat tidur nyenyak! 🌙💤
+Selamat menonton dan selamat bermimpi indah adik-adik! 🌙💤
 \`\`\`
 
 ---
@@ -196,8 +196,9 @@ Selamat menonton dan selamat tidur nyenyak! 🌙💤
 ## 🎵 4. TIKTOK & SHORT-FORM TEASER (Snappy Hook <150 Chars)
 
 \`\`\`text
-Topi kesayangan hilang tertiup angin... kok malah dipakai bulan?! 🌙🧢 Tonton cerita lengkap "${titleId}" di YouTube Zayn Storybook! Link di bio! #DongengAnak #CeritaLucu #AnimasiAnak #BedtimeStory
+Waaah seru banget! 😱 ${hookId.slice(0, 80)}... Tonton cerita lengkap "${titleId}" di YouTube Zayn Storybook yuk! Link di bio! 🎈✨ #DongengAnak #CeritaLucu #AnimasiAnak #BedtimeStory
 \`\`\`
+
 `;
 }
 
