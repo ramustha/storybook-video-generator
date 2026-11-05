@@ -1,0 +1,33 @@
+scripts/upload-youtube.ts
+  698ac31901cd73e0 557-558,578,583,585-587,589-592,594-629,665-758
+src/remotion/components/CompilationThumbnailComposition.tsx
+  698ac31901cd73e0 1-350
+scripts/upload-meta.ts
+  698ac31901cd73e0 623
+package.json
+  698ac31901cd73e0 36-37
+scripts/render-compilation-thumbnail.ts
+  698ac31901cd73e0 1-77
+src/remotion/Root.tsx
+  698ac31901cd73e0 5,71-78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "54d6dbff0a6a96e2390dfed72b30383a811bda07",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 585,
+      "total_deletions": 43,
+      "accepted_lines": 585,
+      "overriden_lines": 0
+    }
+  }
+}
