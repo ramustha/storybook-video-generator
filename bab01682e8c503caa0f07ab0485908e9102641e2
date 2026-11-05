@@ -1,0 +1,31 @@
+scripts/publish-all.ts
+  698ac31901cd73e0 203,208-215
+skills/storybook-video-generator/references/social-promotion-playbook.md
+  698ac31901cd73e0 1-111
+package.json
+  698ac31901cd73e0 26
+scripts/generate-social-promo.ts
+  698ac31901cd73e0 1-231
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 25,61-63,342-362,418
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "bab01682e8c503caa0f07ab0485908e9102641e2",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 379,
+      "total_deletions": 4,
+      "accepted_lines": 379,
+      "overriden_lines": 0
+    }
+  }
+}
