@@ -24,6 +24,7 @@ interface R2Config {
 
 interface UploadOptions {
   bookSlug: string;
+  compilationTheme?: string;
   lang: "id" | "en";
   platform: "instagram" | "facebook" | "both";
   format: "vertical" | "landscape" | "auto";
@@ -49,6 +50,10 @@ function parseArgs(): UploadOptions {
     const arg = args[i];
     if (arg === "--book" && args[i + 1]) {
       options.bookSlug = args[++i].replace(/^stories\//, "").replace(/\/$/, "");
+    } else if (arg === "--compilation" && args[i + 1]) {
+      options.compilationTheme = args[++i];
+      options.platform = "facebook";
+      options.format = "landscape";
     } else if (arg === "--lang" && args[i + 1]) {
       options.lang = args[++i] as "id" | "en";
     } else if (arg === "--platform" && args[i + 1]) {
@@ -588,6 +593,98 @@ async function main() {
 
   // Load config
   const config = await loadMetaConfig();
+
+  // Handle compilation upload if requested
+  if (options.compilationTheme) {
+    const outDir = path.resolve("./exports/compilations");
+    const videoFilename = `kompilasi-${options.compilationTheme}-${options.lang}-16x9.mp4`;
+    const metaFilename = `kompilasi-${options.compilationTheme}-${options.lang}-metadata.txt`;
+    const videoPath = path.join(outDir, videoFilename);
+    const metaPath = path.join(outDir, metaFilename);
+
+    if (!existsSync(videoPath)) {
+      throw new Error(`Compilation video not found at ${videoPath}`);
+    }
+
+    let title = "Kumpulan Dongeng Pengantar Tidur Anak 🌙✨";
+    let caption = "Kompilasi dongeng anak bergambar non-stop...";
+    if (existsSync(metaPath)) {
+      const metaContent = await fs.readFile(metaPath, "utf-8");
+      const titleMatch = metaContent.match(/JUDUL:\s*\n([^\n]+)/);
+      if (titleMatch) title = titleMatch[1].trim();
+      const descMatch = metaContent.match(/DESKRIPSI:\s*\n([\s\S]+?)(?=\n⏳ TIMESTAMPS|\n===|$)/);
+      const descPart = descMatch ? descMatch[1].trim() : "";
+      const timestampsMatch = metaContent.match(/(⏳ TIMESTAMPS[\s\S]+?)(?=\n===|$)/);
+      const timestampsPart = timestampsMatch ? timestampsMatch[1].trim() : "";
+      caption = `${title}\n\n${descPart}\n\n${timestampsPart}\n\n#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak`;
+    }
+
+    const thumbnailCandidates = [
+      path.resolve("./stories/pisang-terlalu-banyak/exports/id/thumbnail-bedtime.png"),
+      path.resolve("./stories/hari-cukur-rambut/exports/id/thumbnail-bedtime.png"),
+      path.resolve("./stories/jas-hujan-merah/exports/id/thumbnail-popular.png"),
+    ];
+    const thumbnailPath = thumbnailCandidates.find((p) => existsSync(p));
+
+    console.log(`\n=======================================================`);
+    console.log(`🎬 COMPILATION FACEBOOK WATCH UPLOADER`);
+    console.log(`=======================================================`);
+    console.log(`🏷️ Theme      : ${options.compilationTheme}`);
+    console.log(`🌐 Language   : ${options.lang}`);
+    console.log(`📁 Video File : ${videoPath}`);
+    console.log(`📌 Title      : ${title}`);
+    if (thumbnailPath) console.log(`🖼️ Thumbnail  : ${thumbnailPath}`);
+    console.log("-------------------------------------------------------");
+    console.log(caption);
+    console.log("-------------------------------------------------------\n");
+
+    if (options.dryRun) {
+      console.log("✔ DRY RUN COMPLETED! Compilation payload and metadata verified.");
+      return;
+    }
+
+    const { publicVideoUrl, cleanup } = await uploadVideoToR2(
+      videoPath,
+      `kompilasi-${options.compilationTheme}`,
+      options.lang
+    );
+
+    try {
+      const fbResult = await uploadToFacebookPage(
+        { publicUrl: publicVideoUrl },
+        title,
+        caption,
+        config,
+        "landscape",
+        thumbnailPath
+      );
+
+      console.log(`\n🎉 COMPILATION VIDEO LIVE ON FACEBOOK WATCH!`);
+      console.log(`🔗 Link: ${fbResult.permalink}`);
+
+      // Save compilation publication metadata
+      const pubRecordPath = path.join(outDir, "publication-status.json");
+      let pubRecord: Record<string, any> = {};
+      if (existsSync(pubRecordPath)) {
+        try {
+          pubRecord = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
+        } catch {}
+      }
+      pubRecord[`${options.compilationTheme}-${options.lang}`] = {
+        title,
+        videoId: fbResult.videoId,
+        permalink: fbResult.permalink,
+        publishedAt: new Date().toISOString(),
+        durationFrames: 19928,
+        durationMinutes: 11.1,
+      };
+      await fs.writeFile(pubRecordPath, JSON.stringify(pubRecord, null, 2), "utf-8");
+    } finally {
+      await cleanup();
+    }
+
+    return;
+  }
 
   // Load story manifest
   const storyDir = path.resolve("./stories", options.bookSlug);

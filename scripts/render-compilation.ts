@@ -348,8 +348,8 @@ async function renderCompilation() {
     ``,
     `DESKRIPSI:`,
     langArg === "en"
-      ? `Enjoy a magical bedtime story marathon with Zayn Storybook! 4 delightful, calming animated storybooks full of humor, friendship, and positive moral lessons.`
-      : `Dengarkan 4 dongeng anak bergambar penuh pesan moral dalam satu video non-stop! Cocok untuk menemani si kecil tidur nyenyak, santai akhir pekan, atau waktu bermain tanpa gangguan.`,
+      ? `Enjoy a magical bedtime story marathon with Zayn Storybook! ${targetSlugs.length} delightful, calming animated storybooks full of humor, friendship, and positive moral lessons.`
+      : `Dengarkan ${targetSlugs.length} dongeng anak bergambar penuh pesan moral dalam satu video non-stop! Cocok untuk menemani si kecil tidur nyenyak, santai akhir pekan, atau waktu bermain tanpa gangguan.`,
     ``,
     `⏳ TIMESTAMPS / DAFTAR CERITA:`,
     ...chaptersList.map((ch) => `${formatTime(ch.timeSec)} - ${ch.title}`),
