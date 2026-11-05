@@ -200,10 +200,19 @@ async function main() {
     }
   }
 
-  // 3. Final Summary Report
+  // 3. Final Summary Report & Social Promotion Kit Generation
   console.log(`\n==================================================================`);
   console.log(`🎉 MULTI-PLATFORM PUBLISHING RUN COMPLETE!`);
   console.log(`==================================================================`);
+
+  // Generate Bilingual Social Promotion Kit for all platforms (Instagram, Facebook, YouTube Community, TikTok)
+  try {
+    console.log(`\n📢 Generating Multi-Platform Bilingual Social Promotion Kit...`);
+    await runCommand("npx", ["tsx", "scripts/generate-social-promo.ts", options.bookSlug]);
+    console.log(`✔ Social promotion kit saved to stories/${options.bookSlug}/exports/social-promotion-posts.md`);
+  } catch (promoErr: any) {
+    console.warn("⚠️ Warning: could not generate social promotion kit:", promoErr.message);
+  }
 
   if (!options.dryRun) {
     // Re-read updated story.json to display consolidated links
