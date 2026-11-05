@@ -249,6 +249,60 @@ async function uploadVideoToR2(
 }
 
 /**
+ * Uploads a local image to Cloudflare R2 temporarily for Instagram Reels cover ingestion.
+ */
+async function uploadImageToR2(
+  imagePath: string,
+  bookSlug: string,
+  lang: string
+): Promise<{ publicImageUrl: string; cleanup: () => Promise<void> }> {
+  const r2 = await loadR2Config();
+  const stats = await fs.stat(imagePath);
+
+  const s3 = new S3Client({
+    region: "auto",
+    endpoint: r2.endpoint,
+    credentials: {
+      accessKeyId: r2.accessKeyId,
+      secretAccessKey: r2.secretAccessKey,
+    },
+  });
+
+  const fileStream = createReadStream(imagePath);
+  const key = `covers/${bookSlug}-${lang}-${Date.now()}.png`;
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: r2.bucketName,
+      Key: key,
+      Body: fileStream,
+      ContentType: "image/png",
+      ContentLength: stats.size,
+    })
+  );
+
+  const publicImageUrl = `${r2.publicDomain.replace(/\/$/, "")}/${key}`;
+  console.log(`   ✔ Cover image uploaded to Cloudflare R2 for Reel cover: ${publicImageUrl}`);
+
+  const cleanup = async () => {
+    try {
+      console.log(`🧹 Cleaning up temporary cover image from Cloudflare R2...`);
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: r2.bucketName,
+          Key: key,
+        })
+      );
+      console.log(`   ✔ R2 cover object removed.`);
+    } catch (err: any) {
+      console.warn("   ⚠️ R2 cover cleanup warning:", err.message);
+    }
+  };
+
+  return { publicImageUrl, cleanup };
+}
+
+/**
  * Polls Instagram media container status until FINISHED or ERROR.
  */
 async function pollInstagramContainer(
@@ -301,7 +355,8 @@ async function uploadToInstagramReels(
   config: MetaConfig,
   shareToFeed: boolean,
   bookSlug: string,
-  lang: string
+  lang: string,
+  thumbnailPath?: string
 ): Promise<{ mediaId: string; permalink: string }> {
   console.log(`\n==================================================`);
   console.log(`📸 STARTING INSTAGRAM REELS UPLOAD (CLOUDFLARE R2)`);
@@ -321,20 +376,39 @@ async function uploadToInstagramReels(
     console.log(`🌐 Using R2 URL   : ${publicVideoUrl}`);
   }
 
+  // Upload custom cover image to R2 for Reel cover_url if provided
+  let publicCoverUrl: string | undefined;
+  let coverCleanup: (() => Promise<void>) | null = null;
+  if (thumbnailPath && existsSync(thumbnailPath)) {
+    try {
+      const coverRes = await uploadImageToR2(thumbnailPath, bookSlug, lang);
+      publicCoverUrl = coverRes.publicImageUrl;
+      coverCleanup = coverRes.cleanup;
+    } catch (covErr: any) {
+      console.warn(`⚠️ Could not upload Reel cover thumbnail to R2: ${covErr.message}`);
+    }
+  }
+
   let containerId: string;
   try {
-    // Step 2: Initialize Instagram Reels container using video_url
+    // Step 2: Initialize Instagram Reels container using video_url and optional cover_url
     console.log(`\n📡 Step 2: Registering Instagram Reels container with Meta Graph API...`);
+    const containerPayload: Record<string, any> = {
+      media_type: "REELS",
+      video_url: publicVideoUrl,
+      caption,
+      share_to_feed: shareToFeed,
+      access_token: config.pageAccessToken,
+    };
+    if (publicCoverUrl) {
+      containerPayload.cover_url = publicCoverUrl;
+      console.log(`   🖼️ Custom Cover URL attached: ${publicCoverUrl}`);
+    }
+
     const initRes = await fetch(`https://graph.facebook.com/v21.0/${config.instagramUserId}/media`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        media_type: "REELS",
-        video_url: publicVideoUrl,
-        caption,
-        share_to_feed: shareToFeed,
-        access_token: config.pageAccessToken,
-      }),
+      body: JSON.stringify(containerPayload),
     });
 
     const initData = await initRes.json();
@@ -351,6 +425,9 @@ async function uploadToInstagramReels(
   } finally {
     if (localCleanup) {
       await localCleanup();
+    }
+    if (coverCleanup) {
+      await coverCleanup();
     }
   }
 
@@ -552,9 +629,9 @@ async function uploadToFacebookPage(
 
   console.log(`   ✔ Published Video ID: ${videoId}`);
 
-  // Attach custom thumbnail for normal landscape videos if available
-  if (isLandscape && thumbnailPath && existsSync(thumbnailPath)) {
-    console.log(`\n🖼️ Attaching custom landscape thumbnail: ${thumbnailPath}...`);
+  // Attach custom thumbnail for videos and Reels if available
+  if (thumbnailPath && existsSync(thumbnailPath)) {
+    console.log(`\n🖼️ Attaching custom ${isLandscape ? "landscape" : "vertical"} thumbnail: ${thumbnailPath}...`);
     try {
       await uploadThumbnailToFacebook(videoId, thumbnailPath, config.pageAccessToken);
       console.log(`   ✔ Custom thumbnail attached as preferred poster!`);
@@ -743,11 +820,23 @@ async function main() {
     );
   }
 
-  // Thumbnail path resolution (for 16:9 Landscape videos)
-  const popularThumbRel =
-    story.thumbnails?.[options.lang]?.popular ||
-    story.thumbnails?.[options.lang]?.primary;
-  let thumbnailPath = popularThumbRel ? path.join(storyDir, popularThumbRel) : "";
+  // Thumbnail path resolution (vertical for Reels / landscape for normal videos)
+  let thumbnailPath = "";
+  if (!isLandscape) {
+    const vertThumbRel = story.thumbnails?.[options.lang]?.vertical;
+    if (vertThumbRel && existsSync(path.join(storyDir, vertThumbRel))) {
+      thumbnailPath = path.join(storyDir, vertThumbRel);
+    } else if (existsSync(path.join(storyDir, "exports", options.lang, "thumbnail-vertical.png"))) {
+      thumbnailPath = path.join(storyDir, "exports", options.lang, "thumbnail-vertical.png");
+    }
+  }
+
+  if (!thumbnailPath) {
+    const popularThumbRel =
+      story.thumbnails?.[options.lang]?.popular ||
+      story.thumbnails?.[options.lang]?.primary;
+    thumbnailPath = popularThumbRel ? path.join(storyDir, popularThumbRel) : "";
+  }
 
   if (!thumbnailPath || !existsSync(thumbnailPath)) {
     thumbnailPath = path.join(storyDir, "exports", options.lang, "thumbnail.png");
@@ -826,7 +915,8 @@ async function main() {
           config,
           options.shareToFeed,
           options.bookSlug,
-          options.lang
+          options.lang,
+          thumbnailPath
         );
 
         if (!story.publications.instagram) story.publications.instagram = {};
@@ -883,7 +973,8 @@ async function main() {
       config,
       options.shareToFeed,
       options.bookSlug,
-      options.lang
+      options.lang,
+      thumbnailPath
     );
 
     if (!story.publications.instagram) story.publications.instagram = {};

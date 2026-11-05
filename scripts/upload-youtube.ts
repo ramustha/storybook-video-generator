@@ -722,6 +722,25 @@ async function main() {
         continue;
       }
 
+      if (isUpdateThumbnailsOnly) {
+        const pubRecordPath = path.join(outDir, "publication-status.json");
+        let existingId: string | undefined;
+        if (existsSync(pubRecordPath)) {
+          try {
+            const pubData = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
+            existingId = pubData[`${compilationTheme}-${lang}`]?.youtube?.videoId;
+          } catch {}
+        }
+        if (existingId && thumbnailPath) {
+          console.log(`🖼️ Updating YouTube thumbnail for compilation [${lang.toUpperCase()}] (${existingId})...`);
+          await uploadThumbnail(youtube, existingId, thumbnailPath);
+          console.log(`✔ Compilation thumbnail updated successfully for ${existingId}!`);
+        } else {
+          console.warn(`⚠️ Could not find live YouTube videoId for ${compilationTheme}-${lang} in publication-status.json`);
+        }
+        continue;
+      }
+
       const compilationTags = isEn
         ? [
             "Bedtime Stories",
@@ -1262,6 +1281,16 @@ async function main() {
               shortsVideoId = browserRes.videoId;
               shortsUrl = browserRes.videoUrl || (shortsVideoId ? `https://youtube.com/shorts/${shortsVideoId}` : undefined);
               console.log(`🎉 Playwright Shorts Upload Successful! Link: ${shortsUrl || "Live in YouTube Studio"}`);
+
+              // Guarantee custom vertical thumbnail is set via official YouTube API for desktop/channel views
+              if (shortsVideoId && youtube && verticalThumbnailPath && existsSync(verticalThumbnailPath)) {
+                try {
+                  console.log(`🖼️ Syncing vertical thumbnail to YouTube Shorts via API...`);
+                  await uploadThumbnail(youtube, shortsVideoId, verticalThumbnailPath);
+                } catch (tErr: any) {
+                  console.warn(`⚠️ Post-browser thumbnail sync warning: ${tErr.message}`);
+                }
+              }
             } else {
               console.warn(`⚠️ Playwright browser upload: ${browserRes.error}`);
               if (engine === "playwright") {

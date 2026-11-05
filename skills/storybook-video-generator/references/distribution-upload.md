@@ -178,6 +178,20 @@ npx tsx scripts/upload-youtube.ts --book <book-slug> --lang all --update-thumbna
 * **Phone Verification**: YouTube Data API requires the uploading channel to have **Intermediate Features (Phone Verification)** enabled:
   * Visit: [https://www.youtube.com/verify](https://www.youtube.com/verify)
 * If phone verification is pending, YouTube API returns `403 The authenticated user doesn't have permissions to upload and set custom video thumbnails`. The script catches this gracefully.
+
+---
+
+## 6. Short-Form (9:16) & Multi-Platform Cover Artwork
+
+Each short-form platform handles covers differently. The pipeline enforces platform-specific mechanics so covers are never blank or awkward:
+
+| Platform | Format / API Parameter | Behavior & Guarantee |
+| :--- | :--- | :--- |
+| **YouTube Shorts** | `youtube.thumbnails.set` & Video Frame 0 | **Desktop & Search**: API attaches `thumbnail-vertical.png`.<br>**Mobile Shorts Feed**: YouTube auto-selects a video frame from 0:00–1:00s. Since `CoverScene` initializes at `bookScale >= 0.94`, the mobile feed preview automatically displays the full 3D storybook cover. |
+| **Instagram Reels** | `cover_url` (Container creation) | `scripts/upload-meta.ts` temporarily uploads `thumbnail-vertical.png` to Cloudflare R2, passes `cover_url` to Meta Graph API, and deletes the temporary R2 file once registered. The Instagram Profile Grid and Reels tab display the custom cover. |
+| **Facebook Reels** | `POST /{video-id}/thumbnails` | Attached via Meta Graph API multipart upload with `is_preferred=true` using `thumbnail-vertical.png`. |
+| **TikTok** | `video_cover_timestamp_ms: 1000` | TikTok Content Posting API selects the video frame at 1000ms (1.0s), which displays the full-bloom `CoverScene`. |
+
 * **Thumbnail Velocity Throttling**: YouTube enforces an unadvertised burst rate limit on `thumbnails.set`. When setting >3 thumbnails rapidly in succession, YouTube temporarily throttles subsequent thumbnail requests with `The user has uploaded too many thumbnails recently. Please try the request again later.`. The upload engine traps this with a warning without breaking the pipeline. Allow 15–30 minutes cooldown before running `--update-thumbnails` for remaining videos, or drag-and-drop into YouTube Studio.
 * The generated `thumbnail.png` in `exports/id/` and `exports/en/` can always be manually attached with a single click in [YouTube Studio](https://studio.youtube.com).
 

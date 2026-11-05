@@ -98,7 +98,7 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
         {/* Left Column: High-Impact Typography */}
         <div
           style={{
-            width: "52%",
+            width: "50%",
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-start",
@@ -137,7 +137,7 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
           <div
             style={{
               color: "#38BDF8",
-              fontSize: 48,
+              fontSize: 50,
               fontWeight: 900,
               letterSpacing: "0.04em",
               textTransform: "uppercase",
@@ -152,7 +152,7 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
           <h1
             style={{
               margin: 0,
-              fontSize: 92,
+              fontSize: 96,
               fontWeight: 900,
               lineHeight: 1.02,
               letterSpacing: "-0.02em",
@@ -199,7 +199,7 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
               fontSize: 26,
               fontWeight: 600,
               lineHeight: 1.35,
-              maxWidth: 780,
+              maxWidth: 820,
               textShadow: "0 3px 10px rgba(0, 0, 0, 0.8)",
               marginTop: 6,
             }}
@@ -214,23 +214,23 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
               alignItems: "center",
               gap: 10,
               marginTop: 10,
-              padding: "10px 20px",
+              padding: "10px 22px",
               borderRadius: 16,
               backgroundColor: "rgba(15, 23, 42, 0.8)",
               border: "1px solid rgba(255, 255, 255, 0.15)",
               color: "#94A3B8",
-              fontSize: 20,
+              fontSize: 21,
               fontWeight: 600,
             }}
           >
-            <span>✨ 5 Kisah Penuh Tawa & Budi Pekerti Zayn Storybook</span>
+            <span>{lang === "en" ? "✨ 5 Heartwarming & Calming Bedtime Adventures" : "✨ 5 Kisah Penuh Tawa & Budi Pekerti Zayn Storybook"}</span>
           </div>
         </div>
 
-        {/* Right Column: Fan of 3D Storybook Cards */}
+        {/* Right Column: Fan of 3D Storybook Cards (Enlarged to fill space & eliminate dead areas) */}
         <div
           style={{
-            width: "44%",
+            width: "48%",
             height: "100%",
             position: "relative",
             display: "flex",
@@ -243,13 +243,13 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
             <div
               style={{
                 position: "absolute",
-                width: 380,
-                height: 270,
-                borderRadius: 24,
+                width: 520,
+                height: 370,
+                borderRadius: 28,
                 overflow: "hidden",
-                border: "6px solid #FFFFFF",
+                border: "7px solid #FFFFFF",
                 boxShadow: "0 25px 60px rgba(0,0,0,0.85)",
-                transform: "translate(-80px, 140px) rotate(-14deg)",
+                transform: "translate(-110px, 190px) rotate(-13deg)",
                 zIndex: 1,
               }}
             >
@@ -265,13 +265,13 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
             <div
               style={{
                 position: "absolute",
-                width: 400,
-                height: 285,
-                borderRadius: 24,
+                width: 540,
+                height: 385,
+                borderRadius: 28,
                 overflow: "hidden",
-                border: "6px solid #FFFFFF",
+                border: "7px solid #FFFFFF",
                 boxShadow: "0 30px 70px rgba(0,0,0,0.85)",
-                transform: "translate(90px, -110px) rotate(12deg)",
+                transform: "translate(110px, -150px) rotate(11deg)",
                 zIndex: 2,
               }}
             >
@@ -287,13 +287,13 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
             <div
               style={{
                 position: "absolute",
-                width: 420,
-                height: 300,
-                borderRadius: 28,
+                width: 570,
+                height: 405,
+                borderRadius: 30,
                 overflow: "hidden",
-                border: "8px solid #FFFFFF",
+                border: "9px solid #FFFFFF",
                 boxShadow: "0 35px 80px rgba(0,0,0,0.9)",
-                transform: "translate(-50px, -70px) rotate(-5deg)",
+                transform: "translate(-60px, -90px) rotate(-5deg)",
                 zIndex: 3,
               }}
             >
@@ -304,19 +304,19 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
             </div>
           )}
 
-          {/* Card 1: Main Center Hero (Pak Srinivas / Bananas) */}
+          {/* Card 1: Main Center Hero (Pak Srinivas / Bananas) - Maximized Hero Size */}
           {storyCovers[0] && (
             <div
               style={{
                 position: "absolute",
-                width: 450,
-                height: 320,
-                borderRadius: 32,
+                width: 620,
+                height: 440,
+                borderRadius: 34,
                 overflow: "hidden",
-                border: "10px solid #FFFFFF",
+                border: "12px solid #FFFFFF",
                 boxShadow:
-                  "0 40px 90px rgba(0, 0, 0, 0.95), 0 0 50px rgba(253, 224, 71, 0.4)",
-                transform: "translate(40px, 40px) rotate(4deg)",
+                  "0 45px 100px rgba(0, 0, 0, 0.95), 0 0 60px rgba(253, 224, 71, 0.45)",
+                transform: "translate(50px, 60px) rotate(3.5deg)",
                 zIndex: 4,
               }}
             >
@@ -328,18 +328,19 @@ export const CompilationThumbnailComposition: React.FC<CompilationThumbnailProps
               <div
                 style={{
                   position: "absolute",
-                  bottom: 16,
-                  right: 16,
+                  bottom: 18,
+                  right: 18,
                   backgroundColor: "#FACC15",
                   color: "#000",
                   fontWeight: 900,
-                  fontSize: 22,
-                  padding: "8px 18px",
-                  borderRadius: 14,
-                  boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
+                  fontSize: 24,
+                  padding: "10px 22px",
+                  borderRadius: 16,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+                  border: "2px solid #000000",
                 }}
               >
-                5 Cerita Seru! 🌙✨
+                {lang === "en" ? "5 Fun Tales! 🌙✨" : "5 Cerita Seru! 🌙✨"}
               </div>
             </div>
           )}

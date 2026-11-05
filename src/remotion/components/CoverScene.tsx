@@ -18,6 +18,9 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
     config: { damping: 14, stiffness: 90 },
   });
 
+  // Keep frame 0 at >=0.94 scale so platform auto-thumbnails (YouTube Shorts, TikTok, Reels) capture a complete book cover
+  const bookScale = interpolate(entrance, [0, 1], [0.94, 1.0]);
+
   const floatY = Math.sin(frame / 18) * 8;
   const floatRotate = Math.sin(frame / 24) * 1.5;
 
@@ -44,7 +47,10 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
     );
   }
 
-  const coverImgSrc = staticFile(scene.visual.imagePath);
+  const coverImgSrc =
+    scene.visual.imagePath.startsWith("data:") || scene.visual.imagePath.startsWith("http")
+      ? scene.visual.imagePath
+      : staticFile(scene.visual.imagePath);
 
   // Support both portrait (aspect ratio < 1.0) and landscape (aspect ratio > 1.0) picture books
   const isCoverPortrait =
@@ -142,7 +148,7 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
       <div
         style={{
           zIndex: 10,
-          transform: `scale(${entrance}) translateY(${floatY}px) rotate(${floatRotate}deg)`,
+          transform: `scale(${bookScale}) translateY(${floatY}px) rotate(${floatRotate}deg)`,
           perspective: 1000,
           display: "flex",
           flexDirection: "column",
