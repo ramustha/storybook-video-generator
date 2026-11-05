@@ -561,7 +561,7 @@ async function main() {
   const setPrivacy = getArg("--set-privacy") as "public" | "unlisted" | "private" | undefined;
   const scheduleTime = getArg("--schedule") || getArg("--publish-at");
   const isMadeForKids = args.includes("--made-for-kids");
-  const requestedLang = (getArg("--lang") || "all") as "id" | "en" | "all";
+  const requestedLang = (getArg("--lang") || "all") as "id" | "en" | "all" | "both";
   const isForceReplace = args.includes("--force") || args.includes("--replace");
   const isUpdateMetadata = args.includes("--update-metadata") || args.includes("--resync-all");
   const isUpdateThumbnailsOnly = args.includes("--update-thumbnails") || args.includes("--thumbnail-only");
@@ -806,7 +806,7 @@ async function main() {
   }
 
   const languages: Array<"id" | "en"> =
-    requestedLang === "all" ? ["id", "en"] : [requestedLang];
+    requestedLang === "all" || requestedLang === "both" ? ["id", "en"] : [requestedLang as "id" | "en"];
 
   // If user only wants to update visibility status or schedule publishing
   if (setPrivacy || scheduleTime) {

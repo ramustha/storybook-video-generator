@@ -36,7 +36,8 @@
     "compilation:render": "tsx scripts/render-compilation.ts",
     "compilation:thumbnail": "tsx scripts/render-compilation-thumbnail.ts",
     "compilation:chapters": "tsx scripts/render-chapter-thumbnails.ts",
-    "docs:portal": "tsx scripts/generate-docs-portal.ts"
+    "docs:portal": "tsx scripts/generate-docs-portal.ts",
+    "audio:synthesize": "tsx scripts/synthesize-story-audio.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",

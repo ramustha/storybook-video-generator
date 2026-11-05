@@ -63,7 +63,7 @@ async function main() {
         try {
           const raw = await fs.readFile(wordsFile, "utf-8");
           const parsed = JSON.parse(raw);
-          wordsMap[scene.sceneId] = parsed.words || [];
+          wordsMap[scene.sceneId] = Array.isArray(parsed) ? parsed : (parsed.words || []);
         } catch (err) {
           wordsMap[scene.sceneId] = [];
         }
@@ -126,6 +126,7 @@ async function main() {
       );
       const startTime = Date.now();
 
+      let lastLoggedPercent = -1;
       await renderMedia({
         composition: {
           ...composition,
@@ -137,6 +138,13 @@ async function main() {
         outputLocation,
         inputProps,
         concurrency: 2,
+        onProgress: ({ renderedFrames, progress }) => {
+          const percent = Math.floor(progress * 100);
+          if (percent >= lastLoggedPercent + 10 || percent === 100) {
+            lastLoggedPercent = percent;
+            console.log(`⏳ [${lang.toUpperCase()}-${format}] Progress: ${percent}% (${renderedFrames}/${composition.durationInFrames} frames)`);
+          }
+        },
       });
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);

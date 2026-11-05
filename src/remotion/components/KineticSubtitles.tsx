@@ -19,14 +19,40 @@ const SPEAKER_ICONS: Record<string, string> = {
   guru: "👩‍🏫",
   ibu: "👩",
   mother: "👩",
+  bunda: "👩",
+  papa: "👨",
+  ayah: "👨",
+  father: "👨",
   budi: "👦",
   manu: "👦",
+  chintu: "👦",
   anak: "👦",
-  protagonist: "👦",
+  protagonist: "👧",
+  child_protagonist: "👧",
+  child_girl: "👧",
+  aku: "👧",
+  me: "👧",
   raja: "👑",
   king: "👑",
   anjing: "🐕",
   dog: "🐕",
+  kucing: "🐱",
+  cat: "🐱",
+  kancil: "🦌",
+  sapi: "🐄",
+  cow: "🐄",
+  bulan: "🌙",
+  moon: "🌙",
+  magical_entity: "🌙",
+  animal_funny: "🐾",
+  elder: "👴",
+  kakek: "👴",
+  nenek: "👵",
+  villager: "🏘️",
+  warga: "🏘️",
+  tetangga: "🏘️",
+  keluarga: "👨‍👩‍👧‍👦",
+  family: "👨‍👩‍👧‍👦",
   narator: "📖",
   narrator: "📖",
 };
@@ -52,10 +78,15 @@ function buildContextGroups(words: WordTiming[]): WordTiming[][] {
 
     const isSentenceEnd = /[.!?…]+$/.test(w.word.trim());
     const isClauseBoundary = /[,;:]+$/.test(w.word.trim());
-    const hasEnoughContext = currentGroup.length >= 8;
 
-    // Split at natural sentence ends or major clause boundaries if long
-    if ((isSentenceEnd && hasEnoughContext) || (isClauseBoundary && currentGroup.length >= 12) || currentGroup.length >= 16) {
+    // Prefer splitting at natural sentence ends (min 5 words) or clause boundaries (min 8 words)
+    // Avoid arbitrary splits in the middle of clauses unless group exceeds 22 words
+    const shouldSplit =
+      (isSentenceEnd && currentGroup.length >= 5) ||
+      (isClauseBoundary && currentGroup.length >= 8) ||
+      currentGroup.length >= 22;
+
+    if (shouldSplit && i < words.length - 1) {
       groups.push(currentGroup);
       currentGroup = [];
     }

@@ -1,0 +1,212 @@
+import fs from "fs/promises";
+import { existsSync, createReadStream, createWriteStream } from "fs";
+import path from "path";
+import os from "os";
+import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { VoiceActorRole, getVoiceActor } from "./voice-actors";
+
+export interface DialogueLine {
+  speakerRole: VoiceActorRole;
+  speakerCustomName?: string;
+  text: string;
+}
+
+export interface WordTimingItem {
+  word: string;
+  start: number;
+  end: number;
+  speaker: string;
+  speakerName: string;
+  speakerColor: string;
+}
+
+export interface SceneSynthesisInput {
+  sceneId: string;
+  lang: "id" | "en";
+  lines: DialogueLine[];
+  outputMp3Path: string;
+  outputWordsPath: string;
+}
+
+export interface SynthesisResult {
+  sceneId: string;
+  lang: "id" | "en";
+  durationSeconds: number;
+  wordCount: number;
+  outputMp3Path: string;
+  outputWordsPath: string;
+}
+
+/**
+ * Re-attaches punctuation marks (?, !, ., ,, ...) stripped by Azure TTS word boundary telemetry.
+ */
+export function attachPunctuation(azureWords: string[], originalText: string): string[] {
+  const originalTokens = originalText.trim().split(/\s+/);
+  const clean = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9-]/g, "");
+
+  let tokenIdx = 0;
+  return azureWords.map((azWord) => {
+    for (let i = tokenIdx; i < originalTokens.length; i++) {
+      const orig = originalTokens[i];
+      if (clean(orig).includes(clean(azWord)) || clean(azWord).includes(clean(orig))) {
+        tokenIdx = i + 1;
+        return orig;
+      }
+    }
+    return azWord;
+  });
+}
+
+/**
+ * Synthesizes a single dialogue line for a given speaker role with telemetry.
+ */
+async function synthesizeLine(
+  line: DialogueLine,
+  lang: "id" | "en",
+  tempDir: string,
+  lineIndex: number
+): Promise<{
+  audioPath: string;
+  durationSec: number;
+  words: WordTimingItem[];
+}> {
+  const actor = getVoiceActor(line.speakerRole);
+  const voiceConfig = actor.voice[lang];
+  const speakerName = line.speakerCustomName || actor.defaultName[lang];
+  const speakerColor = actor.signatureColor;
+
+  const tts = new MsEdgeTTS();
+  await tts.setMetadata(voiceConfig.voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
+    wordBoundaryEnabled: true,
+    sentenceBoundaryEnabled: true,
+  });
+
+  const lineTempDir = path.join(tempDir, `line_${lineIndex}`);
+  await fs.mkdir(lineTempDir, { recursive: true });
+
+  const { audioFilePath, metadataFilePath } = await tts.toFile(lineTempDir, line.text, {
+    pitch: voiceConfig.pitch,
+    rate: voiceConfig.rate,
+  });
+
+  const words: WordTimingItem[] = [];
+  let durationSec = 2.0;
+
+  if (metadataFilePath && existsSync(metadataFilePath)) {
+    try {
+      const metaRaw = await fs.readFile(metadataFilePath, "utf-8");
+      const parsed = JSON.parse(metaRaw);
+      const metaItems: any[] = parsed.Metadata || [];
+      const wordItems = metaItems.filter((m) => m.Type === "WordBoundary");
+      const rawWords = wordItems.map((m) => m.Data?.text?.Text || "");
+      const punctuated = attachPunctuation(rawWords, line.text);
+
+      wordItems.forEach((m, idx) => {
+        const rawText = punctuated[idx] || m.Data?.text?.Text || "";
+        const offsetTicks = m.Data?.Offset || 0;
+        const durTicks = m.Data?.Duration || 0;
+        const startSec = parseFloat((offsetTicks / 10_000_000).toFixed(2));
+        const endSec = parseFloat(((offsetTicks + durTicks) / 10_000_000).toFixed(2));
+
+        words.push({
+          word: rawText,
+          start: startSec,
+          end: endSec,
+          speaker: actor.role,
+          speakerName,
+          speakerColor,
+        });
+
+        if (endSec > durationSec) {
+          durationSec = endSec;
+        }
+      });
+    } catch (e) {
+      console.warn("Telemetry parse error:", e);
+    }
+  }
+
+  // Add 0.25s natural pause tail
+  durationSec = parseFloat((durationSec + 0.25).toFixed(2));
+
+  return {
+    audioPath: audioFilePath,
+    durationSec,
+    words,
+  };
+}
+
+/**
+ * Combines multiple MP3 files sequentially.
+ */
+async function concatenateMp3Files(inputPaths: string[], outputPath: string): Promise<void> {
+  const writeStream = createWriteStream(outputPath);
+  for (const p of inputPaths) {
+    const data = await fs.readFile(p);
+    writeStream.write(data);
+  }
+  await new Promise((resolve) => writeStream.end(resolve));
+}
+
+/**
+ * Synthesizes a scene with one or multiple dialogue lines across different voice actors.
+ * Automatically aligns word boundaries and merges audio segments.
+ */
+export async function synthesizeSceneVoice(input: SceneSynthesisInput): Promise<SynthesisResult> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), `tts-scene-${input.sceneId}-`));
+
+  try {
+    const segmentResults = [];
+    for (let i = 0; i < input.lines.length; i++) {
+      const lineRes = await synthesizeLine(input.lines[i], input.lang, tempDir, i);
+      segmentResults.push(lineRes);
+    }
+
+    // Merge word timings with sequential time offsets
+    const mergedWords: WordTimingItem[] = [];
+    let currentOffset = 0;
+
+    for (const seg of segmentResults) {
+      for (const w of seg.words) {
+        mergedWords.push({
+          ...w,
+          start: parseFloat((w.start + currentOffset).toFixed(2)),
+          end: parseFloat((w.end + currentOffset).toFixed(2)),
+        });
+      }
+      currentOffset += seg.durationSec;
+    }
+
+    const totalDuration = parseFloat(currentOffset.toFixed(2));
+
+    // Ensure output directories exist
+    await fs.mkdir(path.dirname(input.outputMp3Path), { recursive: true });
+    await fs.mkdir(path.dirname(input.outputWordsPath), { recursive: true });
+
+    if (segmentResults.length === 1) {
+      // Single line direct copy
+      await fs.copyFile(segmentResults[0].audioPath, input.outputMp3Path);
+    } else {
+      // Multi-speaker dialogue concatenation
+      const audioFiles = segmentResults.map((s) => s.audioPath);
+      await concatenateMp3Files(audioFiles, input.outputMp3Path);
+    }
+
+    // Write merged word timings
+    await fs.writeFile(input.outputWordsPath, JSON.stringify({ words: mergedWords }, null, 2));
+
+    return {
+      sceneId: input.sceneId,
+      lang: input.lang,
+      durationSeconds: totalDuration,
+      wordCount: mergedWords.length,
+      outputMp3Path: input.outputMp3Path,
+      outputWordsPath: input.outputWordsPath,
+    };
+  } finally {
+    // Cleanup temp directory
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
