@@ -1,0 +1,33 @@
+skills/storybook-video-generator/references/distribution-upload.md
+  698ac31901cd73e0 244-254
+scripts/publish-launch-posts.ts
+  698ac31901cd73e0 5,16,21,79-89,92-101,104-106,109,111,139,143-144,147-197
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 355-357,359,361,363-372,374
+skills/storybook-video-generator/references/social-promotion-playbook.md
+  698ac31901cd73e0 89-93,114,116,119,122-123,125-129,132-136
+scripts/publish-instagram-post.ts
+  698ac31901cd73e0 5,369-396,398-406,410,421-422,426-429,432
+scripts/publish-all.ts
+  698ac31901cd73e0 13,25,42-43,221-252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "628e7c30985ff4270129bb735bdffe24e533e7cb",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 214,
+      "total_deletions": 38,
+      "accepted_lines": 214,
+      "overriden_lines": 0
+    }
+  }
+}
