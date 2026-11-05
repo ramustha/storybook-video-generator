@@ -554,6 +554,8 @@ async function main() {
   };
 
   const bookSlug = getArg("--book") || "gara-gara-kucing";
+  const compilationTheme = getArg("--compilation");
+  const isDryRun = args.includes("--dry-run");
   const format = (getArg("--format") as "landscape" | "vertical" | "all") || "all";
   const privacy = (getArg("--privacy") as "public" | "unlisted" | "private") || "unlisted";
   const setPrivacy = getArg("--set-privacy") as "public" | "unlisted" | "private" | undefined;
@@ -573,55 +575,58 @@ async function main() {
     process.exit(loginOk ? 0 : 1);
   }
 
-  const storyDir = path.resolve(`./stories/${bookSlug}`);
-  const manifestPath = path.join(storyDir, "story.json");
-
-  if (!existsSync(manifestPath)) {
-    console.error(`Error: Story manifest not found at ${manifestPath}`);
-    process.exit(1);
-  }
-
-  const manifest: StoryManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
-
-  // Calculate total story duration & determine 4-tier publication strategy
+  let manifest: StoryManifest | null = null;
   let totalDurationSeconds = 0;
-  if (manifest.scenes && manifest.scenes.length > 0) {
-    totalDurationSeconds = manifest.scenes.reduce((acc, s) => acc + (s.durationSeconds || 0), 0);
-  }
-
   let durationTier: "tier1" | "tier2" | "tier3" | "tier4" = "tier3";
   let strategyCode = "dual-hybrid";
   let strategyDescription = "Standard Storybook (Dual Format: 16:9 Long-Form & 9:16 Shorts)";
-
-  if (totalDurationSeconds > 0 && totalDurationSeconds < 20) {
-    durationTier = "tier1";
-    strategyCode = "short-only";
-    strategyDescription = "Tier 1: Micro-Story / Teaser (<20s) -> Short-Form Exclusive (Shorts/TikTok/Reels ONLY)";
-  } else if (totalDurationSeconds >= 20 && totalDurationSeconds < 60) {
-    durationTier = "tier2";
-    strategyCode = "short-primary";
-    strategyDescription = "Tier 2: Snackable Mini-Story (20-60s) -> Short-Primary (Shorts/TikTok/Reels)";
-  } else if (totalDurationSeconds >= 60 && totalDurationSeconds <= 180) {
-    durationTier = "tier3";
-    strategyCode = "dual-hybrid";
-    strategyDescription = "Tier 3: Standard Storybook (60-180s) -> Dual-Format (16:9 Widescreen & 9:16 Shorts)";
-  } else if (totalDurationSeconds > 180) {
-    durationTier = "tier4";
-    strategyCode = "long-primary";
-    strategyDescription = "Tier 4: Extended Storybook (>180s) -> Long-Primary (16:9 Widescreen Master + Teaser Hook)";
-  }
-
-  console.log(`\n⏱️ Total Story Duration: ${totalDurationSeconds.toFixed(1)}s`);
-  console.log(`🎯 Strategy Classification: ${strategyDescription}`);
-
-  // Automatically enforce short-only for Tier 1 (<20s) if format is "all"
   let effectiveFormat = format;
-  if (durationTier === "tier1" && format === "all" && !allowShortLandscape) {
-    console.log(`\n💡 DURATION POLICY APPLIED: Storybook is <20s (${totalDurationSeconds.toFixed(1)}s).`);
-    console.log(`   Automatically routing to Short-Form Exclusive (format: "vertical").`);
-    console.log(`   Standalone 16:9 upload suppressed to protect channel watch time.`);
-    console.log(`   (Use --allow-short-landscape to override).`);
-    effectiveFormat = "vertical";
+
+  if (!compilationTheme) {
+    const storyDir = path.resolve(`./stories/${bookSlug}`);
+    const manifestPath = path.join(storyDir, "story.json");
+
+    if (!existsSync(manifestPath)) {
+      console.error(`Error: Story manifest not found at ${manifestPath}`);
+      process.exit(1);
+    }
+
+    manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
+
+    // Calculate total story duration & determine 4-tier publication strategy
+    if (manifest.scenes && manifest.scenes.length > 0) {
+      totalDurationSeconds = manifest.scenes.reduce((acc, s) => acc + (s.durationSeconds || 0), 0);
+    }
+
+    if (totalDurationSeconds > 0 && totalDurationSeconds < 20) {
+      durationTier = "tier1";
+      strategyCode = "short-only";
+      strategyDescription = "Tier 1: Micro-Story / Teaser (<20s) -> Short-Form Exclusive (Shorts/TikTok/Reels ONLY)";
+    } else if (totalDurationSeconds >= 20 && totalDurationSeconds < 60) {
+      durationTier = "tier2";
+      strategyCode = "short-primary";
+      strategyDescription = "Tier 2: Snackable Mini-Story (20-60s) -> Short-Primary (Shorts/TikTok/Reels)";
+    } else if (totalDurationSeconds >= 60 && totalDurationSeconds <= 180) {
+      durationTier = "tier3";
+      strategyCode = "dual-hybrid";
+      strategyDescription = "Tier 3: Standard Storybook (60-180s) -> Dual-Format (16:9 Widescreen & 9:16 Shorts)";
+    } else if (totalDurationSeconds > 180) {
+      durationTier = "tier4";
+      strategyCode = "long-primary";
+      strategyDescription = "Tier 4: Extended Storybook (>180s) -> Long-Primary (16:9 Widescreen Master + Teaser Hook)";
+    }
+
+    console.log(`\n⏱️ Total Story Duration: ${totalDurationSeconds.toFixed(1)}s`);
+    console.log(`🎯 Strategy Classification: ${strategyDescription}`);
+
+    // Automatically enforce short-only for Tier 1 (<20s) if format is "all"
+    if (durationTier === "tier1" && format === "all" && !allowShortLandscape) {
+      console.log(`\n💡 DURATION POLICY APPLIED: Storybook is <20s (${totalDurationSeconds.toFixed(1)}s).`);
+      console.log(`   Automatically routing to Short-Form Exclusive (format: "vertical").`);
+      console.log(`   Standalone 16:9 upload suppressed to protect channel watch time.`);
+      console.log(`   (Use --allow-short-landscape to override).`);
+      effectiveFormat = "vertical";
+    }
   }
 
   // 1. Authorize YouTube API Client (Multi-Project Quota Rotator or Fallback)
@@ -654,6 +659,103 @@ async function main() {
   // If user only wanted to authenticate
   if (args.includes("--auth-only")) {
     console.log("\n✅ Authorization successful! Exiting.");
+    return;
+  }
+
+  // Handle compilation upload if requested
+  if (compilationTheme) {
+    const lang = requestedLang === "all" ? "id" : requestedLang;
+    const outDir = path.resolve("./exports/compilations");
+    const videoFilename = `kompilasi-${compilationTheme}-${lang}-16x9.mp4`;
+    const metaFilename = `kompilasi-${compilationTheme}-${lang}-metadata.txt`;
+    const videoPath = path.join(outDir, videoFilename);
+    const metaPath = path.join(outDir, metaFilename);
+
+    if (!existsSync(videoPath)) {
+      throw new Error(`Compilation video not found at ${videoPath}`);
+    }
+
+    let title = "Kumpulan Dongeng Anak Sebelum Tidur (12 Menit Non-Stop) | Cerita Bergambar Penuh Pesan Moral 🌙✨";
+    let description = "Kompilasi dongeng anak bergambar non-stop...";
+    if (existsSync(metaPath)) {
+      const metaContent = await fs.readFile(metaPath, "utf-8");
+      const titleMatch = metaContent.match(/JUDUL:\s*\n([^\n]+)/);
+      if (titleMatch) title = titleMatch[1].trim();
+      const descMatch = metaContent.match(/DESKRIPSI:\s*\n([\s\S]+?)(?=\n===|$)/);
+      if (descMatch) description = descMatch[1].trim();
+    }
+
+    const thumbnailCandidates = [
+      path.join(outDir, `thumbnail-compilation-${compilationTheme}-${lang}.png`),
+      path.resolve("./stories/pisang-terlalu-banyak/exports/id/thumbnail-bedtime.png"),
+      path.resolve("./stories/hari-cukur-rambut/exports/id/thumbnail-bedtime.png"),
+      path.resolve("./stories/jas-hujan-merah/exports/id/thumbnail-popular.png"),
+    ];
+    const thumbnailPath = thumbnailCandidates.find((p) => existsSync(p));
+
+    console.log(`\n======================================================`);
+    console.log(`🎬 YOUTUBE COMPILATION MARATHON UPLOADER`);
+    console.log(`======================================================`);
+    console.log(`🏷️ Theme      : ${compilationTheme}`);
+    console.log(`🌐 Language   : ${lang}`);
+    console.log(`📁 Video File : ${videoPath}`);
+    console.log(`📌 Title      : ${title}`);
+    if (thumbnailPath) console.log(`🖼️ Thumbnail  : ${thumbnailPath}`);
+    console.log(`🔒 Privacy    : ${privacy.toUpperCase()}`);
+    console.log(`🧪 Mode       : ${isDryRun ? "DRY RUN" : "LIVE UPLOAD"}`);
+    console.log("------------------------------------------------------");
+    console.log(description);
+    console.log("------------------------------------------------------\n");
+
+    if (isDryRun) {
+      console.log("✔ DRY RUN COMPLETED! YouTube compilation payload verified.");
+      return;
+    }
+
+    const videoId = await uploadVideo(youtube, videoPath, {
+      title: sanitizeTitle(title, 100),
+      description,
+      tags: [
+        "Dongeng Anak",
+        "Cerita Anak",
+        "Bedtime Story",
+        "Kompilasi Dongeng",
+        "Zayn Storybook",
+        "Cerita Bergambar",
+        "Video Edukasi Anak",
+        "Dongeng Sebelum Tidur",
+        "Dongeng Pengantar Tidur",
+      ],
+      categoryId: "27",
+      privacyStatus: privacy,
+      isMadeForKids: false,
+      publishAt: scheduleTime ? new Date(scheduleTime).toISOString() : undefined,
+    });
+    if (thumbnailPath) {
+      await uploadThumbnail(youtube, videoId, thumbnailPath);
+    }
+
+    const pubRecordPath = path.join(outDir, "publication-status.json");
+    let pubRecord: Record<string, any> = {};
+    if (existsSync(pubRecordPath)) {
+      try {
+        pubRecord = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
+      } catch {}
+    }
+    const key = `${compilationTheme}-${lang}`;
+    pubRecord[key] = {
+      ...(pubRecord[key] || {}),
+      youtube: {
+        videoId,
+        url: `https://youtu.be/${videoId}`,
+        publishedAt: new Date().toISOString(),
+        privacy,
+      },
+    };
+    await fs.writeFile(pubRecordPath, JSON.stringify(pubRecord, null, 2), "utf-8");
+
+    console.log(`\n🎉 COMPILATION VIDEO LIVE ON YOUTUBE!`);
+    console.log(`🔗 Link: https://youtu.be/${videoId}`);
     return;
   }
 

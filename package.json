@@ -33,7 +33,8 @@
     "upload:tiktok:browser": "tsx scripts/upload-tiktok-browser.ts",
     "status:tiktok": "tsx scripts/upload-tiktok.ts --status",
     "compilation:recommend": "tsx scripts/render-compilation.ts --recommend",
-    "compilation:render": "tsx scripts/render-compilation.ts"
+    "compilation:render": "tsx scripts/render-compilation.ts",
+    "compilation:thumbnail": "tsx scripts/render-compilation-thumbnail.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1161.0",

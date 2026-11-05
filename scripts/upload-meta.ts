@@ -620,6 +620,7 @@ async function main() {
     }
 
     const thumbnailCandidates = [
+      path.join(outDir, `thumbnail-compilation-${options.compilationTheme}-${options.lang}.png`),
       path.resolve("./stories/pisang-terlalu-banyak/exports/id/thumbnail-bedtime.png"),
       path.resolve("./stories/hari-cukur-rambut/exports/id/thumbnail-bedtime.png"),
       path.resolve("./stories/jas-hujan-merah/exports/id/thumbnail-popular.png"),

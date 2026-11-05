@@ -2,6 +2,7 @@ import React from "react";
 import { Composition } from "remotion";
 import { StorybookVideoComposition } from "./components/StorybookVideoComposition";
 import { StorybookThumbnailComposition } from "./components/ThumbnailComposition";
+import { CompilationThumbnailComposition } from "./components/CompilationThumbnailComposition";
 import { TikTokDemoComposition } from "./components/TikTokDemoComposition";
 import {
   StorybookCompilationComposition,
@@ -65,6 +66,16 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+
+      {/* 16:9 YouTube Compilation Marathon Thumbnail Composition (Landscape 1920x1080) */}
+      <Composition
+        id="StorybookCompilationThumbnail"
+        component={CompilationThumbnailComposition as any}
+        durationInFrames={1}
+        fps={30}
+        width={1920}
+        height={1080}
       />
 
       {/* TikTok Developer Review Demo Video (Landscape 1920x1080 @ 30fps, 750 frames = 25s) */}
