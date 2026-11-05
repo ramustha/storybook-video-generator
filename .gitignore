@@ -21,6 +21,8 @@ config/*.json
 *.token
 
 # Large Rendered Video Binaries (>100MB / Video Exports)
+exports/*
+!exports/.gitkeep
 exports/**/*.mp4
 stories/**/exports/**/*.mp4
 *.mp4
