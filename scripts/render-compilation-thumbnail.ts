@@ -12,21 +12,25 @@ async function main() {
   };
 
   const theme = getArg("--theme") || "bedtime";
-  const lang = (getArg("--lang") || "id") as "id" | "en";
+  const rawLang = (getArg("--lang") || "id").toLowerCase();
+
+  const targetLangs: Array<"id" | "en"> =
+    rawLang === "all" || rawLang === "both" || rawLang === "id,en"
+      ? ["id", "en"]
+      : [rawLang as "id" | "en"];
 
   const outDir = path.resolve("./exports/compilations");
   await fs.mkdir(outDir, { recursive: true });
 
   console.log(`\n🎨 Rendering Distinct Compilation Marathon Thumbnail...`);
   console.log(`🏷️ Theme   : ${theme}`);
-  console.log(`🌐 Language: ${lang.toUpperCase()}`);
+  console.log(`🌐 Language: ${targetLangs.map((l) => l.toUpperCase()).join(" & ")}`);
 
   const serveUrl = await bundle({
     entryPoint: path.resolve("./src/remotion/index.ts"),
     publicDir: path.resolve("./stories/branding"),
   });
 
-  const isEn = lang === "en";
   const loadBase64 = async (relPath: string) => {
     const full = path.resolve(relPath);
     if (!existsSync(full)) return "";
@@ -39,36 +43,39 @@ async function main() {
   const cover2 = await loadBase64("stories/jas-hujan-merah/assets/cover.png");
   const cover3 = await loadBase64("stories/gara-gara-kucing/assets/cover.png");
 
-  const inputProps = {
-    badge: isEn ? "🌙 BEDTIME STORIES MARATHON" : "🌙 DONGENG PENGANTAR TIDUR",
-    headlineTop: isEn ? "5 MAGICAL BEDTIME TALES" : "KUMPULAN 5 CERITA",
-    headlineMain: isEn ? "BEDTIME MARATHON" : "DONG-EN-G ANAK",
-    marathonPill: isEn ? "⏱️ 12 MINS NON-STOP MARATHON" : "⏱️ 12 MENIT NON-STOP MARATHON",
-    subHook: isEn
-      ? "Calming, Delightful Bedtime Stories for Sweet Dreams & Warm Smiles 💤✨"
-      : "Bikin Si Kecil Tertidur Nyenyak, Tenang & Penuh Pesan Moral 💤✨",
-    storyCovers: [cover0, cover1, cover2, cover3],
-    lang,
-    theme,
-  };
+  for (const lang of targetLangs) {
+    const isEn = lang === "en";
+    const inputProps = {
+      badge: isEn ? "🌙 BEDTIME STORIES MARATHON" : "🌙 DONGENG PENGANTAR TIDUR",
+      headlineTop: isEn ? "5 MAGICAL BEDTIME TALES" : "KUMPULAN 5 CERITA",
+      headlineMain: isEn ? "BEDTIME MARATHON" : "DONG-EN-G ANAK",
+      marathonPill: isEn ? "⏱️ 12 MINS NON-STOP MARATHON" : "⏱️ 12 MENIT NON-STOP MARATHON",
+      subHook: isEn
+        ? "Calming, Delightful Bedtime Stories for Sweet Dreams & Warm Smiles 💤✨"
+        : "Bikin Si Kecil Tertidur Nyenyak, Tenang & Penuh Pesan Moral 💤✨",
+      storyCovers: [cover0, cover1, cover2, cover3],
+      lang,
+      theme,
+    };
 
-  const composition = await selectComposition({
-    serveUrl,
-    id: "StorybookCompilationThumbnail",
-    inputProps,
-  });
+    const composition = await selectComposition({
+      serveUrl,
+      id: "StorybookCompilationThumbnail",
+      inputProps,
+    });
 
-  const outputLocation = path.join(outDir, `thumbnail-compilation-${theme}-${lang}.png`);
+    const outputLocation = path.join(outDir, `thumbnail-compilation-${theme}-${lang}.png`);
 
-  await renderStill({
-    composition,
-    serveUrl,
-    output: outputLocation,
-    inputProps,
-  });
+    await renderStill({
+      composition,
+      serveUrl,
+      output: outputLocation,
+      inputProps,
+    });
 
-  console.log(`✔ Distinct compilation thumbnail exported successfully!`);
-  console.log(`📁 File : ${outputLocation}\n`);
+    console.log(`✔ Distinct compilation thumbnail [${lang.toUpperCase()}] exported successfully!`);
+    console.log(`📁 File : ${outputLocation}\n`);
+  }
 }
 
 main().catch((err) => {

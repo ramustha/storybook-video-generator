@@ -18,7 +18,13 @@ Transforms open-license children's storybooks and creative folklore concepts int
 | **Cinematography & Motion** | Bang Motion camera laws, multi-plane depth, optional I2V motion | [cinematography.md](./references/cinematography.md) |
 | **Audio, Foley & Subtitles** | Azure Neural Voice (`id-ID-GadisNeural` & `en-US-AnaNeural`), Foley/ASMR, kinetic sync | [voiceover-subtitles.md](./references/voiceover-subtitles.md) |
 | **Video Rendering** | Remotion CLI render, bilingual 1080p MP4 export (16:9 & 9:16), optional 4K UHD | [remotion-renderer.md](./references/remotion-renderer.md) |
-| **Publishing & Distribution** | YouTube Data API v3, auto-chapters, thumbnails, bilingual TikTok/Reels kits | [distribution-upload.md](./references/distribution-upload.md) |
+| **Moral of the Story Outro** | Dedicated kid-friendly moral takeaway card, playful pill badge, hero vignette & kinetic read-along | [cinematography.md#moral-scene-direction](./references/cinematography.md#moral-scene-direction) |
+| **Duration & Platform Strategy** | <20s Short-only, 20-60s Short-primary, 60-180s Dual, >180s Long-primary (YouTube, TikTok, Reels) | [video-duration-strategy.md](./references/video-duration-strategy.md) |
+| **Compilation & Marathon Engine** | Auto-recommendation, thematic curation, ChapterBumper interstitials, >8 min Mid-Roll, YouTube Chapters | [compilation-marathon.md](./references/compilation-marathon.md) |
+| **Publishing & Distribution** | YouTube Data API v3, Instagram Reels (via Cloudflare R2), Facebook (Reels & Page Video) | [distribution-upload.md](./references/distribution-upload.md) |
+| **Analytics & Performance Tracking** | Live views, likes, comments, and catalog metrics via YouTube Data & Analytics API | [distribution-upload.md#5-live-performance--view-analytics-npm-run-stats](./references/distribution-upload.md#5-live-performance--view-analytics-npm-run-stats) |
+| **Copyright & Verification** | CC BY 4.0 attribution, derivative ownership, YouTube Copyright Match Tool | [copyright-compliance.md](./references/copyright-compliance.md) |
+| **Storage Lifecycle & Cleanup** | Reclaim disk space by purging published MP4s and raw PDF pages with 100% reproducibility | [storage-cleanup-policy.md](./references/storage-cleanup-policy.md) |
 | **Boundaries & Limitations** | YouTube Quota, Thumbnail Burst Limits, CDP WebSockets, TTS Alignment | [limitations-and-workarounds.md](./references/limitations-and-workarounds.md) |
 
 ---
@@ -41,31 +47,51 @@ Transforms open-license children's storybooks and creative folklore concepts int
 
 ```mermaid
 flowchart TD
-    S1["1. Source Story & Ingest Bilingual Text"] --> S2["2. Bilingual User Review Checkpoint"]
-    S2 --> S3["3. Pacing & 2s Chunking"]
+    S1["1. Source Story & Ingest Manuscript"] --> S2{"2. MANDATORY USER VERIFICATION GATE<br/>(Halt & Ask: Scenes, Visuals, Characters, Settings)"}
+    S2 -- "User Confirms & Approves" --> S3["3. Pacing & 2s Chunking"]
     S3 --> S4["4. Lock Character & World Bible"]
-    S4 --> S5["5. Generate Visuals (100% Shared Plates)"]
+    S4 --> S5["5. Ingest/Generate Artwork (100% Shared Plates)"]
     S5 --> S6["6. Synthesize Dual-Language Voice & Subtitles"]
     S6 --> S7["7. Remotion Scene Direction"]
     S7 --> S8["8. Direct MP4 Export (4 Deliverables: ID & EN)"]
     S8 --> S9["9. Generate High-CTR Bilingual Thumbnails"]
     S9 --> S10["10. Headless YouTube & Multi-Platform Upload"]
+    S10 --> S11["11. Post-Publication Storage Cleanup & Archival"]
 ```
 
 ### 1. Ingest Storyline & Local Duplicate Check
 * **Duplicate Detection**: Check if `stories/<book-slug>/story.json` exists locally. If present, prompt user with a decision card (Resume & Edit, New Version `-v2`, or Overwrite) before modifying anything.
 * Select a legitimate source from [story-sources.md](./references/story-sources.md).
 * Initialize the self-contained project container: `stories/<book-slug>/{raw,bible,assets,exports}`.
-* **Bilingual Text Extraction (Default)**: Save clean extracted manuscripts for both languages:
-  * `raw/source-manuscript-id.txt` (Bahasa Indonesia)
-  * `raw/source-manuscript-en.txt` (English translation / original)
-* Scaffold `story.json` with bilingual scene mappings using the template in [directory-template.md](./references/directory-template.md).
+* **Bilingual Text Extraction & Moral Formulation (Default)**: Save clean extracted manuscripts for both languages, and formulate a child-friendly closing moral takeaway (headline + spoken advice):
+  * `raw/source-manuscript-id.txt` (Bahasa Indonesia narrative + Pesan Moral Cerita)
+  * `raw/source-manuscript-en.txt` (English translation + Moral of the Story)
+* Scaffold `story.json` with bilingual scene mappings using the template in [directory-template.md](./references/directory-template.md), ensuring the story concludes with a dedicated `"type": "moral"` scene.
 
-### 2. Present Bilingual User Review Card
-Present the story brief to the user using the review template in [story-sources.md](./references/story-sources.md). Confirm:
-* Story titles in both languages (e.g. *Gara-Gara Kucing!* / *It's All the Cat's Fault!*).
-* Clean manuscript breakdown across scenes in both Indonesian and English.
-* Proposed visual style medium & character attributes.
+### 2. Mandatory User Verification & Clarification Checkpoint (HALT & CONFIRM)
+**⛔ HALT EXECUTION GATE — DO NOT AUTONOMOUSLY PROCEED TO ASSET GENERATION**:  
+Immediately after fetching the storyline and source manuscript (and **BEFORE** synthesizing any voiceover, extracting/generating illustrations, or rendering video), the agent **MUST STOP and interactively present the Storyboard & Production Verification Brief** in chat.
+
+The agent **MUST explicitly ask the user to clarify, verify, and confirm the following 5 dimensions**:
+1. **Scene Breakdown & Bilingual Manuscript (Including Closing Moral Takeaway)**:
+   * Scene count, narrative flow, estimated durations, and exact spoken text in both Bahasa Indonesia and English.
+   * **Mandatory Closing Moral Scene (`type: "moral"`)**: The brief must specify the child-friendly moral takeaway (headline and spoken outro lesson) that concludes the video.
+2. **Illustration Availability & Sourcing Strategy**:
+   * Confirm source type: Are authentic open-access PDF/clean plates available (e.g. StoryWeaver, Pratham Books, SIBI Kemendikbud) for automated smart text exclusion & inpainting? Or will source-fidelity AI illustration generation be used?
+   * Book layout: Cover orientation (`portrait` vs `landscape`) and page spreads (single pages vs two-page spreads).
+3. **Character Details (Character Bible)**:
+   * Protagonists, supporting cast, physical traits, cultural garments, species, and hex color palettes.
+4. **Settings & Environment (World Bible)**:
+   * Setting, biome, era, background palette tones, lighting mood, and proposed art medium (e.g. *Whimsical Watercolor*, *Folk Art Gouache*).
+5. **Voiceover, Duration & Format Publishing Strategy**:
+   * Voice personas (e.g. `id-ID-GadisNeural`, `en-US-AnaNeural`), pacing/pitch, and background foley cues.
+   * **Duration-Based Publication Strategy** (per [video-duration-strategy.md](./references/video-duration-strategy.md)):
+     - **Tier 1 (< 20s)**: *Micro-Story / Teaser* $\to$ Recommend **Short-Form Exclusive (9:16 Shorts/Reels/TikTok ONLY)**. Suppress standalone 16:9 landscape upload to protect long-form channel watch time.
+     - **Tier 2 (20s – 60s)**: *Snackable Story* $\to$ Recommend **Short-Primary (9:16)**; 16:9 compilation candidate.
+     - **Tier 3 (60s – 180s / 1–3 mins)**: *Standard Storybook* $\to$ Recommend **Dual-Format Hybrid (Full 16:9 Long-Form & Full 9:16 Shorts)**.
+     - **Tier 4 (> 180s / > 3 mins)**: *Extended Bedtime Tale* $\to$ Recommend **Long-Primary (16:9 Master Video)** + 30–45s Vertical Teaser hook for Shorts/Reels/TikTok.
+
+> **File-First & Interactive Rule**: Always save the complete proposal to `stories/<book-slug>/raw/user-review-card.md` first, then output the structured verification summary directly in chat. **The agent MUST wait for the user to confirm, adjust, or approve before proceeding to Step 3.**
 
 ### 3. Apply 2-Second Rhythmic Pacing
 * Target **6.0 to 8.5 seconds** per scene plate.
@@ -80,38 +106,85 @@ Present the story brief to the user using the review template in [story-sources.
 
 ### 5. Ingest Artwork (Priority Ladder — 100% Shared Across Languages)
 * **Zero Language Redundancy**: All visual plates (`assets/scene_XX.png`, `cover.png`) are text-free and language-agnostic; they are **100% shared between Indonesian and English video deliverables**.
-* **Priority 1 (Authentic Clean Plates)**: Check if open-access source provides pristine, text-free digital illustration plates (e.g. GDL H5P bundles, StoryWeaver raw assets). If available, ingest directly into `assets/` (zero AI quota, 100% artist vision).
-* **Priority 1B (Automated Vision Text-Exclusion for PDFs)**: When official storybooks are only available as PDFs with narrative text baked into pages, execute the automated text-exclusion pipeline:
-  ```bash
-  swift -module-cache-path tmp/cache scripts/smart-text-inpaint.swift --book <book-slug>
-  ```
-  1. **Apple Vision OCR**: Localizes text bounding boxes via `VNRecognizeTextRequest`.
-  2. **Portrait Cover Rule**: Never crop portrait covers (`aspect ratio < 1.0`) into 16:9 bottom slices. Retain full portrait plate (`cover.png`) and set `"coverOrientation": "portrait"` in `story.json`. `CoverScene.tsx` dynamically adapts 3D floating hardcover container dimensions.
-  3. **Single-Page Character Centering Rule**: For standalone single pages without spread partners, center the 16:9 crop window vertically around character faces and action with ~280px headroom (never a naive bottom-aligned crop that cuts off heads).
-  4. **Two-Page Spread 16:9 Crop**: Anchors 16:9 crop into the bottom ~76% illustration area below text margins.
-  5. **Local Watercolor Inpainting**: Samples adjacent ambient washes to heal text and page numbers seamlessly.
-  6. **Automated Verification**: Runs a second Vision OCR verification pass to confirm `remainingTextCount === 0`.
-* **Priority 2 (Source-Fidelity AI Generation)**: When clean authentic artwork is unavailable (e.g. raster scans with baked-in text or plain manuscripts), generate fresh AI illustrations strictly adhering to the character physical traits, attire, species, and environmental setting described in the source manuscript.
-* **3D Cover**: 2.5s opener with embossed gold gilded edges and author credit (`assets/cover.png`).
+* **Priority 1 (Authentic Source PDF & Clean Plates Extraction)**:
+  * Check open-access repositories (Internet Archive Pratham collection, StoryWeaver, SIBI Kemendikbud, Arvind Gupta Toys) to download the authentic storybook PDF (`raw/source-book.pdf`).
+  * Extract pages using native Swift/PDFKit (`swift scripts/extract-pdf-pages.swift raw/source-book.pdf raw/pages/`).
+  * Run **Automated Smart Text Exclusion & Inpainting** (`scripts/smart-text-inpaint.swift` using Apple Vision OCR) to remove typography, author credits, and page numbers, yielding 100% pure artist illustration plates.
+  * Preserves 100% authentic artist vision, incurs zero AI generation quota, and guarantees zero character drift.
+* **Priority 2 (Source-Fidelity AI Generation)**: When clean authentic artwork or open-access PDFs are unavailable (e.g. text-only folklore manuscripts), generate fresh AI illustrations strictly adhering to the character physical traits, attire, species, and environmental setting described in the source manuscript.
+* **Never Render Incomplete/Placeholder Deliverables Unasked**: Do not output final videos with placeholder SVGs or incomplete illustration scenes unless the user explicitly requests a draft preview. All scenes must contain complete, authentic artwork before initiating full production rendering.
+* **3D Cover**: 2.5s opener with embossed gold gilded edges and author credit (`assets/cover.png`). Cover portrait books should set `book.coverOrientation = "portrait"`.
 * Never reuse low-res scans with baked-in typography. Append negative constraints (`--no text, no watermark, no typography`). Details in [consistency-bible.md](./references/consistency-bible.md).
-* **Quota Interception & Progressive Storyboard Protocol**: If an API rate limit (`429 Too Many Requests` / `RESOURCE_EXHAUSTED` / burst throttle) occurs during plate generation:
-  1. Catch the exception immediately and tag missing scenes in `story.json` as `"status": "quota_pending"`.
-  2. Surface an interactive Decision Card to the user:
-     - **Option 1 (Wait & Auto-Resume)**: Pause pipeline and resume when the quota window resets (~4–5 hours).
-     - **Option 2 (Progressive Draft Mode)**: Generate styled storyboard placeholder cards for pending scenes, continue voiceover synthesis (ID & EN), kinetic subtitles, and export preview video drafts right away. Swap final plates in later in <60s via `npx tsx scripts/manage-story.ts --resume-quota`.
-     - **Option 3 (Secondary Key / Source Ingestion)**: Provide alternate API key or ingest clean H5P plates.
+
+### ⚠️ Mandatory Quota & Limitation Confirmation Protocol
+
+Whenever ANY API quota limit, rate limit, burst velocity cap, or platform boundary is encountered at ANY stage of production (e.g., Image Generation `429 / RESOURCE_EXHAUSTED`, YouTube Upload Limit `400 uploadLimitExceeded` / `403 quotaExceeded`, YouTube Thumbnail burst rate-limit, TTS throttling):
+
+1. **STRICT PROHIBITION: Zero Autonomous Fallbacks**:
+   * The agent **MUST NEVER** autonomously choose an unasked workaround (such as generating placeholder cards, rendering draft videos with missing scenes, skipping deliverables, or deferring uploads silently).
+   * The agent **MUST IMMEDIATELY HALT** that execution lane.
+   * Do NOT render final video deliverables with placeholder boxes or missing artwork unless the user explicitly requested a draft preview.
+
+2. **SURFACE A FORMAL DECISION CARD**:
+   * Present an official Decision Card to the user with verified error signatures, exact reset cooldown window, and options ordered by risk:
+     * **Option 1 (Recommended — Wait & Auto-Resume / Schedule)**: Pause pipeline lane, record cooldown reset timestamp, and resume when the quota opens.
+       - *Risk*: Minimal. *Blast Radius*: Single task paused. *Cost*: Free. *Reversibility*: 100%. *Business Impact*: Full quality preserved, zero incomplete deliverables.
+     * **Option 2 (Alternative Key / Source Ingestion)**: Ingest authentic open-source PDF/plates or provide alternative API credentials.
+       - *Risk*: Low. *Blast Radius*: None. *Cost*: Zero/User-supplied. *Reversibility*: High.
+     * **Option 3 (User-Requested Progressive Draft Preview)**: Only if explicitly approved by user: generate temporary storyboard placeholders to preview audio pacing, subtitles, and scene duration before final plates arrive.
+       - *Risk*: High (incomplete visual output). *Blast Radius*: Video exports contain placeholders. *Reversibility*: Fast (<60s swap).
+
+3. **AWAIT USER CONFIRMATION**:
+   * Do not assume, guess, or execute any fallback without the user's explicit confirmation. Await user selection before proceeding.
 
 ### 6. Synthesize Dual-Language Voice, Subtitles & Foley (Default)
-* **Indonesian (`id-ID`) Track**: Synthesized via `id-ID-GadisNeural` / `id-ID-ArdiNeural` (pitch: `+20%`, speed: `+5%`). Saved to `assets/id/scene_XX.mp3` & `assets/id/scene_XX_words.json`.
+* **Indonesian (`id-ID`) Track**:
+  * **Childish, Attractive & Funny Cadence**:
+    * Child Narrator: `id-ID-GadisNeural` (pitch: `+30%`, speed: `+6%`). Shifting pitch to `+30%` shifts the vocal formant into an authentic, adorable, bubbly young child (5–8 years).
+    * Comedic Hero / Boy Character: `id-ID-ArdiNeural` (pitch: `+26%`, speed: `+8%`) for energetic, funny, mischievous dialogue.
+    * **Comedic Interjections & Punctuation**: Embed lively expressive interjections in manuscripts (*"Waaah!"*, *"Waduh!"*, *"Aduh!"*, *"Horeee!"*, *"Hihihi!"*, *"Plop!"*, *"Guk guk!"*, *"Hosh... hosh..."*) and exclamation marks `!` to force the neural engine to modulate pitch with joyful comedic acting.
+  * Saved to `assets/id/scene_XX.mp3` & `assets/id/scene_XX_words.json`.
 * **English (`en-US` / `en-GB`) Track**: Synthesized via `en-US-AnaNeural` (Child Storyteller) or `en-US-EmmaNeural` (Warm Bedtime). Saved to `assets/en/scene_XX.mp3` & `assets/en/scene_XX_words.json`.
 * **Punctuation (*Tanda Baca*) Restoration**: Azure `WordBoundary` strips punctuation; run `attachPunctuation()` to re-align original punctuation (`?`, `!`, `,`, `.`, `...`, hyphens) to timing tokens in both languages.
-* **Multi-Speaker Color Tagging**: Assign distinct color accents and avatar tags per persona (Teacher `#38BDF8`, Child `#FDE047`, Narrator `#34D399`).
-* Tactile Foley cues saved to `assets/scene_XX_sfx.mp3`. Details in [voiceover-subtitles.md](./references/voiceover-subtitles.md).
+* **Full-Context Kinetic Subtitles (Zero-Cut Policy)**:
+  * **Never Chop Context**: Do not slice sentences into arbitrary 4-word snippets that vanish mid-sentence. Display the complete sentence / thought context of the scene together.
+  * **Natural Sentence Boundaries**: For longer narratives, group words by natural punctuation marks (`.`, `!`, `?`, `...`), keeping each complete sentence intact on screen.
+  * **Voiceover Alignment**: Active spoken words animate with a spring bounce and glow in the speaker's accent color (`#FDE047`, `#38BDF8`). Already spoken words stay visible in crisp solid white (`#FFFFFF`), while upcoming words remain readable in soft translucent white (`rgba(255,255,255,0.6)`).
+* **Multi-Speaker Color Tagging**: Assign distinct color accents and avatar tags per persona (Teacher `#38BDF8`, Child `#FDE047`, Narrator `#34D399`, King `#F59E0B`).
+* **Multi-Track Audio Engineering (Voiceover + BGM + Action Foley SFX)**:
+  * **Track 1 — Foreground Neural Voiceover**: Child storyteller speech at volume `1.00`.
+  * **Track 2 — Continuous Acoustic Background Music (BGM)**: Gentle, warm marimba/glockenspiel storybook soundtrack (`assets/audio/bgm_whimsical_story.m4a`) looping seamlessly at volume `0.14` to eliminate awkward dead silence between spoken phrases.
+  * **Track 3 — Synchronized Action Foley SFX**: Tactile cartoon sound effects (`assets/sfx/sfx_XX.m4a`) triggered per-scene with millisecond delay timing (`sfxDelaySeconds`, volume `0.65`):
+    * Scene action examples: scissors snipping, cooking pots bubbling, wood saw slicing, tiger roaring with shockwave rumble, comic *boing-pop* when hair falls off, cartoon galloping footsteps, crystal head shine *ping*, and celebratory chimes.
+  * Details in [voiceover-subtitles.md](./references/voiceover-subtitles.md).
 
 ### 7. Configure Remotion Scene Direction
 * Enforce Bang Motion camera laws: scale `≥ 1.08x`, continuous camera breathing, and alternating motions (`slow_zoom_in`, `pan_right`, `tilt_up`).
+* **Preserve Narrative Scene Continuity (No Artificial Chopping)**: Do not artificially split a single coherent book page or unified illustration into fragmented micro-scenes with abrupt camera cuts. Keep the scene context unified and let the narrative and audio flow smoothly.
 * **Zero-Crop Vertical Canvas (9:16 Shorts/Reels)**: Use Ambient Pillarbox Canvas (full-bleed blurred background + floating 16:9 centerpiece plate + subtitles below artwork). Never use raw `objectFit: cover` which cuts off >60% of horizontal action.
-* Kinetic subtitles: elastic spring bounce (`scale: 1.25x`), speaker accent color highlight, crisp white past words, safe-zones (`bottom-[18%]` on 9:16). See [cinematography.md](./references/cinematography.md).
+* **3D Cover Presence (Zero Empty Space)**:
+  * Scale book cover to fill **65% to 75%** of the frame (landscape: `height: 760px, width: 560–1160px`; vertical: `height: 1180px, width: 860–1000px`).
+  * Embellish with animated golden stardust particles, gilded 3D spine creases, and giant readable title typography (`fontSize: 46px–56px`) so no awkward dead space remains.
+* **Dedicated Kid-Friendly Moral Outro Scene (`MoralScene.tsx`)**:
+  * Every video must conclude with a dedicated, uplifting closing scene (`type: "moral"`) designed for young children (3–8 years):
+    * **Playful Badge & Header**: Floating animated pill badge (`✨ PESAN MORAL CERITA ✨` / `✨ MORAL OF THE STORY ✨`) with spring entrance and glowing golden border.
+    * **Hero Avatar Vignette**: Circular illustration frame with golden sticker border (`border: '5px solid #F59E0B'`) displaying the happy protagonist alongside a floating `💡` insight badge.
+    * **Child-Friendly Card Layout**: Soft rounded cloud-white card (`background: linear-gradient(180deg, #FFFFFF, #FEF9C3)`, `borderRadius: 36px–44px`, `boxShadow: 0 24px 70px rgba(0,0,0,0.45)`).
+    * **Kinetic Read-Along Box**: Dashed warm amber box with real-time karaoke word bouncing & highlighting so children can read along phonetically with the neural voiceover.
+    * **Floating Sparkles & Stars**: Gentle floating particles (`⭐`, `✨`, `🌟`, `💖`, `🌈`) drifting with smooth sine-wave animation.
+    * **Encouraging Outro Note**: Sweet parting message (`💖 Terima kasih sudah menonton! Sampai jumpa di dongeng seru berikutnya! ✨` / `💖 Thank you for watching! See you in the next adventure! ✨`).
+* **Next Video Recommendation & Subscribe Outro Scene (`OutroScene.tsx`)**:
+  * An 8–10 second dynamic ending scene (`type: "outro"`) engineered for cross-story discovery and channel growth:
+    * **Dynamic & Universal Standard**: Never hardcode specific story titles into outro voiceovers or default labels so that the outro template is 100% reusable across any current or future storybook:
+      * **Universal Voiceover Narration**:
+        * ID: *"Wah, seru sekali ya ceritanya! Jangan lupa klik video di sebelah sini untuk menonton dongeng seru lainnya, dan klik tombol Subscribe agar kita bisa terus berpetualang bersama! Sampai jumpa di cerita berikutnya! Dadah!"*
+        * EN: *"Did you enjoy the story? Click the video on your screen to watch another fun adventure, and don't forget to hit Subscribe so we can keep reading together! See you in the next story! Bye-bye!"*
+      * **Dynamic Preview Box**: 16:9 frame displaying dynamic recommendation title (`"Dongeng Seru Berikutnya!"` / `"Next Exciting Adventure!"`), subtitle (`"Klik untuk Menonton Cerita Lengkap"`), and "Play ▶" button. **Coordinates are pixel-matched to YouTube's End Screen 16:9 interactive element**, ensuring YouTube Studio's "Best for Viewer" interactive card snaps seamlessly over the frame while remaining visually compelling on Shorts, TikTok, and Reels!
+      * **Dynamic Channel Subscribe Card**: Pulsing avatar paired with dynamic channel handle (`@ZaynAdyanRamadhan`), tagline (`"Dongeng Cerita Baru Tiap Minggu!"`), and bold red `SUBSCRIBE 🔔` call-to-action button, aligning with YouTube's Subscribe End Screen element.
+      * **Full-Context Kinetic Subtitles**: Syncs spoken outro voiceover with real-time word bouncing and phonetic color highlights.
+* **Responsive Subtitle Positioning & Safe Zones**:
+  * **Landscape 16:9**: Positioned at `bottom: "64px"`, max-width `84%`, rounded glassmorphic card (`borderRadius: "20px"`), font size `32px`.
+  * **Vertical 9:16**: Positioned at `bottom: "260px"` (well above YouTube Shorts / TikTok bottom UI overlays of 0–220px, and comfortably below the centerpiece illustration card), font size `27px`. See [cinematography.md](./references/cinematography.md).
 
 ### 8. Export Multi-Format MP4 Videos (4 Deliverables by Default)
 * Execute Remotion headless rendering CLI commands to export all 4 deliverables (ID 16:9, ID 9:16, EN 16:9, EN 9:16):
@@ -131,23 +204,23 @@ Present the story brief to the user using the review template in [story-sources.
   * `stories/<book-slug>/exports/en/<book-slug>-16x9.mp4` & `-9x16.mp4`
 * Details in [remotion-renderer.md](./references/remotion-renderer.md).
 
-### 9. Generate High-CTR Bilingual Thumbnails (Popular & Niche Formats)
+### 9. Generate High-CTR Bilingual Thumbnails (Edge-to-Edge & Zero Dead Space)
 * Generate high-CTR 1920x1080 thumbnails for both languages before publishing. YouTube thumbnail CTR determines algorithmic reach.
-* **Dynamic Story-Bound Configuration (`story.json.thumbnailConfig`)**:
-  * Never hardcode story titles, curiosity hooks, or character stickers in thumbnail templates.
-  * Every book defines its own `thumbnailConfig` in `story.json` (with language keys `id` and `en` specifying `headlineTop`, `headlineBottom`, `hook`, `hookEmoji`, `badge`, `sticker`, and `bedtimeHook`).
-  * If omitted, the engine dynamically derives the headline by splitting the active story `title` / `originalTitle` and extracts contextual emojis based on narrative keywords.
+* **Edge-to-Edge Screen Fill Rule**:
+  * >75% of YouTube watch time originates on mobile devices where thumbnails are displayed at ~140px wide. Centered tiny elements or vast empty borders kill CTR.
+  * The hero asset and bold typography must occupy **≥85% of total thumbnail canvas area**.
 * **Format 1 — Popular Comic Action Hook (`thumbnail-popular.png`)**:
-  * Tilted dynamic headline (`rotate(-2deg)`) with heavy dark stroke (`-webkit-text-stroke: 6px #000`) and 3D yellow gradient fill.
-  * Attention-grabbing eyebrow pill: e.g. `🔥 CERITA ANAK SERU BANGET!` / `🔥 HILARIOUS KIDS STORYBOOK`.
-  * Curiosity gap sticker: Dynamic contextual hook (e.g. `🌧️😱 MANU PENGEN BANGET HUJAN?!` / `MANU CAN'T WAIT FOR RAIN?!`).
-  * Sticker-bordered hero artwork with white outline and drop-shadow (`0 24px 60px rgba(0,0,0,0.9)`).
-  * Safe-zone compliant: Keeps bottom-right quadrant clear of text/faces where YouTube stamps the video runtime overlay.
+  * **Giant 2-Line Headline**: Line 1 `fontSize: 90px`, Line 2 `fontSize: 114px` with thick black stroke (`-webkit-text-stroke: 6px–7px #000`), 3D amber extrusion shadow (`0 10px 0 #B45309`), and tight line height (`0.92`) to eliminate vertical dead space.
+  * **Massive Hero Artwork Frame**: Expanded to `780px × 640px` (was 580×480), filling the entire right half of the frame with a dynamic `rotate(2.5deg)` angle, thick `12px solid #FFFFFF` sticker border, and 3D yellow ambient drop shadow.
+  * **Curiosity Gap Hook Sticker**: `fontSize: 36px` on punchy cyan badge (`#38BDF8`) with dark 3D bevel.
+  * **Narrow Edge Padding**: Reduced to `48px` horizontally to utilize the full widescreen canvas.
+  * **Safe-Zone Compliant**: Bottom-right corner reserved for YouTube's video duration timestamp pill.
 * **Format 2 — Niche Whimsical Bedtime Storybook (`thumbnail-bedtime.png`)**:
-  * Ornate golden picture-book frame with warm ambient stardust lighting and midnight blue gradient.
-  * Gold embossed typography, moonlight pill (`🌙 DONGENG SEBELUM TIDUR` / `🌙 BEDTIME READ-ALOUD`), dynamic book title, and gentle bedtime subtitle.
+  * Expanded storybook frame (`760px × 560px`) with ornate golden rim (`border: 6px solid rgba(251, 191, 36, 0.9)`).
+  * Gold embossed typography (`fontSize: 84px`), moonlight pill (`🌙 DONGENG SEBELUM TIDUR` / `🌙 BEDTIME READ-ALOUD`), and gentle bedtime subtitle.
 * **Format 3 — Vertical 9:16 Shorts & Reels Cover (`thumbnail-vertical.png`)**:
-  * Full-bleed ambient backdrop with dramatic centered character card (10px sticker border, 3D drop shadow).
+  * Hero card scaled to `960px × 800px` with thick 12px sticker border and reaction sticker.
+  * Stacked headline scaled to `90px` and `114px`, filling the vertical canvas without dead space.
   * High-contrast title typography + curiosity gap hook sticker, safe-zone compliant (top 150px and bottom 300px clear for native player UI).
 * **Automated Remotion Still Rendering**:
   ```bash
@@ -159,6 +232,12 @@ Present the story brief to the user using the review template in [story-sources.
   * `stories/<book-slug>/exports/en/thumbnail.png`, `thumbnail-bedtime.png`, & `thumbnail-vertical.png`
 
 ### 10. Multi-Platform Idempotent Publishing & Duplicate Prevention
+* **Automated Duration-Based Format Routing (Channel Metric Protection)**:
+  * Inspects story total duration before publishing to enforce platform best practices ([video-duration-strategy.md](./references/video-duration-strategy.md)):
+    * **Tier 1 (< 20s)**: *Micro-Story / Teaser* $\to$ Automatically sets `--format vertical` (Shorts/TikTok/Reels ONLY). Suppresses 16:9 landscape upload to prevent poor viewer retention and algorithmic suppression on horizontal YouTube channels (override with `--allow-short-landscape`).
+    * **Tier 2 (20s – 60s)**: *Snackable Story* $\to$ Recommends Shorts/TikTok/Reels as primary; 16:9 optional or compilation candidate.
+    * **Tier 3 (60s – 180s / 1–3 mins)**: *Standard Storybook* $\to$ Publishes **Dual-Format (Full 16:9 Widescreen & Full 9:16 Shorts)**.
+    * **Tier 4 (> 180s / > 3 mins)**: *Extended Bedtime Tale* $\to$ Publishes 16:9 Long-Form Hero; extracts/renders 30–45s Teaser Hook for Shorts/Reels/TikTok.
 * **Pre-Publishing Deduplication Protocol (Local & Cross-Platform)**:
   * Before publishing any video (YouTube, TikTok, Reels), the pipeline executes a 2-stage deduplication check:
     1. **Local Manifest Probe**: Checks `story.json.publications[platform]` and `story.json.exports` for existing remote video IDs.
@@ -169,8 +248,12 @@ Present the story brief to the user using the review template in [story-sources.
     * **`--force` / `--replace`**: Replaces the video by automatically deleting the previous remote upload first (`youtube.videos.delete`), ensuring zero duplicates on the channel.
 * **Automated Publishing CLI**:
   ```bash
-  # Publish both language editions safely (Idempotent: skips if already live):
-  npm run upload -- --book <book-slug> --lang all --format all --privacy unlisted
+  # Publish with automated duration routing (safely uploads to optimal formats):
+  npm run upload -- --book <book-slug> --lang all --privacy unlisted
+
+  # Explicit format control:
+  npm run upload -- --book <book-slug> --format vertical  # Shorts/TikTok/Reels only (<20s or quick story)
+  npm run upload -- --book <book-slug> --format landscape # 16:9 Widescreen only
 
   # Full resync of title, description, chapters & custom thumbnails across all videos & shorts:
   npm run upload -- --book <book-slug> --lang all --resync-all
@@ -183,8 +266,125 @@ Present the story brief to the user using the review template in [story-sources.
 
   # Clean up older duplicate videos from channel:
   npx tsx scripts/manage-youtube.ts --clean-duplicates
+
+  # Monitor real-time views, likes, comments & channel performance:
+  npm run stats
+
+  # --- MULTI-PLATFORM UNIFIED PUBLISHER (YOUTUBE, INSTAGRAM & FACEBOOK) ---
+  # One-shot automated distribution across all platforms:
+  npm run publish:all -- --book <book-slug>
+  npm run publish:all -- --book <book-slug> --lang all
+  npm run publish:all -- --book <book-slug> --dry-run
+
+  # --- META PUBLISHING (INSTAGRAM REELS & FACEBOOK) ---
+  # Verify Meta Page, Instagram Account & Publishing Quota:
+  npm run test:meta
+
+  # Upload to Instagram Reels (9:16 Vertical via Cloudflare R2 Edge CDN buffer):
+  npm run upload:meta -- --book <book-slug> --platform instagram
+
+  # Upload to Facebook Reels (9:16 Vertical direct multipart):
+  npm run upload:meta -- --book <book-slug> --platform facebook --format vertical
+
+  # Upload to Facebook Normal Page Video / Watch (16:9 Landscape + Custom Thumbnail):
+  npm run upload:meta -- --book <book-slug> --platform facebook --format landscape
+
+  # Upload to BOTH Instagram Reels and Facebook Page:
+  npm run upload:meta -- --book <book-slug> --platform both
+
+  # Monitor real-time Meta performance (Facebook & Instagram views, likes, comments):
+  npm run stats:meta
   ```
 * Saves returned live video IDs, URLs, and timestamps into `story.json.publications[platform]`. Details in [distribution-upload.md](./references/distribution-upload.md).
+* **Cloudflare R2 Temporary Edge Buffer Lifecycle**:
+  * For Instagram Reels, the video is staged on Cloudflare R2 (`zayn-storybook` bucket, $0 egress).
+  * As soon as Meta confirms container transcoding is `READY`, the script **automatically deletes the R2 video object** (`DeleteObjectCommand`), keeping cloud storage at **0 MB** permanently.
+* **Live View Analytics & Performance Monitoring**:
+  * Run `npm run stats` anytime to query YouTube Data API v3 and generate an instant consolidated performance matrix of all published storybooks across languages and formats (real-time views, likes, comments, privacy status, and channel totals).
+  * Deeper audience retention curves, traffic sources, and demographics can be queried via the YouTube Analytics API v2 (`youtubeAnalytics.reports.query`) with the `yt-analytics.readonly` OAuth scope. Details in [distribution-upload.md](./references/distribution-upload.md).
+* **Publishing Quota Cap & Velocity Limitation Handling**:
+  * If YouTube returns `400 Bad Request: The user has exceeded the number of videos they may upload` (daily upload limit) or `403 quotaExceeded`:
+    1. Trap the error gracefully. Tag pending exports in `story.json.publications.youtube` as `"status": "daily_limit_reached"`.
+    2. Halt further uploads immediately to prevent token churn.
+    3. Present an official Decision Card to the user:
+       - **Option 1 (Recommended — Auto-Schedule / Resume on Rolling Reset)**: Keep exports ready and run upload once the rolling 24h reset opens (~12:17 WIB / 05:17 UTC).
+       - **Option 2 (Switch Channel / OAuth Profile)**: Authenticate another channel profile if managing multiple channels.
+       - **Option 3 (Manual Upload via YouTube Studio)**: Use local MP4 files in `exports/` paired with `exports/youtube-upload-metadata.md`.
+    4. Await user confirmation before attempting retry.
+
+### 11. Compilation Video & Marathon Packaging (Auto-Recommendation & Retention Architecture)
+* **The Long-Form Monetization Engine**: Individual storybooks (1–3 mins) excel for short-form reach, but compilations (10–30+ mins) unlock **YouTube Mid-Roll Ads (>8 mins)** and serve parent viewing behavior (*"Set-and-Forget"* screen time for bedtime, playtime, and car rides).
+* **Auto-Recommendation Engine**:
+  * Evaluates local catalog across `stories/`.
+  * Triggers recommendation when $\ge 3$ stories or $\ge 8.0$ minutes total duration are available.
+  * Recommends themed packages: *Bedtime Stories Marathon*, *Funny Animals & Wit*, *Character & Moral Values*.
+  * Inspect recommendations anytime:
+    ```bash
+    npm run compilation:recommend
+    ```
+* **Retention Sequencing & Interstitials**:
+  * **The Anchor Sequence**: Story 1 (High-energy Hook) $\to$ Story 2 (Momentum) $\to$ Story 3 (Emotional Core) $\to$ Story 4 (Calming Finale).
+  * **Intermediate Outro Suppression**: Stories 1 to $N-1$ suppress their individual subscribe outro callout to prevent premature viewer drop-off.
+  * **Chapter Bumper (`ChapterBumper.tsx`)**: 4.0s (120 frames) animated transition card between stories with 3D floating cover preview, chapter pill badge (`✨ CERITA SELANJUTNYA • BABAK X DARI Y ✨`), and progress bar.
+  * **Master Outro**: The final story plays the complete closing outro with moral advice and channel subscribe invitation.
+* **Automated Bilingual YouTube Chapters & Metadata**:
+  * Computes exact timestamps and writes copy-paste ready description & chapters to `exports/compilations/kompilasi-<theme>-<lang>-metadata.txt` for both Indonesian and English editions.
+* **Distinct Bilingual Compilation Thumbnail Engine**:
+  * Renders dedicated 16:9 marathon thumbnail (`StorybookCompilationThumbnail`, `scripts/render-compilation-thumbnail.ts`) featuring 3–4 fanned 3D storybook covers, bold gradient typography, language-specific hooks, and marathon duration badge.
+  * Command: `npm run compilation:thumbnail -- --theme <theme> --lang all`
+* **Multi-Platform Bilingual Publication (Facebook Watch & YouTube)**:
+  * **Facebook Watch**: `npx tsx scripts/upload-meta.ts --compilation <theme> --lang <id|en>` via Cloudflare R2 edge ingestion with custom thumbnail poster.
+  * **YouTube Public**: `npx tsx scripts/upload-youtube.ts --compilation <theme> --lang <id|en|all> --privacy public` with auto-detected YouTube Chapters and custom compilation thumbnail.
+* **Compilation Commands**:
+  ```bash
+  # Check auto-recommendations across catalog:
+  npm run compilation:recommend
+
+  # Dry-run timeline and generate YouTube Chapters for both languages:
+  npm run compilation:render -- --theme bedtime --lang all --dry-run
+
+  # Render Dual-Language Bedtime Marathon (ID & EN 16:9 Landscape):
+  npm run compilation:render -- --theme bedtime --lang all
+
+  # Render single language edition:
+  npm run compilation:render -- --theme bedtime --lang id
+  npm run compilation:render -- --theme bedtime --lang en
+
+  # Custom book sequence:
+  npm run compilation:render -- --books gara-gara-kucing,jas-hujan-merah,raja-gemuk-anjing-kurus --lang all
+
+  # Render distinct high-CTR compilation thumbnails (both languages):
+  npm run compilation:thumbnail -- --theme bedtime --lang all
+
+  # Publish compilation to Facebook Watch:
+  npx tsx scripts/upload-meta.ts --compilation bedtime --lang id
+  npx tsx scripts/upload-meta.ts --compilation bedtime --lang en
+
+  # Publish compilation directly to YouTube Public:
+  npx tsx scripts/upload-youtube.ts --compilation bedtime --lang id --privacy public
+  npx tsx scripts/upload-youtube.ts --compilation bedtime --lang en --privacy public
+  ```
+
+### 12. Post-Publication Storage Cleanup & Disk Optimization
+* **Disk Exhaustion Prevention**: Once videos are confirmed published to YouTube/platforms, heavy local binary artifacts are safely purged to avoid disk quota exhaustion (details in [storage-cleanup-policy.md](./references/storage-cleanup-policy.md)).
+* **Safe Archival Rules**:
+  * **Purged**: Local `.mp4` video files in `exports/` (~150MB–400MB) and raw intermediate extraction pages in `raw/pages/` (~50MB–250MB).
+  * **Strictly Preserved**: `story.json` (with remote video URLs/IDs), `bible/`, `assets/` (final illustration plates & audio), `thumbnails`, and `youtube-upload-metadata.md`.
+  * **100% Reproducibility**: Cleaned-up videos can be re-rendered on demand via Remotion anytime (`npm run render -- --book <slug>`).
+* **Cleanup Commands**:
+  ```bash
+  # Preview reclaimable disk space across all books (Dry-Run):
+  npm run cleanup
+
+  # Execute cleanup for all published books:
+  npm run cleanup -- --execute
+
+  # Clean specific book:
+  npm run cleanup -- --book <book-slug> --execute
+
+  # Clean during upload automatically:
+  npm run upload -- --book <book-slug> --lang all --auto-cleanup
+  ```
 
 ---
 
@@ -213,7 +413,6 @@ To modify or fix any scene without re-running the entire pipeline or re-spending
 
 | Domain | Boundary / Limitation | Impact & Error Signature | Standard Operating Procedure / Mitigation |
 | :--- | :--- | :--- | :--- |
-| **Publish Visibility & Scheduling** | Videos uploaded as Public prematurely without QC | Unintended notification blast to subscribers with audio/subtitle errors | Always upload as Unlisted by default (`privacyStatus: "unlisted"`); provide preview links and ask user whether to publish immediately (`--set-privacy public`), schedule (`--schedule <time>`), or keep unlisted. |
 | **YouTube Quota** | Default 10,000 units/day quota | 4 video releases = ~6,620 units (max 1 full bilingual title/day) | Use `--resync-all` / `--update-metadata` (51 units/video) for revisions; never re-upload binaries to fix metadata. |
 | **Thumbnail Velocity** | API burst throttle on `thumbnails.set` | `400/429 The user has uploaded too many thumbnails recently` when updating >3 thumbnails rapidly | Wait 15–30 min cooldown, then run `--update-thumbnails` for remaining videos, or drag-and-drop into YouTube Studio. |
 | **Channel Verification** | Phone verification required for custom thumbnails | `403 The authenticated user doesn't have permissions to upload and set custom video thumbnails` | Complete one-time channel verification at `https://www.youtube.com/verify` (Intermediate Features). |
@@ -234,10 +433,14 @@ To modify or fix any scene without re-running the entire pipeline or re-spending
 
 Before delivering or publishing:
 - [ ] **Local Duplicate Check Respected**: Prompted user before scaffolding when title existed.
+- [ ] **User Verification Checkpoint Approved**: Explicit confirmation obtained from user on scenes, illustration availability, character details, and settings BEFORE synthesizing audio, generating visuals, or rendering video.
 - [ ] **Bilingual Video Deliverables Rendered (Default)**: Verified all 4 video files (ID Landscape & Shorts, EN Landscape & Shorts) with smooth 30fps playback.
+- [ ] **Moral of the Story Closing Scene**: Dedicated child-friendly moral outro scene (`MoralScene.tsx`) rendered at the end of every video with bubbly pill badge, hero vignette, warm card layout, and kinetic karaoke read-along words.
+- [ ] **Duration & Platform Strategy Followed**: Story duration analyzed against 4-tier matrix (<20s Short-only, 20s-60s Short-primary, 60-180s Dual-hybrid, >180s Long-primary); micro-stories <20s suppressed from standalone 16:9 upload.
 - [ ] **Zero Language Visual Redundancy**: 100% of illustration plates shared across both languages with zero foreign text overlays.
 - [ ] **Artwork Priority Followed**: Authentic clean plates used if present; otherwise source-faithful AI illustrations generated.
-- [ ] **Illustration Quota Handled**: If API limits occurred, Decision Card was surfaced and manifest marked with `quota_pending` / `placeholder`.
+- [ ] **User Confirmation on Quotas & Limitations**: Never executed autonomous workarounds, generated placeholder cards, or rendered draft videos without explicit user Decision Card confirmation.
+- [ ] **Illustration Quota Handled**: If API limits occurred, Decision Card was surfaced and manifest marked with `quota_pending`.
 - [ ] **Character Consistency**: Protagonist's clothes, hair, and facial features match across all scenes.
 - [ ] **Punctuation (*Tanda Baca*) Preserved**: Subtitles in both Indonesian and English retain original commas, question marks, and exclamation marks.
 - [ ] **Multi-Speaker Tagging**: Distinct color accents and badges assigned to each persona.
@@ -245,8 +448,9 @@ Before delivering or publishing:
 - [ ] **Bilingual Multi-Platform Metadata Prepared**: `exports/youtube-upload-metadata.md` generated with timestamps, cross-promotion links, and full attribution.
 - [ ] **Bilingual High-CTR Thumbnails Rendered**: Generated 1920x1080 thumbnails in both Popular Comic and Niche Bedtime formats for ID and EN editions with title typography and curiosity hooks.
 - [ ] **Cross-Platform Duplicate Prevention Verified**: Confirmed publication idempotency via local manifest and live platform API checks before video insertion.
-- [ ] **Publish Visibility Unlisted by Default**: All videos uploaded as "unlisted" initially; preview links presented to user to confirm quality before switching to "public" or scheduling via `--set-privacy public` or `--schedule`.
 - [ ] **Automated YouTube Publishing Complete**: Live video URLs for both language editions synced back into `story.json`.
+- [ ] **Copyright & License Compliance Verified**: Full CC BY 4.0 attribution (Author, Illustrator, Publisher, Source URL, License URL) embedded in descriptions; royalty-free audio verified; YouTube Copyright Match Tool guidelines (`support.google.com/youtube/answer/7648743`) respected with Restrictions set to None.
+- [ ] **Post-Publication Storage Cleanup Executed**: Large local MP4 video files and raw PDF extraction scrap purged from published projects, reclaiming disk space while maintaining 100% Remotion reproducibility.
 
 ---
 
@@ -264,7 +468,6 @@ Before delivering or publishing:
 | **YouTube API 403 / Access Denied** | API disabled or test user missing | Enable YouTube Data API v3 in GCP and add channel email under OAuth Consent Screen Test Users. |
 | **YouTube API 403 on custom thumbnail** | Channel phone verification missing | Visit `https://www.youtube.com/verify` to activate Intermediate Features. |
 | **YouTube thumbnail velocity rate-limit** | Updating >3 thumbnails in rapid burst | Trapped gracefully; wait 15–30m cooldown, then run `--update-thumbnails` for remaining videos. |
-| **Thumbnail displays wrong/previous story title** | Hardcoded text fallbacks in Remotion composition | Define `thumbnailConfig` in `story.json` per book and use dynamic headline splitting and keyword emoji derivation. |
 | **Remotion render fails with `EPERM`** | Headless Chrome WebSocket blocked | Run render outside sandbox (`BypassSandbox: true`) for CDP socket communication. |
 | **Image generation quota hit (429 / RESOURCE_EXHAUSTED)** | Free/burst API quota limit reached | Present Decision Card: Wait & Auto-Resume vs Progressive Draft with storyboard placeholders. |
 | **4K render Chrome tab crash (OOM)** | Memory spikes on 4K canvas | Standardize on 1080p Full HD (`1920×1080`); only use 4K on machines with ≥16GB RAM. |

@@ -664,98 +664,126 @@ async function main() {
 
   // Handle compilation upload if requested
   if (compilationTheme) {
-    const lang = requestedLang === "all" ? "id" : requestedLang;
+    const compilationLangs: Array<"id" | "en"> =
+      requestedLang === "all" || requestedLang === "both" ? ["id", "en"] : [requestedLang as "id" | "en"];
     const outDir = path.resolve("./exports/compilations");
-    const videoFilename = `kompilasi-${compilationTheme}-${lang}-16x9.mp4`;
-    const metaFilename = `kompilasi-${compilationTheme}-${lang}-metadata.txt`;
-    const videoPath = path.join(outDir, videoFilename);
-    const metaPath = path.join(outDir, metaFilename);
 
-    if (!existsSync(videoPath)) {
-      throw new Error(`Compilation video not found at ${videoPath}`);
+    for (const lang of compilationLangs) {
+      const isEn = lang === "en";
+      const videoFilename = `kompilasi-${compilationTheme}-${lang}-16x9.mp4`;
+      const metaFilename = `kompilasi-${compilationTheme}-${lang}-metadata.txt`;
+      const videoPath = path.join(outDir, videoFilename);
+      const metaPath = path.join(outDir, metaFilename);
+
+      if (!existsSync(videoPath)) {
+        console.warn(`⚠️ Warning: Compilation video not found at ${videoPath}, skipping ${lang.toUpperCase()}.`);
+        continue;
+      }
+
+      let title = isEn
+        ? "Bedtime Stories Marathon for Kids (12 Mins Non-Stop) | Calming Animated Picture Books 🌙✨"
+        : "Kumpulan Dongeng Anak Sebelum Tidur (12 Menit Non-Stop) | Cerita Bergambar Penuh Pesan Moral 🌙✨";
+      let description = isEn
+        ? "Enjoy a magical bedtime story marathon with Zayn Storybook! Delightful, calming animated storybooks full of humor, friendship, and positive moral lessons."
+        : "Dengarkan dongeng anak bergambar penuh pesan moral dalam satu video non-stop! Cocok untuk menemani si kecil tidur nyenyak, santai akhir pekan, atau waktu bermain tanpa gangguan.";
+
+      if (existsSync(metaPath)) {
+        const metaContent = await fs.readFile(metaPath, "utf-8");
+        const titleMatch = metaContent.match(/JUDUL:\s*\n([^\n]+)/);
+        if (titleMatch) title = titleMatch[1].trim();
+        const descMatch = metaContent.match(/DESKRIPSI:\s*\n([\s\S]+?)(?=\n===|$)/);
+        if (descMatch) description = descMatch[1].trim();
+      }
+
+      const thumbnailCandidates = [
+        path.join(outDir, `thumbnail-compilation-${compilationTheme}-${lang}.png`),
+        path.resolve(`./stories/pisang-terlalu-banyak/exports/${lang}/thumbnail-bedtime.png`),
+        path.resolve(`./stories/hari-cukur-rambut/exports/${lang}/thumbnail-bedtime.png`),
+        path.resolve(`./stories/jas-hujan-merah/exports/${lang}/thumbnail-popular.png`),
+      ];
+      const thumbnailPath = thumbnailCandidates.find((p) => existsSync(p));
+
+      console.log(`\n======================================================`);
+      console.log(`🎬 YOUTUBE COMPILATION MARATHON UPLOADER [${lang.toUpperCase()}]`);
+      console.log(`======================================================`);
+      console.log(`🏷️ Theme      : ${compilationTheme}`);
+      console.log(`🌐 Language   : ${lang}`);
+      console.log(`📁 Video File : ${videoPath}`);
+      console.log(`📌 Title      : ${title}`);
+      if (thumbnailPath) console.log(`🖼️ Thumbnail  : ${thumbnailPath}`);
+      console.log(`🔒 Privacy    : ${privacy.toUpperCase()}`);
+      console.log(`🧪 Mode       : ${isDryRun ? "DRY RUN" : "LIVE UPLOAD"}`);
+      console.log("------------------------------------------------------");
+      console.log(description);
+      console.log("------------------------------------------------------\n");
+
+      if (isDryRun) {
+        console.log(`✔ DRY RUN [${lang.toUpperCase()}] COMPLETED! YouTube compilation payload verified.`);
+        continue;
+      }
+
+      const compilationTags = isEn
+        ? [
+            "Bedtime Stories",
+            "Children Storybook",
+            "Kids Stories Marathon",
+            "Animated Storybook",
+            "Zayn Storybook",
+            "Picture Books",
+            "English Stories for Kids",
+            "Calming Stories",
+            "Audiobook for Kids",
+            "Moral Stories for Kids",
+            "Read Aloud Books",
+          ]
+        : [
+            "Dongeng Anak",
+            "Cerita Anak",
+            "Bedtime Story",
+            "Kompilasi Dongeng",
+            "Zayn Storybook",
+            "Cerita Bergambar",
+            "Video Edukasi Anak",
+            "Dongeng Sebelum Tidur",
+            "Dongeng Pengantar Tidur",
+          ];
+
+      const videoId = await uploadVideo(youtube, videoPath, {
+        title: sanitizeTitle(title, 100),
+        description,
+        tags: compilationTags,
+        categoryId: "27",
+        privacyStatus: privacy,
+        isMadeForKids: false,
+        publishAt: scheduleTime ? new Date(scheduleTime).toISOString() : undefined,
+      });
+      if (thumbnailPath) {
+        await uploadThumbnail(youtube, videoId, thumbnailPath);
+      }
+
+      const pubRecordPath = path.join(outDir, "publication-status.json");
+      let pubRecord: Record<string, any> = {};
+      if (existsSync(pubRecordPath)) {
+        try {
+          pubRecord = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
+        } catch {}
+      }
+      const key = `${compilationTheme}-${lang}`;
+      pubRecord[key] = {
+        ...(pubRecord[key] || {}),
+        title,
+        youtube: {
+          videoId,
+          url: `https://youtu.be/${videoId}`,
+          publishedAt: new Date().toISOString(),
+          privacy,
+        },
+      };
+      await fs.writeFile(pubRecordPath, JSON.stringify(pubRecord, null, 2), "utf-8");
+
+      console.log(`\n🎉 COMPILATION VIDEO [${lang.toUpperCase()}] LIVE ON YOUTUBE!`);
+      console.log(`🔗 Link: https://youtu.be/${videoId}`);
     }
-
-    let title = "Kumpulan Dongeng Anak Sebelum Tidur (12 Menit Non-Stop) | Cerita Bergambar Penuh Pesan Moral 🌙✨";
-    let description = "Kompilasi dongeng anak bergambar non-stop...";
-    if (existsSync(metaPath)) {
-      const metaContent = await fs.readFile(metaPath, "utf-8");
-      const titleMatch = metaContent.match(/JUDUL:\s*\n([^\n]+)/);
-      if (titleMatch) title = titleMatch[1].trim();
-      const descMatch = metaContent.match(/DESKRIPSI:\s*\n([\s\S]+?)(?=\n===|$)/);
-      if (descMatch) description = descMatch[1].trim();
-    }
-
-    const thumbnailCandidates = [
-      path.join(outDir, `thumbnail-compilation-${compilationTheme}-${lang}.png`),
-      path.resolve("./stories/pisang-terlalu-banyak/exports/id/thumbnail-bedtime.png"),
-      path.resolve("./stories/hari-cukur-rambut/exports/id/thumbnail-bedtime.png"),
-      path.resolve("./stories/jas-hujan-merah/exports/id/thumbnail-popular.png"),
-    ];
-    const thumbnailPath = thumbnailCandidates.find((p) => existsSync(p));
-
-    console.log(`\n======================================================`);
-    console.log(`🎬 YOUTUBE COMPILATION MARATHON UPLOADER`);
-    console.log(`======================================================`);
-    console.log(`🏷️ Theme      : ${compilationTheme}`);
-    console.log(`🌐 Language   : ${lang}`);
-    console.log(`📁 Video File : ${videoPath}`);
-    console.log(`📌 Title      : ${title}`);
-    if (thumbnailPath) console.log(`🖼️ Thumbnail  : ${thumbnailPath}`);
-    console.log(`🔒 Privacy    : ${privacy.toUpperCase()}`);
-    console.log(`🧪 Mode       : ${isDryRun ? "DRY RUN" : "LIVE UPLOAD"}`);
-    console.log("------------------------------------------------------");
-    console.log(description);
-    console.log("------------------------------------------------------\n");
-
-    if (isDryRun) {
-      console.log("✔ DRY RUN COMPLETED! YouTube compilation payload verified.");
-      return;
-    }
-
-    const videoId = await uploadVideo(youtube, videoPath, {
-      title: sanitizeTitle(title, 100),
-      description,
-      tags: [
-        "Dongeng Anak",
-        "Cerita Anak",
-        "Bedtime Story",
-        "Kompilasi Dongeng",
-        "Zayn Storybook",
-        "Cerita Bergambar",
-        "Video Edukasi Anak",
-        "Dongeng Sebelum Tidur",
-        "Dongeng Pengantar Tidur",
-      ],
-      categoryId: "27",
-      privacyStatus: privacy,
-      isMadeForKids: false,
-      publishAt: scheduleTime ? new Date(scheduleTime).toISOString() : undefined,
-    });
-    if (thumbnailPath) {
-      await uploadThumbnail(youtube, videoId, thumbnailPath);
-    }
-
-    const pubRecordPath = path.join(outDir, "publication-status.json");
-    let pubRecord: Record<string, any> = {};
-    if (existsSync(pubRecordPath)) {
-      try {
-        pubRecord = JSON.parse(await fs.readFile(pubRecordPath, "utf-8"));
-      } catch {}
-    }
-    const key = `${compilationTheme}-${lang}`;
-    pubRecord[key] = {
-      ...(pubRecord[key] || {}),
-      youtube: {
-        videoId,
-        url: `https://youtu.be/${videoId}`,
-        publishedAt: new Date().toISOString(),
-        privacy,
-      },
-    };
-    await fs.writeFile(pubRecordPath, JSON.stringify(pubRecord, null, 2), "utf-8");
-
-    console.log(`\n🎉 COMPILATION VIDEO LIVE ON YOUTUBE!`);
-    console.log(`🔗 Link: https://youtu.be/${videoId}`);
     return;
   }
 
