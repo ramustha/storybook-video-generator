@@ -594,7 +594,14 @@ async function main() {
 
     // Calculate total story duration & determine 4-tier publication strategy
     if (manifest.scenes && manifest.scenes.length > 0) {
-      totalDurationSeconds = manifest.scenes.reduce((acc, s) => acc + (s.durationSeconds || 0), 0);
+      totalDurationSeconds = manifest.scenes.reduce((acc, s: any) => {
+        if (requestedLang === "en") {
+          return acc + (s.audio?.en?.durationSeconds || s.audio?.en?.duration || s.durationSeconds || 0);
+        } else if (requestedLang === "id") {
+          return acc + (s.audio?.id?.durationSeconds || s.audio?.id?.duration || s.durationSeconds || 0);
+        }
+        return acc + (s.durationSeconds || 0);
+      }, 0);
     }
 
     if (totalDurationSeconds > 0 && totalDurationSeconds < 20) {
@@ -627,8 +634,8 @@ async function main() {
       effectiveFormat = "vertical";
     }
 
-    // Automatically enforce landscape-only for Tier 4 (>180s) because YouTube Shorts hard ceiling is 180s (3 minutes)
-    if (durationTier === "tier4" && (effectiveFormat === "all" || effectiveFormat === "vertical")) {
+    // Automatically enforce landscape-only for Tier 4 (>180s) when format is "all"
+    if (durationTier === "tier4" && format === "all") {
       console.log(`\n💡 DURATION POLICY APPLIED: Storybook is >180s (${totalDurationSeconds.toFixed(1)}s).`);
       console.log(`   YouTube Shorts strictly limits vertical videos to <=180s (anything longer is forced into Long Video section).`);
       console.log(`   Automatically routing to Landscape-Only (format: "landscape") to prevent channel video duplication.`);
@@ -933,12 +940,25 @@ async function main() {
     const exportsDir = path.join(storyDir, "exports", lang);
     const landscapeRel = (manifest.exports as any)?.[lang]?.landscape?.path;
     const verticalRel = (manifest.exports as any)?.[lang]?.vertical?.path;
-    const landscapeVideo = landscapeRel
-      ? path.join(storyDir, landscapeRel)
-      : path.join(exportsDir, `${bookSlug}-16x9.mp4`);
-    const verticalVideo = verticalRel
-      ? path.join(storyDir, verticalRel)
-      : path.join(exportsDir, `${bookSlug}-9x16.mp4`);
+    const candidateLandscapeVideos = [
+      landscapeRel ? path.join(storyDir, landscapeRel) : null,
+      path.join(exportsDir, `${bookSlug}-16x9.mp4`),
+      path.join(storyDir, "exports", `${bookSlug}-16x9.mp4`),
+      isEn && manifest.originalTitle
+        ? path.join(exportsDir, `${manifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-16x9.mp4`)
+        : null,
+    ].filter(Boolean) as string[];
+    const landscapeVideo = candidateLandscapeVideos.find((p) => existsSync(p)) || path.join(exportsDir, `${bookSlug}-16x9.mp4`);
+
+    const candidateVerticalVideos = [
+      verticalRel ? path.join(storyDir, verticalRel) : null,
+      path.join(exportsDir, `${bookSlug}-9x16.mp4`),
+      path.join(storyDir, "exports", `${bookSlug}-9x16.mp4`),
+      isEn && manifest.originalTitle
+        ? path.join(exportsDir, `${manifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-9x16.mp4`)
+        : null,
+    ].filter(Boolean) as string[];
+    const verticalVideo = candidateVerticalVideos.find((p) => existsSync(p)) || path.join(exportsDir, `${bookSlug}-9x16.mp4`);
 
     const popularThumbRel =
       (manifest as any).thumbnails?.[lang]?.popular ||
@@ -1233,7 +1253,20 @@ async function main() {
     }
 
     // 5. Upload Vertical Shorts (9:16) with Pre-Upload Deduplication Check
-    if ((effectiveFormat === "vertical" || effectiveFormat === "all") && existsSync(verticalVideo)) {
+    const langDuration = manifest.scenes
+      ? manifest.scenes.reduce((acc: number, s: any) => {
+          if (lang === "en") {
+            return acc + (s.audio?.en?.durationSeconds || s.audio?.en?.duration || s.durationSeconds || 0);
+          }
+          return acc + (s.audio?.id?.durationSeconds || s.audio?.id?.duration || s.durationSeconds || 0);
+        }, 0)
+      : totalDurationSeconds;
+
+    if ((effectiveFormat === "vertical" || effectiveFormat === "all") && langDuration > 180) {
+      console.log(`\n🛑 DURATION POLICY: [${lang.toUpperCase()}] Story duration is ${langDuration.toFixed(1)}s (> 180s).`);
+      console.log(`   YouTube Shorts strictly limits vertical videos to <=180s (anything longer is forced into the Videos tab).`);
+      console.log(`   Skipping Shorts upload for this edition to prevent channel video duplication.`);
+    } else if ((effectiveFormat === "vertical" || effectiveFormat === "all") && existsSync(verticalVideo)) {
       console.log(`\n📱 Checking Shorts (9:16) publication status for ${lang.toUpperCase()}...`);
 
       let targetShortsId =
