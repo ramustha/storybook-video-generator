@@ -139,13 +139,20 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
    * Do not assume, guess, or execute any fallback without the user's explicit confirmation. Await user selection before proceeding.
 
 ### 6. Synthesize Dual-Language Voice, Subtitles & Foley (Default)
-* **Indonesian (`id-ID`) Track**:
-  * **Childish, Attractive & Funny Cadence**:
-    * Child Narrator: `id-ID-GadisNeural` (pitch: `+30%`, speed: `+6%`). Shifting pitch to `+30%` shifts the vocal formant into an authentic, adorable, bubbly young child (5–8 years).
-    * Comedic Hero / Boy Character: `id-ID-ArdiNeural` (pitch: `+26%`, speed: `+8%`) for energetic, funny, mischievous dialogue.
-    * **Comedic Interjections & Punctuation**: Embed lively expressive interjections in manuscripts (*"Waaah!"*, *"Waduh!"*, *"Aduh!"*, *"Horeee!"*, *"Hihihi!"*, *"Plop!"*, *"Guk guk!"*, *"Hosh... hosh..."*) and exclamation marks `!` to force the neural engine to modulate pitch with joyful comedic acting.
+* **Pure Child Voice Rule (No Adult Male Formants)**:
+  * **Never use `id-ID-ArdiNeural` for child narrators or child characters**. `ArdiNeural` retains adult male chest resonance (*formants*) even when pitch-shifted.
+  * In Indonesian (`id-ID`), use `id-ID-GadisNeural` for all child personas with **dual-cadence prosody**:
+    * **Child Narrator (Zayn Storyteller Host)**: `id-ID-GadisNeural` (`pitch: +18%`, `speed: +10%`). Lively, attractive, joyful, presentation host cadence.
+    * **Child Protagonist (Aku / Main Character)**: `id-ID-GadisNeural` (`pitch: +32%`, `speed: +4%`). Sweet, cute, innocent child storytelling cadence.
+    * **Child Girl Supporting**: `id-ID-GadisNeural` (`pitch: +34%`, `speed: +5%`).
+    * **Child Boy Supporting**: `id-ID-GadisNeural` (`pitch: +20%`, `speed: +6%`).
+    * **Adult Roles**: Use `id-ID-GadisNeural` (`pitch: -6Hz`, `speed: -8%`) for Mother, `id-ID-ArdiNeural` (`pitch: -2Hz`, `speed: -2%`) for Father, and `id-ID-ArdiNeural` (`pitch: -8Hz`, `speed: -10%`) for Grandparent / Elder.
+  * **Comedic Interjections & Punctuation**: Embed lively expressive interjections in manuscripts (*"Waaah!"*, *"Waduh!"*, *"Aduh!"*, *"Horeee!"*, *"Hihihi!"*, *"Plop!"*, *"Guk guk!"*, *"Hosh... hosh..."*) and exclamation marks `!` to force the neural engine to modulate pitch with joyful comedic acting.
   * Saved to `assets/id/scene_XX.mp3` & `assets/id/scene_XX_words.json`.
-* **English (`en-US` / `en-GB`) Track**: Synthesized via `en-US-AnaNeural` (Child Storyteller) or `en-US-EmmaNeural` (Warm Bedtime). Saved to `assets/en/scene_XX.mp3` & `assets/en/scene_XX_words.json`.
+* **English (`en-US` / `en-GB`) Track**:
+  * Narrator: `en-US-AnaNeural` (`pitch: +15%`, `speed: +8%`).
+  * Protagonist: `en-US-AnaNeural` (`pitch: +28%`, `speed: +4%`).
+  * Saved to `assets/en/scene_XX.mp3` & `assets/en/scene_XX_words.json`.
 * **Punctuation (*Tanda Baca*) Restoration**: Azure `WordBoundary` strips punctuation; run `attachPunctuation()` to re-align original punctuation (`?`, `!`, `,`, `.`, `...`, hyphens) to timing tokens in both languages.
 * **Full-Context Kinetic Subtitles (Zero-Cut Policy)**:
   * **Never Chop Context**: Do not slice sentences into arbitrary 4-word snippets that vanish mid-sentence. Display the complete sentence / thought context of the scene together.

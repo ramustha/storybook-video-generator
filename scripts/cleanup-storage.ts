@@ -140,6 +140,41 @@ async function scanBook(bookSlug: string, options: CleanupOptions): Promise<{ it
   return { items, totalBytes };
 }
 
+async function scanCompilations(): Promise<{ items: CleanupItem[]; totalBytes: number }> {
+  const items: CleanupItem[] = [];
+  let totalBytes = 0;
+  const compDir = path.resolve("./exports/compilations");
+  const pubPath = path.join(compDir, "publication-status.json");
+  if (!existsSync(pubPath)) return { items, totalBytes };
+
+  try {
+    const pubStatus = JSON.parse(await fs.readFile(pubPath, "utf-8"));
+    for (const [key, data] of Object.entries(pubStatus) as [string, any][]) {
+      const isYt = !!data.youtube?.videoId;
+      const isFb = !!data.videoId || !!data.permalink;
+      if (isYt || isFb) {
+        const mp4Path = path.join(compDir, `kompilasi-${key}-16x9.mp4`);
+        if (existsSync(mp4Path)) {
+          const stat = statSync(mp4Path);
+          items.push({
+            type: "published_video",
+            bookSlug: `compilation-${key}`,
+            lang: key.includes("-en") ? "en" : "id",
+            format: "landscape (16:9)",
+            filePath: mp4Path,
+            sizeBytes: stat.size,
+            publishedUrl: data.youtube?.url || data.permalink,
+          });
+          totalBytes += stat.size;
+        }
+      }
+    }
+  } catch {
+    // Ignore error
+  }
+  return { items, totalBytes };
+}
+
 async function executeCleanup(items: CleanupItem[]) {
   console.log(`\n🧹 Executing Safe Storage Cleanup...`);
   const touchedManifests = new Set<string>();
@@ -221,6 +256,17 @@ async function main() {
     });
     allItems.push(...items);
     grandTotalBytes += totalBytes;
+  }
+
+  if (allItems.length === 0) {
+    // Also scan compilations
+    const compScan = await scanCompilations();
+    allItems.push(...compScan.items);
+    grandTotalBytes += compScan.totalBytes;
+  } else {
+    const compScan = await scanCompilations();
+    allItems.push(...compScan.items);
+    grandTotalBytes += compScan.totalBytes;
   }
 
   if (allItems.length === 0) {

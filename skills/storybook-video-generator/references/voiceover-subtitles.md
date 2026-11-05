@@ -4,45 +4,39 @@ This document specifies the speech synthesis configuration, word-level timestamp
 
 ---
 
-## 1. Dual-Language Neural TTS (Bahasa Indonesia & English)
+## 1. Dual-Language Neural TTS & Universal Voice Actor System
 
-We use Microsoft Azure Cognitive Neural Voices via `msedge-tts` (100% free, studio grade, natural child cadence).
+We use Microsoft Azure Cognitive Neural Voices via `msedge-tts` (100% free, studio grade, natural child cadence) combined with our modular **Universal Voice Actor Casting & Synthesis System (`src/audio/voice-actors.ts` & `src/audio/tts-engine.ts`)**.
 
 > [!TIP]
-> **100% Visual Plate Reuse Across Languages**:  
-> Because all visual illustration plates (`assets/scene_XX.png`) are generated completely free of baked-in text overlays (`--no text, no watermark`), **the exact same illustration plates and camera motions are reused for both Bahasa Indonesia and English**. Only speech audio (`.mp3`) and word boundaries (`_words.json`) are synthesized per language!
+> **Universal Multi-Speaker Casting**:  
+> Stories can define multi-speaker dialogue lines per scene where Narrator, Child Protagonist, Mother, Father, and Magical Entities (e.g. The Moon) have distinct voices, pitch/rate prosody tuning, signature glow colors, and subtitle badges.
 
-### Voice Configurations by Language:
+### Standard Voice Actor Casting Registry (`src/audio/voice-actors.ts`):
 
-| Language | Persona | Voice Identifier | Pitch | Rate (Speed) | Emotional Tone |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Indonesian (`id-ID`)** | **Female Child Storyteller** | `id-ID-GadisNeural` | `+20%` | `+4%` to `+6%` | Warm, cheerful, gentle storytelling |
-| **Indonesian (`id-ID`)** | **Male Child Storyteller** | `id-ID-ArdiNeural` | `+20%` | `+5%` to `+7%` | Energetic, curious, playful |
-| **English (`en-US`)** | **Child Storyteller (Ana)** | `en-US-AnaNeural` | `+10%` | `+0%` to `+3%` | Sweet, friendly, authentic young child voice |
-| **English (`en-US`)** | **Warm Bedtime (Emma)** | `en-US-EmmaNeural` | `+5%` | `-2%` to `+2%` | Expressive, comforting bedtime narrator |
-| **English (`en-GB`)** | **British Child (Maisie)** | `en-GB-MaisieNeural` | `+8%` | `+2%` | Playful fairytale storybook narrator |
+> [!IMPORTANT]
+> **Pure Child Voice Rule (No Adult Male Formants):**  
+> Never use `id-ID-ArdiNeural` for child narrators. Because `ArdiNeural` is fundamentally an adult male model, pitch-shifting upwards leaves heavy adult chest resonance (*formants*).  
+> In Indonesian, use `id-ID-GadisNeural` for all child personas with **dual-cadence prosody**:
+> - **Narrator (Zayn Child Host)**: `pitch: +18%`, `rate: +10%` (Energetic, funny, joyful, presentation cadence).
+> - **Protagonist (Aku / Child Character)**: `pitch: +32%`, `rate: +4%` (Sweet, cute, expressive, innocent child storytelling).
 
-### Dual-Language Synthesis Script Pattern:
-```ts
-import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+| Role Identifier | Indonesian Persona (`id-ID`) | English Persona (`en-US`) | Icon & Glow Color | Tuning & Cadence |
+| :--- | :--- | :--- | :--- | :--- |
+| **`narrator`** | `id-ID-GadisNeural` (`+18%`, `+10%`) | `en-US-AnaNeural` (`+15%`, `+8%`) | 📖 `#34D399` (Mint) | Lively, funny, attractive, energetic child host (Zayn Storyteller) |
+| **`child_protagonist`** | `id-ID-GadisNeural` (`+32%`, `+4%`) | `en-US-AnaNeural` (`+28%`, `+4%`) | 👧 `#FACC15` (Gold) | Sweet, cute, expressive, innocent young storytelling child |
+| **`child_girl`** | `id-ID-GadisNeural` (`+34%`, `+5%`) | `en-US-AnaNeural` (`+30%`, `+4%`) | 👧 `#F472B6` (Pink) | Sweet, bright, playful young girl |
+| **`child_boy`** | `id-ID-GadisNeural` (`+20%`, `+6%`) | `en-US-AnaNeural` (`+16%`, `+4%`) | 👦 `#FBBF24` (Amber) | Cheerful, spunky little brother / boy friend |
+| **`mother`** | `id-ID-GadisNeural` (`-6Hz`, `-8%`) | `en-US-JennyNeural` (`-2Hz`, `-4%`) | 👩 `#38BDF8` (Sky Blue) | Maternal, gentle, soothing adult female |
+| **`father`** | `id-ID-ArdiNeural` (`-2Hz`, `-2%`) | `en-US-BrianNeural` (`default`, `-2%`) | 👨 `#FB923C` (Orange) | Warm, grounded, reassuring adult male |
+| **`elder`** | `id-ID-ArdiNeural` (`-8Hz`, `-10%`) | `en-US-RogerNeural` (`-4Hz`, `-8%`) | 👴 `#A3E635` (Lime) | Wise grandparent / village elder |
+| **`magical_entity`** | `id-ID-ArdiNeural` (`-5Hz`, `-8%`) | `en-US-BrianNeural` (`-4Hz`, `-6%`) | 🌙 `#FEF08A` (Moon Gold)| Ethereal, echoing, serene bedtime cadence |
+| **`animal_funny`** | `id-ID-GadisNeural` (`+36%`, `+10%`) | `en-US-AnaNeural` (`+32%`, `+8%`) | 🐾 `#C084FC` (Lavender) | High-speed, witty, bouncy cartoon animals |
 
-const voiceMap = {
-  id: "id-ID-GadisNeural",
-  en: "en-US-AnaNeural",
-};
-
-export async function synthesizeLanguageAudio(lang: "id" | "en", text: string, outputPath: string) {
-  const tts = new MsEdgeTTS();
-  await tts.setMetadata(voiceMap[lang], OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
-    wordBoundaryEnabled: true,
-  });
-
-  const { audioFilePath, metadataFilePath } = await tts.toFile(tempDir, text, {
-    pitch: lang === "id" ? "+20%" : "+10%",
-    rate: "+4%",
-  });
-  // ... copies audio to assets/<lang>/scene_XX.mp3 and saves word boundaries
-}
+### Multi-Speaker Synthesis CLI:
+```bash
+# Synthesize all scenes and multi-speaker dialogue lines automatically:
+npm run audio:synthesize -- --book <book-slug> --lang all
 ```
 
 ---

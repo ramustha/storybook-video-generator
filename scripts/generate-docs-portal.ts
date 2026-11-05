@@ -34,13 +34,14 @@ if (!fs.existsSync(docsDir)) {
   fs.mkdirSync(docsDir, { recursive: true });
 }
 
-const stories = [
-  "gara-gara-kucing",
-  "hari-cukur-rambut",
-  "jas-hujan-merah",
-  "raja-gemuk-anjing-kurus",
-  "pisang-terlalu-banyak"
-];
+const stories = fs.readdirSync(storiesDir).filter((f) => {
+  try {
+    const stat = fs.statSync(path.join(storiesDir, f));
+    return stat.isDirectory() && fs.existsSync(path.join(storiesDir, f, "story.json"));
+  } catch {
+    return false;
+  }
+}).sort();
 
 const auditRecords: AuditRecord[] = [];
 let counter = 1;
