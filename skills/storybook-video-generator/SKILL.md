@@ -22,6 +22,7 @@ Transforms open-license children's storybooks and creative folklore concepts int
 | **Duration & Platform Strategy** | <20s Short-only, 20-60s Short-primary, 60-180s Dual, >180s Long-primary (YouTube, TikTok, Reels) | [video-duration-strategy.md](./references/video-duration-strategy.md) |
 | **Compilation & Marathon Engine** | Auto-recommendation, thematic curation, ChapterBumper interstitials, >8 min Mid-Roll, YouTube Chapters | [compilation-marathon.md](./references/compilation-marathon.md) |
 | **Publishing & Distribution** | YouTube Data API v3, Instagram Reels (via Cloudflare R2), Facebook (Reels & Page Video) | [distribution-upload.md](./references/distribution-upload.md) |
+| **Bilingual Social Promotion & Growth** | Single post dual-language hook, carousel blueprint, engagement questions, YouTube Community polls | [social-promotion-playbook.md](./references/social-promotion-playbook.md) |
 | **Audit & Publication Catalog** | Standalone GitHub Pages catalog (`docs/index.html`), 53+ multi-platform records, CSV/JSON export | [distribution-upload.md#7-multi-platform-publication-catalog--audit-portal-github-pages](./references/distribution-upload.md#7-multi-platform-publication-catalog--audit-portal-github-pages) |
 | **Analytics & Performance Tracking** | Live views, likes, comments, and catalog metrics via YouTube Data & Analytics API | [distribution-upload.md#5-live-performance--view-analytics-npm-run-stats](./references/distribution-upload.md#5-live-performance--view-analytics-npm-run-stats) |
 | **Copyright & Verification** | CC BY 4.0 attribution, derivative ownership, YouTube Copyright Match Tool | [copyright-compliance.md](./references/copyright-compliance.md) |
@@ -57,7 +58,9 @@ flowchart TD
     S7 --> S8["8. Direct MP4 Export (4 Deliverables: ID & EN)"]
     S8 --> S9["9. Generate High-CTR Bilingual Thumbnails"]
     S9 --> S10["10. Headless YouTube & Multi-Platform Upload"]
-    S10 --> S11["11. Post-Publication Storage Cleanup & Archival"]
+    S10 --> S11["11. Generate Bilingual Social Promotion Kit across All Platforms"]
+    S11 --> S12["12. Compilation Video & Marathon Packaging"]
+    S12 --> S13["13. Post-Publication Storage Cleanup & Archival"]
 ```
 
 ### 1. Ingest Storyline & Local Duplicate Check
@@ -336,7 +339,27 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
        - **Option 3 (Manual Upload via YouTube Studio)**: Use local MP4 files in `exports/` paired with `exports/youtube-upload-metadata.md`.
     4. Await user confirmation before attempting retry.
 
-### 11. Compilation Video & Marathon Packaging (Auto-Recommendation & Retention Architecture)
+### 11. Multi-Platform Bilingual Social Promotion & Audience Growth Engine
+* **The "Single Post, Dual Language" Strategy**: To attract new viewers, spark parent conversations, and capture both domestic Indonesian and global English discovery, every published video MUST generate a structured bilingual promotion package ([social-promotion-playbook.md](./references/social-promotion-playbook.md)):
+  * **Double Hook & Engagement Spark**:
+    * 🇮🇩 Indonesian emotional hook + parenting humor.
+    * 🇺🇸 English translation hook for diaspora and ESL educators.
+    * 💡 Moral of the story highlight card quote.
+    * 💬 **Interactive Question for Comments**: Relatable prompt asking parents about their child's habits or funny bedtime excuses to trigger algorithm-boosting comment velocity.
+    * 💾 **"Save for Bedtime" CTA**: Maximizes bookmark/save count (the #1 ranking signal on Instagram & TikTok).
+* **Multi-Platform Deployment Package (`exports/social-promotion-posts.md`)**:
+  * **Instagram Feed Carousel (5 Slides)**: Cover + 2 Scene Stills + Moral Card + YouTube CTA.
+  * **Facebook Page Feed Post**: High-CTR thumbnail (`thumbnail-popular.png`) + full bilingual story overview + parenting community discussion question.
+  * **YouTube Community Tab**: Interactive 4-option Image Poll + bilingual announcement.
+  * **TikTok & Reels**: Snappy curiosity teaser (<150 chars).
+* **Automated Generation CLI**:
+  ```bash
+  # Generate bilingual social promotion package for a storybook:
+  npm run promo:social -- <book-slug>
+  ```
+  *(Note: `npm run publish:all` automatically invokes this generator upon video publication).*
+
+### 12. Compilation Video & Marathon Packaging (Auto-Recommendation & Retention Architecture)
 * **The Long-Form Monetization Engine**: Individual storybooks (1–3 mins) excel for short-form reach, but compilations (10–30+ mins) unlock **YouTube Mid-Roll Ads (>8 mins)** and serve parent viewing behavior (*"Set-and-Forget"* screen time for bedtime, playtime, and car rides).
 * **Auto-Recommendation Engine**:
   * Evaluates local catalog across `stories/`.
@@ -392,7 +415,7 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   npx tsx scripts/upload-youtube.ts --compilation bedtime --lang en --privacy public
   ```
 
-### 12. Post-Publication Storage Cleanup & Disk Optimization
+### 13. Post-Publication Storage Cleanup & Disk Optimization
 * **Disk Exhaustion Prevention**: Once videos are confirmed published to YouTube/platforms, heavy local binary artifacts are safely purged to avoid disk quota exhaustion (details in [storage-cleanup-policy.md](./references/storage-cleanup-policy.md)).
 * **Safe Archival Rules**:
   * **Purged**: Local `.mp4` video files in `exports/` (~150MB–400MB) and raw intermediate extraction pages in `raw/pages/` (~50MB–250MB).
