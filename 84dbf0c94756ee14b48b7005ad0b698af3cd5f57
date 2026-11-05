@@ -1,0 +1,33 @@
+scripts/render-compilation-thumbnail.ts
+  698ac31901cd73e0 15,17-20,27,46-59,61-65,67,69-74,76-78
+skills/storybook-video-generator/references/compilation-marathon.md
+  698ac31901cd73e0 1-187
+scripts/upload-meta.ts
+  698ac31901cd73e0 609-612,622-625,630-632,637,649,669,680-682,686
+scripts/upload-youtube.ts
+  698ac31901cd73e0 667-668,671-681,683-696,698-723,725-762,764-782,784-785
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 21-27,50-51,53,59,66-69,71-94,109-116,118-119,121-138,141-146,149-159,163,165-187,207,209-211,213-217,219-220,222-223,235-240,251-256,269-296,299-387,436,438-439,442-443,452-453
+scripts/render-compilation.ts
+  698ac31901cd73e0 169,188,193-197,204,207,215-216,218-225,227-231,233-235,237-240,242-245,247-261,263-264,269-285,287-293,295-301,305-317,321-324,326-329,331-333,335,337-340,342-346,349-352,355-389,391-394,396-398,400-416,418-449,451-455
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "84dbf0c94756ee14b48b7005ad0b698af3cd5f57",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 844,
+      "total_deletions": 394,
+      "accepted_lines": 843,
+      "overriden_lines": 0
+    }
+  }
+}
