@@ -1,0 +1,29 @@
+package.json
+  698ac31901cd73e0 27
+docs/audit-data.json
+  698ac31901cd73e0 1164-1165,1212-1214
+scripts/publish-launch-posts.ts
+  698ac31901cd73e0 1-130
+docs/index.html
+  698ac31901cd73e0 1051
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "665a07dfa86b427c6a59ce53025c7f5349b91610",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 137,
+      "total_deletions": 6,
+      "accepted_lines": 137,
+      "overriden_lines": 0
+    }
+  }
+}
