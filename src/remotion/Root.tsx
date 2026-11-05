@@ -3,6 +3,10 @@ import { Composition } from "remotion";
 import { StorybookVideoComposition } from "./components/StorybookVideoComposition";
 import { StorybookThumbnailComposition } from "./components/ThumbnailComposition";
 import { TikTokDemoComposition } from "./components/TikTokDemoComposition";
+import {
+  StorybookCompilationComposition,
+  calculateCompilationTotalFrames,
+} from "./components/StorybookCompilationComposition";
 
 export function calculateTotalFrames(story: any, fps: number = 30): number {
   if (!story || !story.scenes) return 300;
@@ -71,6 +75,40 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+
+      {/* 16:9 Landscape Compilation / Marathon (1920x1080) */}
+      <Composition
+        id="StorybookCompilation-Landscape"
+        component={StorybookCompilationComposition as any}
+        durationInFrames={900}
+        fps={fps}
+        width={1920}
+        height={1080}
+        calculateMetadata={({ props }: any) => ({
+          durationInFrames: calculateCompilationTotalFrames(
+            props.items,
+            fps,
+            props.bumperDurationFrames || 120
+          ),
+        })}
+      />
+
+      {/* 9:16 Vertical Compilation / Marathon (1080x1920) */}
+      <Composition
+        id="StorybookCompilation-Vertical"
+        component={StorybookCompilationComposition as any}
+        durationInFrames={900}
+        fps={fps}
+        width={1080}
+        height={1920}
+        calculateMetadata={({ props }: any) => ({
+          durationInFrames: calculateCompilationTotalFrames(
+            props.items,
+            fps,
+            props.bumperDurationFrames || 120
+          ),
+        })}
       />
     </>
   );
