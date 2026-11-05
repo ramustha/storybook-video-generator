@@ -238,10 +238,20 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   npm run thumbnail -- --book <book-slug> --lang all --variant all
   ```
 * Deliverables:
-  * `stories/<book-slug>/exports/id/thumbnail.png`, `thumbnail-bedtime.png`, & `thumbnail-vertical.png`
-  * `stories/<book-slug>/exports/en/thumbnail.png`, `thumbnail-bedtime.png`, & `thumbnail-vertical.png`
+  * `stories/<book-slug>/exports/id/thumbnail-popular.png` (Primary Default 16:9), `thumbnail-bedtime.png`, `thumbnail.png`, & `thumbnail-vertical.png`
+  * `stories/<book-slug>/exports/en/thumbnail-popular.png` (Primary Default 16:9), `thumbnail-bedtime.png`, `thumbnail.png`, & `thumbnail-vertical.png`
+* **Shorts Mobile Feed Reality**: Note that YouTube mobile Shorts feed auto-picks a video frame from 0.0s–1.0s. `thumbnail-vertical.png` attaches to YouTube API for desktop/playlists and serves as the curated cover for Instagram Reels and Facebook Reels.
 
 ### 10. Multi-Platform Idempotent Publishing & Duplicate Prevention
+* **YouTube Single-Format & Anti-Duplication Policy**:
+  * **Landscape-Only YouTube Default**: YouTube is strictly a 16:9 widescreen channel for storybooks and compilations. All multi-platform publishing (`npm run publish:all`) defaults to `--format landscape` for YouTube to prevent channel clutter and split watch-time.
+  * **Shorts >180s Limit Guardrail**: YouTube strictly limits Shorts to 180s (3m). Any vertical video >180s is automatically rejected by YouTube as a Short and demoted into the channel's standard "Videos" tab with letterbox black bars, creating an exact content duplicate next to the 16:9 master video. The upload engine automatically blocks vertical uploads if duration >180s (Tier 4).
+  * **Platform Division of Labor**:
+    * **YouTube**: 16:9 Landscape Widescreen Storybooks & Compilations.
+    * **Instagram & Facebook Reels**: 9:16 Vertical Video (with R2-protected custom cover).
+    * **TikTok**: 9:16 Vertical Video / Teasers.
+* **Instagram Reels Cloudflare R2 Cover Lifecycle**:
+  * The temporary cover file staged on Cloudflare R2 MUST NOT be cleaned up during transcoding polling; `coverCleanup()` runs strictly in the `finally` block **after** `POST /media_publish` returns success.
 * **Automated Duration-Based Format Routing (Channel Metric Protection)**:
   * Inspects story total duration before publishing to enforce platform best practices ([video-duration-strategy.md](./references/video-duration-strategy.md)):
     * **Tier 1 (< 20s)**: *Micro-Story / Teaser* $\to$ Automatically sets `--format vertical` (Shorts/TikTok/Reels ONLY). Suppresses 16:9 landscape upload to prevent poor viewer retention and algorithmic suppression on horizontal YouTube channels (override with `--allow-short-landscape`).
@@ -271,11 +281,15 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   # Force replace video (safely deletes old remote video first before uploading):
   npm run upload -- --book <book-slug> --lang all --force
 
-  # Update custom thumbnails only on existing published videos & shorts:
+  # Update custom high-CTR thumbnails only on existing published YouTube videos:
   npx tsx scripts/upload-youtube.ts --book <book-slug> --lang all --update-thumbnails
 
-  # Clean up older duplicate videos from channel:
-  npx tsx scripts/manage-youtube.ts --clean-duplicates
+  # Audit all channel videos, aspect ratios, durations & check for duplicate titles:
+  npx tsx scripts/list-channel-videos.ts
+
+  # Channel remedy engine (batch-sync high-CTR thumbnails & purge vertical duplicates):
+  npx tsx scripts/remedy-youtube-duplicates-and-thumbnails.ts --dry-run
+  npx tsx scripts/remedy-youtube-duplicates-and-thumbnails.ts
 
   # Monitor real-time views, likes, comments & channel performance:
   npm run stats
