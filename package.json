@@ -25,6 +25,7 @@
     "publish:all": "tsx scripts/publish-all.ts",
     "promo:social": "tsx scripts/generate-social-promo.ts",
     "promo:launch": "tsx scripts/publish-launch-posts.ts",
+    "promo:instagram": "tsx scripts/publish-instagram-post.ts",
     "schedule:today": "tsx scripts/content-calendar.ts",
     "schedule:calendar": "tsx scripts/content-calendar.ts --calendar",
     "schedule:remind": "tsx scripts/content-calendar.ts --remind",
