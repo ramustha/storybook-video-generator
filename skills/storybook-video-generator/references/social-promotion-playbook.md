@@ -15,7 +15,23 @@ This playbook establishes the cross-platform promotion methodology for children'
 
 ---
 
-## 2. The "Double Hook & Engagement Spark" Copywriting Formula
+## 2. The Playful & Cheerful Kid-Friendly Voice Doctrine (Anti-Formal Standard)
+
+### The Voice: "Kak Zayn, Sahabat Cerita Anak" (Warm, Cheerful Storyteller)
+All promotion copy, community posts, captions, and communications across every platform MUST strictly embody a **playful, joyful, whimsical, and affectionate tone** tailored for children and their parents.
+
+| Aspect | ❌ FORBIDDEN (Stiff / Formal / Corporate) | ✅ REQUIRED (Playful, Joyful & Kid-Friendly) |
+| :--- | :--- | :--- |
+| **Greeting** | *"Halo Sobat Pendidik dan Rekan Semua"* | *"Horeee! Yeeay! 🎈🎉 Halo adik-adik dan Ayah Bunda tersayang! 🥰"* |
+| **Channel Mission** | *"Berdasarkan komitmen kami menghadirkan tontonan bermutu dan edukatif"* | *"Zayn Storybook hadir membawakan petualangan seru yang bikin ketawa geli dan tidur nyenyak! 🌙💤"* |
+| **Story Hook** | *"Video ini mengulas tentang pentingnya tanggung jawab"* | *"Waaah, Budi ga ngerjain PR... eh alasannya karena digangguin kucing oranye gemoy! 😹"* |
+| **Bedtime CTA** | *"Manfaatkan video ini untuk manajemen waktu tidur"* | *"Tarik selimut hangatmu, peluk boneka kesayanganmu 🧸, dan yuk kita dengerin dongeng! 🚀✨"* |
+| **Interjections** | None / Monotone | *"Horeee!"*, *"Yeeay!"*, *"Waduh!"*, *"Waaah!"*, *"PLOP!"*, *"Hihihi!"*, *"Yaaay!"*, *"Giggles!"* |
+| **Emojis** | Plain text or minimal | 🎈, 🦄, 🌈, 🍭, 🚀, 🐱, 🦁, 🍌, 🌙, ✨, 🥳, 🎉, 🧸, 📖 |
+
+---
+
+## 3. The "Double Hook & Engagement Spark" Copywriting Formula
 
 Every social promotion post must follow this 7-step architecture:
 
@@ -53,7 +69,7 @@ Every social promotion post must follow this 7-step architecture:
 
 ---
 
-## 3. Platform-by-Platform Execution Blueprint
+## 4. Platform-by-Platform Execution Blueprint
 
 ### 📸 A. Instagram (Feed Carousel + Reel + Story)
 * **Feed Carousel Blueprint (5 Slides)**:
@@ -91,7 +107,7 @@ Every social promotion post must follow this 7-step architecture:
 
 ---
 
-## 4. Automated Generation via CLI
+## 5. Automated Generation via CLI
 
 The project provides an automated generator that parses `story.json` (title, original title, moral scene text, thumbnail hooks, and live publication URLs) to produce a copy-paste ready package:
 

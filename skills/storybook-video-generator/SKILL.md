@@ -340,12 +340,16 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
     4. Await user confirmation before attempting retry.
 
 ### 11. Multi-Platform Bilingual Social Promotion & Audience Growth Engine
+* **Playful, Cheerful & Kid-Friendly Voice Doctrine**:
+  * **Strict Anti-Formal Standard**: Copywriting MUST NEVER sound stiff, corporate, or academic.
+  * **Persona**: Warm, enthusiastic, cheerful storyteller friend (*"Kak Zayn"* vibe) speaking warmly to kids and parents.
+  * **Joyful Elements**: Weave in playful interjections (*"Horeee!"*, *"Yeeay!"*, *"Waaah!"*, *"PLOP!"*, *"Hihihi!"*), vibrant emojis (🎈, 🦄, 🌈, 🍭, 🚀, 🐱, 🦁, 🍌, 🌙, ✨, 🧸), and cozy bedtime prompts (*"Tarik selimut hangatmu & peluk bonekamu!"*).
 * **The "Single Post, Dual Language" Strategy**: To attract new viewers, spark parent conversations, and capture both domestic Indonesian and global English discovery, every published video MUST generate a structured bilingual promotion package ([social-promotion-playbook.md](./references/social-promotion-playbook.md)):
   * **Double Hook & Engagement Spark**:
-    * 🇮🇩 Indonesian emotional hook + parenting humor.
-    * 🇺🇸 English translation hook for diaspora and ESL educators.
-    * 💡 Moral of the story highlight card quote.
-    * 💬 **Interactive Question for Comments**: Relatable prompt asking parents about their child's habits or funny bedtime excuses to trigger algorithm-boosting comment velocity.
+    * 🇮🇩 Indonesian cheerful hook + toddler/parenting humor.
+    * 🇺🇸 English translation hook for diaspora and ESL families.
+    * 💡 Moral of the story sweet takeaway quote.
+    * 💬 **Interactive Question for Comments**: Relatable prompt asking parents about their child's funny bedtime excuses or silly habits to trigger algorithm-boosting comment velocity.
     * 💾 **"Save for Bedtime" CTA**: Maximizes bookmark/save count (the #1 ranking signal on Instagram & TikTok).
 * **Multi-Platform Deployment Package (`exports/social-promotion-posts.md`)**:
   * **Instagram Feed Carousel (5 Slides)**: Cover + 2 Scene Stills + Moral Card + YouTube CTA.
