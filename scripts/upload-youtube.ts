@@ -581,11 +581,10 @@ async function main() {
   let strategyCode = "dual-hybrid";
   let strategyDescription = "Standard Storybook (Dual Format: 16:9 Long-Form & 9:16 Shorts)";
   let effectiveFormat = format;
+  let storyDir = path.resolve(`./stories/${bookSlug}`);
+  let manifestPath = path.join(storyDir, "story.json");
 
   if (!compilationTheme) {
-    const storyDir = path.resolve(`./stories/${bookSlug}`);
-    const manifestPath = path.join(storyDir, "story.json");
-
     if (!existsSync(manifestPath)) {
       console.error(`Error: Story manifest not found at ${manifestPath}`);
       process.exit(1);
@@ -917,7 +916,7 @@ async function main() {
       (manifest as any).thumbnails?.[lang]?.popular ||
       (manifest as any).thumbnails?.[lang]?.primary;
     const verticalThumbRel = (manifest as any).thumbnails?.[lang]?.vertical;
-    const currentLandscapeId =
+    let currentLandscapeId =
       (manifest.exports as any)?.[lang]?.landscape?.youtubeId ||
       (isEn
         ? (manifest.exports as any)?.en?.landscape?.youtubeId
@@ -1160,6 +1159,7 @@ async function main() {
           }
 
           targetVideoId = videoId;
+          currentLandscapeId = targetVideoId;
         }
 
         if (targetVideoId) {

@@ -212,3 +212,24 @@ Google Cloud YouTube Data API v3 enforces a default free quota of **10,000 units
 * **Metadata & Thumbnail Resync (`--resync-all`)**: `(50 + 50 + 1) × 4 ≈ 404 units` → Consumes <5% of daily quota. Never re-upload video binaries to correct titles, timestamps, or thumbnails.
 
 See complete catalog of boundaries and edge cases in [limitations-and-workarounds.md](./limitations-and-workarounds.md).
+
+---
+
+## 7. Multi-Platform Publication Catalog & Audit Portal (GitHub Pages)
+
+To maintain an un-siloed, auditable index of all published video assets across platforms (YouTube, Facebook, Instagram) without mixing audit tables inside core application code, the repository provides a standalone, dedicated **GitHub Pages** portal:
+
+* **Live GitHub Pages URL**: `https://<github-user>.github.io/<repo-name>/` (e.g. `https://ramustha.github.io/storybook-video-generator/`)
+* **Portal Source Files**:
+  * `docs/index.html`: Fully responsive, self-contained single-page application (SPA) with dark/light themes, instant search, platform chips (YouTube, Facebook, Instagram), language filters (ID, EN), and embedded YouTube player modal.
+  * `docs/audit-data.json`: Machine-readable array of all audit records (Audit ID, story slug, platform, video ID, permalink, published timestamp, license).
+  * `docs/.nojekyll`: Disables Jekyll processing on GitHub Pages to preserve all assets and paths.
+* **CLI Command**:
+  ```bash
+  # Regenerate the GitHub Pages audit catalog from current story.json manifests
+  npm run docs:portal
+  ```
+* **Audit & Compliance Capabilities**:
+  * **One-Click CSV Export**: Auditors can click `📥 Export CSV` to instantly download `zayn-storybook-multi-platform-audit-catalog.csv` formatted with complete metadata and license columns.
+  * **One-Click JSON Export**: Download programmatic audit records.
+  * **ID Copy Shortcuts**: One-click copy for video IDs and audit tracking numbers (`AUD-xxx`).
