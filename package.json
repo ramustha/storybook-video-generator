@@ -7,6 +7,8 @@
     "manage": "tsx scripts/manage-story.ts",
     "render": "tsx scripts/render-book.ts",
     "thumbnail": "tsx scripts/render-thumbnail.ts",
+    "thumbnail:verify": "tsx scripts/render-thumbnail.ts --verify --all-books",
+    "thumbnail:repair": "tsx scripts/render-thumbnail.ts --repair --all-books",
     "upload": "tsx scripts/upload-youtube.ts",
     "upload:shorts": "tsx scripts/publish-shorts.ts",
     "upload:instagram:reels": "tsx scripts/publish-instagram-reels.ts",

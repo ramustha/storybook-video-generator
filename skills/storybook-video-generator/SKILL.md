@@ -237,13 +237,34 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   * 4 fanned storybook covers scaled up with hero cover at `620px × 440px` (was 450×320) and supporting covers at 570px, 540px, and 520px, filling ≥80% of the right column with zero dead margins.
 * **Automated Remotion Still Rendering**:
   ```bash
-  # Render all thumbnail variants (Landscape & Vertical Shorts, ID & EN) in <1s:
+  # Render all thumbnail variants (Landscape & Vertical Shorts, ID & EN):
   npm run thumbnail -- --book <book-slug> --lang all --variant all
+
+  # Audit existing thumbnails (exit 0 = all valid, exit 1 = failures):
+  npm run thumbnail -- --book <book-slug> --verify
+
+  # Audit all stories in the repo:
+  npm run thumbnail:verify
+
+  # Auto-repair missing or invalid thumbnails across all stories:
+  npm run thumbnail:repair
   ```
+* **Mandatory 4-Thumbnail Requirement** — every story needs all 4 types **per language** before publish:
+
+  | File | Dimensions | Platforms |
+  |---|---|---|
+  | `thumbnail-popular.png` | 1920×1080 | YouTube (primary), Facebook Video |
+  | `thumbnail-bedtime.png` | 1920×1080 | YouTube Bedtime/Niche playlists |
+  | `thumbnail.png` | 1920×1080 | Default fallback, FB Link Card, SEO OpenGraph |
+  | `thumbnail-vertical.png` | 1080×1920 | YouTube Shorts, Instagram Reels, FB Reels, TikTok |
+
+  → Full safe-zone specs and platform matrix: [thumbnail-platform-spec.md](./references/thumbnail-platform-spec.md)
+
 * Deliverables:
-  * `stories/<book-slug>/exports/id/thumbnail-popular.png` (Primary Default 16:9), `thumbnail-bedtime.png`, `thumbnail.png`, & `thumbnail-vertical.png`
-  * `stories/<book-slug>/exports/en/thumbnail-popular.png` (Primary Default 16:9), `thumbnail-bedtime.png`, `thumbnail.png`, & `thumbnail-vertical.png`
-* **Shorts Mobile Feed Reality**: Note that YouTube mobile Shorts feed auto-picks a video frame from 0.0s–1.0s. `thumbnail-vertical.png` attaches to YouTube API for desktop/playlists and serves as the curated cover for Instagram Reels and Facebook Reels.
+  * `stories/<book-slug>/exports/id/thumbnail-popular.png`, `thumbnail-bedtime.png`, `thumbnail.png`, & `thumbnail-vertical.png`
+  * `stories/<book-slug>/exports/en/thumbnail-popular.png`, `thumbnail-bedtime.png`, `thumbnail.png`, & `thumbnail-vertical.png`
+* **Auto-Verification Gate in `publish:all`**: `scripts/publish-all.ts` runs `verifyStoryThumbnails()` before every platform upload. Missing or wrong-dimension thumbnails are auto-rendered via Remotion. Run `npm run thumbnail:verify` before the first publish of any new story.
+* **Shorts Mobile Feed Reality**: YouTube mobile Shorts feed auto-picks a video frame from 0.0s–1.0s. `thumbnail-vertical.png` attaches to YouTube API for desktop/playlists and serves as the curated cover for Instagram Reels and Facebook Reels. Instagram cover **cannot be updated post-publish** — ensure the thumbnail is correct before upload.
 
 ### 10. Multi-Platform Idempotent Publishing & Duplicate Prevention
 * **YouTube Dual-Format Intentional Strategy & Shorts Duration Policy**:
@@ -551,6 +572,7 @@ Before delivering or publishing:
 - [ ] **Zero-Crop Vertical Canvas**: 9:16 Shorts/Reels use Ambient Pillarbox Canvas so no artwork is cropped.
 - [ ] **Bilingual Multi-Platform Metadata Prepared**: `exports/youtube-upload-metadata.md` generated with timestamps, cross-promotion links, and full attribution.
 - [ ] **Bilingual High-CTR Thumbnails Rendered**: Generated 1920x1080 thumbnails in both Popular Comic and Niche Bedtime formats for ID and EN editions with title typography and curiosity hooks.
+- [ ] **Multi-Platform Thumbnail Matrix Complete**: All 4 types (`thumbnail-popular.png`, `thumbnail-bedtime.png`, `thumbnail.png`, `thumbnail-vertical.png`) exist with correct dimensions (1920×1080 landscape, 1080×1920 vertical) for both `id` and `en`. Verified with `npm run thumbnail:verify`.
 - [ ] **Cross-Platform Duplicate Prevention Verified**: Confirmed publication idempotency via local manifest and live platform API checks before video insertion.
 - [ ] **Automated YouTube Publishing Complete**: Live video URLs for both language editions synced back into `story.json`.
 - [ ] **Copyright & License Compliance Verified**: Full CC BY 4.0 attribution (Author, Illustrator, Publisher, Source URL, License URL) embedded in descriptions; royalty-free audio verified; YouTube Copyright Match Tool guidelines (`support.google.com/youtube/answer/7648743`) respected with Restrictions set to None.
