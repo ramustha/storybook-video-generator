@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import { verifyStoryThumbnails, renderStoryThumbnails } from "./render-thumbnail";
 
 interface PublishAllOptions {
   bookSlug: string;
@@ -85,6 +86,30 @@ async function main() {
   console.log(`📚 Story Title: "${story.title}"\n`);
 
   const langsToProcess = options.lang === "all" ? ["id", "en"] : [options.lang];
+
+  // ── Pre-publish thumbnail verification gate ──────────────────────────────
+  console.log(`\n🔍 Verifying multi-platform thumbnails before publishing...`);
+  const thumbVerifs = await verifyStoryThumbnails(options.bookSlug, options.lang);
+  for (const v of thumbVerifs) {
+    if (!v.isValid) {
+      const missing = v.types
+        .filter((t) => !t.isValid)
+        .map((t) => `${t.type} (${t.reason})`)
+        .join(", ");
+      console.log(
+        `⚠️  Missing/invalid thumbnails for [${v.lang.toUpperCase()}]: ${missing}`
+      );
+      if (!options.dryRun) {
+        console.log(`🔧 Auto-rendering missing thumbnails for [${v.lang.toUpperCase()}]...`);
+        await renderStoryThumbnails({ bookSlug: options.bookSlug, lang: v.lang, silent: false });
+      } else {
+        console.log(`ℹ️  (DRY RUN) Would auto-render missing thumbnails for [${v.lang.toUpperCase()}].`);
+      }
+    } else {
+      console.log(`✔  All thumbnails valid for [${v.lang.toUpperCase()}]`);
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   for (const currentLang of langsToProcess) {
     console.log(`\n======================================================`);
