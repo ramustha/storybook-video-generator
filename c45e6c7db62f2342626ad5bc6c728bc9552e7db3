@@ -1,0 +1,31 @@
+scripts/publish-instagram-reels.ts
+  698ac31901cd73e0 1-206
+package.json
+  698ac31901cd73e0 12
+docs/index.html
+  698ac31901cd73e0 1051
+docs/audit-data.json
+  698ac31901cd73e0 198-200,221-223,405-407,428-430,840-842,863-865,1275-1277,1298-1300
+scripts/upload-meta.ts
+  698ac31901cd73e0 859
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "c45e6c7db62f2342626ad5bc6c728bc9552e7db3",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 233,
+      "total_deletions": 26,
+      "accepted_lines": 233,
+      "overriden_lines": 0
+    }
+  }
+}
