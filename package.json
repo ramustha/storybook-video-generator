@@ -9,6 +9,7 @@
     "thumbnail": "tsx scripts/render-thumbnail.ts",
     "upload": "tsx scripts/upload-youtube.ts",
     "upload:shorts": "tsx scripts/publish-shorts.ts",
+    "upload:instagram:reels": "tsx scripts/publish-instagram-reels.ts",
     "upload:login": "tsx scripts/upload-youtube.ts --login",
     "upload:browser": "tsx scripts/upload-youtube.ts --engine playwright",
     "stats": "tsx scripts/youtube-stats.ts",

@@ -856,7 +856,7 @@ async function main() {
   console.log("\n📝 GENERATED METADATA:");
   console.log(`📌 Title      : ${title}`);
   console.log(`📁 Video File : ${videoPath}`);
-  if (isLandscape) console.log(`🖼️ Thumbnail  : ${thumbnailPath}`);
+  console.log(`🖼️ Thumbnail  : ${thumbnailPath || "(none)"}`);
   console.log("-------------------------------------------------------");
   console.log(caption);
   console.log("-------------------------------------------------------\n");
