@@ -120,6 +120,15 @@ async function main() {
     const langs: Array<"id" | "en"> = targetLang ? [targetLang] : ["id", "en"];
 
     for (const lang of langs) {
+      // Skip if already published with custom cover after restoration unless --force-all is passed
+      const forceAll = args.includes("--force-all");
+      const lastPublishedAt = manifest.publications?.instagram?.[lang]?.publishedAt;
+      const isAlreadyCustomCover = lastPublishedAt && new Date(lastPublishedAt).getTime() > new Date("2026-11-06T13:30:00Z").getTime();
+      if (isAlreadyCustomCover && !forceAll) {
+        console.log(`⏩ Skipping ${slug} [${lang.toUpperCase()}] — already published with custom cover (${manifest.publications?.instagram?.[lang]?.url})`);
+        continue;
+      }
+
       const title = lang === "en" ? (manifest.originalTitle || manifest.title) : manifest.title;
       const videoPath = resolveVerticalVideo(storyDir, slug, lang, manifest);
       const thumbnailPath = resolveVerticalThumbnail(storyDir, lang, manifest);
