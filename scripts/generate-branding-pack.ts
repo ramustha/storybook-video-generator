@@ -569,9 +569,9 @@ export function generateYouTubeBannerSvg(): string {
         Bilingual Picture Books (Bahasa Indonesia &amp; English) • Peaceful Bedtime Tales
       </text>
 
-      <!-- Broadcast Schedule & Value Pill Badges -->
+      <!-- Broadcast Category & Value Pill Badges -->
       <g transform="translate(0, 205)">
-        <!-- Badge 1: Daily Broadcast Schedule -->
+        <!-- Badge 1: Core Bedtime Category (Evergreen & General) -->
         <rect x="0" y="0" width="280" height="42" rx="21" fill="#F59E0B" />
         <text x="140" y="27"
               font-family="'Nunito', sans-serif"
@@ -580,7 +580,7 @@ export function generateYouTubeBannerSvg(): string {
               fill="#1E1B4B"
               text-anchor="middle"
               letter-spacing="0.5">
-          ⏰ TAYANG TIAP HARI 19.00 WIB
+          🌙 DONGENG PENGANTAR TIDUR
         </text>
 
         <!-- Badge 2: Family Safe & Moral Focus -->
@@ -705,16 +705,16 @@ export function generateFacebookCoverSvg(): string {
         Koleksi Cerita Penuh Pesan Moral, Menemani Si Kecil Tidur Nyenyak &amp; Ceria
       </text>
 
-      <!-- Schedule Pill -->
+      <!-- Category Pill -->
       <g transform="translate(0, 185)">
-        <rect x="0" y="0" width="260" height="38" rx="19" fill="#F59E0B" />
-        <text x="130" y="24"
+        <rect x="0" y="0" width="250" height="38" rx="19" fill="#F59E0B" />
+        <text x="125" y="24"
               font-family="'Nunito', sans-serif"
               font-size="15"
               font-weight="800"
               fill="#1E1B4B"
               text-anchor="middle">
-          🌙 Tayang Tiap Hari 19.00 WIB
+          🌙 Dongeng Pengantar Tidur
         </text>
 
         <rect x="275" y="0" width="220" height="38" rx="19" fill="#1E293B" stroke="#38BDF8" stroke-width="2" />
