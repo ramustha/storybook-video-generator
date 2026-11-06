@@ -265,11 +265,14 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
 * **Pre-Publishing Deduplication Protocol (Local & Cross-Platform)**:
   * Before publishing any video (YouTube, TikTok, Reels), the pipeline executes a 2-stage deduplication check:
     1. **Local Manifest Probe**: Checks `story.json.publications[platform]` and `story.json.exports` for existing remote video IDs.
-    2. **Remote API Live Verification**: Calls the target platform API (`youtube.videos.list` and `youtube.search.list(forMine: true)`) to verify whether the video is already published and active on the channel.
+    2. **Remote API Live Verification**:
+       * **YouTube**: Calls `youtube.videos.list` and `youtube.search.list(forMine: true)` to verify whether the video is already active.
+       * **Meta (Instagram & Facebook)**: Calls `GET /{instagramUserId}/media` and `GET /{facebookPageId}/videos` to match canonical titles against live captions.
+         * *Critical Instagram Constraint*: Meta Graph API **does not support remote deletion** of published media (`Unsupported delete request` code 100/33) nor PATCH updates to covers. Once published, older Reels cannot be deleted via API. Therefore, pre-upload live detection is mandatory: any video already live on Instagram/Facebook is **automatically skipped** to guarantee zero duplicate reels.
   * **Safe Idempotency Handling**:
     * **Default (Safe Skip)**: If the video is already live on the platform, the upload is skipped with a `🛑 DUPLICATE DETECTED` notice to prevent duplicate content and wasted API quota.
     * **`--resync-all` / `--update-metadata`**: Updates remote title, description, tags, chapters, and custom thumbnails (16:9 for landscape, 9:16 for shorts) across all published videos without re-uploading video files.
-    * **`--force` / `--replace`**: Replaces the video by automatically deleting the previous remote upload first (`youtube.videos.delete`), ensuring zero duplicates on the channel.
+    * **`--force` / `--replace`**: Replaces the video (for YouTube, deletes old remote video first; for Meta, warns user and proceeds with fresh post).
 * **Automated Publishing CLI**:
   ```bash
   # Publish with automated duration routing (safely uploads to optimal formats):

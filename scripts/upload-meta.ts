@@ -30,6 +30,7 @@ interface UploadOptions {
   format: "vertical" | "landscape" | "auto";
   dryRun: boolean;
   shareToFeed: boolean;
+  force: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ function parseArgs(): UploadOptions {
     format: "auto",
     dryRun: false,
     shareToFeed: true,
+    force: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -64,6 +66,8 @@ function parseArgs(): UploadOptions {
       options.dryRun = true;
     } else if (arg === "--no-feed") {
       options.shareToFeed = false;
+    } else if (arg === "--force") {
+      options.force = true;
     }
   }
 
@@ -514,6 +518,64 @@ async function uploadThumbnailToFacebook(
 }
 
 /**
+ * Verifies if an Instagram media object is currently live and active by querying user's media collection.
+ */
+async function findLiveInstagramMediaByTitle(
+  instagramUserId: string,
+  title: string,
+  accessToken: string
+): Promise<{ id: string; permalink: string } | null> {
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${instagramUserId}/media?fields=id,permalink,caption&limit=50&access_token=${accessToken}`
+    );
+    const data = await res.json();
+    if (!data.data || !Array.isArray(data.data)) return null;
+
+    const target = title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    for (const item of data.data) {
+      const caption = (item.caption || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
+      if (caption.includes(target)) {
+        return { id: item.id, permalink: item.permalink };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Verifies if a Facebook video is currently live by querying Page video collection.
+ */
+async function findLiveFacebookVideoByTitle(
+  facebookPageId: string,
+  title: string,
+  format: "vertical" | "landscape",
+  accessToken: string
+): Promise<{ id: string; permalink: string } | null> {
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${facebookPageId}/videos?fields=id,title,description,permalink_url&limit=50&access_token=${accessToken}`
+    );
+    const data = await res.json();
+    if (!data.data || !Array.isArray(data.data)) return null;
+
+    const target = title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    for (const item of data.data) {
+      const itemTitle = (item.title || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
+      const itemDesc = (item.description || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
+      if (itemTitle.includes(target) || itemDesc.includes(target)) {
+        return { id: item.id, permalink: item.permalink_url || `https://www.facebook.com/${item.id}` };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Uploads video to Facebook Page feed using Cloudflare R2 file_url or local multipart form-data.
  * Handles both Normal Videos (16:9 Landscape) and Reels (9:16 Vertical).
  */
@@ -870,6 +932,72 @@ async function main() {
     story.publications = {};
   }
 
+  // --- PRE-UPLOAD DEDUPLICATION & IDEMPOTENCY CHECK ---
+  let skipFacebook = false;
+  let skipInstagram = false;
+
+  // 1. Check Instagram live status
+  if (options.platform === "instagram" || options.platform === "both") {
+    const localIg = story.publications?.instagram?.[options.lang];
+    const liveIg = await findLiveInstagramMediaByTitle(config.instagramUserId, title, config.pageAccessToken);
+
+    if (liveIg || localIg?.id) {
+      const activeUrl = liveIg?.permalink || localIg?.url || "https://www.instagram.com/reel/";
+      const activeId = liveIg?.id || localIg?.id;
+      if (!options.force) {
+        console.log(`\n🛑 DUPLICATE DETECTED: "${title}" is ALREADY LIVE on Instagram!`);
+        console.log(`   🔗 Live URL    : ${activeUrl}`);
+        console.log(`   🆔 Media ID    : ${activeId}`);
+        console.log(`   🛡️ Safe Skip   : Skipping Instagram upload to prevent duplicate Reels.`);
+        console.log(`      (Pass --force to publish a new post despite existing Reel)`);
+        skipInstagram = true;
+      } else {
+        console.warn(`\n⚠️ FORCE OVERRIDE: Proceeding with fresh Instagram Reel upload despite existing post.`);
+        console.warn(`   Note: Meta Graph API does not support remote media deletion.`);
+        console.warn(`   Please delete the old Reel (${activeUrl}) manually in Instagram app if needed.`);
+      }
+    }
+  }
+
+  // 2. Check Facebook live status
+  if (options.platform === "facebook" || options.platform === "both") {
+    const localFb = story.publications?.facebook?.[options.lang]?.[options.format];
+    const liveFb = await findLiveFacebookVideoByTitle(
+      config.facebookPageId,
+      title,
+      options.format as "vertical" | "landscape",
+      config.pageAccessToken
+    );
+
+    if (liveFb || localFb?.id) {
+      const activeUrl = liveFb?.permalink || localFb?.url || "https://www.facebook.com/";
+      const activeId = liveFb?.id || localFb?.id;
+      if (!options.force) {
+        console.log(`\n🛑 DUPLICATE DETECTED: "${title}" is ALREADY LIVE on Facebook (${options.format})!`);
+        console.log(`   🔗 Live URL    : ${activeUrl}`);
+        console.log(`   🆔 Video ID    : ${activeId}`);
+        console.log(`   🛡️ Safe Skip   : Skipping Facebook upload to prevent duplicate video.`);
+        console.log(`      (Pass --force to re-upload)`);
+        skipFacebook = true;
+      } else {
+        console.warn(`\n⚠️ FORCE OVERRIDE: Proceeding with fresh Facebook upload.`);
+      }
+    }
+  }
+
+  if (options.platform === "instagram" && skipInstagram) {
+    console.log("\n✔ Instagram upload skipped safely. Zero duplicates created! Exiting.\n");
+    return;
+  }
+  if (options.platform === "facebook" && skipFacebook) {
+    console.log("\n✔ Facebook upload skipped safely. Zero duplicates created! Exiting.\n");
+    return;
+  }
+  if (options.platform === "both" && skipInstagram && skipFacebook) {
+    console.log("\n✔ Video already published on both Facebook and Instagram. Zero duplicates allowed. Exiting cleanly.\n");
+    return;
+  }
+
   // --- UNIFIED CLOUDFLARE R2 FAN-OUT (FOR BOTH PLATFORMS) ---
   if (options.platform === "both") {
     console.log(`\n======================================================`);
@@ -882,54 +1010,62 @@ async function main() {
 
     try {
       // 1. Facebook Page Video / Reel Ingestion via R2 URL
-      try {
-        const fbResult = await uploadToFacebookPage(
-          { publicUrl: publicVideoUrl },
-          title,
-          caption,
-          config,
-          options.format as "vertical" | "landscape",
-          thumbnailPath
-        );
+      if (!skipFacebook) {
+        try {
+          const fbResult = await uploadToFacebookPage(
+            { publicUrl: publicVideoUrl },
+            title,
+            caption,
+            config,
+            options.format as "vertical" | "landscape",
+            thumbnailPath
+          );
 
-        if (!story.publications.facebook) story.publications.facebook = {};
-        if (!story.publications.facebook[options.lang]) story.publications.facebook[options.lang] = {};
+          if (!story.publications.facebook) story.publications.facebook = {};
+          if (!story.publications.facebook[options.lang]) story.publications.facebook[options.lang] = {};
 
-        story.publications.facebook[options.lang][options.format] = {
-          id: fbResult.videoId,
-          url: fbResult.permalink,
-          publishedAt: new Date().toISOString(),
-          title: story.title,
-          status: "published",
-        };
-      } catch (err: any) {
-        fbError = err;
-        console.error("\n❌ Facebook Upload Failed:", err.message);
+          story.publications.facebook[options.lang][options.format] = {
+            id: fbResult.videoId,
+            url: fbResult.permalink,
+            publishedAt: new Date().toISOString(),
+            title: story.title,
+            status: "published",
+          };
+        } catch (err: any) {
+          fbError = err;
+          console.error("\n❌ Facebook Upload Failed:", err.message);
+        }
+      } else {
+        console.log(`\n⏩ Skipping Facebook upload (already live: ${existingFbPub?.url})`);
       }
 
       // 2. Instagram Reels Ingestion via same R2 URL
-      try {
-        const igResult = await uploadToInstagramReels(
-          { publicUrl: publicVideoUrl },
-          caption,
-          config,
-          options.shareToFeed,
-          options.bookSlug,
-          options.lang,
-          thumbnailPath
-        );
+      if (!skipInstagram) {
+        try {
+          const igResult = await uploadToInstagramReels(
+            { publicUrl: publicVideoUrl },
+            caption,
+            config,
+            options.shareToFeed,
+            options.bookSlug,
+            options.lang,
+            thumbnailPath
+          );
 
-        if (!story.publications.instagram) story.publications.instagram = {};
-        story.publications.instagram[options.lang] = {
-          id: igResult.mediaId,
-          url: igResult.permalink,
-          publishedAt: new Date().toISOString(),
-          title: story.title,
-          status: "published",
-        };
-      } catch (err: any) {
-        igError = err;
-        console.error("\n❌ Instagram Reels Upload Failed:", err.message);
+          if (!story.publications.instagram) story.publications.instagram = {};
+          story.publications.instagram[options.lang] = {
+            id: igResult.mediaId,
+            url: igResult.permalink,
+            publishedAt: new Date().toISOString(),
+            title: story.title,
+            status: "published",
+          };
+        } catch (err: any) {
+          igError = err;
+          console.error("\n❌ Instagram Reels Upload Failed:", err.message);
+        }
+      } else {
+        console.log(`\n⏩ Skipping Instagram upload (already live: ${existingIgPub?.url})`);
       }
     } finally {
       // Always cleanup R2 buffer object immediately after both finish
