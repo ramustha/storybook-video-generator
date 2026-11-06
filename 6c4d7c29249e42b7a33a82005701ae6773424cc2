@@ -1,0 +1,29 @@
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 342-354
+scripts/publish-instagram-reels.ts
+  698ac31901cd73e0 89,92-95,100-108,197-214,217
+skills/storybook-video-generator/references/distribution-upload.md
+  698ac31901cd73e0 255-279
+skills/storybook-video-generator/references/limitations-and-workarounds.md
+  698ac31901cd73e0 17,115-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "6c4d7c29249e42b7a33a82005701ae6773424cc2",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 91,
+      "total_deletions": 4,
+      "accepted_lines": 91,
+      "overriden_lines": 0
+    }
+  }
+}
