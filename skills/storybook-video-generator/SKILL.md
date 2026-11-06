@@ -464,6 +464,29 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   npm run upload -- --book <book-slug> --lang all --auto-cleanup
   ```
 
+### 14. Authentic Multi-Platform Storybook Branding Suite (Anti-AI Slop)
+* **Design Philosophy & Visual Authenticity**:
+  * **Strict Anti-AI Slop Rule**: Eliminate cheap generative AI tropes (no oversaturated neon magenta/cyan plastic glows, no muddy textures, no distorted hands/faces).
+  * **Authentic Picture-Book Aesthetic**: Rich gouache, warm tempera, and deckled parchment textures echoing classic picture books (*Bulan dan Topi Biru*, *Gara-Gara Kucing!*, *Jas Hujan Merah*).
+  * **Handcrafted Storybook Palette**:
+    * 🌌 **Twilight Midnight Navy** (`#141836` ➔ `#0E1126`): Deep, comforting bedtime sky.
+    * 🌙 **Buttercup Honey Gold** (`#FBBF24` ➔ `#F59E0B`): Warm crescent moon and starlight.
+    * 🧢 **Robin Egg Cerulean Blue** (`#0284C7` ➔ `#0369A1`): The iconic blue nightcap from *Bulan dan Topi Biru*.
+    * 🐱 **Ginger Marmalade** (`#F97316` ➔ `#EA580C`): Curious kitten peeking from *Gara-Gara Kucing!*.
+    * 📖 **Warm Ivory & Cream Paper** (`#FFFDF7` ➔ `#FEF3C7`): Tactile open storybook pages.
+    * 🎀 **Warm Crimson Ribbon** (`#E11D48`): Manu's red raincoat accent bookmark.
+* **Multi-Platform Matrix & Safe Zones**:
+  * **YouTube Channel**: Profile Picture (800×800), Watermark Stamp (150×150 transparent), and Panoramic Banner (2560×1440 with 1546×423 central safe zone).
+  * **Instagram**: Profile Avatar (1080×1080 retina) and Story Highlight Covers (1080×1920).
+  * **Facebook**: Page Profile Picture (800×800) and Page Cover Photo (1640×924).
+  * **TikTok**: Profile Avatar (800×800).
+  * **Web & PWA**: High-res App Icon (512×512, 192×192) and Favicons (64×64, 32×32).
+* **Automated Generation CLI**:
+  ```bash
+  npm run branding:generate
+  ```
+  Generates and synchronizes master vector SVGs and crisp anti-aliased PNGs across `stories/branding/`, `exports/branding/`, and `docs/branding/`.
+
 ---
 
 ## Incremental & Non-Destructive Editing
