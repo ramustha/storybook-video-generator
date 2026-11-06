@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" width="1080" height="1920">
+  <defs>
+    <linearGradient id="igStorySky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E244D" />
+      <stop offset="50%" stop-color="#141836" />
+      <stop offset="100%" stop-color="#0B0D1F" />
+    </linearGradient>
+    <radialGradient id="highlightGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1920" fill="url(#igStorySky)" />
+
+  <!-- Stars around top and bottom -->
+  <polygon points="220,340 228,356 244,364 228,372 220,388 212,372 196,364 212,356" fill="#FDE047" opacity="0.8" />
+  <circle cx="340" cy="280" r="7" fill="#FDE047" opacity="0.85" />
+  <polygon points="860,320 868,336 884,344 868,352 860,368 852,352 836,344 852,336" fill="#FDE047" opacity="0.8" />
+  <circle cx="780" cy="260" r="8" fill="#38BDF8" opacity="0.85" />
+
+  <polygon points="200,1580 206,1594 220,1600 206,1606 200,1620 194,1606 180,1600 194,1594" fill="#FDE047" opacity="0.75" />
+  <polygon points="880,1560 886,1574 900,1580 886,1586 880,1600 874,1586 860,1580 874,1574" fill="#38BDF8" opacity="0.75" />
+
+  <!-- Center Highlight Badge (Centered exactly at Y: 960) -->
+  <circle cx="540" cy="960" r="380" fill="url(#highlightGlow)" />
+  <circle cx="540" cy="960" r="320" fill="#181D45" stroke="#F59E0B" stroke-width="10" />
+
+  <!-- Embedded Icon Centered -->
+  <g transform="translate(340, 760)">
+    <!-- Moon Body -->
+    <path d="M 180 50 C 265 50, 320 115, 320 195 C 320 270, 265 320, 190 328 C 245 292, 275 238, 275 195 C 275 140, 235 78, 180 50 Z" fill="#FBBF24" />
+    <path d="M 270 182 Q 280 192 290 182" fill="none" stroke="#92400E" stroke-width="3.5" stroke-linecap="round" />
+    <ellipse cx="282" cy="200" rx="9" ry="5" fill="#FB7185" opacity="0.6" />
+
+    <!-- Cap -->
+    <g transform="translate(160, 5) rotate(-14)">
+      <path d="M 16 68 C 8 28, 48 6, 84 9 C 112 12, 128 40, 124 68 Z" fill="#0284C7" stroke="#0369A1" stroke-width="2.5" />
+      <rect x="10" y="60" width="120" height="20" rx="10" fill="#FFFFFF" />
+      <circle cx="85" cy="8" r="11" fill="#FDE047" />
+    </g>
+
+    <!-- Cat -->
+    <g transform="translate(75, 180)">
+      <polygon points="20,28 32,4 44,24" fill="#F97316" stroke="#C2410C" stroke-width="2" />
+      <polygon points="62,24 74,4 86,28" fill="#F97316" stroke="#C2410C" stroke-width="2" />
+      <ellipse cx="53" cy="48" rx="34" ry="26" fill="#F97316" stroke="#C2410C" stroke-width="2" />
+      <circle cx="41" cy="45" r="4.5" fill="#18181B" />
+      <circle cx="65" cy="45" r="4.5" fill="#18181B" />
+      <polygon points="51,53 55,53 53,57" fill="#FB7185" />
+      <ellipse cx="41" cy="74" rx="9" ry="6" fill="#FFFFFF" />
+      <ellipse cx="65" cy="74" rx="9" ry="6" fill="#FFFFFF" />
+    </g>
+
+    <!-- Book -->
+    <g transform="translate(20, 20)">
+      <path d="M 40 285 Q 180 320 320 285 L 310 305 Q 180 340 50 305 Z" fill="#2E2657" stroke="#F59E0B" stroke-width="2.5" />
+      <path d="M 50 275 Q 170 295 175 255 L 175 270 Q 170 310 50 290 Z" fill="#FFFDF7" stroke="#CBD5E1" stroke-width="1.5" />
+      <path d="M 310 275 Q 190 295 185 255 L 185 270 Q 190 310 310 290 Z" fill="#FFFDF7" stroke="#CBD5E1" stroke-width="1.5" />
+    </g>
+  </g>
+
+  <!-- Title Bottom -->
+  <text x="540" y="1370"
+        font-family="'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif"
+        font-size="52"
+        font-weight="900"
+        fill="#FDE047"
+        text-anchor="middle"
+        letter-spacing="5">
+    ZAYN STORYBOOK
+  </text>
+  <text x="540" y="1420"
+        font-family="'Nunito', sans-serif"
+        font-size="24"
+        font-weight="700"
+        fill="#E2E8F0"
+        text-anchor="middle"
+        letter-spacing="3">
+    CERITA &amp; DONGENG ANAK
+  </text>
+</svg>

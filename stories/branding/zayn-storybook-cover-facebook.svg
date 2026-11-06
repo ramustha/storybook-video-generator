@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 924" width="1640" height="924">
+  <defs>
+    <linearGradient id="fbSky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141836" />
+      <stop offset="50%" stop-color="#212854" />
+      <stop offset="100%" stop-color="#0E1126" />
+    </linearGradient>
+    <linearGradient id="fbGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF7" />
+      <stop offset="50%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+    <filter id="fbShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#04060E" flood-opacity="0.7" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1640" height="924" fill="url(#fbSky)" />
+
+  <!-- Stars -->
+  <polygon points="180,180 186,194 200,200 186,206 180,220 174,206 160,200 174,194" fill="#FDE047" opacity="0.8" />
+  <circle cx="320" cy="140" r="5" fill="#FDE047" opacity="0.8" />
+  <polygon points="1460,180 1466,194 1480,200 1466,206 1460,220 1454,206 1440,200 1454,194" fill="#FDE047" opacity="0.8" />
+  <circle cx="1320" cy="140" r="6" fill="#38BDF8" opacity="0.85" />
+
+  <!-- Content Centered for Desktop & Mobile -->
+  <g transform="translate(260, 240)" filter="url(#fbShadow)">
+    <!-- Mini Emblem Left -->
+    <g transform="translate(0, 0)">
+      <circle cx="160" cy="160" r="150" fill="#181D45" stroke="#F59E0B" stroke-width="6" />
+
+      <!-- Moon with Cap -->
+      <path d="M 155 45 C 220 45, 260 95, 260 160 C 260 220, 220 260, 160 265 C 205 235, 225 190, 225 160 C 225 120, 190 70, 155 45 Z" fill="url(#fbGold)" />
+      <path d="M 225 150 Q 232 158 240 150" fill="none" stroke="#92400E" stroke-width="3" stroke-linecap="round" />
+      <ellipse cx="235" cy="164" rx="7" ry="4" fill="#FB7185" opacity="0.6" />
+
+      <!-- Blue Cap -->
+      <g transform="translate(138, 5) rotate(-14)">
+        <path d="M 12 50 C 6 20, 36 5, 65 6 C 88 10, 100 30, 96 50 Z" fill="#0284C7" />
+        <rect x="6" y="45" width="94" height="16" rx="8" fill="#FFFFFF" />
+        <circle cx="65" cy="6" r="8" fill="#FDE047" />
+      </g>
+
+      <!-- Peeking Cat -->
+      <g transform="translate(70, 140)">
+        <polygon points="15,22 25,4 35,20" fill="#F97316" stroke="#C2410C" stroke-width="1.5" />
+        <polygon points="50,20 60,4 70,22" fill="#F97316" stroke="#C2410C" stroke-width="1.5" />
+        <ellipse cx="43" cy="38" rx="26" ry="20" fill="#F97316" stroke="#C2410C" stroke-width="1.5" />
+        <circle cx="33" cy="36" r="3.5" fill="#18181B" />
+        <circle cx="53" cy="36" r="3.5" fill="#18181B" />
+        <polygon points="41,43 45,43 43,47" fill="#FB7185" />
+        <ellipse cx="33" cy="60" rx="7" ry="5" fill="#FFFFFF" />
+        <ellipse cx="53" cy="60" rx="7" ry="5" fill="#FFFFFF" />
+      </g>
+
+      <!-- Open Book -->
+      <g transform="translate(15, 25)">
+        <path d="M 40 225 Q 145 250 250 225 L 245 240 Q 145 265 45 240 Z" fill="#2E2657" stroke="#F59E0B" stroke-width="2" />
+        <path d="M 50 215 Q 140 235 145 205 L 145 218 Q 140 248 50 228 Z" fill="#FFFDF7" />
+        <path d="M 240 215 Q 150 235 145 205 L 145 218 Q 150 248 240 228 Z" fill="#FFFDF7" />
+      </g>
+    </g>
+
+    <!-- Right: Text & Information -->
+    <g transform="translate(360, 45)">
+      <text x="0" y="65"
+            font-family="'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif"
+            font-size="64"
+            font-weight="900"
+            fill="url(#fbGold)"
+            letter-spacing="3">
+        ZAYN STORYBOOK
+      </text>
+
+      <text x="5" y="115"
+            font-family="'Nunito', sans-serif"
+            font-size="24"
+            font-weight="800"
+            fill="#FFFFFF">
+        Halaman Resmi Dongeng &amp; Cerita Bergambar Edukatif Anak 🌙✨
+      </text>
+
+      <text x="5" y="152"
+            font-family="'Nunito', sans-serif"
+            font-size="19"
+            font-weight="600"
+            fill="#93C5FD">
+        Koleksi Cerita Penuh Pesan Moral, Menemani Si Kecil Tidur Nyenyak &amp; Ceria
+      </text>
+
+      <!-- Schedule Pill -->
+      <g transform="translate(0, 185)">
+        <rect x="0" y="0" width="260" height="38" rx="19" fill="#F59E0B" />
+        <text x="130" y="24"
+              font-family="'Nunito', sans-serif"
+              font-size="15"
+              font-weight="800"
+              fill="#1E1B4B"
+              text-anchor="middle">
+          🌙 Tayang Tiap Hari 19.00 WIB
+        </text>
+
+        <rect x="275" y="0" width="220" height="38" rx="19" fill="#1E293B" stroke="#38BDF8" stroke-width="2" />
+        <text x="385" y="24"
+              font-family="'Nunito', sans-serif"
+              font-size="15"
+              font-weight="800"
+              fill="#E0F2FE"
+              text-anchor="middle">
+          🌈 Cerita Aman &amp; Edukatif
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,276 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <!-- Background Gradient (Deep Cozy Storybook Night) -->
+    <radialGradient id="twilightSky" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#232959" />
+      <stop offset="60%" stop-color="#151938" />
+      <stop offset="100%" stop-color="#0B0D1F" />
+    </radialGradient>
+
+    <!-- Golden Rim Gradient -->
+    <linearGradient id="goldRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Warm Moon Gold Gradient -->
+    <linearGradient id="moonGrad" x1="15%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="40%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+
+    <!-- Cap Blue Gradient (From "Bulan dan Topi Biru") -->
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#075985" />
+    </linearGradient>
+
+    <!-- Cat Ginger Gradient (From "Gara-Gara Kucing!") -->
+    <linearGradient id="catGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C" />
+      <stop offset="50%" stop-color="#F97316" />
+      <stop offset="100%" stop-color="#EA580C" />
+    </linearGradient>
+
+    <!-- Storybook Cover Gradient -->
+    <linearGradient id="bookCoverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B356B" />
+      <stop offset="100%" stop-color="#1E193B" />
+    </linearGradient>
+
+    <!-- Parchment Page Gradient -->
+    <linearGradient id="parchmentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FEF3C7" />
+    </linearGradient>
+
+    <!-- Ribbon Gradient (Manu's Red Raincoat Accent) -->
+    <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F43F5E" />
+      <stop offset="50%" stop-color="#E11D48" />
+      <stop offset="100%" stop-color="#BE123C" />
+    </linearGradient>
+
+    <!-- Soft Ambient Bloom Filter (Subtle, non-AI) -->
+    <filter id="gentleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Drop Shadow for Dimensional Book & Characters -->
+    <filter id="softDropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#060814" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- 1. Background Circle -->
+  <circle cx="540" cy="540" r="520" fill="url(#twilightSky)" stroke="url(#goldRimGrad)" stroke-width="12" />
+
+  <!-- 2. Decorative Starlight Ring (Circular Safe-Zone Guide) -->
+  <circle cx="540" cy="540" r="460" fill="none" stroke="#FBBF24" stroke-width="2.5" stroke-dasharray="8 16" opacity="0.4" />
+
+  <!-- 3. Ambient Stardust Glow behind Moon & Book -->
+  <circle cx="540" cy="460" r="280" fill="#FBBF24" opacity="0.12" filter="url(#gentleGlow)" />
+  <circle cx="540" cy="520" r="240" fill="#38BDF8" opacity="0.1" filter="url(#gentleGlow)" />
+
+  <!-- 4. Floating Storybook Starbursts (Hand-drawn 4-point Stars) -->
+  <!-- Top Left -->
+  <polygon points="260,260 272,286 298,298 272,310 260,336 248,310 222,298 248,286" fill="#FDE047" opacity="0.9" />
+  <circle cx="340" cy="220" r="7" fill="#FDE047" opacity="0.8" />
+  <circle cx="210" cy="400" r="6" fill="#38BDF8" opacity="0.75" />
+
+  <!-- Top Right -->
+  <polygon points="810,250 822,274 846,286 822,298 810,322 798,298 774,286 798,274" fill="#FDE047" opacity="0.9" />
+  <circle cx="730" cy="210" r="8" fill="#FDE047" opacity="0.85" />
+  <circle cx="860" cy="380" r="6.5" fill="#F472B6" opacity="0.75" />
+
+  <!-- Floating Sparkles around Book -->
+  <polygon points="300,560 306,572 318,578 306,584 300,596 294,584 282,578 294,572" fill="#FDE047" opacity="0.7" />
+  <polygon points="780,550 786,562 798,568 786,574 780,586 774,574 762,568 774,562" fill="#38BDF8" opacity="0.75" />
+
+  <!-- 5. MAIN HERO: The Glowing Crescent Moon with Blue Cap -->
+  <g id="MoonAndCap" filter="url(#softDropShadow)">
+    <!-- Golden Crescent Moon -->
+    <!-- Center of moon curved body -->
+    <path d="M 520 200
+             C 660 200, 750 310, 750 440
+             C 750 560, 660 650, 530 660
+             C 630 600, 680 500, 680 430
+             C 680 340, 610 240, 520 200 Z"
+          fill="url(#moonGrad)" />
+
+    <!-- Sleeping / Peaceful Smiling Face on Moon -->
+    <!-- Closed curved happy eye -->
+    <path d="M 675 415 Q 692 430 705 415" fill="none" stroke="#92400E" stroke-width="5" stroke-linecap="round" />
+    <!-- Happy gentle smile -->
+    <path d="M 660 460 Q 675 478 692 464" fill="none" stroke="#92400E" stroke-width="4.5" stroke-linecap="round" />
+    <!-- Rosy cheek blush -->
+    <ellipse cx="695" cy="445" rx="14" ry="9" fill="#FB7185" opacity="0.5" />
+
+    <!-- THE ICONIC BLUE CAP (from "Bulan dan Topi Biru") -->
+    <g id="BlueCap" transform="translate(485, 125) rotate(-14)">
+      <!-- Cap Main Dome -->
+      <path d="M 30 110
+               C 20 50, 80 15, 130 20
+               C 170 25, 200 65, 195 110 Z"
+            fill="url(#capGrad)" stroke="#0369A1" stroke-width="3" />
+
+      <!-- Cap Brim / Folded Cuff -->
+      <rect x="20" y="100" width="185" height="34" rx="17" fill="#F8FAFC" stroke="#0284C7" stroke-width="3" />
+      <line x1="60" y1="102" x2="60" y2="132" stroke="#E2E8F0" stroke-width="2.5" />
+      <line x1="110" y1="102" x2="110" y2="132" stroke="#E2E8F0" stroke-width="2.5" />
+      <line x1="160" y1="102" x2="160" y2="132" stroke="#E2E8F0" stroke-width="2.5" />
+
+      <!-- Fluffy Golden Pompom on Top -->
+      <circle cx="132" cy="16" r="18" fill="#FDE047" stroke="#F59E0B" stroke-width="3" />
+      <circle cx="130" cy="14" r="14" fill="#FEF08A" />
+      <circle cx="127" cy="10" r="4" fill="#FFFFFF" />
+    </g>
+  </g>
+
+  <!-- 6. THE PLAYFUL GINGER CAT (from "Gara-Gara Kucing!") Peeking from Left -->
+  <g id="StorybookCat" transform="translate(250, 420)" filter="url(#softDropShadow)">
+    <!-- Cat Ears -->
+    <polygon points="50,60 70,10 95,50" fill="url(#catGrad)" stroke="#C2410C" stroke-width="3" />
+    <polygon points="58,55 72,25 87,48" fill="#FED7AA" />
+
+    <polygon points="125,50 150,10 170,60" fill="url(#catGrad)" stroke="#C2410C" stroke-width="3" />
+    <polygon points="133,48 148,25 162,55" fill="#FED7AA" />
+
+    <!-- Cat Head Round Silhouette -->
+    <ellipse cx="110" cy="85" rx="60" ry="50" fill="url(#catGrad)" stroke="#C2410C" stroke-width="3" />
+
+    <!-- Tabby Forehead Stripes -->
+    <path d="M 110 45 L 110 65" stroke="#C2410C" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M 95 48 L 100 64" stroke="#C2410C" stroke-width="4" stroke-linecap="round" />
+    <path d="M 125 48 L 120 64" stroke="#C2410C" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Big Curious Cheerful Eyes -->
+    <ellipse cx="88" cy="82" rx="11" ry="14" fill="#FEF08A" stroke="#451A03" stroke-width="3" />
+    <ellipse cx="89" cy="82" rx="6" ry="11" fill="#1C1917" />
+    <circle cx="86" cy="76" r="3.5" fill="#FFFFFF" />
+
+    <ellipse cx="132" cy="82" rx="11" ry="14" fill="#FEF08A" stroke="#451A03" stroke-width="3" />
+    <ellipse cx="131" cy="82" rx="6" ry="11" fill="#1C1917" />
+    <circle cx="128" cy="76" r="3.5" fill="#FFFFFF" />
+
+    <!-- Cute Snout & Pink Nose -->
+    <ellipse cx="110" cy="98" rx="16" ry="11" fill="#FFF7ED" />
+    <polygon points="106,94 114,94 110,100" fill="#FB7185" />
+    <path d="M 110 100 Q 104 106 98 102" fill="none" stroke="#7C2D12" stroke-width="3" stroke-linecap="round" />
+    <path d="M 110 100 Q 116 106 122 102" fill="none" stroke="#7C2D12" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Whiskers -->
+    <path d="M 72 96 L 42 92" stroke="#FFF7ED" stroke-width="3" stroke-linecap="round" />
+    <path d="M 70 104 L 40 106" stroke="#FFF7ED" stroke-width="3" stroke-linecap="round" />
+    <path d="M 148 96 L 178 92" stroke="#FFF7ED" stroke-width="3" stroke-linecap="round" />
+    <path d="M 150 104 L 180 106" stroke="#FFF7ED" stroke-width="3" stroke-linecap="round" />
+
+    <!-- White Paws Resting on Top of the Book -->
+    <ellipse cx="90" cy="135" rx="14" ry="11" fill="#FFFFFF" stroke="#EA580C" stroke-width="2.5" />
+    <ellipse cx="130" cy="135" rx="14" ry="11" fill="#FFFFFF" stroke="#EA580C" stroke-width="2.5" />
+  </g>
+
+  <!-- 7. THE OPEN MAGICAL STORYBOOK -->
+  <g id="OpenStorybook" transform="translate(0, 40)" filter="url(#softDropShadow)">
+    <!-- Book Shadow -->
+    <ellipse cx="540" cy="670" rx="360" ry="40" fill="#060814" opacity="0.6" />
+
+    <!-- Hardcover Book Base (Rich Royal Indigo with Gold Trim) -->
+    <path d="M 200 595 Q 540 660 880 595 L 865 635 Q 540 700 215 635 Z"
+          fill="url(#bookCoverGrad)" stroke="#F59E0B" stroke-width="4" />
+
+    <!-- Stacked Parchment Pages (Left Wing) -->
+    <path d="M 220 580 Q 520 625 530 540 L 530 565 Q 520 645 220 605 Z" fill="#E2E8F0" />
+    <path d="M 225 570 Q 520 615 530 530 L 530 555 Q 520 635 225 595 Z" fill="#F1F5F9" />
+    <path d="M 230 558 Q 520 600 530 520 L 530 545 Q 520 625 230 582 Z"
+          fill="url(#parchmentGrad)" stroke="#CBD5E1" stroke-width="2" />
+
+    <!-- Stacked Parchment Pages (Right Wing) -->
+    <path d="M 860 580 Q 560 625 550 540 L 550 565 Q 560 645 860 605 Z" fill="#E2E8F0" />
+    <path d="M 855 570 Q 560 615 550 530 L 550 555 Q 560 635 855 595 Z" fill="#F1F5F9" />
+    <path d="M 850 558 Q 560 600 550 520 L 550 545 Q 560 625 850 582 Z"
+          fill="url(#parchmentGrad)" stroke="#CBD5E1" stroke-width="2" />
+
+    <!-- Golden Spine Centerpiece -->
+    <path d="M 530 520 Q 540 515 550 520 L 550 670 Q 540 675 530 670 Z" fill="url(#goldRimGrad)" />
+
+    <!-- Page Text Illustration Hints (Gentle Gold Flourishes) -->
+    <path d="M 280 575 Q 360 585 450 570" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" opacity="0.45" />
+    <path d="M 300 592 Q 370 600 440 588" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round" opacity="0.35" />
+    <path d="M 630 570 Q 720 585 800 575" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" opacity="0.45" />
+    <path d="M 640 588 Q 710 600 780 592" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round" opacity="0.35" />
+
+    <!-- Crimson Bookmark Ribbon hanging gracefully from center -->
+    <path d="M 535 660 Q 545 740 580 770 L 605 755 L 590 730 Q 555 700 545 660 Z"
+          fill="url(#ribbonGrad)" stroke="#9F1239" stroke-width="2.5" />
+  </g>
+
+  <!-- 8. BRAND RIBBON & TYPOGRAPHY -->
+  <g id="BrandBanner" transform="translate(0, 10)" filter="url(#softDropShadow)">
+    <!-- Banner Shadow -->
+    <path d="M 200 780 L 880 780 L 840 890 L 240 890 Z" fill="#060814" opacity="0.5" />
+
+    <!-- Banner Outer Gold Border -->
+    <path d="M 190 760
+             Q 540 730 890 760
+             L 860 880
+             Q 540 850 220 880 Z"
+          fill="url(#goldRimGrad)" />
+
+    <!-- Banner Inner Deep Navy Plate -->
+    <path d="M 200 768
+             Q 540 740 880 768
+             L 852 870
+             Q 540 842 228 870 Z"
+          fill="#161938" stroke="#2B3163" stroke-width="2" />
+
+    <!-- Typography: "ZAYN" (Handcrafted Chunky Serif Display) -->
+    <!-- Drop Shadow for 3D Warmth -->
+    <text x="540" y="828"
+          font-family="'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif"
+          font-size="64"
+          font-weight="900"
+          fill="#92400E"
+          text-anchor="middle"
+          letter-spacing="8">
+      ZAYN
+    </text>
+    <!-- Crisp White/Cream Face -->
+    <text x="540" y="824"
+          font-family="'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif"
+          font-size="64"
+          font-weight="900"
+          fill="#FFFDF7"
+          text-anchor="middle"
+          letter-spacing="8">
+      ZAYN
+    </text>
+
+    <!-- Subtitle: "STORYBOOK" in Golden Spaced Sans -->
+    <text x="540" y="855"
+          font-family="'Montserrat', 'Century Gothic', sans-serif"
+          font-size="18"
+          font-weight="800"
+          fill="#FDE047"
+          text-anchor="middle"
+          letter-spacing="11">
+      STORYBOOK
+    </text>
+  </g>
+
+  <!-- 9. Educational Channel Subtitle Tag -->
+  <text x="540" y="945"
+        font-family="'Nunito', 'Montserrat', sans-serif"
+        font-size="19"
+        font-weight="700"
+        fill="#CBD5E1"
+        text-anchor="middle"
+        letter-spacing="3"
+        opacity="0.9">
+    ANIMATED CHILDREN'S BOOKS
+  </text>
+</svg>

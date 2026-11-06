@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1440" width="2560" height="1440">
+  <defs>
+    <!-- Panoramic Night Sky Gradient -->
+    <linearGradient id="bannerSky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E1229" />
+      <stop offset="35%" stop-color="#1B214A" />
+      <stop offset="70%" stop-color="#161A3D" />
+      <stop offset="100%" stop-color="#0A0C1C" />
+    </linearGradient>
+
+    <!-- Ambient Nebular Glows -->
+    <radialGradient id="nebulaGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="nebulaBlue" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Golden Text Gradient -->
+    <linearGradient id="titleGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDF7" />
+      <stop offset="40%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+
+    <!-- Filter Shadows -->
+    <filter id="bannerShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#04060E" flood-opacity="0.75" />
+    </filter>
+  </defs>
+
+  <!-- 1. Full Panoramic Background -->
+  <rect width="2560" height="1440" fill="url(#bannerSky)" />
+
+  <!-- 2. Ambient Fairytale Glows -->
+  <circle cx="1280" cy="720" r="650" fill="url(#nebulaGold)" />
+  <circle cx="850" cy="700" r="500" fill="url(#nebulaBlue)" />
+  <circle cx="1700" cy="740" r="500" fill="url(#nebulaBlue)" />
+
+  <!-- 3. Whimsical Star Constellation Backdrop -->
+  <!-- Constellation Left -->
+  <circle cx="280" cy="350" r="5" fill="#FDE047" opacity="0.8" />
+  <circle cx="420" cy="280" r="7" fill="#FDE047" opacity="0.9" />
+  <circle cx="560" cy="380" r="4.5" fill="#38BDF8" opacity="0.75" />
+  <path d="M 280 350 L 420 280 L 560 380" stroke="#FDE047" stroke-width="1.5" stroke-dasharray="4 8" opacity="0.3" fill="none" />
+
+  <!-- Constellation Right -->
+  <circle cx="2050" cy="320" r="7" fill="#FDE047" opacity="0.85" />
+  <circle cx="2200" cy="240" r="5.5" fill="#F472B6" opacity="0.75" />
+  <circle cx="2320" cy="360" r="6.5" fill="#38BDF8" opacity="0.8" />
+  <path d="M 2050 320 L 2200 240 L 2320 360" stroke="#FDE047" stroke-width="1.5" stroke-dasharray="4 8" opacity="0.3" fill="none" />
+
+  <!-- Random Ambient Twinkle Stars -->
+  <polygon points="380,680 386,694 400,700 386,706 380,720 374,706 360,700 374,694" fill="#FDE047" opacity="0.75" />
+  <polygon points="620,850 624,860 634,864 624,868 620,878 616,868 606,864 616,860" fill="#38BDF8" opacity="0.6" />
+  <polygon points="2180,650 2186,664 2200,670 2186,676 2180,690 2174,676 2160,670 2174,664" fill="#FDE047" opacity="0.75" />
+  <polygon points="1960,860 1964,870 1974,874 1964,878 1960,888 1956,878 1946,874 1956,870" fill="#F472B6" opacity="0.6" />
+
+  <!-- 4. LEFT WING (STORYBOOK ELEMENTS): Manu's Red Raincoat & Sringeri's Bananas -->
+  <g id="LeftStorybookCluster" transform="translate(480, 520)" filter="url(#bannerShadow)">
+    <!-- Little Raincloud with Stardust -->
+    <ellipse cx="140" cy="90" rx="65" ry="32" fill="#334155" opacity="0.6" />
+    <ellipse cx="180" cy="75" rx="50" ry="38" fill="#475569" opacity="0.7" />
+    <circle cx="110" cy="170" r="4" fill="#38BDF8" />
+    <circle cx="150" cy="190" r="4" fill="#38BDF8" />
+    <circle cx="190" cy="165" r="4" fill="#38BDF8" />
+
+    <!-- Manu's Cheerful Red Raincoat (Jas Hujan Merah) -->
+    <path d="M 125 105 L 175 105 L 205 180 L 175 185 L 165 145 L 165 240 L 135 240 L 135 145 L 125 185 L 95 180 Z"
+          fill="#E11D48" stroke="#9F1239" stroke-width="3" rx="5" />
+    <!-- Yellow buttons -->
+    <circle cx="150" cy="140" r="4.5" fill="#FDE047" />
+    <circle cx="150" cy="170" r="4.5" fill="#FDE047" />
+    <circle cx="150" cy="200" r="4.5" fill="#FDE047" />
+
+    <!-- Floating Sweet Bananas (Pisang Terlalu Banyak!) -->
+    <path d="M 60 220 Q 80 200 110 215 Q 85 240 60 220 Z" fill="#FBBF24" stroke="#D97706" stroke-width="2.5" />
+    <path d="M 50 240 Q 75 220 105 235 Q 78 260 50 240 Z" fill="#FBBF24" stroke="#D97706" stroke-width="2.5" />
+  </g>
+
+  <!-- 5. RIGHT WING (STORYBOOK CHARACTERS): Fat King & Thin Dog Walkers -->
+  <g id="RightStorybookCluster" transform="translate(1860, 520)" filter="url(#bannerShadow)">
+    <!-- Jolly King Silhouette / Hat with Crown -->
+    <circle cx="120" cy="100" r="32" fill="#F59E0B" />
+    <!-- Royal Crown -->
+    <polygon points="98,72 108,50 120,65 132,50 142,72" fill="#FDE047" stroke="#B45309" stroke-width="2" />
+    <!-- King Robe -->
+    <path d="M 75 130 Q 120 120 165 130 L 175 240 L 65 240 Z" fill="#7C3AED" stroke="#5B21B6" stroke-width="3" />
+    <!-- Ermine Fur Collar -->
+    <rect x="75" y="125" width="90" height="24" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2" />
+
+    <!-- Thin Dog Silhouette running happily -->
+    <g transform="translate(160, 160)">
+      <ellipse cx="60" cy="40" rx="35" ry="16" fill="#F97316" stroke="#C2410C" stroke-width="2.5" />
+      <circle cx="95" cy="25" r="16" fill="#F97316" stroke="#C2410C" stroke-width="2.5" />
+      <!-- Floppy Ear -->
+      <path d="M 90 20 Q 82 40 86 48" stroke="#9A3412" stroke-width="5" stroke-linecap="round" />
+      <!-- Legs -->
+      <line x1="40" y1="52" x2="35" y2="80" stroke="#C2410C" stroke-width="4" stroke-linecap="round" />
+      <line x1="75" y1="52" x2="80" y2="80" stroke="#C2410C" stroke-width="4" stroke-linecap="round" />
+      <!-- Wagging Tail -->
+      <path d="M 28 35 Q 12 25 18 10" stroke="#C2410C" stroke-width="4" stroke-linecap="round" fill="none" />
+    </g>
+  </g>
+
+  <!-- 6. CENTER SAFE-ZONE HERO BRANDING (X: 800 to 1760, Y: 520 to 920) -->
+  <g id="CenterBrandHero" filter="url(#bannerShadow)">
+    <!-- Left: Scaled Emblem Badge (Diameter 360px) -->
+    <g transform="translate(780, 520)">
+      <!-- Outer Glow -->
+      <circle cx="180" cy="180" r="185" fill="#F59E0B" opacity="0.25" />
+      <circle cx="180" cy="180" r="175" fill="#181D45" stroke="#F59E0B" stroke-width="7" />
+
+      <!-- Moon with Blue Cap inside Banner -->
+      <path d="M 175 55 C 245 55, 290 110, 290 180 C 290 245, 245 290, 180 295 C 230 265, 250 215, 250 180 C 250 135, 215 80, 175 55 Z"
+            fill="url(#titleGold)" />
+      <!-- Sleepy Eye -->
+      <path d="M 250 168 Q 258 178 266 168" fill="none" stroke="#92400E" stroke-width="3" stroke-linecap="round" />
+      <!-- Rosy Cheek -->
+      <ellipse cx="260" cy="184" rx="8" ry="5" fill="#FB7185" opacity="0.6" />
+
+      <!-- Cap -->
+      <g transform="translate(155, 12) rotate(-14)">
+        <path d="M 15 60 C 8 25, 42 6, 75 8 C 100 12, 115 36, 110 60 Z" fill="#0284C7" stroke="#0369A1" stroke-width="2" />
+        <rect x="8" y="54" width="106" height="18" rx="9" fill="#FFFFFF" />
+        <circle cx="75" cy="8" r="10" fill="#FDE047" />
+      </g>
+
+      <!-- Peeking Orange Cat -->
+      <g transform="translate(75, 160)">
+        <polygon points="20,25 32,4 42,22" fill="#F97316" stroke="#C2410C" stroke-width="2" />
+        <polygon points="56,22 66,4 78,25" fill="#F97316" stroke="#C2410C" stroke-width="2" />
+        <ellipse cx="49" cy="42" rx="30" ry="24" fill="#F97316" stroke="#C2410C" stroke-width="2" />
+        <circle cx="38" cy="40" r="4" fill="#18181B" />
+        <circle cx="60" cy="40" r="4" fill="#18181B" />
+        <polygon points="47,48 51,48 49,52" fill="#FB7185" />
+        <ellipse cx="38" cy="68" rx="8" ry="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5" />
+        <ellipse cx="60" cy="68" rx="8" ry="6" fill="#FFFFFF" stroke="#C2410C" stroke-width="1.5" />
+      </g>
+
+      <!-- Open Book under Moon -->
+      <g transform="translate(10, 30)">
+        <path d="M 50 255 Q 170 285 290 255 L 285 272 Q 170 302 55 272 Z" fill="#2E2657" stroke="#F59E0B" stroke-width="2" />
+        <path d="M 60 245 Q 165 265 170 230 L 170 245 Q 165 280 60 260 Z" fill="#FFFDF7" stroke="#CBD5E1" stroke-width="1" />
+        <path d="M 280 245 Q 175 265 170 230 L 170 245 Q 175 280 280 260 Z" fill="#FFFDF7" stroke="#CBD5E1" stroke-width="1" />
+      </g>
+    </g>
+
+    <!-- Right: Big Bold Typography & Editorial Tagline -->
+    <g transform="translate(1190, 560)">
+      <!-- Channel Main Title: ZAYN STORYBOOK -->
+      <text x="0" y="80"
+            font-family="'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif"
+            font-size="82"
+            font-weight="900"
+            fill="#B45309"
+            letter-spacing="4">
+        ZAYN STORYBOOK
+      </text>
+      <text x="0" y="74"
+            font-family="'Fredoka', 'Nunito', 'Arial Rounded MT Bold', sans-serif"
+            font-size="82"
+            font-weight="900"
+            fill="url(#titleGold)"
+            letter-spacing="4">
+        ZAYN STORYBOOK
+      </text>
+
+      <!-- Tagline: Bilingual & Heartwarming -->
+      <text x="5" y="132"
+            font-family="'Nunito', 'Montserrat', sans-serif"
+            font-size="28"
+            font-weight="800"
+            fill="#FFFFFF"
+            letter-spacing="1">
+        Buku Cerita &amp; Dongeng Animasi Anak Bergambar 🌙✨
+      </text>
+
+      <text x="5" y="172"
+            font-family="'Nunito', 'Montserrat', sans-serif"
+            font-size="22"
+            font-weight="600"
+            fill="#93C5FD"
+            letter-spacing="0.5">
+        Bilingual Picture Books (Bahasa Indonesia &amp; English) • Peaceful Bedtime Tales
+      </text>
+
+      <!-- Broadcast Schedule & Value Pill Badges -->
+      <g transform="translate(0, 205)">
+        <!-- Badge 1: Daily Broadcast Schedule -->
+        <rect x="0" y="0" width="280" height="42" rx="21" fill="#F59E0B" />
+        <text x="140" y="27"
+              font-family="'Nunito', sans-serif"
+              font-size="16"
+              font-weight="800"
+              fill="#1E1B4B"
+              text-anchor="middle"
+              letter-spacing="0.5">
+          ⏰ TAYANG TIAP HARI 19.00 WIB
+        </text>
+
+        <!-- Badge 2: Family Safe & Moral Focus -->
+        <rect x="295" y="0" width="220" height="42" rx="21" fill="#1E293B" stroke="#38BDF8" stroke-width="2" />
+        <text x="405" y="27"
+              font-family="'Nunito', sans-serif"
+              font-size="16"
+              font-weight="800"
+              fill="#E0F2FE"
+              text-anchor="middle"
+              letter-spacing="0.5">
+          🌈 100% AMAN &amp; EDUKATIF
+        </text>
+
+        <!-- Badge 3: Creative Commons Attribution -->
+        <rect x="530" y="0" width="160" height="42" rx="21" fill="#1E293B" stroke="#94A3B8" stroke-width="1.5" />
+        <text x="610" y="27"
+              font-family="'Nunito', sans-serif"
+              font-size="15"
+              font-weight="700"
+              fill="#CBD5E1"
+              text-anchor="middle">
+          📖 CC BY 4.0
+        </text>
+      </g>
+    </g>
+  </g>
+</svg>
