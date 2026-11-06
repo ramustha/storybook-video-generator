@@ -1,0 +1,31 @@
+docs/branding/zayn-storybook-banner-youtube.svg
+  698ac31901cd73e0 190,192,201
+docs/branding/zayn-storybook-cover-facebook.svg
+  698ac31901cd73e0 92,94-95,101
+scripts/generate-branding-pack.ts
+  698ac31901cd73e0 572,574,583,708,710-711,717
+stories/branding/zayn-storybook-banner-youtube.svg
+  698ac31901cd73e0 190,192,201
+stories/branding/zayn-storybook-cover-facebook.svg
+  698ac31901cd73e0 92,94-95,101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "d54bf79e0396548fab76e8906414a4501ce8159d",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 21,
+      "total_deletions": 21,
+      "accepted_lines": 21,
+      "overriden_lines": 0
+    }
+  }
+}
