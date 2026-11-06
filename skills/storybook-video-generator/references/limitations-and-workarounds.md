@@ -14,6 +14,7 @@ This document provides an exhaustive, engineering-grade catalog of real-world bo
 | **YouTube API** | **Phone Verification Requirement** | `403 The authenticated user doesn't have permissions to upload and set custom video thumbnails` | Complete one-time channel verification at `https://www.youtube.com/verify` (Intermediate Features). |
 | **YouTube API** | **Shorts Vertical Thumbnail UI Behavior** | API sets 9:16 thumbnail in library, but mobile Shorts feed dynamically grabs an animated video frame | Thumbnail displays on desktop, search, and channel playlists; choose primary frame during mobile upload if needed. |
 | **Meta Graph API** | **Instagram Reels Cover Premature R2 Deletion** | Deleting Cloudflare R2 cover image during transcoding polling causes HTTP 404, resulting in missing Reels cover | Enforce R2 cover lifecycle: `coverCleanup()` runs strictly in `finally` AFTER `POST /media_publish` returns success. |
+| **Meta Graph API** | **Burst Velocity Trigger & Algorithmic Suspension** | `Code 100 subcode 33 ("Object does not exist")` + HTTP 403 / Account Suspended when uploading >3 Reels rapidly | Enforce anti-burst cooldown (≥30–60 mins between Reels); prefer 1 post/day via `daily-broadcast.yml`; submit Instagram in-app appeal; re-link Page via Edit Profile. |
 | **YouTube API** | **Processing Latency & SD Preview** | Newly published videos default to 360p/480p SD playback for the first 5–15 minutes | Switch player gear ⚙️ to 1080p HD; optional 4K triggers VP9/AV1 codec allocation for maximum clarity. |
 | **Remotion** | **Headless Chrome WebSocket / CDP** | `connect EPERM 127.0.0.1` inside isolated sandbox environments | Run rendering scripts with sandbox network bypass (`BypassSandbox: true` / elevated socket permissions). |
 | **Remotion** | **High Memory Spikes on 4K Canvas** | Chrome tab crash (`SIGKILL` / OOM) on machines with <8GB available RAM | Standardize on 1080p Full HD (`1920×1080`) by default; reserve 4K for dedicated high-RAM render nodes. |
@@ -108,6 +109,25 @@ Even when daily quota remains available, YouTube enforces an unadvertised **burs
 * **Asynchronous Cover Ingestion**: In the Meta Graph API container workflow, passing a public `cover_url` stages the cover image for download. However, Meta's media crawler downloads the image asynchronously during or right before the `POST /{ig-user-id}/media_publish` call.
 * **Failure Mode (HTTP 404 Cover Fetch)**: If the Cloudflare R2 temporary cover object is deleted during container transcoding polling (`pollInstagramContainer()`), Meta encounters an HTTP 404 error when attempting to fetch the cover file and quietly falls back to an uncurated, random video frame.
 * **Engineering Policy**: The cleanup routine (`coverCleanup()`) MUST strictly execute in the `finally` block **after** `media_publish` completes and returns a valid `mediaId`.
+
+---
+
+### Meta Graph API Instagram Velocity Limits, Bot Heuristics & Account Suspension
+* **The Platform Constraint**:
+  * While Meta documentation quotes a daily publishing limit of 25–50 posts per 24 hours (`content_publishing_limit`), Instagram employs a separate, undocumented **velocity / burst anti-spam heuristic**.
+  * On young or low-trust accounts (<30 days old, low follower count), pushing multiple high-resolution video reels through the API within minutes (e.g. 8 reels in 3 minutes) triggers immediate bot-farm protection.
+* **Failure Signatures**:
+  1. **Soft Disconnect**: Meta quietly disconnects the `instagram_business_account` node from the Facebook Page (`GET /{page-id}?fields=instagram_business_account` returns empty).
+  2. **Subcode 33 Masking**: Subsequent API calls fail with `GraphMethodException: Object with ID '...' does not exist, cannot be loaded due to missing permissions, or does not support this operation. (code: 100, error_subcode: 33)`.
+  3. **Temporary Account Suspension**: Visiting the account returns HTTP 403 Forbidden; opening the Instagram app shows *"We suspended your account on [Date]... Inauthentic automated activity"*.
+* **Mitigation & Operational Rules**:
+  * **Strict Anti-Burst Guard**: Never publish multiple Reels back-to-back without human-cadence delays. Automated batch uploads must enforce a mandatory delay of ≥30–60 minutes between posts.
+  * **Default to Daily Scheduled Broadcast**: Use the GitHub Actions daily workflow (`.github/workflows/daily-broadcast.yml`) to publish 1 storybook Reel per day at 19:00 WIB (12:00 UTC), blending seamlessly into organic platform traffic.
+  * **Recovery Workflow**:
+    1. Submit an appeal in the Instagram mobile app by completing SMS verification, email code confirmation, and a video selfie.
+    2. Provide an appeal statement stating that uploads were performed via registered Meta Developer App through official Meta Graph API endpoints for an educational children's storybook channel.
+    3. Once restored by Meta (typically within hours to 24h), reconnect the Facebook Page from the Instagram App: **Edit Profile ➔ Public Business Information ➔ Page ➔ Select Zayn Storybook**.
+    4. Generate a fresh token in [Meta Graph API Explorer](https://developers.facebook.com/tools/explorer/) with `instagram_basic` and `instagram_content_publish` granted for the restored account.
 
 ---
 

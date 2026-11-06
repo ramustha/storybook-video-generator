@@ -339,6 +339,19 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
        - **Option 2 (Switch Channel / OAuth Profile)**: Authenticate another channel profile if managing multiple channels.
        - **Option 3 (Manual Upload via YouTube Studio)**: Use local MP4 files in `exports/` paired with `exports/youtube-upload-metadata.md`.
     4. Await user confirmation before attempting retry.
+* **Meta & Instagram Graph API Safety Doctrine (Anti-Spam & Algorithmic Protection)**:
+  * **Strict Prohibition of Rapid / Burst Uploads**:
+    * **NEVER** publish multiple Instagram Reels or Carousel posts in rapid succession (e.g., within seconds or minutes).
+    * Instagram enforces hyper-aggressive automated bot / inauthentic activity filters, especially on young accounts (<30 days old or <1,000 followers).
+    * Rapid publishing (>3 videos within 15 minutes) triggers Meta's anti-spam heuristics: Meta automatically unlinks the Page's `instagram_business_account` node, masks API endpoints with `GraphMethodException: Object with ID '...' does not exist (code 100, error_subcode 33)`, and issues an algorithmic temporary account suspension (*"We suspended your account... Inauthentic automated activity"*).
+  * **Enforced Cooldown Architecture**:
+    * Any automated batch script (`scripts/publish-instagram-reels.ts`) MUST enforce a mandatory cooldown (minimum 30–60 minutes between consecutive live uploads).
+    * **Primary Cadence**: Strictly prefer single-video daily releases scheduled through the GitHub Actions workflow (`.github/workflows/daily-broadcast.yml`) at the prime bedtime family slot (19:00 WIB / 12:00 UTC).
+  * **Account Suspension Recovery & Re-linking Protocol**:
+    1. **Immediate Appeal**: Open the Instagram mobile app, tap **"Disagree with decision"**, and complete SMS OTP, email verification, and video selfie.
+    2. **Appeal Statement**: State that uploads were made via registered Meta Developer App using official Meta Graph API endpoints during initial setup of a family-friendly educational children's storybook channel (`@zayn.storybook`).
+    3. **Re-link After Restoration**: Open Instagram App ➔ **Edit Profile** ➔ **Public Business Information** ➔ **Page** ➔ Re-select **Zayn Storybook** Facebook Page.
+    4. **Generate Fresh Token**: Visit [Meta Graph API Explorer](https://developers.facebook.com/tools/explorer/) and ensure both Page and Instagram account are checked in the permission modal.
 
 ### 11. Multi-Platform Bilingual Social Promotion & Audience Growth Engine
 * **Playful, Cheerful & Kid-Friendly Voice Doctrine**:
