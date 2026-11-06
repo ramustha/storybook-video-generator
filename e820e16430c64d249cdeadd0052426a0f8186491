@@ -1,0 +1,31 @@
+skills/storybook-video-generator/references/thumbnail-platform-spec.md
+  698ac31901cd73e0 1-149
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 240,242-250,252-262,264-267,575
+scripts/render-thumbnail.ts
+  698ac31901cd73e0 5,7-10,12-208,210-228,232-236,239-247,249,253,259,261,265-267,269-278,280-287,291-292,295-296,299-301,309,323-325,327,329-330,333,335,341-343,346-351,353-358,362,365-368,390-392,394,397,406-531,534-539
+package.json
+  698ac31901cd73e0 10-11
+scripts/publish-all.ts
+  698ac31901cd73e0 5,90-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "e820e16430c64d249cdeadd0052426a0f8186491",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 638,
+      "total_deletions": 66,
+      "accepted_lines": 638,
+      "overriden_lines": 0
+    }
+  }
+}
