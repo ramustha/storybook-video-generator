@@ -252,3 +252,28 @@ To maintain an un-siloed, auditable index of all published video assets across p
 * **YouTube Community Tab (Official API Skip Policy)**:
   * **Official Limitation**: Google YouTube Data API v3 strictly lacks public endpoints for creating, reading, or managing the Community Tab.
   * **Pipeline Rule**: Automated distribution (`npm run publish:all`) **strictly SKIPS YouTube Community Tab posting** without error. Formatted text is saved to `stories/<book-slug>/exports/social-promotion-posts.md` for optional manual posting via YouTube Studio.
+
+---
+
+## 9. Meta Graph API Safety Doctrine (Anti-Spam, Velocity Throttling & Account Health)
+
+Publishing to Instagram and Facebook via the Meta Graph API requires strict adherence to human-cadence rate limits to protect the account from algorithmic bot-detection heuristics:
+
+### Key Operational Rules:
+1. **Never Burst-Publish Videos**:
+   - Pushing multiple Instagram Reels within a short time window (e.g. 5–10 videos in under 15 minutes) triggers Instagram's automated inauthentic behavior shield.
+   - For new accounts, the algorithm may flag rapid activity and temporarily suspend the account pending human identity verification.
+2. **Mandatory Cooldown Between Automated Uploads**:
+   - In batch publishing scripts (`publish-instagram-reels.ts`), enforce a **minimum delay of 30–60 minutes** between consecutive video uploads.
+   - For regular production, rely on the scheduled GitHub Actions broadcast (`.github/workflows/daily-broadcast.yml`) which publishes **1 video per day** at 19:00 WIB (12:00 UTC).
+3. **Handling Token & Link Breaks (Error Subcode 33)**:
+   - If Meta disconnects the Instagram account due to a burst trigger, Graph API returns `code: 100, error_subcode: 33` (*Object with ID '...' does not exist*).
+   - Re-linking cannot be done via a nonexistent "reconnect" button on Facebook Page settings. Instead:
+     1. Open the **Instagram mobile app** on your phone (account `@zayn.storybook`).
+     2. Go to **Edit Profile ➔ Public Business Information ➔ Page**.
+     3. Select the Facebook Page (**Zayn Storybook**) and tap Done.
+     4. Generate a new User Access Token in [Meta Graph API Explorer](https://developers.facebook.com/tools/explorer/) and run `npx tsx scripts/refresh-meta-token.ts --user-token <TOKEN>` to auto-exchange it for a permanent Page token.
+4. **Temporary Suspension Recovery Protocol**:
+   - If Instagram flags the account for automated activity, it presents an appeal screen (*"We suspended your account on [Date]"*).
+   - Tap **"Disagree with decision"** and complete SMS verification, email code confirmation, and a video selfie.
+   - Accounts suspended for velocity limits are typically restored by Meta within a few hours to 24 hours. Once restored, re-link the Facebook Page via the Instagram mobile app before resuming scheduled single-video publishing.

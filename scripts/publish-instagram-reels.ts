@@ -86,15 +86,26 @@ async function main() {
   };
 
   const isDryRun = args.includes("--dry-run");
+  const forceBurst = args.includes("--force-burst");
   const targetBook = getArg("--book");
   const targetLang = getArg("--lang") as "id" | "en" | undefined;
+  const cooldownMinutesArg = getArg("--cooldown");
+  const cooldownMinutes = cooldownMinutesArg !== undefined
+    ? parseInt(cooldownMinutesArg, 10)
+    : (isDryRun || targetBook ? 0 : 30);
 
   console.log("\n==================================================================");
   console.log("📸 INSTAGRAM REELS BATCH PUBLISHER (WITH CUSTOM COVER)");
   console.log("==================================================================");
-  console.log(`🧪 Execution Mode: ${isDryRun ? "DRY RUN (Preview Only)" : "LIVE EXECUTION"}`);
-  if (targetBook) console.log(`📖 Target Book   : ${targetBook}`);
-  if (targetLang) console.log(`🌐 Target Lang   : ${targetLang.toUpperCase()}`);
+  console.log(`🧪 Execution Mode : ${isDryRun ? "DRY RUN (Preview Only)" : "LIVE EXECUTION"}`);
+  if (targetBook) console.log(`📖 Target Book    : ${targetBook}`);
+  if (targetLang) console.log(`🌐 Target Lang    : ${targetLang.toUpperCase()}`);
+  console.log(`⏱️ Anti-Spam Guard: ${cooldownMinutes > 0 ? `${cooldownMinutes} minutes cooldown between uploads` : "Disabled / Zero delay"}`);
+  if (!isDryRun && cooldownMinutes === 0 && !targetBook && !forceBurst) {
+    console.warn(`\n⚠️ WARNING: Running batch upload without cooldown may trigger Meta's automated`);
+    console.warn(`   spam / bot velocity filter and cause temporary account suspension.`);
+    console.warn(`   Pass --cooldown <minutes> (recommended >= 30) or use daily-broadcast scheduler.\n`);
+  }
   console.log("==================================================================\n");
 
   const storiesToInspect = targetBook ? [targetBook] : ALL_STORIES;
@@ -183,9 +194,27 @@ async function main() {
     }
 
     await runCommand("npx", ["tsx", ...uploadArgs]);
+
+    // 3. Human-cadence cooldown between uploads to prevent Meta anti-spam / velocity triggers
+    if (!isDryRun && i < tasks.length - 1 && cooldownMinutes > 0) {
+      console.log(`\n⏳ Cooling down for ${cooldownMinutes} minutes before next upload (protecting Instagram account health)...`);
+      await new Promise<void>((resolve) => {
+        let remainingSeconds = cooldownMinutes * 60;
+        const interval = setInterval(() => {
+          remainingSeconds -= 10;
+          if (remainingSeconds <= 0) {
+            clearInterval(interval);
+            resolve();
+          } else if (remainingSeconds % 60 === 0) {
+            console.log(`   ⏳ Cooldown remaining: ${remainingSeconds / 60} minutes...`);
+          }
+        }, 10000);
+      });
+      console.log(`   ✔ Cooldown complete! Proceeding to next Reel.\n`);
+    }
   }
 
-  // 3. Update Docs Portal
+  // 4. Update Docs Portal
   if (!isDryRun) {
     console.log(`\n📊 Updating Docs Portal with new Instagram Reel records...`);
     try {
