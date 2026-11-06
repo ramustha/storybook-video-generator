@@ -1,0 +1,55 @@
+docs/branding/zayn-storybook-cover-facebook.svg
+  698ac31901cd73e0 1-116
+docs/branding/zayn-storybook-banner-youtube.svg
+  698ac31901cd73e0 1-229
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 467-489
+docs/branding/zayn-storybook-emblem.svg
+  698ac31901cd73e0 1-276
+package.json
+  698ac31901cd73e0 46-47
+stories/branding/zayn-storybook-emblem-transparent.svg
+  698ac31901cd73e0 1-276
+stories/branding/zayn-storybook-emblem.svg
+  698ac31901cd73e0 1-276
+docs/branding/zayn-storybook-emblem-transparent.svg
+  698ac31901cd73e0 1-276
+docs/branding/zayn-storybook-icon.svg
+  698ac31901cd73e0 1-75
+docs/branding/logo-concept-1-emblem.svg
+  698ac31901cd73e0 1-138
+docs/branding/logo-concept-2-mascot.svg
+  698ac31901cd73e0 1-143
+stories/branding/zayn-storybook-banner-youtube.svg
+  698ac31901cd73e0 1-229
+scripts/generate-branding-pack.ts
+  698ac31901cd73e0 1-973
+stories/branding/zayn-storybook-icon.svg
+  698ac31901cd73e0 1-75
+docs/branding/zayn-storybook-story-highlight.svg
+  698ac31901cd73e0 1-83
+stories/branding/zayn-storybook-story-highlight.svg
+  698ac31901cd73e0 1-83
+stories/branding/zayn-storybook-cover-facebook.svg
+  698ac31901cd73e0 1-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "6c27055ce8f69993bd2da4316fa2c80d7430e576",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 3389,
+      "total_deletions": 1,
+      "accepted_lines": 3389,
+      "overriden_lines": 0
+    }
+  }
+}
