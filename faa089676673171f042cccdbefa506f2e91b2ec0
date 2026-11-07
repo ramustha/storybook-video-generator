@@ -1,0 +1,35 @@
+scripts/manage-story-storage.ts
+  698ac31901cd73e0 32,240,348,464,691-696
+.github/workflows/daily-story-ingest.yml
+  698ac31901cd73e0 1-104
+.gitignore
+  698ac31901cd73e0 15
+package.json
+  698ac31901cd73e0 20-21
+scripts/ingest-story.ts
+  698ac31901cd73e0 1-503
+src/audio/tts-engine.ts
+  698ac31901cd73e0 78-81,83-84,86-90,92-93,95-97,100-133,135-150,154
+config/curated-books.json
+  698ac31901cd73e0 1-451
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "faa089676673171f042cccdbefa506f2e91b2ec0",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 1143,
+      "total_deletions": 62,
+      "accepted_lines": 1142,
+      "overriden_lines": 0
+    }
+  }
+}
