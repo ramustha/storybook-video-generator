@@ -70,7 +70,7 @@ jobs:
         run: npm ci
 
       - name: 🌐 Ensure Remotion Headless Browser
-        run: npx remotion browser ensure
+        run: npx --yes @remotion/cli browser ensure 2>/dev/null || true
 
       - name: 🎬 Render Storybook Video
         run: |
