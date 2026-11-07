@@ -1,0 +1,33 @@
+src/remotion/Root.tsx
+  698ac31901cd73e0 71-80
+scripts/publish-instagram-post.ts
+  698ac31901cd73e0 370,386,388-392,404-410,412-415,419,421,430-431
+scripts/publish-launch-posts.ts
+  698ac31901cd73e0 156,171,173-176
+scripts/render-thumbnail.ts
+  698ac31901cd73e0 13-14,151-165,410-450
+scripts/publish-all.ts
+  698ac31901cd73e0 313,322-323
+src/remotion/components/ThumbnailComposition.tsx
+  698ac31901cd73e0 41,96-97,150-434
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "ad9800a56a90656ca6a3ab4817670f31b470ed57",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 390,
+      "total_deletions": 28,
+      "accepted_lines": 390,
+      "overriden_lines": 0
+    }
+  }
+}
