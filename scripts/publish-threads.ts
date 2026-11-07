@@ -534,6 +534,16 @@ export async function publishStoryToThreads(options: {
   const storyDir = path.resolve("./stories", options.bookSlug);
   const storyJsonPath = path.join(storyDir, "story.json");
   if (!existsSync(storyJsonPath)) {
+    console.log(`📥 Story manifest not found locally for "${options.bookSlug}". Pulling from Cloudflare R2...`);
+    try {
+      const { spawnSync } = await import("child_process");
+      spawnSync("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", options.bookSlug], { stdio: "inherit" });
+    } catch {
+      // Ignore if R2 pull fails, will error below
+    }
+  }
+
+  if (!existsSync(storyJsonPath)) {
     throw new Error(`Manifest not found at ${storyJsonPath}`);
   }
 
@@ -586,7 +596,18 @@ export async function publishStoryToThreads(options: {
         isMadeWithAi: true,
       });
     } else if (mode === "video") {
-      const targetVideo = findStoryVideo(storyDir, lang, options.bookSlug);
+      let targetVideo = findStoryVideo(storyDir, lang, options.bookSlug);
+
+      if (!targetVideo && !options.dryRun) {
+        console.log(`⚙️ Video not found on disk. Rendering 9:16 vertical video for "${options.bookSlug}"...`);
+        try {
+          const { spawnSync } = await import("child_process");
+          spawnSync("npx", ["tsx", "scripts/render-book.ts", "--book", options.bookSlug, "--lang", lang, "--format", "vertical"], { stdio: "inherit" });
+          targetVideo = findStoryVideo(storyDir, lang, options.bookSlug);
+        } catch (err: any) {
+          console.warn("⚠️ Warning rendering vertical video:", err.message);
+        }
+      }
 
       if (!targetVideo) {
         console.log(`⏩ No MP4 video rendered for "${options.bookSlug}". Skipping video publish.`);
@@ -639,6 +660,16 @@ export async function publishStoryToThreads(options: {
 
     await fs.writeFile(storyJsonPath, JSON.stringify(manifest, null, 2), "utf-8");
     console.log(`💾 Saved Threads publication record to story.json`);
+
+    // Sync updated manifest back to Cloudflare R2
+    if (!options.dryRun) {
+      try {
+        const { spawnSync } = await import("child_process");
+        spawnSync("npx", ["tsx", "scripts/manage-story-storage.ts", "push", options.bookSlug, "--manifest-only"], { stdio: "inherit" });
+      } catch {
+        // Ignore R2 push error
+      }
+    }
 
     return { success: true, url: postDetails.permalink };
   } finally {
@@ -703,6 +734,18 @@ async function main() {
   const booksToProcess: string[] = [];
 
   if (isAllBooks) {
+    // If stories directory has fewer than 2 books, pull all from R2
+    const currentStories = existsSync(storiesDir) ? await fs.readdir(storiesDir) : [];
+    if (currentStories.filter((s) => s !== "branding" && !s.startsWith(".")).length < 2) {
+      console.log(`📥 Pulling all stories from Cloudflare R2...`);
+      try {
+        const { spawnSync } = await import("child_process");
+        spawnSync("npx", ["tsx", "scripts/manage-story-storage.ts", "pull-all"], { stdio: "inherit" });
+      } catch {
+        // ignore
+      }
+    }
+
     const entries = await fs.readdir(storiesDir, { withFileTypes: true });
     for (const ent of entries) {
       if (ent.isDirectory() && ent.name !== "branding" && ent.name !== "test-no-image") {
