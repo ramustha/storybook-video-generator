@@ -10,6 +10,10 @@ on:
         description: 'Target Book Slug (or "auto" for next from curated pool)'
         required: true
         default: 'auto'
+      batch_size:
+        description: 'Batch size: number of stories to ingest (e.g. 1, 3, 5, 10, or "all" to fill buffer)'
+        required: false
+        default: '1'
       force:
         description: 'Force re-ingest even if already in Cloudflare R2'
         required: false
@@ -73,6 +77,10 @@ jobs:
           ARGS=""
           if [ "${{ inputs.book }}" != "auto" ] && [ -n "${{ inputs.book }}" ]; then
             ARGS="--book ${{ inputs.book }}"
+          elif [ "${{ inputs.batch_size }}" = "all" ]; then
+            ARGS="--all"
+          elif [ -n "${{ inputs.batch_size }}" ] && [ "${{ inputs.batch_size }}" != "1" ]; then
+            ARGS="--limit ${{ inputs.batch_size }}"
           else
             ARGS="--next"
           fi

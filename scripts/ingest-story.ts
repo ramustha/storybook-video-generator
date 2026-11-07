@@ -61,6 +61,15 @@ export interface CuratedBook {
   scenes: CuratedScene[];
 }
 
+export interface IngestOptions {
+  force?: boolean;
+  dryRun?: boolean;
+  skipPlates?: boolean;
+  skipAudio?: boolean;
+  skipThumbnail?: boolean;
+  skipUpload?: boolean;
+}
+
 /**
  * Downloads a file from remote URL to a local path with automated redirect following.
  */
@@ -134,81 +143,17 @@ async function getExistingR2Stories(): Promise<Set<string>> {
 }
 
 /**
- * Main automated storybook ingestion engine.
+ * Executes full ingestion lifecycle for a single curated storybook.
  */
-async function main() {
-  const args = process.argv.slice(2);
-  const getArg = (flag: string) => {
-    const idx = args.indexOf(flag);
-    return idx !== -1 ? args[idx + 1] : undefined;
-  };
-
-  const requestedSlug = getArg("--book") || (args[0] && !args[0].startsWith("--") ? args[0] : undefined);
-  const autoNext = args.includes("--next");
-  const force = args.includes("--force");
-  const dryRun = args.includes("--dry-run");
-  const skipPlates = args.includes("--skip-plates");
-  const skipAudio = args.includes("--skip-audio");
-  const skipThumbnail = args.includes("--skip-thumbnail");
-  const skipUpload = args.includes("--skip-upload");
-
-  console.log(`\n======================================================`);
-  console.log(`📖 Zayn Storybook Daily Ingestion & Plate Engine`);
-  console.log(`======================================================`);
-
-  const poolPath = path.resolve("./config/curated-books.json");
-  if (!existsSync(poolPath)) {
-    throw new Error(`Curated pool file not found at ${poolPath}`);
-  }
-
-  const curatedPool: CuratedBook[] = JSON.parse(await fs.readFile(poolPath, "utf-8"));
-  console.log(`📚 Curated Ingestion Pool: ${curatedPool.length} authentic titles available.`);
-
-  const r2Slugs = await getExistingR2Stories();
-  console.log(`☁️  Cloudflare R2 Catalog : ${r2Slugs.size} existing stories found.`);
-
-  let targetBook: CuratedBook | undefined = undefined;
-
-  if (requestedSlug) {
-    targetBook = curatedPool.find((b) => b.slug === requestedSlug);
-    if (!targetBook) {
-      throw new Error(`Requested book slug "${requestedSlug}" not found in config/curated-books.json!`);
-    }
-  } else if (autoNext) {
-    targetBook = curatedPool.find((b) => !r2Slugs.has(b.slug));
-    if (!targetBook) {
-      console.log(`\n🎉 All ${curatedPool.length} books in the curated pool are already ingested in Cloudflare R2!`);
-      console.log(`   Zero action needed today. Exiting cleanly.`);
-      process.exit(0);
-    }
-  } else {
-    console.log(`
-Usage:
-  npx tsx scripts/ingest-story.ts --next                     Auto-ingest the next un-ingested story from curated pool
-  npx tsx scripts/ingest-story.ts --book <slug>             Ingest a specific curated story
-  npx tsx scripts/ingest-story.ts --next --dry-run          Preview what will be ingested without touching storage
-
-Options:
-  --force             Re-download and re-process even if story already exists
-  --skip-plates       Skip Swift Apple Vision plate extraction and inpainting
-  --skip-audio        Skip Edge TTS voice synthesis
-  --skip-thumbnail    Skip Remotion thumbnail rendering
-  --skip-upload       Process locally without pushing to Cloudflare R2
-    `);
-    process.exit(0);
-  }
-
+async function processSingleStory(targetBook: CuratedBook, options: IngestOptions): Promise<void> {
   const { slug } = targetBook;
-  console.log(`\n🎯 Selected Target Story: "${targetBook.title}" (${slug})`);
+  console.log(`\n======================================================`);
+  console.log(`🎯 Processing Story: "${targetBook.title}" (${slug})`);
   console.log(`   Author      : ${targetBook.author}`);
   console.log(`   Illustrator : ${targetBook.illustrator}`);
   console.log(`   Publisher   : ${targetBook.publisher} (${targetBook.license})`);
   console.log(`   PDF Source  : ${targetBook.pdfUrl}`);
-
-  if (dryRun) {
-    console.log(`\n[DRY RUN] Ingestion plan verified. Target "${slug}" is ready for processing.`);
-    process.exit(0);
-  }
+  console.log(`======================================================`);
 
   const storyDir = path.resolve(`./stories/${slug}`);
   const rawDir = path.join(storyDir, "raw");
@@ -230,7 +175,7 @@ Options:
   await fs.mkdir(path.join(storyDir, "exports/en"), { recursive: true });
 
   // 2. Download authentic open-access source PDF
-  if (!existsSync(pdfPath) || force) {
+  if (!existsSync(pdfPath) || options.force) {
     await downloadFile(targetBook.pdfUrl, pdfPath);
   } else {
     console.log(`✔ Source PDF already present at ${pdfPath}`);
@@ -441,7 +386,7 @@ Options:
   console.log(`✔ Standard audio pack copied.`);
 
   // 5. Plate Extraction & Text Inpainting via Swift & Apple Vision OCR
-  if (!skipPlates) {
+  if (!options.skipPlates) {
     console.log(`\n🎨 Executing Apple Vision OCR Plate Inpainting & Widescreen Engine...`);
     execSync(`swift scripts/prepare-plates.swift --book ${slug}`, {
       stdio: "inherit",
@@ -451,7 +396,7 @@ Options:
   }
 
   // 6. Neural Voice Synthesis (Bahasa Indonesia & English)
-  if (!skipAudio) {
+  if (!options.skipAudio) {
     console.log(`\n🎙️ Synthesizing Neural Audio & Timed Subtitles (ID & EN)...`);
     execSync(`npx tsx scripts/synthesize-story-audio.ts --book ${slug} --lang all`, {
       stdio: "inherit",
@@ -461,7 +406,7 @@ Options:
   }
 
   // 7. Render High-CTR Thumbnails via Remotion
-  if (!skipThumbnail) {
+  if (!options.skipThumbnail) {
     console.log(`\n🖼️ Rendering High-CTR Multi-Platform Thumbnails...`);
     execSync(`npx tsx scripts/render-thumbnail.ts --book ${slug} --variant all`, {
       stdio: "inherit",
@@ -471,9 +416,9 @@ Options:
   }
 
   // 8. Upload Assets & Manifest to Cloudflare R2
-  if (!skipUpload) {
+  if (!options.skipUpload) {
     console.log(`\n☁️  Uploading Story Package to Cloudflare R2 (zayn-storybook)...`);
-    await pushStory(slug, { force });
+    await pushStory(slug, { force: options.force });
   } else {
     console.log(`⏩ Skipping Cloudflare R2 push (--skip-upload).`);
   }
@@ -485,13 +430,128 @@ Options:
     console.log(`✔ Purged intermediate extraction scraps: ${rawDir}`);
   }
 
+  console.log(`✔ Finished processing [${slug}] successfully!`);
+}
+
+/**
+ * Main automated storybook ingestion engine supporting single, next, and batch processing.
+ */
+async function main() {
+  const args = process.argv.slice(2);
+  const getArg = (flag: string) => {
+    const idx = args.indexOf(flag);
+    return idx !== -1 ? args[idx + 1] : undefined;
+  };
+
+  const requestedSlug = getArg("--book") || (args[0] && !args[0].startsWith("--") ? args[0] : undefined);
+  const autoNext = args.includes("--next");
+  const allFlag = args.includes("--all");
+  const limitArg = getArg("--limit") || getArg("--batch");
+  const force = args.includes("--force");
+  const dryRun = args.includes("--dry-run");
+  const skipPlates = args.includes("--skip-plates");
+  const skipAudio = args.includes("--skip-audio");
+  const skipThumbnail = args.includes("--skip-thumbnail");
+  const skipUpload = args.includes("--skip-upload");
+
   console.log(`\n======================================================`);
-  console.log(`🎉 STORYBOOK INGESTION COMPLETE & READY FOR BROADCAST!`);
-  console.log(`   Slug        : ${slug}`);
-  console.log(`   Title (ID)  : ${targetBook.title}`);
-  console.log(`   Title (EN)  : ${targetBook.originalTitle}`);
-  console.log(`   Scenes      : ${scenesPayload.length}`);
-  console.log(`   R2 Bucket   : zayn-storybook/stories/${slug}/`);
+  console.log(`📖 Zayn Storybook Batch & Daily Ingestion Engine`);
+  console.log(`======================================================`);
+
+  const poolPath = path.resolve("./config/curated-books.json");
+  if (!existsSync(poolPath)) {
+    throw new Error(`Curated pool file not found at ${poolPath}`);
+  }
+
+  const curatedPool: CuratedBook[] = JSON.parse(await fs.readFile(poolPath, "utf-8"));
+  console.log(`📚 Curated Ingestion Pool: ${curatedPool.length} authentic titles available.`);
+
+  const r2Slugs = await getExistingR2Stories();
+  console.log(`☁️  Cloudflare R2 Catalog : ${r2Slugs.size} existing stories found.`);
+
+  const booksToProcess: CuratedBook[] = [];
+
+  if (requestedSlug) {
+    const found = curatedPool.find((b) => b.slug === requestedSlug);
+    if (!found) {
+      throw new Error(`Requested book slug "${requestedSlug}" not found in config/curated-books.json!`);
+    }
+    booksToProcess.push(found);
+  } else if (allFlag || autoNext || limitArg) {
+    const uningested = curatedPool.filter((b) => !r2Slugs.has(b.slug));
+    if (uningested.length === 0) {
+      console.log(`\n🎉 All ${curatedPool.length} books in the curated pool are already ingested in Cloudflare R2!`);
+      console.log(`   Buffer is 100% full. Exiting cleanly.`);
+      process.exit(0);
+    }
+
+    let count = 1;
+    if (allFlag) {
+      count = uningested.length;
+    } else if (limitArg) {
+      count = Math.max(1, parseInt(limitArg, 10));
+    }
+
+    booksToProcess.push(...uningested.slice(0, count));
+  } else {
+    console.log(`
+Usage:
+  npx tsx scripts/ingest-story.ts --next                     Auto-ingest the next 1 un-ingested story from curated pool
+  npx tsx scripts/ingest-story.ts --limit <N>                Batch ingest the next N stories (e.g. --limit 5)
+  npx tsx scripts/ingest-story.ts --all                      Batch ingest ALL remaining stories in the pool
+  npx tsx scripts/ingest-story.ts --book <slug>             Ingest a specific curated story
+  npx tsx scripts/ingest-story.ts --limit <N> --dry-run     Preview queue without executing changes
+
+Options:
+  --force             Re-download and re-process even if story already exists
+  --skip-plates       Skip Swift Apple Vision plate extraction and inpainting
+  --skip-audio        Skip Edge TTS voice synthesis
+  --skip-thumbnail    Skip Remotion thumbnail rendering
+  --skip-upload       Process locally without pushing to Cloudflare R2
+    `);
+    process.exit(0);
+  }
+
+  console.log(`\n📋 Target Ingestion Queue (${booksToProcess.length} books):`);
+  booksToProcess.forEach((b, idx) => {
+    console.log(`   ${idx + 1}. [${b.slug}] "${b.title}" (${b.author})`);
+  });
+
+  if (dryRun) {
+    console.log(`\n[DRY RUN] All ${booksToProcess.length} books verified in plan. No changes made.`);
+    process.exit(0);
+  }
+
+  const options: IngestOptions = {
+    force,
+    dryRun,
+    skipPlates,
+    skipAudio,
+    skipThumbnail,
+    skipUpload,
+  };
+
+  const startTime = Date.now();
+  let successCount = 0;
+
+  for (let i = 0; i < booksToProcess.length; i++) {
+    const book = booksToProcess[i];
+    console.log(`\n▶️  [${i + 1}/${booksToProcess.length}] Processing "${book.title}"...`);
+    try {
+      await processSingleStory(book, options);
+      successCount++;
+    } catch (err: any) {
+      console.error(`\n❌ Error processing [${book.slug}]:`, err.message);
+      console.error(`   Continuing with remaining books in queue...`);
+    }
+  }
+
+  const totalMin = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
+  console.log(`\n======================================================`);
+  console.log(`🎉 BATCH INGESTION RUN FINISHED!`);
+  console.log(`   Processed : ${successCount}/${booksToProcess.length} books succeeded`);
+  console.log(`   Duration  : ${totalMin} minutes`);
+  console.log(`   Buffer in R2 is now expanded and ready for broadcast.`);
   console.log(`======================================================\n`);
 }
 

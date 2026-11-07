@@ -19,6 +19,8 @@
     "cleanup": "tsx scripts/cleanup-storage.ts",
     "story:ingest": "tsx scripts/ingest-story.ts",
     "story:ingest:next": "tsx scripts/ingest-story.ts --next",
+    "story:ingest:batch": "tsx scripts/ingest-story.ts --limit",
+    "story:ingest:all": "tsx scripts/ingest-story.ts --all",
     "story:push": "tsx scripts/manage-story-storage.ts push",
     "story:pull": "tsx scripts/manage-story-storage.ts pull",
     "story:push-all": "tsx scripts/manage-story-storage.ts push-all",
