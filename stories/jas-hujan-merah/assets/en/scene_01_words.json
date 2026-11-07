@@ -1,0 +1,236 @@
+{
+  "words": [
+    {
+      "word": "On",
+      "start": 0.1,
+      "end": 0.32,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Sunday,",
+      "start": 0.33,
+      "end": 0.89,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Manu's",
+      "start": 1.15,
+      "end": 1.55,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "parents",
+      "start": 1.57,
+      "end": 2.05,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "got",
+      "start": 2.06,
+      "end": 2.3,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "him",
+      "start": 2.31,
+      "end": 2.45,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "a",
+      "start": 2.47,
+      "end": 2.51,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "shiny",
+      "start": 2.53,
+      "end": 3.01,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "red",
+      "start": 3.02,
+      "end": 3.28,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "raincoat.",
+      "start": 3.29,
+      "end": 3.91,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Ma,",
+      "start": 4.75,
+      "end": 5.07,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "may",
+      "start": 5.32,
+      "end": 5.46,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "I",
+      "start": 5.47,
+      "end": 5.61,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "wear",
+      "start": 5.62,
+      "end": 5.84,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "it",
+      "start": 5.85,
+      "end": 5.95,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "now?",
+      "start": 5.96,
+      "end": 6.29,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "asked",
+      "start": 7.12,
+      "end": 7.52,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Manu.",
+      "start": 7.54,
+      "end": 8.02,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "No,",
+      "start": 8.86,
+      "end": 9.24,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "my",
+      "start": 9.45,
+      "end": 9.62,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "dear,",
+      "start": 9.64,
+      "end": 10.01,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "the",
+      "start": 10.29,
+      "end": 10.41,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "rains",
+      "start": 10.42,
+      "end": 10.84,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "are",
+      "start": 10.85,
+      "end": 11,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "not",
+      "start": 11.01,
+      "end": 11.29,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "here",
+      "start": 11.3,
+      "end": 11.6,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "yet,",
+      "start": 11.61,
+      "end": 11.88,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "said",
+      "start": 12.16,
+      "end": 12.46,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Ma.",
+      "start": 12.48,
+      "end": 12.78,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

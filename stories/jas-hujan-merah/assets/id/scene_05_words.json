@@ -1,0 +1,172 @@
+{
+  "words": [
+    {
+      "word": "Hari",
+      "start": 0.1,
+      "end": 0.48,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Kamis,",
+      "start": 0.48,
+      "end": 1.11,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Manu",
+      "start": 1.42,
+      "end": 1.75,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "pergi",
+      "start": 1.75,
+      "end": 2.04,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "piknik",
+      "start": 2.04,
+      "end": 2.56,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "ke",
+      "start": 2.56,
+      "end": 2.66,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "taman.",
+      "start": 2.66,
+      "end": 3.24,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Bagaimana",
+      "start": 4.04,
+      "end": 4.72,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "kalau",
+      "start": 4.72,
+      "end": 5.05,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "turun",
+      "start": 5.05,
+      "end": 5.41,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "hujan,",
+      "start": 5.41,
+      "end": 5.97,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Bu?",
+      "start": 6.26,
+      "end": 6.63,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Tidak,",
+      "start": 7.43,
+      "end": 7.94,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "sayang.",
+      "start": 8.22,
+      "end": 8.99,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Hari",
+      "start": 9.79,
+      "end": 10.18,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "ini",
+      "start": 10.18,
+      "end": 10.5,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "tidak",
+      "start": 10.5,
+      "end": 10.79,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "akan",
+      "start": 10.79,
+      "end": 11.05,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "hujan,",
+      "start": 11.05,
+      "end": 11.62,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "jawab",
+      "start": 11.88,
+      "end": 12.32,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Ibu.",
+      "start": 12.32,
+      "end": 12.91,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

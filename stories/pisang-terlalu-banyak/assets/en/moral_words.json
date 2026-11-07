@@ -1,0 +1,268 @@
+{
+  "words": [
+    {
+      "word": "The",
+      "start": 0.1,
+      "end": 0.24,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "moral",
+      "start": 0.25,
+      "end": 0.69,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "of",
+      "start": 0.7,
+      "end": 0.84,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "the",
+      "start": 0.85,
+      "end": 0.94,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "story:",
+      "start": 0.95,
+      "end": 1.44,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "when",
+      "start": 1.76,
+      "end": 1.99,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "faced",
+      "start": 2,
+      "end": 2.44,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "with",
+      "start": 2.45,
+      "end": 2.6,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "a",
+      "start": 2.61,
+      "end": 2.69,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "difficult",
+      "start": 2.7,
+      "end": 3.2,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "challenge,",
+      "start": 3.22,
+      "end": 3.82,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "never",
+      "start": 4.03,
+      "end": 4.41,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "give",
+      "start": 4.42,
+      "end": 4.63,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "up!",
+      "start": 4.65,
+      "end": 4.92,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "With",
+      "start": 5.75,
+      "end": 5.99,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "creative",
+      "start": 6,
+      "end": 6.54,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "thinking",
+      "start": 6.55,
+      "end": 7.04,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "and",
+      "start": 7.05,
+      "end": 7.18,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "sharing,",
+      "start": 7.19,
+      "end": 7.71,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "we",
+      "start": 8.01,
+      "end": 8.13,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "can",
+      "start": 8.14,
+      "end": 8.33,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "turn",
+      "start": 8.35,
+      "end": 8.68,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "any",
+      "start": 8.69,
+      "end": 8.92,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "problem",
+      "start": 8.93,
+      "end": 9.42,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "into",
+      "start": 9.43,
+      "end": 9.73,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "a",
+      "start": 9.74,
+      "end": 9.81,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "sweet",
+      "start": 9.82,
+      "end": 10.17,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "success",
+      "start": 10.18,
+      "end": 10.77,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "that",
+      "start": 10.79,
+      "end": 11.01,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "brings",
+      "start": 11.02,
+      "end": 11.39,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "joy",
+      "start": 11.4,
+      "end": 11.7,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "to",
+      "start": 11.71,
+      "end": 11.86,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    },
+    {
+      "word": "everyone!",
+      "start": 11.87,
+      "end": 12.52,
+      "speaker": "moral of story",
+      "speakerName": "Moral of Story",
+      "speakerColor": "#F59E0B"
+    }
+  ]
+}

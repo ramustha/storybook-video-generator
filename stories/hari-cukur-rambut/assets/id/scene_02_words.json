@@ -1,0 +1,132 @@
+{
+  "words": [
+    {
+      "word": "Tetapi",
+      "start": 0.1,
+      "end": 0.58,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "tukang",
+      "start": 0.58,
+      "end": 0.96,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "cukur",
+      "start": 0.96,
+      "end": 1.29,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "berkata,",
+      "start": 1.29,
+      "end": 1.96,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "\"Aduh,",
+      "start": 2.59,
+      "end": 3.1,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "hari",
+      "start": 3.39,
+      "end": 3.68,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "ini",
+      "start": 3.68,
+      "end": 3.98,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "aku",
+      "start": 3.98,
+      "end": 4.32,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "tidak",
+      "start": 4.32,
+      "end": 4.6,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "punya",
+      "start": 4.6,
+      "end": 4.83,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "waktu",
+      "start": 4.83,
+      "end": 5.23,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "untuk",
+      "start": 5.23,
+      "end": 5.63,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "memotong",
+      "start": 5.63,
+      "end": 6.01,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "rambut",
+      "start": 6.01,
+      "end": 6.37,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "sepanjang",
+      "start": 6.37,
+      "end": 6.85,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "itu!\"",
+      "start": 6.85,
+      "end": 7.29,
+      "speaker": "barber",
+      "speakerName": "Tukang Cukur",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

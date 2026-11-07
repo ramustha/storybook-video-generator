@@ -1,0 +1,45 @@
+{
+  "characters": [
+    {
+      "id": "sringeri-srinivas",
+      "name": "Pak Sringeri Srinivas",
+      "englishName": "Sringeri Srinivas",
+      "role": "Gentle & Clever Village Farmer",
+      "physicalTraits": {
+        "hair": "Shaved/bald head with traditional black tuft, prominent arched mustache",
+        "clothing": "White cotton shirt, traditional checked lungi/dhoti",
+        "accessories": "Sometimes carries umbrella or rides bicycle",
+        "demeanor": "Expressive, funny, kind-hearted, creative problem solver"
+      },
+      "voice": {
+        "id": "id-ID-ArdiNeural",
+        "en": "en-US-AnaNeural",
+        "color": "#FDE047",
+        "badge": "👨 Pak Srinivas"
+      }
+    },
+    {
+      "id": "narrator",
+      "name": "Zayn Storyteller",
+      "role": "Narrator / Pencerita Anak Ceria",
+      "voice": {
+        "id": "id-ID-GadisNeural",
+        "en": "en-US-AnaNeural",
+        "color": "#38BDF8",
+        "badge": "📖 Zayn"
+      }
+    },
+    {
+      "id": "shivanna",
+      "name": "Pak Shivanna",
+      "englishName": "Neighbour Shivanna",
+      "role": "Neighbour in Need of Bananas",
+      "voice": {
+        "id": "id-ID-ArdiNeural",
+        "en": "en-US-GuyNeural",
+        "color": "#F97316",
+        "badge": "👨 Shivanna"
+      }
+    }
+  ]
+}

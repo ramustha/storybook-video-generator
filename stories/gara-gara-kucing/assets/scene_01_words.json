@@ -1,0 +1,84 @@
+{
+  "words": [
+    {
+      "word": "Mengapa",
+      "start": 0.1,
+      "end": 0.59,
+      "speaker": "guru",
+      "speakerName": "Ibu Guru",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "kamu",
+      "start": 0.59,
+      "end": 0.98,
+      "speaker": "guru",
+      "speakerName": "Ibu Guru",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "tidak",
+      "start": 0.98,
+      "end": 1.35,
+      "speaker": "guru",
+      "speakerName": "Ibu Guru",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "mengerjakan",
+      "start": 1.35,
+      "end": 1.93,
+      "speaker": "guru",
+      "speakerName": "Ibu Guru",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "tugas?",
+      "start": 1.93,
+      "end": 2.55,
+      "speaker": "guru",
+      "speakerName": "Ibu Guru",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Bu,",
+      "start": 3.35,
+      "end": 3.8,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "ini",
+      "start": 4.23,
+      "end": 4.56,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "semua",
+      "start": 4.56,
+      "end": 5.01,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "gara-gara",
+      "start": 5.01,
+      "end": 5.49,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "kucing!",
+      "start": 5.49,
+      "end": 6.15,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    }
+  ]
+}

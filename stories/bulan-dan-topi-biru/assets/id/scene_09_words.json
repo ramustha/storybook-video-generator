@@ -1,0 +1,204 @@
+{
+  "words": [
+    {
+      "word": "Malam",
+      "start": 0.1,
+      "end": 0.44,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "itu,",
+      "start": 0.44,
+      "end": 0.94,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "sang",
+      "start": 1.28,
+      "end": 1.59,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "Bulan",
+      "start": 1.59,
+      "end": 1.91,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "mengenakan",
+      "start": 1.91,
+      "end": 2.43,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "topi",
+      "start": 2.43,
+      "end": 2.74,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "birunya,",
+      "start": 2.74,
+      "end": 3.43,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "dan",
+      "start": 3.74,
+      "end": 3.96,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "aku",
+      "start": 3.96,
+      "end": 4.38,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "mengenakan",
+      "start": 4.38,
+      "end": 4.92,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "topi",
+      "start": 4.92,
+      "end": 5.29,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "merah",
+      "start": 5.29,
+      "end": 5.72,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "baruku.",
+      "start": 5.72,
+      "end": 6.37,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "Kami",
+      "start": 7.18,
+      "end": 7.57,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "berdua",
+      "start": 7.57,
+      "end": 7.96,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "tersenyum",
+      "start": 7.96,
+      "end": 8.51,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "riang",
+      "start": 8.51,
+      "end": 8.81,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "gembira",
+      "start": 8.81,
+      "end": 9.32,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "di",
+      "start": 9.32,
+      "end": 9.46,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "bawah",
+      "start": 9.46,
+      "end": 9.81,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "langit",
+      "start": 9.81,
+      "end": 10.17,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "malam",
+      "start": 10.17,
+      "end": 10.52,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "yang",
+      "start": 10.52,
+      "end": 10.65,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "bertabur",
+      "start": 10.65,
+      "end": 11.08,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "bintang!",
+      "start": 11.08,
+      "end": 11.76,
+      "speaker": "child_protagonist",
+      "speakerName": "Aku",
+      "speakerColor": "#FACC15"
+    }
+  ]
+}

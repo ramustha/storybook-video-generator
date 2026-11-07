@@ -1,0 +1,84 @@
+{
+  "words": [
+    {
+      "word": "In",
+      "start": 0.1,
+      "end": 0.26,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "a",
+      "start": 0.27,
+      "end": 0.34,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "grand",
+      "start": 0.35,
+      "end": 0.78,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "palace,",
+      "start": 0.79,
+      "end": 1.36,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "there",
+      "start": 1.64,
+      "end": 1.86,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "lived",
+      "start": 1.87,
+      "end": 2.16,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "a",
+      "start": 2.17,
+      "end": 2.22,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "very",
+      "start": 2.23,
+      "end": 2.65,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "fat",
+      "start": 2.66,
+      "end": 3.01,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "king.",
+      "start": 3.02,
+      "end": 3.42,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

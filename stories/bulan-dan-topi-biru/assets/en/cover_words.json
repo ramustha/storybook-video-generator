@@ -1,0 +1,156 @@
+{
+  "words": [
+    {
+      "word": "Zayn",
+      "start": 0.1,
+      "end": 0.46,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Storybook",
+      "start": 0.47,
+      "end": 1.09,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "presents:",
+      "start": 1.1,
+      "end": 1.71,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "The",
+      "start": 1.99,
+      "end": 2.1,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Moon",
+      "start": 2.11,
+      "end": 2.49,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 2.5,
+      "end": 2.67,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 2.68,
+      "end": 2.77,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Cap!",
+      "start": 2.78,
+      "end": 3.16,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "A",
+      "start": 3.97,
+      "end": 4.05,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "heartwarming",
+      "start": 4.06,
+      "end": 4.71,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "tale",
+      "start": 4.72,
+      "end": 5.09,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 5.1,
+      "end": 5.27,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Rohini",
+      "start": 5.28,
+      "end": 5.78,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Nilekani,",
+      "start": 5.79,
+      "end": 6.45,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "illustrated",
+      "start": 6.69,
+      "end": 7.36,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 7.37,
+      "end": 7.53,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Angie",
+      "start": 7.55,
+      "end": 8.06,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 8.07,
+      "end": 8.28,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Upesh.",
+      "start": 8.29,
+      "end": 8.88,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

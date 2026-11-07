@@ -1,0 +1,124 @@
+{
+  "words": [
+    {
+      "word": "Kalau",
+      "start": 0.1,
+      "end": 0.45,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "bapak",
+      "start": 0.45,
+      "end": 0.8,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "tidak",
+      "start": 0.8,
+      "end": 1.15,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "membeli",
+      "start": 1.15,
+      "end": 1.45,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "roti",
+      "start": 1.45,
+      "end": 1.77,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "di",
+      "start": 1.77,
+      "end": 1.86,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "pasar,",
+      "start": 1.86,
+      "end": 2.4,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "anjing",
+      "start": 2.73,
+      "end": 3.06,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "itu",
+      "start": 3.06,
+      "end": 3.39,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "tidak",
+      "start": 3.39,
+      "end": 3.68,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "akan",
+      "start": 3.68,
+      "end": 3.99,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "mengikuti",
+      "start": 3.99,
+      "end": 4.54,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "bapak",
+      "start": 4.54,
+      "end": 4.98,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "ke",
+      "start": 4.98,
+      "end": 5.08,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "rumah.",
+      "start": 5.08,
+      "end": 5.59,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "words": [
+    {
+      "word": "What",
+      "start": 0.1,
+      "end": 0.33,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "a",
+      "start": 0.34,
+      "end": 0.4,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sweet",
+      "start": 0.41,
+      "end": 0.81,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 0.83,
+      "end": 0.96,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "comforting",
+      "start": 0.98,
+      "end": 1.49,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "bedtime",
+      "start": 1.5,
+      "end": 2.03,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "story!",
+      "start": 2.04,
+      "end": 2.6,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Click",
+      "start": 3.39,
+      "end": 3.68,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 3.69,
+      "end": 3.78,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "video",
+      "start": 3.8,
+      "end": 4.24,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "on",
+      "start": 4.25,
+      "end": 4.39,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "your",
+      "start": 4.4,
+      "end": 4.55,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "screen",
+      "start": 4.56,
+      "end": 5.01,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "to",
+      "start": 5.02,
+      "end": 5.15,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "enjoy",
+      "start": 5.16,
+      "end": 5.58,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "another",
+      "start": 5.59,
+      "end": 5.97,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "magical",
+      "start": 5.98,
+      "end": 6.49,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "adventure,",
+      "start": 6.5,
+      "end": 7.11,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 7.4,
+      "end": 7.51,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "don't",
+      "start": 7.52,
+      "end": 7.78,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "forget",
+      "start": 7.79,
+      "end": 8.18,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "to",
+      "start": 8.19,
+      "end": 8.3,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "hit",
+      "start": 8.31,
+      "end": 8.54,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Subscribe",
+      "start": 8.55,
+      "end": 9.2,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "so",
+      "start": 9.21,
+      "end": 9.37,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "we",
+      "start": 9.39,
+      "end": 9.5,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "can",
+      "start": 9.51,
+      "end": 9.69,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "keep",
+      "start": 9.7,
+      "end": 9.95,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "reading",
+      "start": 9.97,
+      "end": 10.31,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "together!",
+      "start": 10.32,
+      "end": 10.86,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "See",
+      "start": 11.66,
+      "end": 11.93,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "you",
+      "start": 11.94,
+      "end": 12.07,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "next",
+      "start": 12.08,
+      "end": 12.41,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "time!",
+      "start": 12.42,
+      "end": 12.81,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Bye-bye!",
+      "start": 13.61,
+      "end": 14.16,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

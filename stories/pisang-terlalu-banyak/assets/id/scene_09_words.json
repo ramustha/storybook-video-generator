@@ -1,0 +1,284 @@
+{
+  "words": [
+    {
+      "word": "Suatu",
+      "start": 0.1,
+      "end": 0.62,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "hari,",
+      "start": 0.62,
+      "end": 1.14,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "tetangga",
+      "start": 1.46,
+      "end": 1.9,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Shivanna",
+      "start": 1.9,
+      "end": 2.45,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "mengadakan",
+      "start": 2.45,
+      "end": 3,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "upacara",
+      "start": 3,
+      "end": 3.57,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "syukuran",
+      "start": 3.57,
+      "end": 4.04,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "besar",
+      "start": 4.04,
+      "end": 4.44,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "di",
+      "start": 4.44,
+      "end": 4.6,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "desa.",
+      "start": 4.6,
+      "end": 5.16,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Sang",
+      "start": 5.95,
+      "end": 6.32,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "pendeta",
+      "start": 6.32,
+      "end": 6.69,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "berkata:",
+      "start": 6.69,
+      "end": 7.36,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "'Kita",
+      "start": 7.82,
+      "end": 8.12,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "membutuhkan",
+      "start": 8.12,
+      "end": 8.69,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "108",
+      "start": 8.69,
+      "end": 9.63,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "buah",
+      "start": 9.63,
+      "end": 9.93,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "pisang",
+      "start": 9.93,
+      "end": 10.32,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "ranum!'",
+      "start": 10.32,
+      "end": 10.86,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Pak",
+      "start": 11.95,
+      "end": 12.16,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Shivanna",
+      "start": 12.16,
+      "end": 12.59,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "panik",
+      "start": 12.59,
+      "end": 13.06,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "dan",
+      "start": 13.06,
+      "end": 13.22,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "berlari",
+      "start": 13.22,
+      "end": 13.63,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "ke",
+      "start": 13.63,
+      "end": 13.76,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "rumah",
+      "start": 13.76,
+      "end": 14.06,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Pak",
+      "start": 14.06,
+      "end": 14.25,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Srinivas:",
+      "start": 14.25,
+      "end": 15.09,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "'Tolong",
+      "start": 15.4,
+      "end": 15.71,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "bantu",
+      "start": 15.71,
+      "end": 16.05,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "aku!",
+      "start": 16.05,
+      "end": 16.58,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "Aku",
+      "start": 17.37,
+      "end": 17.75,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "butuh",
+      "start": 17.75,
+      "end": 18.09,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "108",
+      "start": 18.09,
+      "end": 19.08,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "pisang!'",
+      "start": 19.08,
+      "end": 19.67,
+      "speaker": "shivanna",
+      "speakerName": "Shivanna",
+      "speakerColor": "#F97316"
+    }
+  ]
+}

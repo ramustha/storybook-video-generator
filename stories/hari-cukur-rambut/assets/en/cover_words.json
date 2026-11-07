@@ -1,0 +1,92 @@
+{
+  "words": [
+    {
+      "word": "Annual",
+      "start": 0.1,
+      "end": 0.6,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Haircut",
+      "start": 0.61,
+      "end": 1.11,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Day!",
+      "start": 1.12,
+      "end": 1.45,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Written",
+      "start": 2.28,
+      "end": 2.63,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 2.65,
+      "end": 2.78,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Noni,",
+      "start": 2.79,
+      "end": 3.31,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "illustrated",
+      "start": 3.58,
+      "end": 4.3,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 4.31,
+      "end": 4.49,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Angie",
+      "start": 4.5,
+      "end": 5.04,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 5.05,
+      "end": 5.27,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Upesh.",
+      "start": 5.28,
+      "end": 5.9,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "words": [
+    {
+      "word": "Too",
+      "start": 0.1,
+      "end": 0.32,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Much",
+      "start": 0.33,
+      "end": 0.62,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Noise!",
+      "start": 0.63,
+      "end": 1.14,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Written",
+      "start": 1.93,
+      "end": 2.27,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 2.28,
+      "end": 2.44,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Rohini",
+      "start": 2.45,
+      "end": 2.96,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Nilekani,",
+      "start": 2.97,
+      "end": 3.65,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "illustrated",
+      "start": 3.89,
+      "end": 4.57,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 4.58,
+      "end": 4.75,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Angie",
+      "start": 4.76,
+      "end": 5.27,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 5.28,
+      "end": 5.5,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Upesh.",
+      "start": 5.51,
+      "end": 6.1,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

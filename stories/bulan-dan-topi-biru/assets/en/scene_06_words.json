@@ -1,0 +1,220 @@
+{
+  "words": [
+    {
+      "word": "Late",
+      "start": 0.1,
+      "end": 0.42,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "that",
+      "start": 0.43,
+      "end": 0.66,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "night,",
+      "start": 0.68,
+      "end": 1.01,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "the",
+      "start": 1.28,
+      "end": 1.41,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "big",
+      "start": 1.42,
+      "end": 1.7,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "round",
+      "start": 1.71,
+      "end": 2.09,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "moon",
+      "start": 2.11,
+      "end": 2.45,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "came",
+      "start": 2.47,
+      "end": 2.73,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "up",
+      "start": 2.74,
+      "end": 2.92,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "into",
+      "start": 2.93,
+      "end": 3.17,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "the",
+      "start": 3.19,
+      "end": 3.28,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "quiet",
+      "start": 3.3,
+      "end": 3.76,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "sky.",
+      "start": 3.78,
+      "end": 4.23,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "It",
+      "start": 5.06,
+      "end": 5.25,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "looked",
+      "start": 5.26,
+      "end": 5.55,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "down",
+      "start": 5.56,
+      "end": 5.89,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "gently",
+      "start": 5.9,
+      "end": 6.38,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "at",
+      "start": 6.39,
+      "end": 6.56,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "my",
+      "start": 6.57,
+      "end": 6.74,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "blue",
+      "start": 6.75,
+      "end": 7.06,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "cap",
+      "start": 7.07,
+      "end": 7.38,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "resting",
+      "start": 7.39,
+      "end": 7.91,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "in",
+      "start": 7.92,
+      "end": 8.03,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "the",
+      "start": 8.04,
+      "end": 8.15,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "old",
+      "start": 8.16,
+      "end": 8.46,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "tree",
+      "start": 8.47,
+      "end": 8.76,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "branches.",
+      "start": 8.77,
+      "end": 9.5,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    }
+  ]
+}

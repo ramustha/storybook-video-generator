@@ -1,0 +1,156 @@
+{
+  "words": [
+    {
+      "word": "Hooray,",
+      "start": 0.1,
+      "end": 0.57,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "it's",
+      "start": 0.86,
+      "end": 1.12,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "raining!",
+      "start": 1.13,
+      "end": 1.68,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Manu",
+      "start": 2.51,
+      "end": 2.96,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "ran",
+      "start": 2.97,
+      "end": 3.3,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "outside",
+      "start": 3.31,
+      "end": 3.86,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "dancing",
+      "start": 3.87,
+      "end": 4.42,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "in",
+      "start": 4.43,
+      "end": 4.55,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "the",
+      "start": 4.56,
+      "end": 4.66,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "rain.",
+      "start": 4.67,
+      "end": 5.1,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "But",
+      "start": 5.93,
+      "end": 6.14,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Manu...",
+      "start": 6.15,
+      "end": 6.61,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "you",
+      "start": 6.92,
+      "end": 7.05,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "forgot",
+      "start": 7.06,
+      "end": 7.51,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "to",
+      "start": 7.52,
+      "end": 7.66,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "wear",
+      "start": 7.67,
+      "end": 7.91,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "your",
+      "start": 7.92,
+      "end": 8.12,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "red",
+      "start": 8.13,
+      "end": 8.36,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "raincoat!",
+      "start": 8.37,
+      "end": 9,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

@@ -1,0 +1,388 @@
+{
+  "words": [
+    {
+      "word": "The",
+      "start": 0.1,
+      "end": 0.25,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "ribbit",
+      "start": 0.26,
+      "end": 0.76,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "ribbit",
+      "start": 0.77,
+      "end": 1.2,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "of",
+      "start": 1.21,
+      "end": 1.33,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 1.35,
+      "end": 1.43,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "frogs",
+      "start": 1.44,
+      "end": 1.93,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "was",
+      "start": 1.94,
+      "end": 2.11,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "noisy.",
+      "start": 2.12,
+      "end": 2.67,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "The",
+      "start": 3.46,
+      "end": 3.6,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "cicadas",
+      "start": 3.61,
+      "end": 4.25,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 4.26,
+      "end": 4.43,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "their",
+      "start": 4.44,
+      "end": 4.62,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "kirkk",
+      "start": 4.63,
+      "end": 4.98,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "kirkk",
+      "start": 4.99,
+      "end": 5.35,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "were",
+      "start": 5.36,
+      "end": 5.51,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "too",
+      "start": 5.52,
+      "end": 5.76,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "loud.",
+      "start": 5.78,
+      "end": 6.17,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Sringeri",
+      "start": 6.97,
+      "end": 7.58,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Srinivas",
+      "start": 7.59,
+      "end": 8.25,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "wanted",
+      "start": 8.26,
+      "end": 8.62,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 8.63,
+      "end": 8.7,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "hooting",
+      "start": 8.72,
+      "end": 9.09,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "owls",
+      "start": 9.1,
+      "end": 9.44,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "to",
+      "start": 9.46,
+      "end": 9.55,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "be",
+      "start": 9.56,
+      "end": 9.69,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sent",
+      "start": 9.7,
+      "end": 9.98,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "away.",
+      "start": 9.99,
+      "end": 10.37,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "He",
+      "start": 11.17,
+      "end": 11.34,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "was",
+      "start": 11.35,
+      "end": 11.55,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "angry",
+      "start": 11.56,
+      "end": 12.01,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "at",
+      "start": 12.03,
+      "end": 12.15,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 12.16,
+      "end": 12.25,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "koyals",
+      "start": 12.26,
+      "end": 12.79,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "for",
+      "start": 12.8,
+      "end": 12.97,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "screeching",
+      "start": 12.99,
+      "end": 13.53,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "loudly",
+      "start": 13.54,
+      "end": 14.04,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "at",
+      "start": 14.05,
+      "end": 14.22,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "four",
+      "start": 14.24,
+      "end": 14.57,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "in",
+      "start": 14.58,
+      "end": 14.72,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 14.73,
+      "end": 14.79,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "morning,",
+      "start": 14.8,
+      "end": 15.28,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 15.57,
+      "end": 15.68,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 15.69,
+      "end": 15.78,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "roosters,",
+      "start": 15.79,
+      "end": 16.44,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 16.7,
+      "end": 16.86,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "that",
+      "start": 16.88,
+      "end": 17.12,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "tiger's",
+      "start": 17.13,
+      "end": 17.63,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "roar!",
+      "start": 17.64,
+      "end": 18.03,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

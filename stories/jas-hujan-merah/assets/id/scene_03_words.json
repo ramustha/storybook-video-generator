@@ -1,0 +1,148 @@
+{
+  "words": [
+    {
+      "word": "Hari",
+      "start": 0.1,
+      "end": 0.53,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Selasa",
+      "start": 0.53,
+      "end": 0.96,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "langit",
+      "start": 0.96,
+      "end": 1.45,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "begitu",
+      "start": 1.45,
+      "end": 1.93,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "biru.",
+      "start": 1.93,
+      "end": 2.46,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Bu,",
+      "start": 3.25,
+      "end": 3.67,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "kapan",
+      "start": 4.09,
+      "end": 4.48,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "keinginanku",
+      "start": 4.48,
+      "end": 5.2,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "akan",
+      "start": 5.2,
+      "end": 5.59,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "terwujud?",
+      "start": 5.59,
+      "end": 6.18,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "tanya",
+      "start": 6.98,
+      "end": 7.45,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Manu.",
+      "start": 7.45,
+      "end": 8.07,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Belum",
+      "start": 8.87,
+      "end": 9.23,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "hari",
+      "start": 9.23,
+      "end": 9.47,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "ini,",
+      "start": 9.47,
+      "end": 9.95,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "sayang,",
+      "start": 10.28,
+      "end": 10.98,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "senyum",
+      "start": 11.24,
+      "end": 11.69,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Ibu.",
+      "start": 11.69,
+      "end": 12.23,
+      "speaker": "ibu",
+      "speakerName": "Ibu",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "words": [
+    {
+      "word": "One",
+      "start": 0.1,
+      "end": 0.42,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "sunny",
+      "start": 0.43,
+      "end": 0.82,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "afternoon,",
+      "start": 0.83,
+      "end": 1.49,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "all",
+      "start": 1.77,
+      "end": 1.99,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "of",
+      "start": 2,
+      "end": 2.12,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "us",
+      "start": 2.13,
+      "end": 2.33,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "went",
+      "start": 2.35,
+      "end": 2.6,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "on",
+      "start": 2.61,
+      "end": 2.77,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "an",
+      "start": 2.78,
+      "end": 2.87,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "exciting",
+      "start": 2.89,
+      "end": 3.45,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "family",
+      "start": 3.46,
+      "end": 3.9,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "trip",
+      "start": 3.91,
+      "end": 4.26,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "to",
+      "start": 4.27,
+      "end": 4.38,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "the",
+      "start": 4.39,
+      "end": 4.52,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "lively",
+      "start": 4.53,
+      "end": 4.99,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "village",
+      "start": 5,
+      "end": 5.45,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    },
+    {
+      "word": "fair!",
+      "start": 5.46,
+      "end": 5.87,
+      "speaker": "child_protagonist",
+      "speakerName": "Me",
+      "speakerColor": "#FACC15"
+    }
+  ]
+}

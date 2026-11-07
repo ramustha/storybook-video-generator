@@ -1,0 +1,68 @@
+{
+  "words": [
+    {
+      "word": "So",
+      "start": 0.1,
+      "end": 0.34,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "your",
+      "start": 0.36,
+      "end": 0.56,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "homework",
+      "start": 0.58,
+      "end": 1.08,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "was",
+      "start": 1.09,
+      "end": 1.26,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "eaten",
+      "start": 1.28,
+      "end": 1.61,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "by",
+      "start": 1.62,
+      "end": 1.83,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "a",
+      "start": 1.84,
+      "end": 1.92,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "dog?!",
+      "start": 1.94,
+      "end": 2.33,
+      "speaker": "guru",
+      "speakerName": "Teacher",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}
