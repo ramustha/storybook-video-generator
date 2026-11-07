@@ -146,7 +146,7 @@ export async function auditAndRefineStoryQuality(
     };
   }
 
-  console.log(`\n🤖 Calling Google AI (Gemini 2.0 Flash) for Story Quality & Moral Audit...`);
+  console.log(`\n🤖 Calling Google AI (Gemini Flash Latest) for Story Quality & Moral Audit...`);
   console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
 
   const promptContent = {
@@ -276,7 +276,7 @@ Your job is to audit incoming storybook manuscripts:
     },
   };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
     method: "POST",
@@ -292,7 +292,7 @@ Your job is to audit incoming storybook manuscripts:
   const data: any = await response.json();
   const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!rawText) {
-    throw new Error("Empty response received from Gemini 2.0 Flash.");
+    throw new Error("Empty response received from Gemini Flash.");
   }
 
   const parsed = JSON.parse(rawText);
@@ -300,7 +300,7 @@ Your job is to audit incoming storybook manuscripts:
   const result: QualityAuditResult = {
     bookSlug: targetBook.slug,
     evaluatedAt: new Date().toISOString(),
-    model: "gemini-2.0-flash",
+    model: "gemini-flash-latest",
     safetyAudit: parsed.safetyAudit,
     moralAudit: {
       coreValues: parsed.moralAudit.coreValues || [],
