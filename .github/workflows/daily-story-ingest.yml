@@ -2,8 +2,8 @@ name: Zayn Storybook Daily Ingestion & Plate Cleaning Engine
 
 on:
   schedule:
-    # 00:00 UTC = 07:00 WIB (Daily Morning Ingestion Slot before evening broadcast)
-    - cron: '0 0 * * *'
+    # 00:00 UTC = 07:00 WIB (Batch Buffer Ingestion on Monday & Thursday: 4 stories/batch to amortize macOS setup)
+    - cron: '0 0 * * 1,4'
   workflow_dispatch:
     inputs:
       book:
@@ -83,7 +83,10 @@ jobs:
           GROQ_API_KEY: ${{ secrets.PERSONAL_GROQ_API_KEY || secrets.GROQ_API_KEY }}
         run: |
           ARGS=""
-          if [ "${{ inputs.book }}" != "auto" ] && [ -n "${{ inputs.book }}" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # Scheduled bi-weekly runs ingest a batch of 4 stories into Cloudflare R2 buffer
+            ARGS="--limit 4"
+          elif [ "${{ inputs.book }}" != "auto" ] && [ -n "${{ inputs.book }}" ]; then
             ARGS="--book ${{ inputs.book }}"
           elif [ "${{ inputs.batch_size }}" = "all" ]; then
             ARGS="--all"
@@ -111,15 +114,16 @@ jobs:
       - name: 📊 Post Ingestion Job Summary
         if: always()
         run: |
-          echo "## 📖 Zayn Storybook Daily Ingestion Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 📖 Zayn Storybook Ingestion Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Details |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Workflow** | Daily Morning Ingestion & Plate Cleaning Engine |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Target Book** | ${{ inputs.book || 'auto (next from pool)' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **AI Editorial & Moral Gate** | Google Gemini (Primary) + Groq Llama 3.3 (Failover) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Workflow** | Bi-Weekly Batch Ingestion & Plate Cleaning Engine |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Trigger** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Target Book** | ${{ inputs.book || 'Batch Buffer (4 stories)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **AI Editorial & Moral Gate** | Google Gemini (Primary) + Groq (Failover) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Apple Vision Inpainting** | Swift VNRecognizeTextRequest + Ambient Fill |" >> $GITHUB_STEP_SUMMARY
           echo "| **Remote Storage** | Cloudflare R2 (\`zayn-storybook\`) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Disk Purge** | Intermediate raw PDF & scans purged |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✨ New authentic story is processed and ready in Cloudflare R2 for tonight's broadcast pipeline!" >> $GITHUB_STEP_SUMMARY
+          echo "✨ Authentic stories processed and stored in Cloudflare R2 ready for daily broadcast!" >> $GITHUB_STEP_SUMMARY

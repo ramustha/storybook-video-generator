@@ -138,6 +138,12 @@ async function main() {
         outputLocation,
         inputProps,
         concurrency: 2,
+        x264Preset: "veryfast",
+        crf: 20,
+        pixelFormat: "yuv420p",
+        chromiumOptions: {
+          enableMultiProcessOnLinux: true,
+        },
         onProgress: ({ renderedFrames, progress }) => {
           const percent = Math.floor(progress * 100);
           if (percent >= lastLoggedPercent + 10 || percent === 100) {
