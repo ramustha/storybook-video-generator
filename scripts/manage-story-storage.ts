@@ -29,7 +29,7 @@ interface FileToSync {
 /**
  * Loads R2 configuration from config/r2-config.json or environment variables.
  */
-async function loadR2Config(): Promise<R2Config> {
+export async function loadR2Config(): Promise<R2Config> {
   const configPath = path.resolve("./config/r2-config.json");
   let fileConfig: Partial<R2Config> = {};
 
@@ -237,7 +237,7 @@ async function collectLocalStoryFiles(
 /**
  * Pushes a book to R2.
  */
-async function pushStory(
+export async function pushStory(
   bookSlug: string,
   options: { force?: boolean; manifestOnly?: boolean; dryRun?: boolean } = {}
 ) {
@@ -345,7 +345,7 @@ async function pushStory(
 /**
  * Pulls a book from Cloudflare R2 to local disk.
  */
-async function pullStory(
+export async function pullStory(
   bookSlug: string,
   options: { force?: boolean; manifestOnly?: boolean; dryRun?: boolean } = {}
 ) {
@@ -461,7 +461,7 @@ async function pullStory(
 /**
  * Lists all stories stored in Cloudflare R2 with statistics.
  */
-async function listStories() {
+export async function listStories() {
   const r2 = await loadR2Config();
   const s3 = getS3Client(r2);
 
@@ -688,7 +688,9 @@ Options:
   }
 }
 
-main().catch((err) => {
-  console.error("\n❌ Error in storage management:", err);
-  process.exit(1);
-});
+if (process.argv[1]?.includes("manage-story-storage")) {
+  main().catch((err) => {
+    console.error("\n❌ Error in storage management:", err);
+    process.exit(1);
+  });
+}

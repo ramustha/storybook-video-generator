@@ -75,65 +75,83 @@ async function synthesizeLine(
   const speakerName = line.speakerCustomName || actor.defaultName[lang];
   const speakerColor = actor.signatureColor;
 
-  const tts = new MsEdgeTTS();
-  await tts.setMetadata(voiceConfig.voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
-    wordBoundaryEnabled: true,
-    sentenceBoundaryEnabled: true,
-  });
+  const cleanText = line.text
+    .replace(/&/g, lang === "en" ? "and" : "dan")
+    .replace(/[<>]/g, "")
+    .trim();
 
-  const lineTempDir = path.join(tempDir, `line_${lineIndex}`);
-  await fs.mkdir(lineTempDir, { recursive: true });
-
-  const { audioFilePath, metadataFilePath } = await tts.toFile(lineTempDir, line.text, {
-    pitch: voiceConfig.pitch,
-    rate: voiceConfig.rate,
-  });
-
-  const words: WordTimingItem[] = [];
-  let durationSec = 2.0;
-
-  if (metadataFilePath && existsSync(metadataFilePath)) {
+  let lastError: any = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const metaRaw = await fs.readFile(metadataFilePath, "utf-8");
-      const parsed = JSON.parse(metaRaw);
-      const metaItems: any[] = parsed.Metadata || [];
-      const wordItems = metaItems.filter((m) => m.Type === "WordBoundary");
-      const rawWords = wordItems.map((m) => m.Data?.text?.Text || "");
-      const punctuated = attachPunctuation(rawWords, line.text);
-
-      wordItems.forEach((m, idx) => {
-        const rawText = punctuated[idx] || m.Data?.text?.Text || "";
-        const offsetTicks = m.Data?.Offset || 0;
-        const durTicks = m.Data?.Duration || 0;
-        const startSec = parseFloat((offsetTicks / 10_000_000).toFixed(2));
-        const endSec = parseFloat(((offsetTicks + durTicks) / 10_000_000).toFixed(2));
-
-        words.push({
-          word: rawText,
-          start: startSec,
-          end: endSec,
-          speaker: actor.role,
-          speakerName,
-          speakerColor,
-        });
-
-        if (endSec > durationSec) {
-          durationSec = endSec;
-        }
+      const tts = new MsEdgeTTS();
+      await tts.setMetadata(voiceConfig.voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
+        wordBoundaryEnabled: true,
+        sentenceBoundaryEnabled: true,
       });
-    } catch (e) {
-      console.warn("Telemetry parse error:", e);
+
+      const lineTempDir = path.join(tempDir, `line_${lineIndex}_att${attempt}`);
+      await fs.mkdir(lineTempDir, { recursive: true });
+
+      const { audioFilePath, metadataFilePath } = await tts.toFile(lineTempDir, cleanText, {
+        pitch: voiceConfig.pitch,
+        rate: voiceConfig.rate,
+      });
+
+      const words: WordTimingItem[] = [];
+      let durationSec = 2.0;
+
+      if (metadataFilePath && existsSync(metadataFilePath)) {
+        try {
+          const metaRaw = await fs.readFile(metadataFilePath, "utf-8");
+          const parsed = JSON.parse(metaRaw);
+          const metaItems: any[] = parsed.Metadata || [];
+          const wordItems = metaItems.filter((m) => m.Type === "WordBoundary");
+          const rawWords = wordItems.map((m) => m.Data?.text?.Text || "");
+          const punctuated = attachPunctuation(rawWords, line.text);
+
+          wordItems.forEach((m, idx) => {
+            const rawText = punctuated[idx] || m.Data?.text?.Text || "";
+            const offsetTicks = m.Data?.Offset || 0;
+            const durTicks = m.Data?.Duration || 0;
+            const startSec = parseFloat((offsetTicks / 10_000_000).toFixed(2));
+            const endSec = parseFloat(((offsetTicks + durTicks) / 10_000_000).toFixed(2));
+
+            words.push({
+              word: rawText,
+              start: startSec,
+              end: endSec,
+              speaker: actor.role,
+              speakerName,
+              speakerColor,
+            });
+
+            if (endSec > durationSec) {
+              durationSec = endSec;
+            }
+          });
+        } catch (e) {
+          console.warn("Telemetry parse error:", e);
+        }
+      }
+
+      // Add 0.25s natural pause tail
+      durationSec = parseFloat((durationSec + 0.25).toFixed(2));
+
+      return {
+        audioPath: audioFilePath,
+        durationSec,
+        words,
+      };
+    } catch (err: any) {
+      lastError = err;
+      if (attempt < 3) {
+        console.warn(`   ⚠️ TTS attempt ${attempt}/3 failed: ${err.message}. Retrying in ${attempt}s...`);
+        await new Promise((r) => setTimeout(r, attempt * 1200));
+      }
     }
   }
 
-  // Add 0.25s natural pause tail
-  durationSec = parseFloat((durationSec + 0.25).toFixed(2));
-
-  return {
-    audioPath: audioFilePath,
-    durationSec,
-    words,
-  };
+  throw lastError;
 }
 
 /**

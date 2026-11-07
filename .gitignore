@@ -12,6 +12,7 @@ config/tiktok-browser-session/
 config/projects/
 config/*.json
 !config/.gitkeep
+!config/curated-books.json
 .env
 .env.local
 .env.*
