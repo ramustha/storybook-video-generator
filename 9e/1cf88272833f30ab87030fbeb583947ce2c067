@@ -1,0 +1,25 @@
+scripts/audit-story-quality.ts
+  698ac31901cd73e0 91-93,106,108-114,116-127,130-138,140-143,169-170,177-178,181-185,202-207,232,273,275,284,289,313-429,431-499,505-510,512-515,518-521,524
+.github/workflows/daily-story-ingest.yml
+  698ac31901cd73e0 83,120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "9e1cf88272833f30ab87030fbeb583947ce2c067",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 261,
+      "total_deletions": 136,
+      "accepted_lines": 261,
+      "overriden_lines": 0
+    }
+  }
+}
