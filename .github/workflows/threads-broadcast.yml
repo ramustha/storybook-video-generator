@@ -73,8 +73,16 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      - name: 📦 Install System Dependencies (Chromium & FFmpeg)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2t64 2>/dev/null || sudo apt-get install -y --no-install-recommends ffmpeg libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libasound2
+
       - name: 📦 Install NPM Dependencies
         run: npm ci
+
+      - name: 🌐 Ensure Remotion Headless Browser
+        run: npx --yes @remotion/cli browser ensure 2>/dev/null || true
 
       - name: 🔑 Configure Secrets & Credentials
         env:
@@ -128,6 +136,17 @@ jobs:
           }
           EOF
 
+      - name: ☁️ Pull Story Assets from Cloudflare R2
+        if: ${{ !(inputs.intro) }}
+        run: |
+          if [ "${{ inputs.book }}" = "all" ]; then
+            echo "Pulling all stories from Cloudflare R2..."
+            npx tsx scripts/manage-story-storage.ts pull-all
+          else
+            echo "Pulling ${{ inputs.book }} from Cloudflare R2..."
+            npx tsx scripts/manage-story-storage.ts pull "${{ inputs.book }}"
+          fi
+
       - name: 🔍 Verify Threads Connection
         run: npx tsx scripts/publish-threads.ts --verify-token
 
@@ -166,10 +185,19 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add stories/*/story.json 2>/dev/null || true
           if git diff --staged --quiet; then
-            echo "No story publication metadata changed."
+            echo "No story publication metadata changed in git."
           else
             git commit -m "chore(threads): update publication metadata [skip ci]"
             git push
+          fi
+
+      - name: ☁️ Sync Updated Story Manifests to Cloudflare R2
+        if: ${{ !(inputs.dry_run) && !(inputs.intro) }}
+        run: |
+          if [ "${{ inputs.book }}" = "all" ]; then
+            npx tsx scripts/manage-story-storage.ts push-all --manifest-only || true
+          else
+            npx tsx scripts/manage-story-storage.ts push "${{ inputs.book }}" --manifest-only || true
           fi
 
       - name: 📊 Post Job Summary
