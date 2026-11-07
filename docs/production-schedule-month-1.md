@@ -1,98 +1,102 @@
-# Jadwal Produksi & Kalender Rilis Bulanan (Bulan 1: November – Desember 2026)
+# Kalender Produksi & Jadwal Rilis Harian (Bulan 1: November – Desember 2026)
 **Zayn Storybook Channel (@zayn.storybook)**
+*Mode: Daily Continuous Production & Automated Cloud Broadcast (7 Hari Seminggu)*
 
 ---
 
-## 1. Landasan Strategis & Kunci Virality Algoritma
+## 1. Strategi Produksi & Rilis Harian (Daily Cadence)
 
-Berdasarkan audit analitik performa live multi-platform per 7 November 2026 (Total 1.134 views):
-1. **Franchise Character Effect**: Karakter **Sringeri Srinivas** menyumbang **>70% total views** (809 views dari 1.134). Penonton anak dan orang tua memiliki retensi tertinggi pada karakter komikal yang konsisten dan ekspresif.
-2. **Sensory & Auditory Engagement**: Cerita dengan onomatopoeia dan efek suara interaktif (*klakson "Paoon!", hewan ternak, letupan, tawa*) memiliki completion rate audio tertinggi pada Remotion karaoke player.
-3. **Artwork Authenticity vs AI Generation**:
-   - **Prioritas Utama (Group A)**: Menggunakan ilustrasi asli berlisensi terbuka (**CC BY 4.0 StoryWeaver / Pratham Books**) dengan fidelity visual 100%, bebas distorsi AI, zero kuota API.
-   - **Prioritas Rendah (Group B)**: Cerita rakyat tradisional yang membutuhkan *character consistency bible* dan ilustrasi AI fresh jika tidak tersedia plat digital bersih.
-4. **Distribusi Dual-Hybrid**: Format 16:9 Landscape (YouTube & FB Video) dan 9:16 Vertical (Shorts, IG Reels, FB Reels) dirilis bersamaan dengan thumbnail matriks 4 varian.
-
----
-
-## 2. Kurasi Cerita & Pengelompokan Kategori
-
-### GROUP A: High Priority — Storybook dengan Ilustrasi Asli (Authentic Plates CC BY 4.0)
-
-| No | Judul Indonesia | Judul Inggris | Karakter / Tema | Kunci Virality | Sumber & Lisensi |
-|:--:|---|---|---|---|---|
-| **1** | **Terlalu Banyak Suara!** *(Rilis Pertama)* | *Too Much Noise* | Sringeri Srinivas (Petani Eksentrik) | Lanjutan langsung *Hari Cukur Rambut*; kaya SFX klakson jalan raya, sapi mogok, humor headphone. | Pratham Books / StoryWeaver (CC BY 4.0) |
-| **2** | **Sringeri Srinivas Belajar Tertawa** | *Sringeri Srinivas Learns to Laugh* | Sringeri Srinivas | Slapstick monyet, kulit pisang, tawa lepas; menutup kuartet Sringeri Srinivas. | Pratham Books / StoryWeaver (CC BY 4.0) |
-| **3** | **Tersenyumlah!** | *Smile Please!* | Rusa kecil & hewan hutan | Fabel hewan interaktif balita (*toddler appeal*); ekspresi senyum hewan beruntun. | Sanjiv Jaiswal (CC BY 4.0) |
-| **4** | **Ada Monster di Bawah Tempat Tidurku?!** | *Under My Bed* | Anak kecil & imajinasi malam | Niche pencarian YouTube *Bedtime Fears*; twist komedi (monster = sandal/kucing). | Anupa Lal (CC BY 4.0) |
-| **5** | **Kue Ulang Tahun untuk Mimi** | *A Birthday Cake for Mimi* | Hewan dapur & kue | Tema kekacauan memasak (*baking chaos*); visual kue warna-warni yang disukai anak. | StoryWeaver (CC BY 4.0) |
-| **6** | **Baju Baru Sang Kodok** | *The Frog's New Clothes* | Kodok narsis | Dongeng fabel humor tentang percaya diri dan menerima diri sendiri apa adanya. | StoryWeaver (CC BY 4.0) |
+Menjawab target **produksi setiap hari**:
+1. **Ritme Harian (Daily Production)**: Setiap hari diproduksi 1 paket cerita/edisi baru lengkap (Plates -> Audio TTS -> Thumbnails -> Video 16:9 & 9:16).
+2. **Jam Tayang Emas (Golden Hour - 19:00 WIB)**: GitHub Actions Cron berjalan otomatis setiap hari pukul **12:00 UTC (19:00 WIB)** untuk mempublikasikan edisi terjadwal ke **YouTube**, **Facebook Watch/Reels**, dan **Instagram Reels**.
+3. **Keseimbangan Format & Bahasa**:
+   - **Senin, Rabu, Jumat**: Rilis Cerita Baru (Edisi Bahasa Indonesia).
+   - **Selasa, Kamis**: Rilis Cerita Baru (Edisi English Read-Aloud).
+   - **Sabtu Pagi (08:30 WIB)**: Morning Humor Short / Reels (Keceriaan Akhir Pekan).
+   - **Sabtu Malam (19:00 WIB)**: Saturday Family Prime Special.
+   - **Minggu Malam (19:30 WIB)**: Mega Bedtime Marathon (~15–20 Menit) untuk retensi tontonan panjang anak sebelum tidur.
 
 ---
 
-### GROUP B: Low Priority — Cerita dengan Kebutuhan Generate Ilustrasi Baru (AI Prompting & Consistency Bible)
+## 2. Kurasi Cerita: 100% Ilustrasi Asli (Authentic Plates CC BY 4.0)
 
-| No | Judul Indonesia | Judul Inggris | Karakter / Tema | Kunci Virality | Kebutuhan Aset |
-|:--:|---|---|---|---|---|
-| **7** | **Kancil dan Buaya** | *The Clever Mouse Deer and the Crocodiles* | Si Kancil (Fabel Nusantara) | Cerita rakyat paling dicari di Indonesia; relevan dengan edukasi sekolah & pencarian YouTube. | Character Bible Kancil, AI generation visual sungai tropis & buaya. |
-| **8** | **Si Kancil dan Petani Mentimun** | *The Mouse Deer and the Cucumber Farmer* | Si Kancil & Pak Tani | Slapstick perangkap orang-orangan sawah bergetah (*Tar Baby motif*); komedi lokal. | Konsistensi karakter Kancil dari cerita 7 + karakter Pak Tani. |
+> **Kebijakan Produksi Terkini**: Mengabaikan sementara seluruh cerita yang membutuhkan AI Generation. Seluruh judul 100% menggunakan buku cerita anak berlisensi terbuka (**StoryWeaver / Pratham Books CC BY 4.0**) dengan ilustrasi asli karya ilustrator profesional dunia yang diinpaint otomatis melalui Apple Vision OCR Engine (`npm run plates`).
 
----
-
-## 3. Matriks Jadwal Rilis 4 Pekan (8 Nov – 8 Des 2026)
-
-### 🗓️ PEKAN 1: Srinivas Comedy Universe Expansion
-* **Rabu, 11 Nov 2026 (19.00 WIB)**:
-  - 📖 **"Terlalu Banyak Suara!" (*Too Much Noise*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape (YouTube, FB Video) + 9:16 Vertical (Shorts, IG Reels, FB Reels)
-  - 🎯 Target: Mengonversi penonton *Hari Cukur Rambut* ke video sekuel.
-* **Sabtu, 14 Nov 2026 (10.00 WIB)**:
-  - 📖 **"Sringeri Srinivas Belajar Tertawa" (*Sringeri Srinivas Learns to Laugh*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-
-### 🗓️ PEKAN 2: Toddler Animal Fables & Bedtime Fears
-* **Rabu, 18 Nov 2026 (19.00 WIB)**:
-  - 📖 **"Tersenyumlah!" (*Smile Please!*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-* **Sabtu, 21 Nov 2026 (19.00 WIB)**:
-  - 📖 **"Ada Monster di Bawah Tempat Tidurku?!" (*Under My Bed*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-* **Minggu, 22 Nov 2026 (19.30 WIB) — SPECIAL MARATHON**:
-  - 🎬 **Kompilasi Marathon: "Petualangan Heboh Sringeri Srinivas (4 Cerita Komplit)"**
-  - ⏱️ Durasi: ~12-15 Menit | 📐 Format: 16:9 Long-Form Widescreen | 🎯 YouTube & FB Watch
-
-### 🗓️ PEKAN 3: Whimsical Celebration & Self-Confidence
-* **Rabu, 25 Nov 2026 (19.00 WIB)**:
-  - 📖 **"Kue Ulang Tahun untuk Mimi" (*A Birthday Cake for Mimi*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-* **Sabtu, 28 Nov 2026 (10.00 WIB)**:
-  - 📖 **"Baju Baru Sang Kodok" (*The Frog's New Clothes*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-
-### 🗓️ PEKAN 4: Folklore Nusantara (AI Consistent Generation) & Mega Bedtime
-* **Rabu, 2 Des 2026 (19.00 WIB)**:
-  - 📖 **"Kancil dan Buaya" (*The Clever Mouse Deer*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-* **Sabtu, 5 Des 2026 (10.00 WIB)**:
-  - 📖 **"Si Kancil dan Petani Mentimun" (*The Cucumber Farmer*)** — Edisi ID & EN
-  - 📐 Formats: 16:9 Landscape + 9:16 Vertical
-* **Minggu, 6 Des 2026 (19.30 WIB) — MEGA MARATHON**:
-  - 🎬 **Kompilasi Marathon: "Fabel Hewan Cerdik & Dongeng Nusantara Pengantar Tidur"**
-  - ⏱️ Durasi: ~15-20 Menit | 📐 Format: 16:9 Long-Form Widescreen
+### Daftar Storybook Ilustrasi Asli Pilihan:
+1. **Terlalu Banyak Suara! (*Too Much Noise!*)** — Sringeri Srinivas #3 (Humor klakson & headphone)
+2. **Sringeri Srinivas Belajar Tertawa (*Sringeri Srinivas Learns to Laugh*)** — Sringeri Srinivas #4 (Slapstick monyet & pisang)
+3. **Tersenyumlah! (*Smile Please!*)** — Rusa & senyum hewan hutan (Favorit balita)
+4. **Ada Monster di Bawah Tempat Tidurku?! (*Under My Bed*)** — Niche *bedtime fears* & komedi
+5. **Kue Ulang Tahun untuk Mimi (*A Birthday Cake for Mimi*)** — Memasak kue & hewan ceria
+6. **Baju Baru Sang Kodok (*The Frog's New Clothes*)** — Fabel percaya diri
+7. **Bima si Tukang Tidur (*Bheema the Sleepyhead*)** — Kisah banteng raksasa menggemaskan yang hobi tidur di sembarang tempat
+8. **Payung Merah (*The Red Umbrella*)** — Kisah petualangan payung merah terbang menyelamatkan hewan dari hujan
+9. **Bagaimana Jika? (*What If?*)** — Kisah imajinasi seru rasa ingin tahu anak
+10. **Hari Cukur Rambut (*Annual Haircut Day*)** — Sringeri Srinivas #1 (Petualangan rambut lebat)
+11. **Pisang Terlalu Banyak (*Too Many Bananas*)** — Sringeri Srinivas #2 (Membuat dodol pisang bersama desa)
+12. **Bulan dan Topi Biru (*The Moon and the Cap*)** — Kisah imajinasi malam & kehangatan keluarga
+13. **Gara-Gara Kucing (*It's All the Cat's Fault*)** — Cerita tanggung jawab PR sekolah
+14. **Raja Gemuk, Anjing Kurus (*Fat King, Thin Dog*)** — Olahraga lari bersama anjing
+15. **Jas Hujan Merah (*The Red Raincoat*)** — Menunggu hujan & kesabaran
 
 ---
 
-## 4. Pipeline Produksi & Standar Kualitas (Quality Gate)
+## 3. Matriks Jadwal Rilis Harian (30 Hari Penuh: 7 Nov – 6 Des 2026)
+*Seluruh Konten 100% Ilustrasi Asli (Zero AI)*
 
-Setiap cerita diproduksi mengikuti standar ketat `storybook-video-generator`:
-1. **Bilingual Manuscript Alignment**: Teks ID & EN presisi dengan tanda baca (*tanda baca* koma/titik utuh untuk intonasi alami).
-2. **Neural Speech Synthesis**: Azure/Edge Neural TTS dengan word boundaries presisi untuk karaoke text-highlighting.
-3. **Dual-Canvas Compositions**:
-   - `StorybookVideo`: 1920×1080 (30fps) dengan cinematic camera motion (Ken Burns pan/zoom).
-   - `StorybookShorts`: 1080×1920 (30fps) dengan Ambient Pillarbox Canvas (zero cropping pada karakter).
-4. **Multi-Platform Thumbnail Matrix**:
-   - `thumbnail-popular.png` (1920×1080, headline tebal & hook keingintahuan).
-   - `thumbnail-bedtime.png` (1920×1080, gold rim & moonlight badge).
-   - `thumbnail.png` (1920×1080, OpenGraph fallback).
-   - `thumbnail-vertical.png` (1080×1920, safe zone 110px top / 190px bottom & center 1:1 grid crop).
-5. **Pre-Publish Verification Gate**: Otomatis audit via `npm run thumbnail:verify` sebelum push ke YouTube Data API dan Meta Graph API.
+| Hari & Tanggal | Jam Tayang | Judul Cerita | Bahasa | Format Rilis | Target Platform |
+|:---|:---:|---|:---:|:---:|---|
+| **Sab, 7 Nov** | 19:30 WIB | Terlalu Banyak Suara! | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Min, 8 Nov** | 19:00 WIB | Too Much Noise! | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sen, 9 Nov** | 19:00 WIB | Sringeri Srinivas Belajar Tertawa | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sel, 10 Nov** | 19:00 WIB | Sringeri Srinivas Learns to Laugh | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Rab, 11 Nov** | 19:00 WIB | Tersenyumlah! | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Kam, 12 Nov** | 19:00 WIB | Smile Please! | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Jum, 13 Nov** | 19:30 WIB | Ada Monster di Bawah Tempat Tidurku?! | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sab, 14 Nov** | 08:30 WIB | Terlalu Banyak Suara (Klakson Lucu!) | ID | 9:16 Short | Shorts, IG Reels, FB Reels, TikTok |
+| **Sab, 14 Nov** | 19:00 WIB | Under My Bed | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Min, 15 Nov** | 19:30 WIB | **MARATHON 1: Kompilasi 4 Kisah Sringeri Srinivas** | ID | 16:9 (~15m) | YouTube Master & FB Watch |
+| **Sen, 16 Nov** | 19:00 WIB | Kue Ulang Tahun untuk Mimi | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sel, 17 Nov** | 19:00 WIB | A Birthday Cake for Mimi | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Rab, 18 Nov** | 19:00 WIB | Baju Baru Sang Kodok | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Kam, 19 Nov** | 19:00 WIB | The Frog's New Clothes | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Jum, 20 Nov** | 19:30 WIB | Bima si Tukang Tidur | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sab, 21 Nov** | 08:30 WIB | Monyet dan Kulit Pisang Srinivas | ID | 9:16 Short | Shorts, IG Reels, FB Reels |
+| **Sab, 21 Nov** | 19:00 WIB | Bheema the Sleepyhead | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Min, 22 Nov** | 19:30 WIB | **MARATHON 2: Fabel Binatang Lucu Pengantar Tidur** | ID | 16:9 (~15m) | YouTube Master & FB Watch |
+| **Sen, 23 Nov** | 19:00 WIB | Payung Merah | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sel, 24 Nov** | 19:00 WIB | The Red Umbrella | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Rab, 25 Nov** | 19:00 WIB | Bagaimana Jika? | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Kam, 26 Nov** | 19:00 WIB | What If? | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Jum, 27 Nov** | 19:30 WIB | Jas Hujan Merah (Remastered) | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sab, 28 Nov** | 08:30 WIB | Bima Si Banteng Ketiduran di Jalan | ID | 9:16 Short | Shorts, IG Reels, FB Reels |
+| **Sab, 28 Nov** | 19:00 WIB | The Red Raincoat (Encore) | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Min, 29 Nov** | 19:30 WIB | **MARATHON 3: Dongeng Pengantar Tidur Menenangkan** | ID | 16:9 (~16m) | YouTube Master & FB Watch |
+| **Sen, 30 Nov** | 19:00 WIB | Hari Cukur Rambut (Remastered) | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sel, 1 Des** | 19:00 WIB | Annual Haircut Day (Encore) | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Rab, 2 Des** | 19:00 WIB | Pisang Terlalu Banyak (Remastered) | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Kam, 3 Des** | 19:00 WIB | Too Many Bananas (Encore) | EN | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Jum, 4 Des** | 19:30 WIB | Bulan dan Topi Biru (Encore) | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Sab, 5 Des** | 19:00 WIB | Gara-Gara Kucing (Remastered) | ID | 16:9 & 9:16 | YouTube, FB Watch, IG Reels |
+| **Min, 6 Des** | 19:30 WIB | **MEGA MARATHON: 60 Menit Dongeng Terpopuler Zayn** | Bilingual | 16:9 (~60m) | YouTube Public & FB Watch |
+
+---
+
+## 4. Cara Kerja Otomatisasi GitHub Actions Cron
+
+File Workflow: `.github/workflows/daily-broadcast.yml`
+
+```mermaid
+flowchart TD
+    Cron["GitHub Actions Cron (Setiap Hari 12:00 UTC / 19:00 WIB)"] --> Runner["Spin up Ubuntu Runner"]
+    Runner --> Checkout["Checkout Code & Load Secrets (Meta, R2, YouTube)"]
+    Checkout --> ReadCal["Cek Jadwal Hari Ini (content-calendar.ts)"]
+    ReadCal --> PubYT["Upload YouTube (16:9 Master Video)"]
+    ReadCal --> PubFB["Fan-out Facebook Page Video & Reels via R2"]
+    ReadCal --> PubIG["Publish Instagram Reels (@zayn.storybook)"]
+    PubYT & PubFB & PubIG --> SyncGit["Commit & Push ID Publikasi Baru ke Git"]
+```
+
+1. **Jadwal Tanpa Laptop Nyala**: Karena dieksekusi di server GitHub Actions, komputer lokal Anda tidak perlu menyala pada jam tayang.
+2. **Instagram Reels Terjadwal**: Script memanggil API Instagram Container tepat pada jam 19:00 WIB, mengatasi keterbatasan Instagram Graph API yang tidak punya scheduler server-side.
+3. **Sinkronisasi Otomatis**: Setiap video yang berhasil tayang dicatat ke dalam `story.json` dan otomatis di-push kembali ke branch `main`.
