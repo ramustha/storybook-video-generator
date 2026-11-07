@@ -10,8 +10,8 @@ export interface ThumbnailDimension {
 }
 
 export interface ThumbnailItemVerification {
-  type: "popular" | "bedtime" | "default" | "vertical";
-  orientation: "landscape" | "vertical";
+  type: "popular" | "bedtime" | "default" | "vertical" | "portrait";
+  orientation: "landscape" | "vertical" | "portrait";
   platformTargets: string[];
   expectedDimensions: ThumbnailDimension;
   actualDimensions?: ThumbnailDimension;
@@ -145,6 +145,21 @@ export async function verifyStoryThumbnails(
         expectedDimensions: { width: 1080, height: 1920 },
         filePath: path.join(exportLangDir, "thumbnail-vertical.png"),
         relativePath: `exports/${currentLang}/thumbnail-vertical.png`,
+        exists: false,
+        isValid: false,
+      },
+      // 5. Instagram Feed & Facebook 4:5 Portrait Announcement Cover (1080x1350)
+      {
+        type: "portrait",
+        orientation: "portrait",
+        platformTargets: [
+          "Instagram Feed Post (4:5)",
+          "Instagram Carousel (4:5)",
+          "Facebook Page Photo Post (4:5)",
+        ],
+        expectedDimensions: { width: 1080, height: 1350 },
+        filePath: path.join(exportLangDir, "thumbnail-portrait.png"),
+        relativePath: `exports/${currentLang}/thumbnail-portrait.png`,
         exists: false,
         isValid: false,
       },
@@ -392,6 +407,47 @@ export async function renderStoryThumbnails(
     }
 
     generatedThumbnails[currentLang].vertical = `exports/${currentLang}/${verticalFileName}`;
+
+    // 3. Render 4:5 Portrait Announcement Cover for Instagram & Facebook (1080x1350)
+    if (!silent) {
+      console.log(`\n📸 Rendering [${currentLang.toUpperCase()}] 4:5 Portrait Announcement Cover (1080x1350)...`);
+    }
+
+    const portraitProps = {
+      book: rawManifest,
+      lang: currentLang,
+      variant: "popular" as const,
+      orientation: "portrait" as const,
+      heroImagePath: resolvedHeroVert,
+      backdropImagePath: resolvedBackdropVert,
+      customHeadline,
+      customHook,
+    };
+
+    const portraitComposition = await selectComposition({
+      serveUrl,
+      id: "StorybookThumbnail-Portrait",
+      inputProps: portraitProps,
+    });
+
+    const portraitFileName = "thumbnail-portrait.png";
+    const portraitOutputPath = path.join(exportLangDir, portraitFileName);
+    const startPortrait = Date.now();
+    await renderStill({
+      composition: portraitComposition,
+      serveUrl,
+      output: portraitOutputPath,
+      inputProps: portraitProps,
+    });
+
+    const portraitElapsed = ((Date.now() - startPortrait) / 1000).toFixed(1);
+    const portraitStat = await fs.stat(portraitOutputPath);
+    const portraitSizeMb = (portraitStat.size / (1024 * 1024)).toFixed(2);
+    if (!silent) {
+      console.log(`   ✔ Rendered in ${portraitElapsed}s -> ${portraitFileName} (${portraitSizeMb} MB) [1080x1350]`);
+    }
+
+    generatedThumbnails[currentLang].portrait = `exports/${currentLang}/${portraitFileName}`;
   }
 
   // Update story.json manifest

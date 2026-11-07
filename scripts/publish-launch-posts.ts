@@ -153,6 +153,7 @@ async function main() {
 
   const isDryRun = args.includes("--dry-run");
   const bookSlug = getArg("--book");
+  const langArg = (getArg("--lang") || "id") as "id" | "en";
 
   let photoPath = path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png");
   let captionText = INAUGURAL_LAUNCH_POST_TEXT;
@@ -167,8 +168,12 @@ async function main() {
         captionText = fbMatch[1].trim();
       }
 
-      // Check candidate photos
+      // Check candidate photos - PRIORITIZE 4:5 PORTRAIT (1080x1350)
       const candidatePaths = [
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-portrait.png`),
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-portrait.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-vertical.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-popular.png`),
         path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-popular.png`),
         path.resolve(`./stories/${bookSlug}/exports/thumbnail.png`),
         path.resolve(`./stories/${bookSlug}/assets/cover.png`),

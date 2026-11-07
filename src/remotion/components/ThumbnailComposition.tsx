@@ -38,7 +38,7 @@ export interface ThumbnailProps {
   };
   lang: "id" | "en";
   variant: "popular" | "bedtime";
-  orientation?: "landscape" | "vertical";
+  orientation?: "landscape" | "vertical" | "portrait";
   heroImagePath?: string;
   backdropImagePath?: string;
   customHeadline?: string;
@@ -93,7 +93,8 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   const videoConfig = useVideoConfig();
   const width = videoConfig?.width || 1920;
   const height = videoConfig?.height || 1080;
-  const isVertical = orientation === "vertical" || height > width;
+  const isPortrait = orientation === "portrait" || (height === 1350 && width === 1080);
+  const isVertical = orientation === "vertical" || (height > width && !isPortrait);
   const isEn = lang === "en";
 
   // Dynamic book metadata
@@ -145,6 +146,292 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   const publisher = book.source?.publisher || (isEn ? "Storybook Collection" : "Buku Cerita Bergambar");
   const licenseShort = book.source?.license?.includes("CC BY 4.0") ? "CC BY 4.0" : "";
   const attributionPill = `⭐ ${publisher}${licenseShort ? ` • ${licenseShort}` : ""}`.trim();
+
+  // ==========================================
+  // PORTRAIT 4:5 THUMBNAIL (INSTAGRAM FEED & FACEBOOK ANNOUNCEMENT)
+  // ==========================================
+  if (isPortrait) {
+    return (
+      <div
+        style={{
+          width: 1080,
+          height: 1350,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#0B0F1A",
+          fontFamily: "'Arial Black', 'Impact', 'Montserrat', -apple-system, sans-serif",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        {/* Ambient Blurred Background Plate */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            transform: "scale(1.15)",
+            filter: "brightness(0.35) saturate(1.6) blur(40px)",
+            zIndex: 1,
+          }}
+        >
+          {bgSrc ? (
+            <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 40%, #0F172A 100%)",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Dramatic Radial Gradient & Vignette */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at center, rgba(15, 23, 42, 0.1) 0%, rgba(2, 6, 23, 0.88) 100%)",
+            zIndex: 2,
+          }}
+        />
+
+        {/* Content Container (4:5 with 1:1 Profile Grid Safe Zone) */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "100%",
+            height: 1350,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "46px 36px 54px 36px",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Top Pill / Badge */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 28px",
+                borderRadius: 18,
+                backgroundColor: "#EF4444",
+                border: "3px solid #FFFFFF",
+                boxShadow: "0 8px 24px rgba(239, 68, 68, 0.7)",
+                transform: "rotate(-1.5deg)",
+              }}
+            >
+              <span style={{ fontSize: 24 }}>🔥</span>
+              <span
+                style={{
+                  color: "#FFFFFF",
+                  fontSize: 22,
+                  fontWeight: 900,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {badgeText}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "8px 20px",
+                borderRadius: 14,
+                backgroundColor: "rgba(15, 23, 42, 0.85)",
+                border: "2px solid rgba(255, 255, 255, 0.3)",
+                color: "#FDE047",
+                fontSize: 18,
+                fontWeight: 800,
+                letterSpacing: "0.04em",
+              }}
+            >
+              ⭐ ZAYN STORYBOOK
+            </div>
+          </div>
+
+          {/* Centerpiece Hero Artwork with Clean Sticker Border */}
+          <div
+            style={{
+              width: 1000,
+              height: 680,
+              position: "relative",
+              borderRadius: 36,
+              overflow: "hidden",
+              border: "10px solid #FFFFFF",
+              boxShadow:
+                "0 25px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(253, 224, 71, 0.35)",
+              transform: "rotate(1deg)",
+              backgroundColor: "#1E293B",
+            }}
+          >
+            {heroSrc ? (
+              <Img
+                src={heroSrc}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <ProceduralIllustration
+                scene={{ index: 0, type: "cover" }}
+                book={book}
+                isVertical={false}
+                isCover={true}
+                showTitle={false}
+              />
+            )}
+
+            {/* Inner Vignette */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                boxShadow: "inset 0 0 40px rgba(0,0,0,0.5)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* Comic Floating Reaction Sticker on Artwork */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 20,
+                left: 20,
+                backgroundColor: "#FACC15",
+                color: "#000",
+                fontWeight: 900,
+                fontSize: 26,
+                padding: "10px 24px",
+                borderRadius: 18,
+                border: "4px solid #000",
+                boxShadow: "0 6px 0 #000",
+                transform: "rotate(-4deg)",
+              }}
+            >
+              {stickerText}
+            </div>
+          </div>
+
+          {/* Lower Section: Title, Curiosity Hook & Channel Attribution */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 14,
+              textAlign: "center",
+              width: "100%",
+            }}
+          >
+            {/* Title with 3D Drop Shadow */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: "rotate(-1.5deg)",
+                filter: "drop-shadow(0 12px 24px rgba(0, 0, 0, 0.95))",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 70,
+                  fontWeight: 900,
+                  lineHeight: 0.95,
+                  color: "#FFFFFF",
+                  WebkitTextStroke: "5px #000000",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {headlineTop}
+              </div>
+              <div
+                style={{
+                  fontSize: 86,
+                  fontWeight: 900,
+                  lineHeight: 0.95,
+                  color: "#FDE047",
+                  WebkitTextStroke: "6px #000000",
+                  letterSpacing: "-0.01em",
+                  textShadow: "0 8px 0 #B45309",
+                }}
+              >
+                {headlineBottom}
+              </div>
+            </div>
+
+            {/* Secondary Curiosity Gap Hook Sticker */}
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "12px 28px",
+                borderRadius: 18,
+                backgroundColor: "#38BDF8",
+                border: "4px solid #000000",
+                boxShadow: "0 8px 0 #0284C7, 0 16px 30px rgba(0,0,0,0.6)",
+                transform: "rotate(1deg)",
+              }}
+            >
+              <span style={{ fontSize: 28 }}>{hookEmoji}</span>
+              <span
+                style={{
+                  color: "#000000",
+                  fontSize: 26,
+                  fontWeight: 900,
+                  letterSpacing: "-0.01em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {hookText}
+              </span>
+            </div>
+
+            {/* Platform Banner */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 18,
+                fontWeight: 800,
+                color: "rgba(255, 255, 255, 0.85)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                marginTop: 2,
+              }}
+            >
+              <span>▶️ Tonton di YouTube & Facebook</span>
+              <span>•</span>
+              <span style={{ color: "#FDE047" }}>@zayn.storybook</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // ==========================================
   // VERTICAL 9:16 THUMBNAIL (SHORTS / REELS)
