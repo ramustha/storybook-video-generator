@@ -12,6 +12,7 @@ interface PublishAllOptions {
   skipMeta: boolean;
   skipTiktok: boolean;
   skipPromo: boolean;
+  force: boolean;
 }
 
 function parseArgs(): PublishAllOptions {
@@ -24,6 +25,7 @@ function parseArgs(): PublishAllOptions {
     skipMeta: false,
     skipTiktok: false,
     skipPromo: false,
+    force: false,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -42,6 +44,8 @@ function parseArgs(): PublishAllOptions {
       options.skipTiktok = true;
     } else if (arg === "--skip-promo") {
       options.skipPromo = true;
+    } else if (arg === "--force") {
+      options.force = true;
     }
   }
 
@@ -111,29 +115,64 @@ async function main() {
   }
   // ─────────────────────────────────────────────────────────────────────────
 
+  let anyUploadOccurred = false;
+
   for (const currentLang of langsToProcess) {
     console.log(`\n======================================================`);
     console.log(`📍 PROCESSING LANGUAGE: [${currentLang.toUpperCase()}]`);
     console.log(`======================================================`);
 
+    // ── Pre-publish deduplication & audit gate ────────────────────────────
+    const pub = story.publications || {};
+    const getId = (v: any) => (typeof v === "string" ? v : v?.id || v?.videoId);
+
+    const ytLandscapeId = getId(pub.youtube?.[currentLang]?.landscape) || story.exports?.[currentLang]?.landscape?.youtubeId;
+    const ytVerticalId = getId(pub.youtube?.[currentLang]?.vertical);
+    const ytId = ytLandscapeId || ytVerticalId;
+
+    const igId = getId(pub.instagram?.[currentLang]) || (currentLang === "id" ? getId(pub.instagram?.id) : undefined);
+    const fbLandId = getId(pub.facebook?.[currentLang]?.landscape) || (currentLang === "id" ? getId(pub.facebook?.landscape) : undefined);
+    const fbVertId = getId(pub.facebook?.[currentLang]?.vertical) || (currentLang === "id" ? getId(pub.facebook?.vertical) : undefined);
+
+    console.log(`\n🔍 PRE-PUBLISH DEDUPLICATION AUDIT:`);
+    console.log(`   - YouTube Video : ${ytId ? `✔ LIVE (${ytId})` : "⏳ PENDING"}`);
+    console.log(`   - Instagram Reel: ${igId ? `✔ LIVE (${igId})` : "⏳ PENDING"}`);
+    console.log(`   - Facebook 16:9 : ${fbLandId ? `✔ LIVE (${fbLandId})` : "⏳ PENDING"}`);
+    console.log(`   - Facebook 9:16 : ${fbVertId ? `✔ LIVE (${fbVertId})` : "⏳ PENDING"}`);
+
+    const isAllLive = ytId && igId && (fbLandId || fbVertId);
+    if (isAllLive && !options.force) {
+      console.log(`\n🛡️ [ZERO DUPLICATE GATE] Story "${story.title}" [${currentLang.toUpperCase()}] is ALREADY LIVE across all platforms!`);
+      console.log(`   ⏩ SKIPPING publish to ensure ZERO DUPLICATE content.`);
+      console.log(`   💡 Tip: Pass --force to replace or re-publish anyway.`);
+      continue;
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
     // 1. YouTube Distribution (Dual-Format: 16:9 Landscape Video & 9:16 Shorts if <= 180s per policy)
     if (!options.skipYoutube) {
-      console.log(`\n--- [1/2] PUBLISHING TO YOUTUBE (DUAL-FORMAT: 16:9 VIDEO & SHORTS IF <=180s) ---`);
-      const ytArgs = [
-        "scripts/upload-youtube.ts",
-        "--book",
-        options.bookSlug,
-        "--lang",
-        currentLang,
-        "--format",
-        "all",
-      ];
-      if (options.dryRun) ytArgs.push("--dry-run");
+      if (ytId && !options.force) {
+        console.log(`\n⏩ Skipping YouTube: Video is already live (ID: ${ytId}) to prevent duplicate upload.`);
+      } else {
+        console.log(`\n--- [1/2] PUBLISHING TO YOUTUBE (DUAL-FORMAT: 16:9 VIDEO & SHORTS IF <=180s) ---`);
+        const ytArgs = [
+          "scripts/upload-youtube.ts",
+          "--book",
+          options.bookSlug,
+          "--lang",
+          currentLang,
+          "--format",
+          "all",
+        ];
+        if (options.dryRun) ytArgs.push("--dry-run");
+        if (options.force) ytArgs.push("--force");
 
-      try {
-        await runCommand("npx", ["tsx", ...ytArgs]);
-      } catch (err: any) {
-        console.error("⚠️ YouTube upload warning:", err.message);
+        try {
+          await runCommand("npx", ["tsx", ...ytArgs]);
+          anyUploadOccurred = true;
+        } catch (err: any) {
+          console.error("⚠️ YouTube upload warning:", err.message);
+        }
       }
     } else {
       console.log(`⏩ Skipping YouTube per --skip-youtube`);
@@ -141,48 +180,57 @@ async function main() {
 
     // 2. Meta Distribution (Instagram Reels & Facebook Page Video/Reels via R2 Fan-Out)
     if (!options.skipMeta) {
-      console.log(`\n--- [2/2] PUBLISHING TO META (INSTAGRAM REELS & FACEBOOK) ---`);
+      const isMetaLive = igId && fbLandId && fbVertId;
+      if (isMetaLive && !options.force) {
+        console.log(`\n⏩ Skipping Meta: Video is already live on Instagram (${igId}) and Facebook to prevent duplicates.`);
+      } else {
+        console.log(`\n--- [2/2] PUBLISHING TO META (INSTAGRAM REELS & FACEBOOK) ---`);
 
-      // 2A. Vertical (9:16) Fan-out to Instagram Reels & Facebook Reels
-      const metaVerticalArgs = [
-        "scripts/upload-meta.ts",
-        "--book",
-        options.bookSlug,
-        "--lang",
-        currentLang,
-        "--platform",
-        "both",
-        "--format",
-        "vertical",
-      ];
-      if (options.dryRun) metaVerticalArgs.push("--dry-run");
+        // 2A. Vertical (9:16) Fan-out to Instagram Reels & Facebook Reels
+        const metaVerticalArgs = [
+          "scripts/upload-meta.ts",
+          "--book",
+          options.bookSlug,
+          "--lang",
+          currentLang,
+          "--platform",
+          "both",
+          "--format",
+          "vertical",
+        ];
+        if (options.dryRun) metaVerticalArgs.push("--dry-run");
+        if (options.force) metaVerticalArgs.push("--force");
 
-      try {
-        console.log(`\n📲 Publishing 9:16 Vertical Reel (Instagram & Facebook)...`);
-        await runCommand("npx", ["tsx", ...metaVerticalArgs]);
-      } catch (err: any) {
-        console.error("⚠️ Meta vertical reel upload warning:", err.message);
-      }
+        try {
+          console.log(`\n📲 Publishing 9:16 Vertical Reel (Instagram & Facebook)...`);
+          await runCommand("npx", ["tsx", ...metaVerticalArgs]);
+          anyUploadOccurred = true;
+        } catch (err: any) {
+          console.error("⚠️ Meta vertical reel upload warning:", err.message);
+        }
 
-      // 2B. Landscape (16:9) to Facebook Page Video / Watch
-      const metaLandscapeArgs = [
-        "scripts/upload-meta.ts",
-        "--book",
-        options.bookSlug,
-        "--lang",
-        currentLang,
-        "--platform",
-        "facebook",
-        "--format",
-        "landscape",
-      ];
-      if (options.dryRun) metaLandscapeArgs.push("--dry-run");
+        // 2B. Landscape (16:9) to Facebook Page Video / Watch
+        const metaLandscapeArgs = [
+          "scripts/upload-meta.ts",
+          "--book",
+          options.bookSlug,
+          "--lang",
+          currentLang,
+          "--platform",
+          "facebook",
+          "--format",
+          "landscape",
+        ];
+        if (options.dryRun) metaLandscapeArgs.push("--dry-run");
+        if (options.force) metaLandscapeArgs.push("--force");
 
-      try {
-        console.log(`\n📺 Publishing 16:9 Landscape Video to Facebook Page Watch...`);
-        await runCommand("npx", ["tsx", ...metaLandscapeArgs]);
-      } catch (err: any) {
-        console.error("⚠️ Facebook landscape upload warning:", err.message);
+        try {
+          console.log(`\n📺 Publishing 16:9 Landscape Video to Facebook Page Watch...`);
+          await runCommand("npx", ["tsx", ...metaLandscapeArgs]);
+          anyUploadOccurred = true;
+        } catch (err: any) {
+          console.error("⚠️ Facebook landscape upload warning:", err.message);
+        }
       }
     } else {
       console.log(`⏩ Skipping Meta per --skip-meta`);
@@ -244,7 +292,11 @@ async function main() {
   }
 
   // 4. Automated Multi-Platform Social Promotion (Facebook Page & Instagram Feed/Carousel)
-  if (!options.skipPromo) {
+  if (!anyUploadOccurred && !options.force && !options.dryRun) {
+    console.log(`\n🛡️ [ZERO DUPLICATE GATE] No new video uploads were performed because target editions are already live.`);
+    console.log(`   ⏩ SKIPPING social promotion posts to avoid duplicate feed announcements.`);
+    console.log(`   💡 Tip: Pass --force to broadcast social promotion posts anyway.`);
+  } else if (!options.skipPromo) {
     console.log(`\n==================================================================`);
     console.log(`📢 AUTOMATED SOCIAL PROMOTION DISTRIBUTION`);
     console.log(`==================================================================`);

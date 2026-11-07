@@ -4,15 +4,382 @@ import path from "path";
 import { execSync, spawn } from "child_process";
 
 export interface ScheduledSlot {
+  date?: string; // "YYYY-MM-DD" e.g. "2026-11-07"
   dayName: "Senin" | "Selasa" | "Rabu" | "Kamis" | "Jumat" | "Sabtu" | "Minggu";
   timeSlot: string; // e.g. "19:00 WIB"
-  slotType: "Prime Bedtime Story" | "Morning Energy Short" | "Weekend Family Special" | "Bilingual English Feature";
+  slotType: string;
   bookSlug: string;
   lang: "id" | "en";
   format: "landscape" | "vertical" | "both";
   targetPlatforms: string[];
   theme: string;
 }
+
+export const DAILY_CALENDAR_MONTH_1: ScheduledSlot[] = [
+  {
+    date: "2026-11-07",
+    dayName: "Sabtu",
+    timeSlot: "19:30 WIB",
+    slotType: "Prime Bedtime Story (Grand Launch Cerita Baru #1)",
+    bookSlug: "terlalu-banyak-suara",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Sringeri Srinivas #3: Lelucon Klakson Jalan Raya, Sapi Mogok & Headphone Ajaib",
+  },
+  {
+    date: "2026-11-08",
+    dayName: "Minggu",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "terlalu-banyak-suara",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: Too Much Noise! & Sringeri Srinivas Whimsical Solitude",
+  },
+  {
+    date: "2026-11-09",
+    dayName: "Senin",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Sringeri Srinivas #4: Slapstick Monyet & Kulit Pisang yang Membawa Tawa Lepas",
+  },
+  {
+    date: "2026-11-10",
+    dayName: "Selasa",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: Sringeri Srinivas Learns to Laugh",
+  },
+  {
+    date: "2026-11-11",
+    dayName: "Rabu",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "tersenyumlah",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Fabel Balita Ramah: Rusa Kecil & Senyum Menular Penghuni Hutan",
+  },
+  {
+    date: "2026-11-12",
+    dayName: "Kamis",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "tersenyumlah",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Bedtime Story: Smile Please! A Heartwarming Forest Fable",
+  },
+  {
+    date: "2026-11-13",
+    dayName: "Jumat",
+    timeSlot: "19:30 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "ada-monster-di-bawah-tempat-tidurku",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Mengatasi Ketakutan Tidur Anak: Misteri Monster Lucu di Kolong Ranjang",
+  },
+  {
+    date: "2026-11-14",
+    dayName: "Sabtu",
+    timeSlot: "08:30 WIB",
+    slotType: "Morning Energy Short",
+    bookSlug: "terlalu-banyak-suara",
+    lang: "id",
+    format: "vertical",
+    targetPlatforms: ["Instagram Reels", "Facebook Reels", "YouTube Shorts", "TikTok"],
+    theme: "Weekend Morning Laughs: Klakson Lucu Paoon! Mengguncang Desa",
+  },
+  {
+    date: "2026-11-14",
+    dayName: "Sabtu",
+    timeSlot: "19:00 WIB",
+    slotType: "Weekend Family Special",
+    bookSlug: "ada-monster-di-bawah-tempat-tidurku",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Saturday Bedtime Read-Aloud: Under My Bed?!",
+  },
+  {
+    date: "2026-11-15",
+    dayName: "Minggu",
+    timeSlot: "19:30 WIB",
+    slotType: "Mega Bedtime Marathon",
+    bookSlug: "kompilasi-sringeri-srinivas",
+    lang: "id",
+    format: "landscape",
+    targetPlatforms: ["YouTube Master (16:9)", "Facebook Watch"],
+    theme: "Marathon 1: Kuartet Lengkap Petualangan Kocak Sringeri Srinivas (~15m)",
+  },
+  {
+    date: "2026-11-16",
+    dayName: "Senin",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "kue-ulang-tahun-untuk-mimi",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Kekacauan Dapur Seru & Kasih Sayang: Kue Ulang Tahun untuk Mimi",
+  },
+  {
+    date: "2026-11-17",
+    dayName: "Selasa",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "kue-ulang-tahun-untuk-mimi",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: A Birthday Cake for Mimi (Baking Joy & Friendship)",
+  },
+  {
+    date: "2026-11-18",
+    dayName: "Rabu",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "baju-baru-sang-kodok",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Fabel Percaya Diri: Baju Baru Sang Kodok & Menerima Diri Apa Adanya",
+  },
+  {
+    date: "2026-11-19",
+    dayName: "Kamis",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "baju-baru-sang-kodok",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: The Frog's New Clothes",
+  },
+  {
+    date: "2026-11-20",
+    dayName: "Jumat",
+    timeSlot: "19:30 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "bima-tukang-tidur",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Cerita Fabel Jenaka: Bima Si Banteng Raksasa yang Gemar Tidur Nyenyak",
+  },
+  {
+    date: "2026-11-21",
+    dayName: "Sabtu",
+    timeSlot: "08:30 WIB",
+    slotType: "Morning Energy Short",
+    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    lang: "id",
+    format: "vertical",
+    targetPlatforms: ["Instagram Reels", "Facebook Reels", "YouTube Shorts"],
+    theme: "Shorts Ceria: Monyet Jail & Pak Srinivas Terpeleset",
+  },
+  {
+    date: "2026-11-21",
+    dayName: "Sabtu",
+    timeSlot: "19:00 WIB",
+    slotType: "Weekend Family Special",
+    bookSlug: "bima-tukang-tidur",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Saturday Read-Aloud: Bheema the Sleepyhead (Bedtime Favorite)",
+  },
+  {
+    date: "2026-11-22",
+    dayName: "Minggu",
+    timeSlot: "19:30 WIB",
+    slotType: "Mega Bedtime Marathon",
+    bookSlug: "kompilasi-fabel-hewan",
+    lang: "id",
+    format: "landscape",
+    targetPlatforms: ["YouTube Master (16:9)", "Facebook Watch"],
+    theme: "Marathon 2: Fabel Binatang Lucu & Ramah Pengantar Tidur (~15m)",
+  },
+  {
+    date: "2026-11-23",
+    dayName: "Senin",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "payung-merah",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Petualangan Angin Hujan: Payung Merah Sahabat Rimba Menolong Sesama",
+  },
+  {
+    date: "2026-11-24",
+    dayName: "Selasa",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "payung-merah",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: The Red Umbrella (Wind, Rain, and Kindness)",
+  },
+  {
+    date: "2026-11-25",
+    dayName: "Rabu",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "bagaimana-jika",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Imajinasi Liar Balita: Bagaimana Jika Awan Dari Es Krim & Ikan Terbang?",
+  },
+  {
+    date: "2026-11-26",
+    dayName: "Kamis",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "bagaimana-jika",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: What If? A Joyful Bedtime Spark of Curiosity",
+  },
+  {
+    date: "2026-11-27",
+    dayName: "Jumat",
+    timeSlot: "19:30 WIB",
+    slotType: "Prime Bedtime Story (Encore Remaster)",
+    bookSlug: "jas-hujan-merah",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Kisah Kesabaran: Jas Hujan Merah Siap Menyambut Titik Hujan",
+  },
+  {
+    date: "2026-11-28",
+    dayName: "Sabtu",
+    timeSlot: "08:30 WIB",
+    slotType: "Morning Energy Short",
+    bookSlug: "bima-tukang-tidur",
+    lang: "id",
+    format: "vertical",
+    targetPlatforms: ["Instagram Reels", "Facebook Reels", "YouTube Shorts"],
+    theme: "Shorts: Bima Si Banteng Raksasa Ketiduran di Tengah Pasar!",
+  },
+  {
+    date: "2026-11-28",
+    dayName: "Sabtu",
+    timeSlot: "19:00 WIB",
+    slotType: "Weekend Family Special",
+    bookSlug: "jas-hujan-merah",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Saturday Read-Aloud: The Red Raincoat (Waiting for the Monsoon)",
+  },
+  {
+    date: "2026-11-29",
+    dayName: "Minggu",
+    timeSlot: "19:30 WIB",
+    slotType: "Mega Bedtime Marathon",
+    bookSlug: "kompilasi-dongeng-menenangkan",
+    lang: "id",
+    format: "landscape",
+    targetPlatforms: ["YouTube Master (16:9)", "Facebook Watch"],
+    theme: "Marathon 3: Dongeng Pengantar Tidur Paling Menenangkan (~16m)",
+  },
+  {
+    date: "2026-11-30",
+    dayName: "Senin",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story (Encore Remaster)",
+    bookSlug: "hari-cukur-rambut",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Hits Terpopuler: Hari Cukur Rambut Sringeri Srinivas Remastered",
+  },
+  {
+    date: "2026-12-01",
+    dayName: "Selasa",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "hari-cukur-rambut",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Encore: Annual Haircut Day",
+  },
+  {
+    date: "2026-12-02",
+    dayName: "Rabu",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story (Encore Remaster)",
+    bookSlug: "pisang-terlalu-banyak",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Hits Remaster: Pisang Terlalu Banyak & Dodol Manis Desa",
+  },
+  {
+    date: "2026-12-03",
+    dayName: "Kamis",
+    timeSlot: "19:00 WIB",
+    slotType: "Bilingual English Feature",
+    bookSlug: "pisang-terlalu-banyak",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Encore: Too Many Bananas",
+  },
+  {
+    date: "2026-12-04",
+    dayName: "Jumat",
+    timeSlot: "19:30 WIB",
+    slotType: "Prime Bedtime Story (Encore)",
+    bookSlug: "bulan-dan-topi-biru",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Encore Pengantar Tidur: Bulan dan Topi Biru",
+  },
+  {
+    date: "2026-12-05",
+    dayName: "Sabtu",
+    timeSlot: "19:00 WIB",
+    slotType: "Weekend Family Special (Encore)",
+    bookSlug: "gara-gara-kucing",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Saturday Night Family: Gara-Gara Kucing Remastered",
+  },
+  {
+    date: "2026-12-06",
+    dayName: "Minggu",
+    timeSlot: "19:30 WIB",
+    slotType: "Grand Finale Mega Marathon",
+    bookSlug: "kompilasi-bedtime-60m",
+    lang: "id",
+    format: "landscape",
+    targetPlatforms: ["YouTube Master (16:9)", "Facebook Watch"],
+    theme: "Grand Finale: 60 Menit Mega Dongeng Pengantar Tidur Zayn (~60m)",
+  },
+];
 
 export const WEEKLY_SCHEDULE: ScheduledSlot[] = [
   {
@@ -119,8 +486,22 @@ export const WEEKLY_SCHEDULE: ScheduledSlot[] = [
 
 const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
 
-function getTodaySlot(): ScheduledSlot[] {
+function getTodaySlot(targetDate?: string): ScheduledSlot[] {
   const now = new Date();
+  const jakartaDateStr =
+    targetDate ||
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+
+  const matchedDateSlots = DAILY_CALENDAR_MONTH_1.filter((s) => s.date === jakartaDateStr);
+  if (matchedDateSlots.length > 0) {
+    return matchedDateSlots;
+  }
+
   const dayIndex = now.getDay(); // 0 is Sunday
   const todayName = DAYS_ID[dayIndex];
   return WEEKLY_SCHEDULE.filter((s) => s.dayName === todayName);
@@ -221,19 +602,15 @@ async function showToday() {
 
 function showCalendar() {
   printHeader();
-  console.log("🗓️ JADWAL TAYANG MINGGUAN LENGKAP (ROTASI FASE 1):");
+  console.log("🗓️ KALENDER PRODUKSI & JADWAL RILIS HARIAN BULAN 1 (7 NOV – 6 DES 2026):");
   console.log("==================================================================");
 
-  let currentDay = "";
-  WEEKLY_SCHEDULE.forEach((slot, i) => {
-    if (slot.dayName !== currentDay) {
-      currentDay = slot.dayName;
-      console.log(`\n📌 ${currentDay.toUpperCase()}`);
-    }
+  let currentWeek = "";
+  DAILY_CALENDAR_MONTH_1.forEach((slot, i) => {
     const status = checkPublicationStatus(slot.bookSlug, slot.lang);
     const pubMark = status.yt && status.fb && status.ig ? "✔ [SEMUA LIVE]" : "⏳ [PENDING]";
     console.log(
-      `   • [${slot.timeSlot}] ${slot.bookSlug} [${slot.lang.toUpperCase()}] — ${slot.slotType} ${pubMark}`
+      `   • [${slot.date} (${slot.dayName}) | ${slot.timeSlot}] ${slot.bookSlug} [${slot.lang.toUpperCase()}] — ${slot.slotType} ${pubMark}`
     );
     console.log(`     "${slot.theme}"`);
   });
@@ -242,6 +619,7 @@ function showCalendar() {
   console.log("Keterangan:");
   console.log("• Pagi (08:30 WIB): Shorts/Reels keceriaan & humor akhir pekan.");
   console.log("• Malam (19:00/19:30 WIB): Dongeng sebelum tidur (Bedtime story 16:9 & Reels).");
+  console.log("• Marathon Mingguan (19:30 WIB): Kompilasi long-form ~15-60 menit penahan retensi.");
   console.log("==================================================================\n");
 }
 
