@@ -1,0 +1,31 @@
+.github/workflows/daily-story-ingest.yml
+  698ac31901cd73e0 87-88
+scripts/publish-all.ts
+  698ac31901cd73e0 16,30,39-40,170-171
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 5-7,24-33,130,143-144
+scripts/upload-youtube.ts
+  698ac31901cd73e0 560
+scripts/content-calendar.ts
+  698ac31901cd73e0 31-51,56-68,72,79,83,88-90,94-105,711-715,739-764,768,828-830
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "278d2ec960f7cb2177ad7cce392d27f19873afaf",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 117,
+      "total_deletions": 18,
+      "accepted_lines": 116,
+      "overriden_lines": 0
+    }
+  }
+}
