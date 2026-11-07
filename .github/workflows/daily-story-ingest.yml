@@ -24,6 +24,11 @@ on:
         required: false
         type: boolean
         default: false
+      skip_qc:
+        description: 'Skip AI Quality Control and moral validation gate'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -73,6 +78,8 @@ jobs:
 
       - name: 🚀 Execute Story Ingestion & Apple Vision Inpainting
         id: run_ingest
+        env:
+          GEMINI_API_KEY: ${{ secrets.PERSONAL_GEMINI_API_KEY || secrets.GEMINI_API_KEY }}
         run: |
           ARGS=""
           if [ "${{ inputs.book }}" != "auto" ] && [ -n "${{ inputs.book }}" ]; then
@@ -93,6 +100,10 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
 
+          if [ "${{ inputs.skip_qc }}" = "true" ]; then
+            ARGS="$ARGS --skip-qc"
+          fi
+
           echo "Running: npx tsx scripts/ingest-story.ts $ARGS"
           npx tsx scripts/ingest-story.ts $ARGS
 
@@ -105,6 +116,7 @@ jobs:
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| **Workflow** | Daily Morning Ingestion & Plate Cleaning Engine |" >> $GITHUB_STEP_SUMMARY
           echo "| **Target Book** | ${{ inputs.book || 'auto (next from pool)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **AI Editorial & Moral Gate** | Google Gemini 2.0 Flash (COPPA & Moral Refinement) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Apple Vision Inpainting** | Swift VNRecognizeTextRequest + Ambient Fill |" >> $GITHUB_STEP_SUMMARY
           echo "| **Remote Storage** | Cloudflare R2 (\`zayn-storybook\`) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Disk Purge** | Intermediate raw PDF & scans purged |" >> $GITHUB_STEP_SUMMARY
