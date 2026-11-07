@@ -38,6 +38,7 @@
     "auth:threads": "tsx scripts/auth-threads.ts",
     "resync:facebook:thumbnails": "tsx scripts/resync-facebook-thumbnails.ts",
     "upload:meta": "tsx scripts/upload-meta.ts",
+    "upload:threads": "tsx scripts/publish-threads.ts",
     "stats:meta": "tsx scripts/meta-stats.ts",
     "sync:meta": "tsx scripts/sync-platforms.ts",
     "publish:all": "tsx scripts/publish-all.ts",

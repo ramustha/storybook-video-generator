@@ -1,0 +1,185 @@
+name: Meta Threads Broadcast & Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      book:
+        description: 'Storybook Slug to Publish'
+        required: true
+        type: choice
+        options:
+          - 'all'
+          - 'bulan-dan-topi-biru'
+          - 'gara-gara-kucing'
+          - 'hari-cukur-rambut'
+          - 'jas-hujan-merah'
+          - 'pisang-terlalu-banyak'
+          - 'raja-gemuk-anjing-kurus'
+          - 'terlalu-banyak-suara'
+          - 'topsy-turvy-serba-terbalik'
+        default: 'terlalu-banyak-suara'
+      lang:
+        description: 'Language'
+        required: true
+        type: choice
+        options:
+          - 'id'
+          - 'en'
+          - 'all'
+        default: 'id'
+      mode:
+        description: 'Post Type'
+        required: true
+        type: choice
+        options:
+          - 'video'
+          - 'image'
+          - 'text'
+        default: 'video'
+      intro:
+        description: 'Publish Channel Introduction Post'
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry Run Mode (Test without publishing)'
+        required: true
+        type: boolean
+        default: false
+      force:
+        description: 'Force Publish (Override zero-duplicate gate)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish-threads:
+    name: Publish to Meta Threads
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      - name: 🔑 Configure Secrets & Credentials
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.PERSONAL_META_ACCESS_TOKEN }}
+          META_APP_ID: ${{ secrets.PERSONAL_META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.PERSONAL_META_APP_SECRET }}
+          META_PAGE_ID: ${{ secrets.PERSONAL_META_FACEBOOK_PAGE_ID }}
+          META_IG_ID: ${{ secrets.PERSONAL_META_INSTAGRAM_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.PERSONAL_THREADS_ACCESS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.PERSONAL_THREADS_USER_ID }}
+          THREADS_APP_ID: ${{ secrets.PERSONAL_THREADS_APP_ID }}
+          THREADS_APP_SECRET: ${{ secrets.PERSONAL_THREADS_APP_SECRET }}
+          R2_ACCOUNT_ID: ${{ secrets.PERSONAL_R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.PERSONAL_R2_ACCESS_KEY_ID }}
+          R2_SECRET_KEY: ${{ secrets.PERSONAL_R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
+        run: |
+          mkdir -p config
+
+          cat <<EOF > .env
+          THREADS_ACCESS_TOKEN="${THREADS_ACCESS_TOKEN}"
+          THREADS_USER_ID="${THREADS_USER_ID}"
+          THREADS_APP_ID="${THREADS_APP_ID}"
+          THREADS_APP_SECRET="${THREADS_APP_SECRET}"
+          EOF
+
+          cat <<EOF > config/meta-config.json
+          {
+            "appId": "${META_APP_ID:-1099494459651856}",
+            "facebookPageId": "${META_PAGE_ID:-1473240609201601}",
+            "facebookPageName": "Zayn Storybook",
+            "instagramUserId": "${META_IG_ID:-17841477003917879}",
+            "instagramUsername": "zayn.storybook",
+            "pageAccessToken": "${META_ACCESS_TOKEN}",
+            "threadsUserId": "${THREADS_USER_ID:-31322011817419464}",
+            "threadsUsername": "zayn.storybook",
+            "threadsAccessToken": "${THREADS_ACCESS_TOKEN}",
+            "threadsAppId": "${THREADS_APP_ID:-1507655221210490}",
+            "threadsAppSecret": "${THREADS_APP_SECRET:-0e476feb253e7a84a263e5a2c6069626}"
+          }
+          EOF
+
+          cat <<EOF > config/r2-config.json
+          {
+            "accountId": "${R2_ACCOUNT_ID}",
+            "endpoint": "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+            "accessKeyId": "${R2_ACCESS_KEY_ID}",
+            "secretAccessKey": "${R2_SECRET_KEY}",
+            "bucketName": "zayn-storybook",
+            "publicDomain": "${R2_PUBLIC_DOMAIN:-https://pub-f2786231e5e34f19a6860d7fe9ddd569.r2.dev}"
+          }
+          EOF
+
+      - name: 🔍 Verify Threads Connection
+        run: npx tsx scripts/publish-threads.ts --verify-token
+
+      - name: 🧵 Execute Threads Publication
+        env:
+          INPUT_BOOK: ${{ inputs.book }}
+          INPUT_LANG: ${{ inputs.lang }}
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_INTRO: ${{ inputs.intro }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          INPUT_FORCE: ${{ inputs.force }}
+        run: |
+          if [ "${INPUT_INTRO}" = "true" ]; then
+            CMD_ARGS="--intro"
+          elif [ "${INPUT_BOOK}" = "all" ]; then
+            CMD_ARGS="--all-books --mode ${INPUT_MODE} --lang ${INPUT_LANG}"
+          else
+            CMD_ARGS="--book ${INPUT_BOOK} --mode ${INPUT_MODE} --lang ${INPUT_LANG}"
+          fi
+
+          if [ "${INPUT_DRY_RUN}" = "true" ]; then
+            CMD_ARGS="${CMD_ARGS} --dry-run"
+          fi
+
+          if [ "${INPUT_FORCE}" = "true" ]; then
+            CMD_ARGS="${CMD_ARGS} --force"
+          fi
+
+          echo "Running: npx tsx scripts/publish-threads.ts ${CMD_ARGS}"
+          npx tsx scripts/publish-threads.ts ${CMD_ARGS}
+
+      - name: 💾 Commit & Push Updated Story Manifests
+        if: ${{ !(inputs.dry_run) }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add stories/*/story.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "No story publication metadata changed."
+          else
+            git commit -m "chore(threads): update publication metadata [skip ci]"
+            git push
+          fi
+
+      - name: 📊 Post Job Summary
+        run: |
+          echo "### 🧵 Meta Threads Broadcast Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Book**: ${{ inputs.book }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Language**: ${{ inputs.lang }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode**: ${{ inputs.mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Intro**: ${{ inputs.intro }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run**: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Force**: ${{ inputs.force }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u) UTC" >> $GITHUB_STEP_SUMMARY
+          echo "✔ Meta Threads publication completed successfully!" >> $GITHUB_STEP_SUMMARY

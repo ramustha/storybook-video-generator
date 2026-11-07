@@ -513,6 +513,7 @@ export async function publishStoryToThreads(options: {
   lang?: "id" | "en";
   mode?: "image" | "video" | "text";
   dryRun?: boolean;
+  force?: boolean;
 }): Promise<{ success: boolean; url?: string; skipped?: boolean; reason?: string }> {
   const lang = options.lang || "id";
   const mode = options.mode || "image";
@@ -537,6 +538,12 @@ export async function publishStoryToThreads(options: {
   }
 
   const manifest: StoryManifest = JSON.parse(await fs.readFile(storyJsonPath, "utf-8"));
+  const existingPub = manifest.publications?.threads?.[lang];
+  if (!options.force && existingPub?.id) {
+    console.log(`\n🛡️ [ZERO DUPLICATE GATE] Already published to Threads at ${existingPub.url} (ID: ${existingPub.id})`);
+    console.log(`   💡 Tip: Pass --force to republish.`);
+    return { success: true, url: existingPub.url, skipped: true, reason: "Already published" };
+  }
   const ytUrl =
     (lang === "id"
       ? manifest.publications?.youtube?.id?.landscape?.url
@@ -655,6 +662,7 @@ async function main() {
   const isIntro = args.includes("--intro");
   const isAllBooks = args.includes("--all-books") || args.includes("--all");
   const isDryRun = args.includes("--dry-run");
+  const isForce = args.includes("--force");
   const requestedBook = getArg("--book") || "terlalu-banyak-suara";
   const langArg = (getArg("--lang") || "id") as "id" | "en" | "all";
   const modeArg = (getArg("--mode") || "video") as "image" | "video" | "text";
@@ -718,6 +726,7 @@ async function main() {
         lang: l,
         mode: modeArg,
         dryRun: isDryRun,
+        force: isForce,
       });
 
       // Stagger slightly between posts to be gentle on API rate limit
