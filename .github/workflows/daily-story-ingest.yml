@@ -80,6 +80,7 @@ jobs:
         id: run_ingest
         env:
           GEMINI_API_KEY: ${{ secrets.PERSONAL_GEMINI_API_KEY || secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.PERSONAL_GROQ_API_KEY || secrets.GROQ_API_KEY }}
         run: |
           ARGS=""
           if [ "${{ inputs.book }}" != "auto" ] && [ -n "${{ inputs.book }}" ]; then
@@ -116,7 +117,7 @@ jobs:
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| **Workflow** | Daily Morning Ingestion & Plate Cleaning Engine |" >> $GITHUB_STEP_SUMMARY
           echo "| **Target Book** | ${{ inputs.book || 'auto (next from pool)' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **AI Editorial & Moral Gate** | Google Gemini 2.0 Flash (COPPA & Moral Refinement) |" >> $GITHUB_STEP_SUMMARY
+          echo "| **AI Editorial & Moral Gate** | Google Gemini (Primary) + Groq Llama 3.3 (Failover) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Apple Vision Inpainting** | Swift VNRecognizeTextRequest + Ambient Fill |" >> $GITHUB_STEP_SUMMARY
           echo "| **Remote Storage** | Cloudflare R2 (\`zayn-storybook\`) |" >> $GITHUB_STEP_SUMMARY
           echo "| **Disk Purge** | Intermediate raw PDF & scans purged |" >> $GITHUB_STEP_SUMMARY
