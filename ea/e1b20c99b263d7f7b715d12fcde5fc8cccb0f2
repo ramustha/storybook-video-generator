@@ -1,0 +1,23 @@
+scripts/audit-story-quality.ts
+  698ac31901cd73e0 281-282,284-318,322-350
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "eae1b20c99b263d7f7b715d12fcde5fc8cccb0f2",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 67,
+      "total_deletions": 12,
+      "accepted_lines": 67,
+      "overriden_lines": 0
+    }
+  }
+}
