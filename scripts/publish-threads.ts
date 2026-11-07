@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { createReadStream, existsSync } from "fs";
+import { createReadStream, existsSync, readdirSync } from "fs";
 import path from "path";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
@@ -375,6 +375,137 @@ export function generateThreadsCaption(
 }
 
 /**
+ * Helper to locate the best available video for a story
+ */
+export function findStoryVideo(storyDir: string, lang: string, bookSlug: string): string | null {
+  const searchDirs = [
+    path.join(storyDir, "exports", lang),
+    path.join(storyDir, "exports"),
+  ];
+
+  for (const d of searchDirs) {
+    if (!existsSync(d)) continue;
+    try {
+      const files = readdirSync(d);
+      // Prioritize vertical 9:16 video
+      const vert = files.find(
+        (f) =>
+          f.endsWith(".mp4") &&
+          (f.includes("-9x16") || f.includes("9x16") || f.includes("vertical")) &&
+          !f.includes("compilation")
+      );
+      if (vert) return path.join(d, vert);
+
+      // Next look for landscape 16:9 or any mp4
+      const land = files.find(
+        (f) =>
+          f.endsWith(".mp4") &&
+          (f.includes("-16x9") || f.includes("16x9") || f.includes("landscape")) &&
+          !f.includes("compilation")
+      );
+      if (land) return path.join(d, land);
+
+      const anyMp4 = files.find((f) => f.endsWith(".mp4") && !f.includes("compilation"));
+      if (anyMp4) return path.join(d, anyMp4);
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+/**
+ * Publish the official channel introduction post to Threads
+ */
+export async function publishIntroductionPost(options: { dryRun?: boolean }): Promise<{
+  success: boolean;
+  url?: string;
+}> {
+  const config = await loadThreadsConfig();
+  console.log(`\n======================================================`);
+  console.log(`🎉 PUBLISHING INAUGURAL INTRODUCTION POST TO THREADS`);
+  console.log(`======================================================`);
+
+  if (!config.threadsAccessToken || !config.threadsUserId) {
+    throw new Error("Threads credentials not configured.");
+  }
+
+  const introText = `Halo Ayah, Bunda & Adik-adik tersayang! 👋✨
+
+Selamat datang di Rumah Dongeng Zayn Storybook di Threads! 📖🎈
+
+Kami hadir menyajikan animasi buku cerita bergambar dwibahasa (Indonesia & Inggris) yang:
+💖 Lucu, hangat, dan sarat pesan budi pekerti
+🌿 Suara tenang & tanpa bising (ramah untuk anak)
+🌙 Musik marimba pengantar tidur nyenyak
+
+Yuk ikuti petualangan seru kami di YouTube & Instagram @zayn.storybook! 🎬🧸
+
+#ZaynStorybook #DongengAnak #CeritaAnakBergambar #BukuAnak #KidsBedtimeStories`;
+
+  console.log(`\n📝 Introduction Caption preview (${introText.length}/500 chars):`);
+  console.log(`------------------------------------------------------`);
+  console.log(introText);
+  console.log(`------------------------------------------------------`);
+
+  if (options.dryRun) {
+    console.log(`\n🧪 [DRY RUN] Skipping actual API calls.`);
+    return { success: true, url: "https://www.threads.net/@zayn.storybook/post/DRY_RUN_INTRO" };
+  }
+
+  const brandingDir = path.resolve("./stories/branding");
+  const candidates = [
+    path.join(brandingDir, "pfp-master-1080x1080.png"),
+    path.join(brandingDir, "pfp-instagram-1080x1080.png"),
+    path.join(brandingDir, "cover-facebook-1640x924.png"),
+  ];
+  const targetImage = candidates.find((p) => existsSync(p));
+
+  let cleanupFn: (() => Promise<void>) | null = null;
+  let containerId: string | null = null;
+
+  try {
+    if (targetImage) {
+      console.log(`📸 Uploading intro visual: ${path.basename(targetImage)}...`);
+      const { publicUrl, cleanup } = await uploadImageToR2(targetImage, "threads-intro");
+      cleanupFn = cleanup;
+
+      console.log(`📦 Creating IMAGE Threads container...`);
+      containerId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
+        mediaType: "IMAGE",
+        text: introText,
+        imageUrl: publicUrl,
+        isMadeWithAi: false,
+      });
+    } else {
+      console.log(`📦 Creating TEXT Threads container...`);
+      containerId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
+        mediaType: "TEXT",
+        text: introText,
+        linkAttachment: "https://youtube.com/@ZaynStorybook",
+      });
+    }
+
+    console.log(`✔ Container created! ID: ${containerId}`);
+    console.log(`⏳ Waiting for container processing...`);
+    await waitForThreadsContainer(containerId, config.threadsAccessToken);
+
+    console.log(`🚀 Publishing introduction post to Threads...`);
+    const postId = await publishThreadsContainer(config.threadsUserId, containerId, config.threadsAccessToken);
+
+    console.log(`🎉 Published successfully! Post ID: ${postId}`);
+    const postDetails = await getThreadsPostDetails(postId, config.threadsAccessToken);
+    console.log(`🌐 Permalink: ${postDetails.permalink}\n`);
+
+    return { success: true, url: postDetails.permalink };
+  } finally {
+    if (cleanupFn) {
+      await cleanupFn();
+    }
+  }
+}
+
+/**
  * Main execution routine for publishing to Threads
  */
 export async function publishStoryToThreads(options: {
@@ -448,16 +579,15 @@ export async function publishStoryToThreads(options: {
         isMadeWithAi: true,
       });
     } else if (mode === "video") {
-      // Look for vertical shorts/reels MP4 first, then story MP4
-      const shortVideoPath = path.join(storyDir, "exports", lang, "short-vertical.mp4");
-      const storyVideoPath = path.join(storyDir, "exports", lang, "story.mp4");
-      const targetVideo = existsSync(shortVideoPath) ? shortVideoPath : storyVideoPath;
+      const targetVideo = findStoryVideo(storyDir, lang, options.bookSlug);
 
-      if (!existsSync(targetVideo)) {
-        throw new Error(`No video found for Threads publish at ${targetVideo}`);
+      if (!targetVideo) {
+        console.log(`⏩ No MP4 video rendered for "${options.bookSlug}". Skipping video publish.`);
+        return { success: false, skipped: true, reason: "No video found" };
       }
 
-      console.log(`🎬 Uploading video to R2: ${path.basename(targetVideo)}...`);
+      console.log(`🎬 Found story video: ${path.basename(targetVideo)}`);
+      console.log(`☁️ Uploading video to R2 for Threads...`);
       const { publicUrl, cleanup } = await uploadVideoToR2(targetVideo);
       cleanupFn = cleanup;
 
@@ -522,10 +652,12 @@ async function main() {
   };
 
   const isVerify = args.includes("--verify-token") || args.includes("--verify");
+  const isIntro = args.includes("--intro");
+  const isAllBooks = args.includes("--all-books") || args.includes("--all");
   const isDryRun = args.includes("--dry-run");
-  const bookSlug = getArg("--book") || "terlalu-banyak-suara";
+  const requestedBook = getArg("--book") || "terlalu-banyak-suara";
   const langArg = (getArg("--lang") || "id") as "id" | "en" | "all";
-  const modeArg = (getArg("--mode") || "image") as "image" | "video" | "text";
+  const modeArg = (getArg("--mode") || "video") as "image" | "video" | "text";
 
   if (isVerify) {
     const config = await loadThreadsConfig();
@@ -553,14 +685,47 @@ async function main() {
     }
   }
 
+  // Handle Introduction Post
+  if (isIntro) {
+    await publishIntroductionPost({ dryRun: isDryRun });
+    return;
+  }
+
+  const storiesDir = path.resolve("./stories");
+  const booksToProcess: string[] = [];
+
+  if (isAllBooks) {
+    const entries = await fs.readdir(storiesDir, { withFileTypes: true });
+    for (const ent of entries) {
+      if (ent.isDirectory() && ent.name !== "branding" && ent.name !== "test-no-image") {
+        const manifestPath = path.join(storiesDir, ent.name, "story.json");
+        if (existsSync(manifestPath)) {
+          booksToProcess.push(ent.name);
+        }
+      }
+    }
+  } else {
+    booksToProcess.push(requestedBook);
+  }
+
   const langsToRun: Array<"id" | "en"> = langArg === "all" ? ["id", "en"] : [langArg];
-  for (const l of langsToRun) {
-    await publishStoryToThreads({
-      bookSlug,
-      lang: l,
-      mode: modeArg,
-      dryRun: isDryRun,
-    });
+
+  for (let bIdx = 0; bIdx < booksToProcess.length; bIdx++) {
+    const b = booksToProcess[bIdx];
+    for (const l of langsToRun) {
+      await publishStoryToThreads({
+        bookSlug: b,
+        lang: l,
+        mode: modeArg,
+        dryRun: isDryRun,
+      });
+
+      // Stagger slightly between posts to be gentle on API rate limit
+      if (!isDryRun && (booksToProcess.length > 1 || langsToRun.length > 1)) {
+        console.log(`\n⏳ Cooling down 6 seconds before next publish...`);
+        await new Promise((r) => setTimeout(r, 6000));
+      }
+    }
   }
 }
 
