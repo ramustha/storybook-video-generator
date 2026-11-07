@@ -6,6 +6,7 @@ import { pipeline } from "stream/promises";
 import { Readable } from "stream";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { loadR2Config, pushStory } from "./manage-story-storage";
+import { auditAndRefineStoryQuality, QualityAuditResult } from "./audit-story-quality";
 
 export interface CuratedScene {
   index: number;
@@ -68,6 +69,7 @@ export interface IngestOptions {
   skipAudio?: boolean;
   skipThumbnail?: boolean;
   skipUpload?: boolean;
+  skipQC?: boolean;
 }
 
 /**
@@ -181,6 +183,48 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     console.log(`✔ Source PDF already present at ${pdfPath}`);
   }
 
+  // 2.5. AI Quality Control & Moral Audit Gate
+  let refinedMoral = { ...targetBook.moral };
+  let refinedThumbnailConfig = targetBook.thumbnailConfig ? JSON.parse(JSON.stringify(targetBook.thumbnailConfig)) : undefined;
+  let auditReport: QualityAuditResult | null = null;
+
+  if (!options.skipQC) {
+    try {
+      auditReport = await auditAndRefineStoryQuality(targetBook, { force: options.force, dryRun: options.dryRun });
+      if (auditReport && (auditReport.overallVerdict === "AUTO_REFINED" || auditReport.overallVerdict === "PASS")) {
+        refinedMoral = {
+          headlineId: auditReport.moralAudit.refinedHeadlineId || refinedMoral.headlineId,
+          spokenId: auditReport.moralAudit.refinedSpokenId || refinedMoral.spokenId,
+          headlineEn: auditReport.moralAudit.refinedHeadlineEn || refinedMoral.headlineEn,
+          spokenEn: auditReport.moralAudit.refinedSpokenEn || refinedMoral.spokenEn,
+        };
+
+        if (auditReport.thumbnailRefinement && refinedThumbnailConfig) {
+          if (refinedThumbnailConfig.id) {
+            if (auditReport.thumbnailRefinement.hookId) refinedThumbnailConfig.id.hook = auditReport.thumbnailRefinement.hookId;
+            if (auditReport.thumbnailRefinement.badgeId) refinedThumbnailConfig.id.badge = auditReport.thumbnailRefinement.badgeId;
+            if (auditReport.thumbnailRefinement.stickerId) refinedThumbnailConfig.id.sticker = auditReport.thumbnailRefinement.stickerId;
+          }
+          if (refinedThumbnailConfig.en) {
+            if (auditReport.thumbnailRefinement.hookEn) refinedThumbnailConfig.en.hook = auditReport.thumbnailRefinement.hookEn;
+            if (auditReport.thumbnailRefinement.badgeEn) refinedThumbnailConfig.en.badge = auditReport.thumbnailRefinement.badgeEn;
+            if (auditReport.thumbnailRefinement.stickerEn) refinedThumbnailConfig.en.sticker = auditReport.thumbnailRefinement.stickerEn;
+          }
+        }
+      }
+
+      if (auditReport && !options.dryRun) {
+        await fs.writeFile(
+          path.join(storyDir, "qc-audit-report.json"),
+          JSON.stringify(auditReport, null, 2),
+          "utf-8"
+        );
+      }
+    } catch (err: any) {
+      console.warn(`⚠️ Warning in AI Quality Gate: ${err.message}. Continuing with curated defaults.`);
+    }
+  }
+
   // 3. Assemble story.json manifest
   console.log(`\n📝 Generating story.json manifest...`);
   const sfxList = [
@@ -283,11 +327,11 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
       status: "ready",
     },
     audio: {
-      text: `Pesan moral cerita ini: ${targetBook.moral.headlineId}. ${targetBook.moral.spokenId}`,
+      text: `Pesan moral cerita ini: ${refinedMoral.headlineId}. ${refinedMoral.spokenId}`,
       audioPath: "assets/id/moral.mp3",
       wordsPath: "assets/id/moral_words.json",
       en: {
-        text: `The moral of the story: ${targetBook.moral.headlineEn}. ${targetBook.moral.spokenEn}`,
+        text: `The moral of the story: ${refinedMoral.headlineEn}. ${refinedMoral.spokenEn}`,
         audioPath: "assets/en/moral.mp3",
         wordsPath: "assets/en/moral_words.json",
         durationSeconds: 11.0,
@@ -352,7 +396,7 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
       renderingConstraints:
         "authentic 16:9 plates from open-license source, inpaint typography and page numbers, preserve full illustrator expression",
     },
-    thumbnailConfig: targetBook.thumbnailConfig,
+    thumbnailConfig: refinedThumbnailConfig || targetBook.thumbnailConfig,
     characterBible: targetBook.characterBible,
     worldBible: targetBook.worldBible,
     scenes: scenesPayload,
@@ -453,6 +497,7 @@ async function main() {
   const skipAudio = args.includes("--skip-audio");
   const skipThumbnail = args.includes("--skip-thumbnail");
   const skipUpload = args.includes("--skip-upload");
+  const skipQC = args.includes("--skip-qc");
 
   console.log(`\n======================================================`);
   console.log(`📖 Zayn Storybook Batch & Daily Ingestion Engine`);
@@ -508,6 +553,7 @@ Options:
   --skip-audio        Skip Edge TTS voice synthesis
   --skip-thumbnail    Skip Remotion thumbnail rendering
   --skip-upload       Process locally without pushing to Cloudflare R2
+  --skip-qc           Skip AI Quality Control and moral validation gate
     `);
     process.exit(0);
   }
@@ -529,6 +575,7 @@ Options:
     skipAudio,
     skipThumbnail,
     skipUpload,
+    skipQC,
   };
 
   const startTime = Date.now();
