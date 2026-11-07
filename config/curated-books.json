@@ -447,5 +447,132 @@
         "en": "And they all cheered together: \"HAPPY BIRTHDAY!\" Wow, they had prepared the happiest surprise just for me! I hugged them all with pure joy."
       }
     ]
+  },
+  {
+    "slug": "dengarkan-tubuhku",
+    "title": "Mendengarkan Tubuhku",
+    "originalTitle": "Listen to My Body",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 1,
+    "sourceUrl": "https://storyweaver.org.in/stories/40-listen-to-my-body",
+    "pdfUrl": "https://archive.org/download/ListeningToMyBody-English-Pratham/40-listen-to-my-body.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Petualangan Sensorik & Mindfulness Anak: Mengenal Detak Jantung, Nafas, dan Suara Tubuh",
+    "characterBible": {
+      "protagonists": [
+        {
+          "id": "aku",
+          "name": "Aku / The Mindful Child",
+          "role": "Curious Child",
+          "voice": {
+            "id": "id-ID-ArdiNeural",
+            "en": "en-US-AnaNeural",
+            "color": "#10B981",
+            "badge": "👦 Aku"
+          }
+        }
+      ]
+    },
+    "worldBible": {
+      "village": "Quiet Cozy Bedroom & Scented Kitchen",
+      "palette": {
+        "calmEmerald": "#059669",
+        "warmOrange": "#F97316",
+        "sunnyYellow": "#FBBF24",
+        "softSky": "#38BDF8"
+      }
+    },
+    "moral": {
+      "headlineId": "Kenali dan Rawat Tubuhmu Sendiri!",
+      "spokenId": "Tubuh kita adalah anugerah terindah. Dengarkan saat tubuhmu lelah atau lapar, dan rawatlah dengan makan sehat serta istirahat yang cukup!",
+      "headlineEn": "Listen To and Care For Your Body!",
+      "spokenEn": "Our body is a wonderful gift. Listen when it tells you it's hungry or tired, and treat it well with healthy food and good rest!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_03.png",
+      "backdropImage": "assets/scene_06.png",
+      "id": {
+        "headlineTop": "MENDENGARKAN TUBUHKU",
+        "headlineBottom": "BUNYI AJAIB DI DALAM DIRI! 💓👃",
+        "hook": "SAAT RUMAH MATI LAMPU, ADA SUARA AJAIB DI PERUTKU?!",
+        "hookEmoji": "👂🤯",
+        "badge": "CERITA EDUKASI ANAK SERU",
+        "sticker": "Detak Jantung Ajaib! 💓",
+        "bedtimeTitle": "Mendengarkan Tubuhku",
+        "bedtimeHook": "Kisah Edukatif Mengenal Detak Jantung dan Nafas Diri Sendiri"
+      },
+      "en": {
+        "headlineTop": "LISTEN TO MY BODY!",
+        "headlineBottom": "MAGIC SOUNDS INSIDE! 💓👃",
+        "hook": "WHEN LIGHTS WENT OUT, MY BODY STARTED TALKING?!",
+        "hookEmoji": "👂🤯",
+        "badge": "FUN EDUCATIONAL STORY",
+        "sticker": "Magical Heartbeat! 💓",
+        "bedtimeTitle": "Listen to My Body",
+        "bedtimeHook": "A Mindful Bedtime Journey of Hearing Our Own Heart and Breath"
+      }
+    },
+    "scenes": [
+      {
+        "index": 1,
+        "type": "story",
+        "pageNumber": 2,
+        "id": "Hari ini aku tidak pergi ke sekolah. Hari ini adalah hari libur yang tenang!",
+        "en": "Today I am not going to school. It is a holiday!"
+      },
+      {
+        "index": 2,
+        "type": "story",
+        "pageNumber": 4,
+        "id": "Hari ini aku juga tidak bisa menonton televisi, karena listrik di rumah sedang padam. Lalu, apa yang bisa kulakukan?",
+        "en": "Today I am not going to watch TV. There is no electricity anyway. What am I going to do?"
+      },
+      {
+        "index": 3,
+        "type": "story",
+        "pageNumber": 7,
+        "id": "Aha! Hari ini aku akan mendengarkan suara tubuhku sendiri!",
+        "en": "Today I am going to listen to my body!"
+      },
+      {
+        "index": 4,
+        "type": "story",
+        "pageNumber": 8,
+        "id": "Pertama, aku harus tenang dan diam. Tarik nafas perlahan... hembuskan... sssss... suara nafasku terdengar jelas!",
+        "en": "First, I have to be quiet. Very quiet. So that I can listen to my own body. Yes, now I can hear my breath. In and out."
+      },
+      {
+        "index": 5,
+        "type": "story",
+        "pageNumber": 11,
+        "id": "Dan sekarang aku bisa mendengar detak jantungku! Deg-dug, deg-dug, deg-dug! Saat aku melompat dua puluh kali, jantungku berdetak semakin kencang!",
+        "en": "And now I can hear my heart beating! Doodom, doodoom, dooodooom! By jumping up and down twenty times, my heart beats faster!"
+      },
+      {
+        "index": 6,
+        "type": "story",
+        "pageNumber": 14,
+        "id": "Ketika meletakkan jari di pergelangan tangan, denyut nadiku terasa berdetak. Lalu aku mendengar suara tawaku sendiri: Hahahaha!",
+        "en": "If I put my fingers on my wrist, I can feel my pulse! And I can hear myself laughing happily: Hahahaha!"
+      },
+      {
+        "index": 7,
+        "type": "story",
+        "pageNumber": 18,
+        "id": "Plok-plok-plok! Suara tepuk tanganku nyaring sekali! Tapi yang paling lucu... kruk-kruk-kruk! Perutku berbunyi minta makan!",
+        "en": "Clap-clap-clap! My hands sound so clear! And most of all, I can hear my stomach rumbling: Feed me, feed me!"
+      },
+      {
+        "index": 8,
+        "type": "story",
+        "pageNumber": 20,
+        "id": "Hidungku mencium wangi masakan kue lezat buatan Ibu di dapur. Menyenangkan sekali bisa mendengarkan tubuhku sendiri hari ini!",
+        "en": "My nose can smell sweet treats frying in mother's kitchen. It is so fun listening to my body today!"
+      }
+    ]
   }
 ]
