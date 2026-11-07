@@ -96,9 +96,9 @@ async function main() {
   const thumbVerifs = await verifyStoryThumbnails(options.bookSlug, options.lang);
   for (const v of thumbVerifs) {
     if (!v.isValid) {
-      const missing = v.types
+      const missing = v.items
         .filter((t) => !t.isValid)
-        .map((t) => `${t.type} (${t.reason})`)
+        .map((t) => `${t.type} (${t.error || "missing"})`)
         .join(", ");
       console.log(
         `⚠️  Missing/invalid thumbnails for [${v.lang.toUpperCase()}]: ${missing}`

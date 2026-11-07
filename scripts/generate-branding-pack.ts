@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
-import puppeteer from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 
 /**
  * Palette Definition - Authentic Storybook (Anti-AI Slop):
@@ -820,7 +820,7 @@ export function generateInstagramStoryHighlightSvg(): string {
 }
 
 async function renderSvgToPng(
-  browser: puppeteer.Browser,
+  browser: Browser,
   svgContent: string,
   outputPath: string,
   width: number,

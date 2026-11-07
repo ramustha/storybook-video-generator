@@ -104,6 +104,7 @@ jobs:
           cat <<EOF > config/r2-config.json
           {
             "accountId": "${R2_ACCOUNT_ID}",
+            "endpoint": "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
             "accessKeyId": "${R2_ACCESS_KEY_ID}",
             "secretAccessKey": "${R2_SECRET_KEY}",
             "bucketName": "zayn-storybook",

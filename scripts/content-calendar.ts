@@ -689,6 +689,15 @@ async function publishToday(dryRun: boolean, targetBook?: string, targetLang?: "
 
   for (const slot of slots) {
     console.log(`\n🚀 Memproses Jadwal: ${slot.bookSlug} [${slot.lang.toUpperCase()}]`);
+
+    // Ensure story assets exist locally, pull from Cloudflare R2 if missing
+    const storyDir = path.resolve("./stories", slot.bookSlug);
+    const storyPath = path.join(storyDir, "story.json");
+    if (!existsSync(storyPath)) {
+      console.log(`📥 Story assets not found locally for [${slot.bookSlug}]. Pulling from Cloudflare R2...`);
+      await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug]);
+    }
+
     const status = checkPublicationStatus(slot.bookSlug, slot.lang);
 
     if (status.yt && status.fb && status.ig && !dryRun) {
@@ -697,7 +706,6 @@ async function publishToday(dryRun: boolean, targetBook?: string, targetLang?: "
     }
 
     // Step 1: Cek apakah file video sudah ada; jika belum, render otomatis!
-    const storyDir = path.resolve("./stories", slot.bookSlug);
     const storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
     const vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
     const landPath = storyJson.exports?.[slot.lang]?.landscape?.path ? path.join(storyDir, storyJson.exports[slot.lang].landscape.path) : null;
@@ -716,6 +724,12 @@ async function publishToday(dryRun: boolean, targetBook?: string, targetLang?: "
     if (dryRun) publishArgs.push("--dry-run");
 
     await runChildCommand("npx", ["tsx", ...publishArgs]);
+
+    // Step 3: Sinkronkan kembali manifest story.json yang baru ke Cloudflare R2
+    if (!dryRun) {
+      console.log(`☁️ Syncing updated story manifest back to Cloudflare R2...`);
+      await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "push", slot.bookSlug, "--manifest-only"]);
+    }
   }
 }
 

@@ -27,12 +27,12 @@ exports/**/*.mp4
 stories/**/exports/**/*.mp4
 *.mp4
 
-# Temporary and experimental stories
-stories/test-*/
-stories/raja-gemuk-remotion/
-
-# Storybook Raw Ingestion & Rendered Video Binaries
+# Storybook Assets & Manifests (Stored in Cloudflare R2: zayn-storybook)
+# Git is kept ultra-clean (<5MB pure code). Run 'npm run story:pull <book>' or 'npm run story:pull-all' to restore locally.
+stories/*
+!stories/.gitkeep
+!stories/branding/
+!stories/branding/**
+stories/**/exports/**/*.mp4
 stories/**/raw/
 stories/**/cache/
-stories/**/exports/**/*.mp4
-*.mp4
