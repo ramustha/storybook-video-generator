@@ -3,14 +3,21 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 
-const ALL_STORIES = [
-  "gara-gara-kucing",
-  "jas-hujan-merah",
-  "raja-gemuk-anjing-kurus",
-  "bulan-dan-topi-biru",
-  "hari-cukur-rambut",
-  "pisang-terlalu-banyak",
-];
+async function discoverAllStories(): Promise<string[]> {
+  const storiesDir = path.resolve("./stories");
+  if (!existsSync(storiesDir)) return [];
+  const entries = await fs.readdir(storiesDir, { withFileTypes: true });
+  const result: string[] = [];
+  for (const entry of entries) {
+    if (entry.isDirectory() && !entry.name.startsWith(".") && entry.name !== "branding" && !entry.name.startsWith("test-")) {
+      const storyJson = path.join(storiesDir, entry.name, "story.json");
+      if (existsSync(storyJson)) {
+        result.push(entry.name);
+      }
+    }
+  }
+  return result.sort();
+}
 
 interface ReelTask {
   slug: string;
@@ -108,7 +115,8 @@ async function main() {
   }
   console.log("==================================================================\n");
 
-  const storiesToInspect = targetBook ? [targetBook] : ALL_STORIES;
+  const allDiscovered = await discoverAllStories();
+  const storiesToInspect = targetBook ? [targetBook] : allDiscovered;
   const tasks: ReelTask[] = [];
 
   for (const slug of storiesToInspect) {

@@ -78,7 +78,7 @@ Check if the open-license repository hosts clean, text-free illustration plates:
 
 ### Priority 1B: Automated Vision Text-Exclusion & Inpainting (For PDF Sources)
 When official storybooks are available as high-resolution PDFs with narrative text printed on pages:
-* **Automated 3-Stage Text Exclusion Pipeline (`scripts/smart-text-inpaint.swift`)**:
+* **Automated 3-Stage Text Exclusion Pipeline (`scripts/prepare-plates.swift` via `npm run plates -- --book <slug>`)**:
   1. **Apple Vision OCR Bounding Box Localization (`VNRecognizeTextRequest`)**: Accurately scans each page or two-page spread to detect the exact normalized coordinates of every text observation.
   2. **Smart 16:9 Aspect Crop for Spreads**: Since children's picture books place narrative breath groups in an upper or lower margin (e.g. top ~25%), the engine anchors the 16:9 widescreen crop window safely into the pure illustration region below the lowest text boundary across two-page spreads.
   3. **Portrait Book Cover Preservation Rule**: Never slice or crop a portrait book cover (`aspect ratio < 1.0`) into a 16:9 horizontal strip. Preserve the full portrait illustration plate (`cover.png`) and inpaint title/author/badge text blocks clean. Configure `CoverScene.tsx` with `"coverOrientation": "portrait"` so Remotion's 3D floating hardcover container scales to natural portrait book proportions (`440x614` in landscape, `640x894` in vertical) with zero distortion or black bars.

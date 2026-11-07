@@ -112,9 +112,12 @@ The agent **MUST explicitly ask the user to clarify, verify, and confirm the fol
 * **Zero Language Redundancy**: All visual plates (`assets/scene_XX.png`, `cover.png`) are text-free and language-agnostic; they are **100% shared between Indonesian and English video deliverables**.
 * **Priority 1 (Authentic Source PDF & Clean Plates Extraction)**:
   * Check open-access repositories (Internet Archive Pratham collection, StoryWeaver, SIBI Kemendikbud, Arvind Gupta Toys) to download the authentic storybook PDF (`raw/source-book.pdf`).
-  * Extract pages using native Swift/PDFKit (`swift scripts/extract-pdf-pages.swift raw/source-book.pdf raw/pages/`).
-  * Run **Automated Smart Text Exclusion & Inpainting** (`scripts/smart-text-inpaint.swift` using Apple Vision OCR) to remove typography, author credits, and page numbers, yielding 100% pure artist illustration plates.
-  * Preserves 100% authentic artist vision, incurs zero AI generation quota, and guarantees zero character drift.
+  * Run the **Universal Plate Preparation Engine** (`npm run plates -- --book <book-slug>`):
+    * Automatically extracts PDF pages via Swift/PDFKit if `raw/pages/` is empty.
+    * Reads `sourcePage` mappings from `story.json` (or defaults sequentially).
+    * Runs Apple Vision OCR text localization & texture-sampling inpainting to erase text blocks, author credits, and page numbers.
+    * Composes 16:9 widescreen plates (`assets/scene_XX.png`), cover (`assets/cover.png`), and avatar (`assets/protagonist_avatar.png`) in one automated pass.
+    * Preserves 100% authentic artist vision, incurs zero AI generation quota, and guarantees zero character drift with zero custom scripts needed.
 * **Priority 2 (Source-Fidelity AI Generation)**: When clean authentic artwork or open-access PDFs are unavailable (e.g. text-only folklore manuscripts), generate fresh AI illustrations strictly adhering to the character physical traits, attire, species, and environmental setting described in the source manuscript.
 * **Never Render Incomplete/Placeholder Deliverables Unasked**: Do not output final videos with placeholder SVGs or incomplete illustration scenes unless the user explicitly requests a draft preview. All scenes must contain complete, authentic artwork before initiating full production rendering.
 * **3D Cover**: 2.5s opener with embossed gold gilded edges and author credit (`assets/cover.png`). Cover portrait books should set `book.coverOrientation = "portrait"`.

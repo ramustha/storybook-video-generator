@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "manage": "tsx scripts/manage-story.ts",
+    "plates": "swift scripts/prepare-plates.swift",
     "render": "tsx scripts/render-book.ts",
     "thumbnail": "tsx scripts/render-thumbnail.ts",
     "thumbnail:verify": "tsx scripts/render-thumbnail.ts --verify --all-books",
