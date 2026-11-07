@@ -11,14 +11,17 @@ interface MetaConfig {
   instagramUserId: string;
   instagramUsername?: string;
   pageAccessToken: string;
+  threadsUserId?: string;
+  threadsUsername?: string;
+  threadsAccessToken?: string;
 }
 
 interface MetaPublishedRef {
   bookSlug: string;
   bookTitle: string;
   lang: string;
-  platform: "Facebook" | "Instagram";
-  format: "16:9 Landscape" | "9:16 Reel";
+  platform: "Facebook" | "Instagram" | "Threads";
+  format: "16:9 Landscape" | "9:16 Reel" | "9:16 Video" | "4:5 Image";
   id: string;
   url: string;
   title: string;
@@ -118,6 +121,26 @@ async function collectMetaPublishedVideos(): Promise<MetaPublishedRef[]> {
           }
         }
       }
+
+      // 3. Threads Publications
+      const thPub = manifest.publications?.threads;
+      if (thPub) {
+        for (const lang of ["id", "en"]) {
+          const langEntry = thPub[lang];
+          if (!langEntry || !langEntry.id) continue;
+
+          videos.push({
+            bookSlug: entry.name,
+            bookTitle: manifest.title || entry.name,
+            lang: lang.toUpperCase(),
+            platform: "Threads",
+            format: langEntry.type === "video" ? "9:16 Video" : "4:5 Image",
+            id: langEntry.id,
+            url: langEntry.url || `https://www.threads.net/post/${langEntry.id}`,
+            title: manifest.title || entry.name,
+          });
+        }
+      }
     } catch {
       // Ignore invalid JSON manifests
     }
@@ -211,14 +234,42 @@ async function fetchInstagramMediaStats(mediaId: string, token: string): Promise
   return stats;
 }
 
+async function fetchThreadsPostStats(postId: string, accessToken?: string): Promise<VideoStats> {
+  const stats: VideoStats = { id: postId, views: 0, likes: 0, comments: 0, shares: 0 };
+  if (!accessToken) return stats;
+
+  try {
+    const url = `https://graph.threads.net/v1.0/${postId}/insights?metric=views,likes,replies,reposts,quotes&access_token=${encodeURIComponent(accessToken)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.data && Array.isArray(data.data)) {
+      for (const item of data.data) {
+        const val = item.values?.[0]?.value || 0;
+        if (item.name === "views") stats.views = val;
+        if (item.name === "likes") stats.likes = val;
+        if (item.name === "replies") stats.comments = val;
+        if (item.name === "reposts" || item.name === "quotes") stats.shares = (stats.shares || 0) + val;
+      }
+    }
+  } catch {
+    // Ignore if insights temporarily unavailable
+  }
+
+  return stats;
+}
+
 async function main() {
   console.log("\n=======================================================");
-  console.log("📊 META VIDEO ANALYTICS & INSIGHTS SUMMARY (FB & IG)");
+  console.log("📊 META VIDEO ANALYTICS & INSIGHTS (FB, IG & THREADS)");
   console.log("=======================================================\n");
 
   const config = await loadMetaConfig();
   console.log(`📘 Facebook Page  : ${config.facebookPageName || config.facebookPageId}`);
-  console.log(`📸 Instagram User : @${config.instagramUsername || config.instagramUserId}\n`);
+  console.log(`📸 Instagram User : @${config.instagramUsername || config.instagramUserId}`);
+  if (config.threadsUsername) {
+    console.log(`🧵 Threads User   : @${config.threadsUsername}`);
+  }
+  console.log("");
 
   const videos = await collectMetaPublishedVideos();
   if (videos.length === 0) {
@@ -226,7 +277,7 @@ async function main() {
     return;
   }
 
-  console.log(`Found ${videos.length} published Meta videos. Fetching live performance metrics...\n`);
+  console.log(`Found ${videos.length} published Meta videos & posts. Fetching live performance metrics...\n`);
 
   let totalViews = 0;
   let totalLikes = 0;
@@ -234,16 +285,22 @@ async function main() {
 
   for (let i = 0; i < videos.length; i++) {
     const v = videos[i];
-    const stats =
-      v.platform === "Facebook"
-        ? await fetchFacebookVideoStats(v.id, config.pageAccessToken)
-        : await fetchInstagramMediaStats(v.id, config.pageAccessToken);
+    let stats: VideoStats;
+
+    if (v.platform === "Facebook") {
+      stats = await fetchFacebookVideoStats(v.id, config.pageAccessToken);
+    } else if (v.platform === "Instagram") {
+      stats = await fetchInstagramMediaStats(v.id, config.pageAccessToken);
+    } else {
+      stats = await fetchThreadsPostStats(v.id, config.threadsAccessToken);
+    }
 
     totalViews += stats.views;
     totalLikes += stats.likes;
     totalComments += stats.comments;
 
-    const platformIcon = v.platform === "Facebook" ? "📘 FB" : "📸 IG";
+    const platformIcon =
+      v.platform === "Facebook" ? "📘 FB" : v.platform === "Instagram" ? "📸 IG" : "🧵 TH";
     console.log(`[${i + 1}/${videos.length}] ${platformIcon} | ${v.bookTitle} (${v.lang}) - ${v.format}`);
     console.log(`     🔗 URL       : ${v.url}`);
     console.log(`     👀 Views     : ${stats.views.toLocaleString()}`);

@@ -50,6 +50,10 @@ async function main() {
       if (m.appId) secrets["PERSONAL_META_APP_ID"] = m.appId;
       if (m.facebookPageId) secrets["PERSONAL_META_FACEBOOK_PAGE_ID"] = m.facebookPageId;
       if (m.instagramUserId) secrets["PERSONAL_META_INSTAGRAM_USER_ID"] = m.instagramUserId;
+      if (m.threadsAccessToken) secrets["PERSONAL_THREADS_ACCESS_TOKEN"] = m.threadsAccessToken;
+      if (m.threadsUserId) secrets["PERSONAL_THREADS_USER_ID"] = m.threadsUserId;
+      if (m.threadsAppId) secrets["PERSONAL_THREADS_APP_ID"] = m.threadsAppId;
+      if (m.threadsAppSecret) secrets["PERSONAL_THREADS_APP_SECRET"] = m.threadsAppSecret;
     } catch {}
   }
 
