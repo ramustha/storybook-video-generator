@@ -1036,7 +1036,8 @@ async function main() {
           console.error("\n❌ Facebook Upload Failed:", err.message);
         }
       } else {
-        console.log(`\n⏩ Skipping Facebook upload (already live: ${existingFbPub?.url})`);
+        const existingFbUrl = story.publications?.facebook?.[options.lang]?.[options.format]?.url || "Facebook";
+        console.log(`\n⏩ Skipping Facebook upload (already live: ${existingFbUrl})`);
       }
 
       // 2. Instagram Reels Ingestion via same R2 URL
@@ -1065,7 +1066,8 @@ async function main() {
           console.error("\n❌ Instagram Reels Upload Failed:", err.message);
         }
       } else {
-        console.log(`\n⏩ Skipping Instagram upload (already live: ${existingIgPub?.url})`);
+        const existingIgUrl = story.publications?.instagram?.[options.lang]?.url || "Instagram";
+        console.log(`\n⏩ Skipping Instagram upload (already live: ${existingIgUrl})`);
       }
     } finally {
       // Always cleanup R2 buffer object immediately after both finish
