@@ -68,6 +68,16 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
       />
 
+      {/* 4:5 Portrait Announcement Composition for Instagram Feed & Facebook (1080x1350) */}
+      <Composition
+        id="StorybookThumbnail-Portrait"
+        component={StorybookThumbnailComposition as any}
+        durationInFrames={1}
+        fps={30}
+        width={1080}
+        height={1350}
+      />
+
       {/* 16:9 YouTube Compilation Marathon Thumbnail Composition (Landscape 1920x1080) */}
       <Composition
         id="StorybookCompilationThumbnail"

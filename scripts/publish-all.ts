@@ -310,7 +310,7 @@ async function main() {
     // 4A. Facebook Page Promotional Post
     try {
       console.log(`\n📘 Publishing Promotional Post to Facebook Page...`);
-      const fbArgs = ["scripts/publish-launch-posts.ts", "--book", options.bookSlug];
+      const fbArgs = ["scripts/publish-launch-posts.ts", "--book", options.bookSlug, "--lang", options.lang === "all" ? "id" : options.lang];
       if (options.dryRun) fbArgs.push("--dry-run");
       await runCommand("npx", ["tsx", ...fbArgs]);
     } catch (fbErr: any) {
@@ -319,8 +319,8 @@ async function main() {
 
     // 4B. Instagram Feed / Carousel Post
     try {
-      console.log(`\n📸 Publishing Promotional Carousel to Instagram Feed...`);
-      const igArgs = ["scripts/publish-instagram-post.ts", "--book", options.bookSlug, "--carousel"];
+      console.log(`\n📸 Publishing Promotional Post to Instagram Feed...`);
+      const igArgs = ["scripts/publish-instagram-post.ts", "--book", options.bookSlug, "--lang", options.lang === "all" ? "id" : options.lang, "--carousel"];
       if (options.dryRun) igArgs.push("--dry-run");
       await runCommand("npx", ["tsx", ...igArgs]);
     } catch (igErr: any) {

@@ -367,6 +367,7 @@ async function main() {
   const isDryRun = args.includes("--dry-run");
   const isCarousel = args.includes("--carousel");
   const bookSlug = getArg("--book");
+  const langArg = (getArg("--lang") || "id") as "id" | "en";
 
   let customImagePath = getArg("--image") || path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png");
   let captionText = DEFAULT_LAUNCH_CAPTION;
@@ -382,8 +383,13 @@ async function main() {
         captionText = igMatch[1].trim();
       }
 
-      // Check candidate single photo
+      // Check candidate single photo - PRIORITIZE 4:5 PORTRAIT (1080x1350)
       const candidateSingle = [
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-portrait.png`),
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-portrait.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-vertical.png`),
+        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-vertical.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-popular.png`),
         path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-popular.png`),
         path.resolve(`./stories/${bookSlug}/exports/thumbnail.png`),
         path.resolve(`./stories/${bookSlug}/assets/cover.png`),
@@ -395,36 +401,34 @@ async function main() {
         }
       }
 
-      // Candidates for carousel (cover + key scenes)
-      carouselSlides = [
-        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-popular.png`),
-        path.resolve(`./stories/${bookSlug}/assets/scene_01.png`),
-        path.resolve(`./stories/${bookSlug}/assets/scene_02.png`),
-        path.resolve(`./stories/${bookSlug}/assets/scene_03.png`),
-        path.resolve(`./stories/${bookSlug}/exports/id/thumbnail-bedtime.png`),
+      // Check candidate uniform 4:5 carousel slides
+      const candidatePortraitSlides = [
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/thumbnail-portrait.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/carousel-slide-1.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/carousel-slide-2.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/carousel-slide-3.png`),
+        path.resolve(`./stories/${bookSlug}/exports/${langArg}/carousel-slide-4.png`),
       ].filter((p) => existsSync(p));
+
+      if (candidatePortraitSlides.length >= 2) {
+        carouselSlides = candidatePortraitSlides;
+      }
     }
   }
 
-  if (isCarousel) {
-    const slidesToUse = carouselSlides.length > 0 ? carouselSlides : [
-      path.resolve("./exports/compilations/thumbnail-compilation-bedtime-id.png"),
-      path.resolve("./exports/compilations/chapters/bedtime-id/chapter-04-gara-gara-kucing.png"),
-      path.resolve("./exports/compilations/chapters/bedtime-id/chapter-02-hari-cukur-rambut.png"),
-      path.resolve("./exports/compilations/chapters/bedtime-id/chapter-03-jas-hujan-merah.png"),
-      path.resolve("./exports/compilations/chapters/bedtime-id/chapter-01-pisang-terlalu-banyak.png"),
-      path.resolve("./exports/compilations/chapters/bedtime-id/chapter-05-raja-gemuk-anjing-kurus.png"),
-      path.resolve("./stories/bulan-dan-topi-biru/exports/id/thumbnail-popular.png"),
-    ].filter((p) => existsSync(p));
-
+  if (isCarousel && carouselSlides.length >= 2) {
     await publishInstagramCarousel({
-      imagePaths: slidesToUse,
+      imagePaths: carouselSlides,
       caption: captionText,
       dryRun: isDryRun,
     });
   } else {
     if (!existsSync(customImagePath)) {
       throw new Error(`Image not found: ${customImagePath}`);
+    }
+
+    if (isCarousel && carouselSlides.length < 2) {
+      console.log(`ℹ️ Multi-slide 4:5 carousel not found. Publishing high-impact 4:5 Portrait Announcement Photo!`);
     }
 
     await publishInstagramFeedPhoto({
