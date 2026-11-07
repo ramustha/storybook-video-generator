@@ -557,7 +557,7 @@ async function main() {
   const compilationTheme = getArg("--compilation");
   const isDryRun = args.includes("--dry-run");
   const format = (getArg("--format") as "landscape" | "vertical" | "all") || "all";
-  const privacy = (getArg("--privacy") as "public" | "unlisted" | "private") || "unlisted";
+  const privacy = (getArg("--privacy") as "public" | "unlisted" | "private") || "public";
   const setPrivacy = getArg("--set-privacy") as "public" | "unlisted" | "private" | undefined;
   const scheduleTime = getArg("--schedule") || getArg("--publish-at");
   const isMadeForKids = args.includes("--made-for-kids");

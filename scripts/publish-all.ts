@@ -13,6 +13,7 @@ interface PublishAllOptions {
   skipTiktok: boolean;
   skipPromo: boolean;
   force: boolean;
+  privacy: "public" | "unlisted" | "private";
 }
 
 function parseArgs(): PublishAllOptions {
@@ -26,6 +27,7 @@ function parseArgs(): PublishAllOptions {
     skipTiktok: false,
     skipPromo: false,
     force: false,
+    privacy: "public",
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -34,6 +36,8 @@ function parseArgs(): PublishAllOptions {
       options.bookSlug = args[++i].replace(/^stories\//, "").replace(/\/$/, "");
     } else if (arg === "--lang" && args[i + 1]) {
       options.lang = args[++i] as "id" | "en" | "all";
+    } else if (arg === "--privacy" && args[i + 1]) {
+      options.privacy = args[++i] as "public" | "unlisted" | "private";
     } else if (arg === "--dry-run") {
       options.dryRun = true;
     } else if (arg === "--skip-youtube") {
@@ -163,6 +167,8 @@ async function main() {
           currentLang,
           "--format",
           "all",
+          "--privacy",
+          options.privacy || "public",
         ];
         if (options.dryRun) ytArgs.push("--dry-run");
         if (options.force) ytArgs.push("--force");

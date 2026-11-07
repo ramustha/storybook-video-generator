@@ -84,8 +84,8 @@ jobs:
         run: |
           ARGS=""
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            # Scheduled bi-weekly runs ingest a batch of 4 stories into Cloudflare R2 buffer
-            ARGS="--limit 4"
+            # Scheduled bi-weekly runs ingest a batch of 7 stories into Cloudflare R2 buffer (14 stories/week for 2 stories/day)
+            ARGS="--limit 7"
           elif [ "${{ inputs.book }}" != "auto" ] && [ -n "${{ inputs.book }}" ]; then
             ARGS="--book ${{ inputs.book }}"
           elif [ "${{ inputs.batch_size }}" = "all" ]; then
