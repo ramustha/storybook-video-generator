@@ -2,10 +2,10 @@ name: Zayn Storybook Daily Broadcast Scheduler
 
 on:
   schedule:
-    # 12:00 UTC = 19:00 WIB (Daily Prime Bedtime Slot)
+    # 00:30 UTC = 07:30 WIB (Daily Morning Slot - Morning Energy & English Feature)
+    - cron: '30 0 * * *'
+    # 12:00 UTC = 19:00 WIB (Daily Prime Bedtime Slot - Indonesian Bedtime Story)
     - cron: '0 12 * * *'
-    # 01:30 UTC = 08:30 WIB (Saturday Morning Energy Short Slot)
-    - cron: '30 1 * * 6'
   workflow_dispatch:
     inputs:
       book:
@@ -20,6 +20,16 @@ on:
           - 'auto'
           - 'id'
           - 'en'
+        default: 'auto'
+      slot:
+        description: 'Target Slot (auto, morning, evening, all)'
+        required: false
+        type: choice
+        options:
+          - 'auto'
+          - 'morning'
+          - 'evening'
+          - 'all'
         default: 'auto'
       dry_run:
         description: 'Dry Run Mode (Test without publishing)'
@@ -117,6 +127,7 @@ jobs:
         env:
           INPUT_BOOK: ${{ inputs.book || 'auto' }}
           INPUT_LANG: ${{ inputs.lang || 'auto' }}
+          INPUT_SLOT: ${{ inputs.slot || 'auto' }}
           INPUT_DRY_RUN: ${{ inputs.dry_run || false }}
         run: |
           ARGS="--publish-today"
@@ -128,6 +139,9 @@ jobs:
           fi
           if [ "${INPUT_LANG}" != "auto" ]; then
             ARGS="${ARGS} --lang ${INPUT_LANG}"
+          fi
+          if [ -n "${INPUT_SLOT}" ]; then
+            ARGS="${ARGS} --slot ${INPUT_SLOT}"
           fi
 
           echo "Running: npx tsx scripts/content-calendar.ts ${ARGS}"

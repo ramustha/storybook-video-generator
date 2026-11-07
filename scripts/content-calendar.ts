@@ -28,10 +28,10 @@ export const DAILY_CALENDAR_MONTH_1: ScheduledSlot[] = [
     theme: "Sringeri Srinivas #3: Lelucon Klakson Jalan Raya, Sapi Mogok & Headphone Ajaib",
   },
   {
-    date: "2026-11-08",
-    dayName: "Minggu",
-    timeSlot: "19:00 WIB",
-    slotType: "Bilingual English Feature",
+    date: "2026-11-07",
+    dayName: "Sabtu",
+    timeSlot: "21:00 WIB",
+    slotType: "Bilingual English Bedtime Feature (Grand Launch Cerita Baru #2)",
     bookSlug: "terlalu-banyak-suara",
     lang: "en",
     format: "both",
@@ -39,8 +39,19 @@ export const DAILY_CALENDAR_MONTH_1: ScheduledSlot[] = [
     theme: "English Read-Aloud: Too Much Noise! & Sringeri Srinivas Whimsical Solitude",
   },
   {
-    date: "2026-11-09",
-    dayName: "Senin",
+    date: "2026-11-08",
+    dayName: "Minggu",
+    timeSlot: "08:30 WIB",
+    slotType: "Morning Energy & English Read-Aloud",
+    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "English Read-Aloud: Sringeri Srinivas Learns to Laugh",
+  },
+  {
+    date: "2026-11-08",
+    dayName: "Minggu",
     timeSlot: "19:00 WIB",
     slotType: "Prime Bedtime Story",
     bookSlug: "sringeri-srinivas-belajar-tertawa",
@@ -50,15 +61,48 @@ export const DAILY_CALENDAR_MONTH_1: ScheduledSlot[] = [
     theme: "Sringeri Srinivas #4: Slapstick Monyet & Kulit Pisang yang Membawa Tawa Lepas",
   },
   {
-    date: "2026-11-10",
-    dayName: "Selasa",
-    timeSlot: "19:00 WIB",
-    slotType: "Bilingual English Feature",
-    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    date: "2026-11-09",
+    dayName: "Senin",
+    timeSlot: "07:30 WIB",
+    slotType: "Morning English Feature",
+    bookSlug: "tersenyumlah",
     lang: "en",
     format: "both",
     targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
-    theme: "English Read-Aloud: Sringeri Srinivas Learns to Laugh",
+    theme: "English Bedtime Story: Smile Please! A Heartwarming Forest Fable",
+  },
+  {
+    date: "2026-11-09",
+    dayName: "Senin",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "tersenyumlah",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Fabel Balita Ramah: Rusa Kecil & Senyum Menular Penghuni Hutan",
+  },
+  {
+    date: "2026-11-10",
+    dayName: "Selasa",
+    timeSlot: "07:30 WIB",
+    slotType: "Morning English Feature",
+    bookSlug: "ada-monster-di-bawah-tempat-tidurku",
+    lang: "en",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Tuesday Read-Aloud: Under My Bed?! Overcoming Nighttime Fears",
+  },
+  {
+    date: "2026-11-10",
+    dayName: "Selasa",
+    timeSlot: "19:00 WIB",
+    slotType: "Prime Bedtime Story",
+    bookSlug: "ada-monster-di-bawah-tempat-tidurku",
+    lang: "id",
+    format: "both",
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: "Mengatasi Ketakutan Tidur Anak: Misteri Monster Lucu di Kolong Ranjang",
   },
   {
     date: "2026-11-11",
@@ -664,7 +708,12 @@ async function runChildCommand(bin: string, args: string[]): Promise<void> {
   });
 }
 
-async function publishToday(dryRun: boolean, targetBook?: string, targetLang?: "id" | "en") {
+async function publishToday(
+  dryRun: boolean,
+  targetBook?: string,
+  targetLang?: "id" | "en",
+  slotFilter?: "morning" | "evening" | "auto" | "all"
+) {
   printHeader();
   let slots = getTodaySlot();
   if (targetBook) {
@@ -687,8 +736,36 @@ async function publishToday(dryRun: boolean, targetBook?: string, targetLang?: "
     return;
   }
 
+  if (!targetBook && slotFilter && slotFilter !== "all") {
+    const jakartaHour = parseInt(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Jakarta",
+        hour: "numeric",
+        hour12: false,
+      }).format(new Date()),
+      10
+    );
+    const isMorning = slotFilter === "morning" || (slotFilter === "auto" && jakartaHour < 14);
+
+    const filtered = slots.filter((s) => {
+      const isMorningSlot =
+        s.timeSlot.includes("07:") ||
+        s.timeSlot.includes("08:") ||
+        s.timeSlot.toLowerCase().includes("pagi") ||
+        s.slotType.toLowerCase().includes("morning");
+      return isMorning ? isMorningSlot : !isMorningSlot;
+    });
+
+    if (filtered.length > 0) {
+      slots = filtered;
+      console.log(`🎯 Filter Slot Aktif: [${isMorning ? "PAGI / MORNING" : "MALAM / BEDTIME"}] (${slots.length} tayangan)`);
+    } else {
+      console.log(`ℹ️ Tidak ada slot khusus ${isMorning ? "pagi" : "malam"}. Memproses slot jadwal hari ini...`);
+    }
+  }
+
   for (const slot of slots) {
-    console.log(`\n🚀 Memproses Jadwal: ${slot.bookSlug} [${slot.lang.toUpperCase()}]`);
+    console.log(`\n🚀 Memproses Jadwal: ${slot.bookSlug} [${slot.lang.toUpperCase()}] (${slot.timeSlot})`);
 
     // Ensure story assets exist locally, pull from Cloudflare R2 if missing
     const storyDir = path.resolve("./stories", slot.bookSlug);
@@ -748,7 +825,9 @@ async function main() {
     const book = bookIdx !== -1 && args[bookIdx + 1] !== "auto" ? args[bookIdx + 1] : undefined;
     const langIdx = args.indexOf("--lang");
     const lang = langIdx !== -1 && (args[langIdx + 1] === "id" || args[langIdx + 1] === "en") ? args[langIdx + 1] as "id" | "en" : undefined;
-    await publishToday(dryRun, book, lang);
+    const slotIdx = args.indexOf("--slot");
+    const slot = slotIdx !== -1 ? (args[slotIdx + 1] as "morning" | "evening" | "auto" | "all") : "auto";
+    await publishToday(dryRun, book, lang, slot);
   } else {
     await showToday();
   }
