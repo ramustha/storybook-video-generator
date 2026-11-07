@@ -1,0 +1,451 @@
+[
+  {
+    "slug": "topsy-turvy-serba-terbalik",
+    "title": "Semua Serba Terbalik!",
+    "originalTitle": "Topsy Turvy",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/957-topsy-turvy",
+    "pdfUrl": "https://archive.org/download/TopsyTurvy-English-Pratham/957-topsy-turvy.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kejutan Pagi Ajaib: Kamar Jungkir Balik & Pesulap Cilik",
+    "characterBible": {
+      "protagonists": [
+        {
+          "id": "bocah",
+          "name": "Bocah Cilik / The Boy",
+          "role": "Curious Boy",
+          "voice": {
+            "id": "id-ID-ArdiNeural",
+            "en": "en-US-AnaNeural",
+            "color": "#38BDF8",
+            "badge": "👦 Bocah"
+          }
+        },
+        {
+          "id": "pesulap",
+          "name": "Pesulap Sorban / The Magic Man",
+          "role": "Funny Magician",
+          "voice": {
+            "id": "id-ID-ArdiNeural",
+            "en": "en-US-GuyNeural",
+            "color": "#F59E0B",
+            "badge": "🧙‍♂️ Pesulap"
+          }
+        }
+      ]
+    },
+    "worldBible": {
+      "village": "Topsy-Turvy Wonderland Bedroom",
+      "palette": {
+        "skyBlue": "#38BDF8",
+        "warmYellow": "#FDE047",
+        "coralRed": "#EF4444",
+        "softPurple": "#A855F7"
+      }
+    },
+    "moral": {
+      "headlineId": "Tetap Tenang Saat Mengalami Hal Tak Terduga!",
+      "spokenId": "Ketika keadaan menjadi kacau atau tidak seperti biasanya, jangan langsung panik atau menangis. Tetaplah tersenyum dan tenang, karena setiap masalah selalu ada jalan keluarnya!",
+      "headlineEn": "Stay Calm When Things Turn Upside Down!",
+      "spokenEn": "When unexpected chaos happens or things feel upside down, don't panic or cry. Stay calm with a smile, because every funny mess always has a solution!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_03.png",
+      "backdropImage": "assets/scene_06.png",
+      "id": {
+        "headlineTop": "SEMUA SERBA TERBALIK!",
+        "headlineBottom": "KAMAR JADI AJAIB! 😱🙃",
+        "hook": "KASUR NEMPEL DI DINDING, KIPAS JADI GURITA?!",
+        "hookEmoji": "🐙🤯",
+        "badge": "DONGENG CERITA ANAK SERU",
+        "sticker": "Semua Jungkir Balik! 🤣",
+        "bedtimeTitle": "Semua Serba Terbalik",
+        "bedtimeHook": "Kisah Jenaka Saat Kamar Menjadi Ajaib dan Lucu"
+      },
+      "en": {
+        "headlineTop": "TOPSY TURVY!",
+        "headlineBottom": "UPSIDE DOWN ROOM! 😱🙃",
+        "hook": "COT ON THE WALL, FAN TURNS TO AN OCTOPUS?!",
+        "hookEmoji": "🐙🤯",
+        "badge": "HILARIOUS KIDS ANIMATED STORY",
+        "sticker": "Totally Upside Down! 🤣",
+        "bedtimeTitle": "Topsy Turvy",
+        "bedtimeHook": "A Hilarious Bedtime Tale of an Upside Down Magic Day"
+      }
+    },
+    "scenes": [
+      {
+        "index": 1,
+        "type": "story",
+        "pageNumber": 2,
+        "id": "Entah mengapa, pagi ini aku bangun sangat pagi. Dan tak disangka, hari baru yang sungguh aneh telah menantiku!",
+        "en": "I do not know why I woke up very early today. Soon I saw that it was a strange new day!"
+      },
+      {
+        "index": 2,
+        "type": "story",
+        "pageNumber": 3,
+        "id": "Sama sekali tak ada yang beres di dalam ruangan. Dan tiba-tiba, ada suara berteriak keras ke arahku!",
+        "en": "Nothing at all was as it really should be. And I could hear someone shouting loudly at me!"
+      },
+      {
+        "index": 3,
+        "type": "story",
+        "pageNumber": 4,
+        "id": "Kasur tidur kami memanjat naik ke dinding tinggi! Dan jam dinding kecilku mendadak tumbuh menjadi sangat jangkung!",
+        "en": "Our cot had climbed right up the wall. And my little clock had grown very tall!"
+      },
+      {
+        "index": 4,
+        "type": "story",
+        "pageNumber": 5,
+        "id": "Payung kami berputar-putar kencang tanpa henti! Topi merah biruku terus berbunyi klik-klak klik-klak sendiri!",
+        "en": "Our umbrella was twirling madly round and round. My red and blue cap was making a clicking sound!"
+      },
+      {
+        "index": 5,
+        "type": "story",
+        "pageNumber": 6,
+        "id": "Aduh, apa yang sedang terjadi dengan kamar kecil kami? Rasanya aku mau pingsan sekarang juga!",
+        "en": "What on earth has happened to our little room? I fear I am going to faint very soon!"
+      },
+      {
+        "index": 6,
+        "type": "story",
+        "pageNumber": 7,
+        "id": "Kipas angin di langit-langit berubah menjadi gurita! Boneka adikku sedang lahap menyantap nasi dan lauknya!",
+        "en": "The fan has turned into a big octopus. My sister's doll is eating dal and rice without a fuss."
+      },
+      {
+        "index": 7,
+        "type": "story",
+        "pageNumber": 8,
+        "id": "Kucing kami duduk bersantai di kursi Ayah. Dan lihatlah ke televisi! Seekor tikus kecil sedang membacakan berita!",
+        "en": "Our cat is sitting up in Papa's chair. And look! A mouse is reading the news on the air!"
+      },
+      {
+        "index": 8,
+        "type": "story",
+        "pageNumber": 9,
+        "id": "Saat bercermin... Aaaah! Tinggiku mendadak menjadi dua meter lebih! Aku hampir menangis kencang rasanya!",
+        "en": "In the mirror - Aah! See! I am seven feet high! I know I am going to loudly cry!"
+      },
+      {
+        "index": 9,
+        "type": "story",
+        "pageNumber": 10,
+        "id": "Tetapi tiba-tiba, datanglah seorang pesulap ajaib. 'Maaf! Maafkan aku!' katanya ramah, 'Biar kubantu bereskan semuanya!'",
+        "en": "But now look! Here comes a magic man. \"Sorry! Sorry!\" he says, \"I will do what I can!\""
+      },
+      {
+        "index": 10,
+        "type": "story",
+        "pageNumber": 11,
+        "id": "'Ya, benar! Akulah yang membuat kekacauan kecil ini. Sungguh tidak sengaja, aku mengaku salah!'",
+        "en": "\"Yes, yes! It was I who made this little mess. It was not so nice of me, I do confess!\""
+      },
+      {
+        "index": 11,
+        "type": "story",
+        "pageNumber": 12,
+        "id": "'Abrakadabra cin-cin-cu! Wahai kamar ajaib, kembalilah rapi seperti semula, satu, dua, tiga!' Cling! Semua benda pun kembali ke tempatnya.",
+        "en": "\"So Abra-ca-da-dabra chin chin choo! Room! Get back in order - one - three - two!\""
+      }
+    ]
+  },
+  {
+    "slug": "kacamata-nenek",
+    "title": "Misteri Kacamata Nenek",
+    "originalTitle": "Grandma's Glasses",
+    "author": "Rohini Nilekani",
+    "illustrator": "Tanaya Vyas",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/1034-grandma-s-glasses",
+    "pdfUrl": "https://archive.org/download/GrandmasGlasses-English-Pratham/1034-grandma-s-glasses.pdf",
+    "coverPage": 1,
+    "avatarPage": 3,
+    "theme": "Detektif Cilik Keluarga: Pencarian Kacamata Nenek yang Penuh Kasih",
+    "characterBible": {
+      "protagonists": [
+        {
+          "id": "richa",
+          "name": "Richa / The Little Detective",
+          "role": "Caring Granddaughter",
+          "voice": {
+            "id": "id-ID-GadisNeural",
+            "en": "en-US-AnaNeural",
+            "color": "#EC4899",
+            "badge": "👧 Richa"
+          }
+        },
+        {
+          "id": "nenek",
+          "name": "Nenek / Grandma Nani",
+          "role": "Loving Forgetful Grandmother",
+          "voice": {
+            "id": "id-ID-GadisNeural",
+            "en": "en-US-AnaNeural",
+            "color": "#F59E0B",
+            "badge": "👵 Nenek"
+          }
+        }
+      ]
+    },
+    "worldBible": {
+      "village": "Warm Family House & Cozy Study Room",
+      "palette": {
+        "warmAmber": "#D97706",
+        "terracotta": "#B45309",
+        "rosePink": "#F472B6",
+        "creamWhite": "#FEF3C7"
+      }
+    },
+    "moral": {
+      "headlineId": "Selalu Sayang dan Bantu Orang Tua Kita!",
+      "spokenId": "Kakek dan nenek kita terkadang suka lupa menaruh barang. Bantulah mereka dengan sabar, penuh senyuman, dan rasa kasih sayang!",
+      "headlineEn": "Always Care for and Help Our Elders!",
+      "spokenEn": "Our grandparents sometimes misplace their belongings. Help them patiently with a warm heart and loving smile!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_03.png",
+      "backdropImage": "assets/scene_09.png",
+      "id": {
+        "headlineTop": "MISTERI KACAMATA NENEK",
+        "headlineBottom": "KEMANA HILANGNYA?! 🔍👵",
+        "hook": "DICARI KE SELURUH RUMAH, TERNYATA SEMBUNYI DI...",
+        "hookEmoji": "👓🤯",
+        "badge": "DONGENG CERITA ANAK SERU",
+        "sticker": "Detektif Cilik Hebat! 🕵️‍♀️",
+        "bedtimeTitle": "Misteri Kacamata Nenek",
+        "bedtimeHook": "Kisah Detektif Cilik Membantu Nenek Tercinta"
+      },
+      "en": {
+        "headlineTop": "GRANDMA'S GLASSES",
+        "headlineBottom": "WHERE DID THEY GO?! 🔍👵",
+        "hook": "SEARCHED THE ENTIRE HOUSE, FOUND IN THE WEIRDEST SPOT!",
+        "hookEmoji": "👓🤯",
+        "badge": "HILARIOUS KIDS ANIMATED STORY",
+        "sticker": "Clever Little Detective! 🕵️‍♀️",
+        "bedtimeTitle": "Grandma's Glasses",
+        "bedtimeHook": "A Sweet Tale of a Granddaughter's Loving Mystery Search"
+      }
+    },
+    "scenes": [
+      {
+        "index": 1,
+        "type": "story",
+        "pageNumber": 2,
+        "id": "Nenek selalu lupa di mana menaruh kacamatanya. 'Di mana ya kacamata Nenek?' tanyanya bingung. Tanpa kacamata, Nenek tentu tak bisa melihat untuk mencarinya!",
+        "en": "Nani keeps losing her glasses. \"Where did I keep them?\" she always asks. Without her glasses, she cannot find her glasses."
+      },
+      {
+        "index": 2,
+        "type": "story",
+        "pageNumber": 3,
+        "id": "Karena itulah Nenek membutuhkanku! Aku menjadi mata Nenek, untuk menemukan kacamata ajaibnya!",
+        "en": "So she needs me. To be her eyes, to find her own eyes!"
+      },
+      {
+        "index": 3,
+        "type": "story",
+        "pageNumber": 4,
+        "id": "Kadang kacamatanya ada di kamar mandi. Kadang di atas kasur. Dan kadang... tepat di atas kepala Nenek sendiri! 'Nenek, kacamatanya ada di kepala!' seruku tertawa.",
+        "en": "Sometimes her spectacles are in the bathroom. Or on her bed. Or on her head. \"Nani,\" I say, \"they are on your head!\""
+      },
+      {
+        "index": 4,
+        "type": "story",
+        "pageNumber": 5,
+        "id": "'Astaga! Lucu sekali Nenek ini. Terima kasih banyak, Richa sayang,' kata Nenek sambil terkekeh. Tapi kali ini, aku benar-benar belum bisa menemukannya.",
+        "en": "\"Of course! How silly of me. Thank you, Richa dear,\" she says with a giggle. This time, though, I cannot find Nani's glasses. Not yet."
+      },
+      {
+        "index": 5,
+        "type": "story",
+        "pageNumber": 6,
+        "id": "Aku sudah mencari ke mana-mana. Di kepala Nenek, di kamar mandi, di dalam lemari, sampai di bawah kursi kesayangannya. Hasilnya tetap nihil!",
+        "en": "I have looked everywhere. In all the usual places. On her head, in the bathroom, inside her cupboard. Nothing. Where could they be?"
+      },
+      {
+        "index": 6,
+        "type": "story",
+        "pageNumber": 7,
+        "id": "Aku memutuskan menjadi detektif hebat! Aku harus menelusuri apa saja yang dilakukan Nenek sepanjang hari ini untuk menemukan petunjuk.",
+        "en": "I decided to be a good detective. I decided to find out what she had done all day."
+      },
+      {
+        "index": 7,
+        "type": "story",
+        "pageNumber": 8,
+        "id": "Nenek bercerita, 'Hari ini Nenek kedatangan tamu, minum banyak teh hangat, dan menghabiskan kue manis buatan Ibumu.'",
+        "en": "\"I did nothing much today. Except that our neighbour came by, we had many cups of tea, and enjoyed sweet treats together,\" said Nani."
+      },
+      {
+        "index": 8,
+        "type": "story",
+        "pageNumber": 9,
+        "id": "Kak Raju menambahkan, 'Nenek juga sibuk sekali menulis surat panjang di meja kerjanya tadi siang.'",
+        "en": "Raju said, \"Nani was very busy today. She wrote an important letter at her study desk.\""
+      },
+      {
+        "index": 9,
+        "type": "story",
+        "pageNumber": 10,
+        "id": "Ibu berkata, 'Nenek juga mengobrol di telepon dan selesai merajut sweater hangat untuk Raju!' Wah, kini aku punya banyak petunjuk!",
+        "en": "Amma said, \"She spoke on the phone and finished knitting the warm sweater for Raju!\" I now had many clues!"
+      },
+      {
+        "index": 10,
+        "type": "story",
+        "pageNumber": 11,
+        "id": "Aha! Ketemu! Kacamatanya terselip di bawah telepon, di samping gulungan benang rajut Nenek! Nenek pun tersenyum bahagia dan memelukku erat.",
+        "en": "Aha! I found them! The spectacles were wrapped in wool, under the phone on her desk! Nani smiled happily and gave me a big warm hug."
+      }
+    ]
+  },
+  {
+    "slug": "jangan-sekarang",
+    "title": "Jangan Sekarang, Tunggu Dulu!",
+    "originalTitle": "Not Now, Not Now!",
+    "author": "Rohini Nilekani",
+    "illustrator": "Ruchi Shah",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 1,
+    "sourceUrl": "https://storyweaver.org.in/stories/33-not-now-not-now",
+    "pdfUrl": "https://archive.org/download/NotNowNotNow-English-Pratham/33-not-now-not-now.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kejutan Ulang Tahun Istimewa: Belajar Menunggu dengan Sabar",
+    "characterBible": {
+      "protagonists": [
+        {
+          "id": "anak",
+          "name": "Boni / The Birthday Boy",
+          "role": "Impatient Little Boy",
+          "voice": {
+            "id": "id-ID-ArdiNeural",
+            "en": "en-US-AnaNeural",
+            "color": "#38BDF8",
+            "badge": "👦 Boni"
+          }
+        },
+        {
+          "id": "keluarga",
+          "name": "Keluarga / The Loving Family",
+          "role": "Warm Family",
+          "voice": {
+            "id": "id-ID-GadisNeural",
+            "en": "en-US-GuyNeural",
+            "color": "#10B981",
+            "badge": "👨‍👩‍👧‍👦 Keluarga"
+          }
+        }
+      ]
+    },
+    "worldBible": {
+      "village": "Warm Family Home with Birthday Festive Vibes",
+      "palette": {
+        "brightCyan": "#06B6D4",
+        "sunGold": "#F59E0B",
+        "festiveRed": "#EF4444",
+        "leafGreen": "#10B981"
+      }
+    },
+    "moral": {
+      "headlineId": "Bersabarlah, Hal Baik Sedang Disiapkan Untukmu!",
+      "spokenId": "Ketika orang tua menyuruh kita menunggu, jangan cepat kesal atau marah. Seringkali mereka sedang menyiapkan kejutan indah dan terbaik untuk kita!",
+      "headlineEn": "Be Patient, Good Things Are Being Prepared!",
+      "spokenEn": "When grown-ups ask you to wait, don't feel angry. Most often, they are preparing a wonderful and lovely surprise for you!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_04.png",
+      "backdropImage": "assets/scene_07.png",
+      "id": {
+        "headlineTop": "JANGAN SEKARANG!",
+        "headlineBottom": "KEJUTAN APA INI?! 🎁🎂",
+        "hook": "SEHARIAN DISURUH TUNGGU, TERNYATA ADA RAHASIA BESAR!",
+        "hookEmoji": "🤫🎉",
+        "badge": "DONGENG CERITA ANAK SERU",
+        "sticker": "Kejutan Manis Keluarga! ❤️",
+        "bedtimeTitle": "Jangan Sekarang, Tunggu Dulu",
+        "bedtimeHook": "Kisah Hangat Tentang Kesabaran dan Kejutan Manis"
+      },
+      "en": {
+        "headlineTop": "NOT NOW, NOT NOW!",
+        "headlineBottom": "WHAT'S THE SECRET?! 🎁🎂",
+        "hook": "TOLD TO WAIT ALL DAY, TURNED OUT TO BE A HUGE SURPRISE!",
+        "hookEmoji": "🤫🎉",
+        "badge": "HILARIOUS KIDS ANIMATED STORY",
+        "sticker": "Sweet Family Surprise! ❤️",
+        "bedtimeTitle": "Not Now, Not Now!",
+        "bedtimeHook": "A Sweet Tale of Patience and a Heartwarming Birthday Surprise"
+      }
+    },
+    "scenes": [
+      {
+        "index": 1,
+        "type": "story",
+        "pageNumber": 2,
+        "id": "Aku bertanya kepada Nenek, 'Nenek, bolehkah aku minta kue manis sekarang?' 'Jangan sekarang sayang, mungkin besok ya.' Tapi aku tidak mau menunggu sampai besok!",
+        "en": "I asked Grandma, \"May I please have some sweets?\" \"Not now, sweetheart, maybe tomorrow.\" But I did not want to wait till tomorrow."
+      },
+      {
+        "index": 2,
+        "type": "story",
+        "pageNumber": 3,
+        "id": "Aku bertanya kepada Kakek, 'Kakek, bolehkah aku main keluar bersama teman-teman?' 'Jangan sekarang sayang, nanti setelah tidur siang ya.' Tapi aku tidak mau tidur siang!",
+        "en": "I asked Grandpa, \"May I go out to play with my friends?\" \"Not now, dear. Maybe after your nap?\" But I did not want to wait after my nap."
+      },
+      {
+        "index": 3,
+        "type": "story",
+        "pageNumber": 4,
+        "id": "Aku bertanya kepada Ibu, 'Ibu, bolehkah aku pakai baju baru yang keren ini?' 'Jangan sekarang sayang, pakailah saat kita pergi nanti.' Tapi aku ingin memakainya sekarang!",
+        "en": "I asked Mom, \"May I wear these new clothes?\" \"Not now, sweetheart, you can wear them when we go out.\" But I wanted to wear them now."
+      },
+      {
+        "index": 4,
+        "type": "story",
+        "pageNumber": 5,
+        "id": "Aku bertanya kepada Ayah, 'Ayah, bolehkah aku membuka kotak berpita indah itu?' 'Jangan sekarang, jangan sekarang. Kamu harus menunggu.' Tapi aku sudah tidak sabar lagi!",
+        "en": "I asked Dad, \"May I open that nice looking box?\" \"Not now, not now. You must wait.\" But I did not want to wait any more."
+      },
+      {
+        "index": 5,
+        "type": "story",
+        "pageNumber": 6,
+        "id": "Kenapa orang dewasa selalu bilang 'Jangan sekarang, jangan sekarang'? Malam itu, aku pergi tidur dengan hati yang sedikit kesal.",
+        "en": "Why do big people always say, 'Not now, not now'? That night, I went to sleep feeling a little grumpy."
+      },
+      {
+        "index": 6,
+        "type": "story",
+        "pageNumber": 7,
+        "id": "Keesokan paginya, aku bangun pagi-pagi sekali dan pergi ke dapur. Nenek tersenyum manis dan berkata, 'Nah, sekarang kamu boleh makan kue-kue manis ini!'",
+        "en": "The next day, I woke up early and went into the kitchen. Grandma smiled warmly and said, \"You can eat these sweets now!\""
+      },
+      {
+        "index": 7,
+        "type": "story",
+        "pageNumber": 8,
+        "id": "Kakek berkata, 'Sekarang kita main bersama!' Ibu berkata, 'Sekarang pakailah baju barumu!' Dan Ayah memberikan kotak kado sambil tersenyum lebar.",
+        "en": "Grandpa said, \"We can play now!\" Mom said, \"You can wear these clothes now!\" And Dad handed over the gift box with a big bright smile."
+      },
+      {
+        "index": 8,
+        "type": "story",
+        "pageNumber": 8,
+        "id": "Dan mereka semua berseru serentak: 'SELAMAT ULANG TAHUN!' Wah, ternyata mereka menyiapkan kejutan paling membahagiakan untukku! Aku pun memeluk mereka dengan riang.",
+        "en": "And they all cheered together: \"HAPPY BIRTHDAY!\" Wow, they had prepared the happiest surprise just for me! I hugged them all with pure joy."
+      }
+    ]
+  }
+]

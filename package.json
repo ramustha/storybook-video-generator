@@ -17,6 +17,8 @@
     "upload:browser": "tsx scripts/upload-youtube.ts --engine playwright",
     "stats": "tsx scripts/youtube-stats.ts",
     "cleanup": "tsx scripts/cleanup-storage.ts",
+    "story:ingest": "tsx scripts/ingest-story.ts",
+    "story:ingest:next": "tsx scripts/ingest-story.ts --next",
     "story:push": "tsx scripts/manage-story-storage.ts push",
     "story:pull": "tsx scripts/manage-story-storage.ts pull",
     "story:push-all": "tsx scripts/manage-story-storage.ts push-all",
