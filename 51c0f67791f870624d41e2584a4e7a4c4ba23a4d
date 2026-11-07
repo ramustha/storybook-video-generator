@@ -1,0 +1,37 @@
+scripts/upload-meta.ts
+  698ac31901cd73e0 1039-1040,1069-1070
+scripts/publish-all.ts
+  698ac31901cd73e0 99,101
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 107
+package.json
+  698ac31901cd73e0 20-24
+scripts/manage-story-storage.ts
+  698ac31901cd73e0 1-694
+scripts/generate-branding-pack.ts
+  698ac31901cd73e0 4,823
+.gitignore
+  698ac31901cd73e0 30-36
+scripts/content-calendar.ts
+  698ac31901cd73e0 692-700,727-732
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "51c0f67791f870624d41e2584a4e7a4c4ba23a4d",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 730,
+      "total_deletions": 14,
+      "accepted_lines": 730,
+      "overriden_lines": 0
+    }
+  }
+}
