@@ -365,7 +365,7 @@ async function auditWithGroq(targetBook: CuratedBook, apiKey: string): Promise<Q
 }`;
 
   const requestBody = {
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-120b",
     messages: [
       {
         role: "system",
@@ -407,7 +407,7 @@ async function auditWithGroq(targetBook: CuratedBook, apiKey: string): Promise<Q
   return {
     bookSlug: targetBook.slug,
     evaluatedAt: new Date().toISOString(),
-    model: "groq-llama-3.3-70b",
+    model: "groq-gpt-oss-120b",
     safetyAudit: parsed.safetyAudit,
     moralAudit: {
       coreValues: parsed.moralAudit.coreValues || [],
@@ -436,15 +436,16 @@ async function auditWithGroq(targetBook: CuratedBook, apiKey: string): Promise<Q
  */
 export async function auditAndRefineStoryQuality(
   targetBook: CuratedBook,
-  options: { force?: boolean; dryRun?: boolean } = {}
+  options: { force?: boolean; dryRun?: boolean; engine?: "auto" | "gemini" | "groq" } = {}
 ): Promise<QualityAuditResult> {
   const geminiKey = getGeminiApiKey();
   const groqKey = getGroqApiKey();
+  const preferredEngine = options.engine || "auto";
 
   let auditResult: QualityAuditResult | null = null;
 
-  // 1. Try Google Gemini (Primary)
-  if (geminiKey) {
+  // 1. Try Google Gemini (if auto or gemini requested)
+  if (geminiKey && (preferredEngine === "auto" || preferredEngine === "gemini")) {
     console.log(`\n🤖 Calling Primary Engine: Google AI (Gemini Flash Latest)...`);
     console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
     try {
@@ -454,9 +455,9 @@ export async function auditAndRefineStoryQuality(
     }
   }
 
-  // 2. Failover to Groq Cloud (Secondary) if Gemini failed or has no key
-  if (!auditResult && groqKey) {
-    console.log(`\n⚡ Activating Failover Engine: Groq Cloud (Llama 3.3 70B)...`);
+  // 2. Failover to Groq Cloud (if auto failover or groq explicitly requested)
+  if (!auditResult && groqKey && (preferredEngine === "auto" || preferredEngine === "groq")) {
+    console.log(`\n⚡ Activating Failover Engine: Groq Cloud (GPT OSS 120B)...`);
     console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
     try {
       auditResult = await auditWithGroq(targetBook, groqKey);
@@ -546,8 +547,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(1);
     }
 
+    const engineIdx = args.indexOf("--engine");
+    const engine = engineIdx !== -1 ? (args[engineIdx + 1] as any) : "auto";
+
     for (const book of targets) {
-      const report = await auditAndRefineStoryQuality(book, { dryRun });
+      const report = await auditAndRefineStoryQuality(book, { dryRun, engine });
       if (!dryRun) {
         const outDir = path.resolve(`./stories/${book.slug}`);
         await fs.mkdir(outDir, { recursive: true });
