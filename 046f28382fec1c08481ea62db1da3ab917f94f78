@@ -1,0 +1,29 @@
+.github/workflows/daily-story-ingest.yml
+  698ac31901cd73e0 27-31,81-82,103-104,119
+package.json
+  698ac31901cd73e0 24-25
+scripts/audit-story-quality.ts
+  698ac31901cd73e0 1-384
+scripts/ingest-story.ts
+  698ac31901cd73e0 9,72,186-227,330,334,399,500,556,578
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "046f28382fec1c08481ea62db1da3ab917f94f78",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 448,
+      "total_deletions": 3,
+      "accepted_lines": 448,
+      "overriden_lines": 0
+    }
+  }
+}
