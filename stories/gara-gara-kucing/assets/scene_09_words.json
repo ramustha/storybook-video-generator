@@ -1,0 +1,52 @@
+{
+  "words": [
+    {
+      "word": "Iya,",
+      "start": 0.1,
+      "end": 0.74,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Bu.",
+      "start": 0.98,
+      "end": 1.5,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "Itu",
+      "start": 2.3,
+      "end": 2.72,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "semua",
+      "start": 2.72,
+      "end": 3.16,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "gara-gara",
+      "start": 3.16,
+      "end": 3.67,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "kucing!",
+      "start": 3.67,
+      "end": 4.36,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    }
+  ]
+}

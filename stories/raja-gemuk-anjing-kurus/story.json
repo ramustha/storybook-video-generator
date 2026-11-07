@@ -1,0 +1,623 @@
+{
+  "version": "1.0.0",
+  "id": "raja-gemuk-anjing-kurus",
+  "slug": "raja-gemuk-anjing-kurus",
+  "title": "Raja Gemuk, Anjing Kurus!",
+  "originalTitle": "Fat King, Thin Dog!",
+  "language": "id-ID",
+  "coverOrientation": "portrait",
+  "coverAspectRatio": 0.706,
+  "source": {
+    "repository": "Pratham Books (StoryWeaver)",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "originalAuthor": "Parismita Singh",
+    "originalIllustrator": "Parismita Singh",
+    "sourceUrl": "https://storyweaver.org.in/stories/fat-king-thin-dog"
+  },
+  "stylePreset": {
+    "artMedium": "Whimsical Children's Book Watercolor & Warm Gouache",
+    "artistInfluences": "Parismita Singh, Priya Kuriyan, Beatrix Potter",
+    "renderingConstraints": "soft watercolor washes, delicate expressive ink outlines, joyful cartoon character acting, vibrant fairytale lighting, clean 16:9 composition, full bleed, no text, no watermark, no typography, no letters"
+  },
+  "thumbnailConfig": {
+    "heroImage": "assets/cover.png",
+    "backdropImage": "assets/scene_01.png",
+    "id": {
+      "headlineTop": "RAJA GEMUK",
+      "headlineBottom": "ANJING KURUS! 👑🐕",
+      "hook": "LARI NGEJAR ANJING SAMPE LANGSING?!",
+      "hookEmoji": "🏃‍♂️💨",
+      "badge": "DONGENG CERITA ANAK SERU",
+      "sticker": "Ngejar Anjing Berhari-hari! 😂",
+      "bedtimeTitle": "Raja Gemuk, Anjing Kurus",
+      "bedtimeHook": "Kisah Lucu Penuh Tawa Tentang Persahabatan & Kesehatan"
+    },
+    "en": {
+      "headlineTop": "FAT KING",
+      "headlineBottom": "THIN DOG! 👑🐕",
+      "hook": "RUNNING AFTER HIS DOG TILL TRIM?!",
+      "hookEmoji": "🏃‍♂️💨",
+      "badge": "HILARIOUS KIDS ANIMATED STORY",
+      "sticker": "Chased His Pet For Days! 😂",
+      "bedtimeTitle": "Fat King, Thin Dog",
+      "bedtimeHook": "A Charming Bedtime Tale of Friendship and Fitness"
+    }
+  },
+  "characterBible": {
+    "protagonists": [
+      {
+        "id": "king",
+        "name": "Sang Raja / The King",
+        "role": "Jovial Monarch",
+        "voice": {
+          "id": "id-ID-ArdiNeural",
+          "en": "en-US-GuyNeural",
+          "color": "#F59E0B",
+          "badge": "👑 Raja"
+        },
+        "visualTraits": {
+          "buildInitial": "Plump, round belly, cheerful rosy cheeks",
+          "buildFinal": "Fit, trim, healthy, glowing with vitality",
+          "facialHair": "Neatly groomed curled black mustache",
+          "crown": "Ornate gold crown with ruby jewels and pearls",
+          "attire": "Scarlet-red royal tunic with gold borders and ermine fur collar, purple silk cape, brown boots"
+        }
+      },
+      {
+        "id": "dog",
+        "name": "Si Anjing Kurus / The Thin Dog",
+        "role": "Energetic Canine Companion",
+        "voice": {
+          "id": "id-ID-GadisNeural",
+          "en": "en-US-AnaNeural",
+          "color": "#38BDF8",
+          "badge": "🐕 Anjing Kurus"
+        },
+        "visualTraits": {
+          "species": "Whippet / Terrier mix",
+          "build": "Slender, skinny, long athletic legs, curved tail",
+          "fur": "Short caramel-tan coat with white chest patch",
+          "ears": "Alert, perky floppy ears",
+          "collar": "Bright red collar with a shiny golden bell"
+        }
+      }
+    ]
+  },
+  "worldBible": {
+    "kingdom": "The Fairytale Kingdom of Greenwood",
+    "palette": {
+      "royalRed": "#DC2626",
+      "royalGold": "#F59E0B",
+      "emeraldMeadow": "#10B981",
+      "skyAzure": "#38BDF8"
+    }
+  },
+  "scenes": [
+    {
+      "index": 0,
+      "sceneId": "cover",
+      "type": "cover",
+      "durationSeconds": 8.2,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "prompt": "Whimsical children's picture book cover illustration, a jolly round fat king with golden crown and purple cape laughing cheerfully beside his skinny caramel-brown dog with a red collar, lush sunny palace garden background, vibrant watercolor and gouache texture, 16:9 full bleed, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Raja Gemuk, Anjing Kurus! Karya Parismita Singh, diterbitkan oleh Pratham Books.",
+        "audioPath": "assets/id/cover.mp3",
+        "wordsPath": "assets/id/cover_words.json",
+        "sfxPath": "assets/sfx/sfx_00_opener.m4a",
+        "status": "ready",
+        "en": {
+          "text": "Fat King, Thin Dog! Written by Parismita Singh, published by Pratham Books.",
+          "audioPath": "assets/en/cover.mp3",
+          "wordsPath": "assets/en/cover_words.json",
+          "durationSeconds": 7.1,
+          "status": "ready"
+        },
+        "sfxVolume": 0.65
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1,
+        "scaleEnd": 1.12
+      }
+    },
+    {
+      "index": 1,
+      "sceneId": "scene_01",
+      "type": "narrative",
+      "durationSeconds": 5.1,
+      "visual": {
+        "imagePath": "assets/scene_01.png",
+        "prompt": "Whimsical children's picture book illustration, a jolly, plump, round-bellied fat king sitting on an ornate golden throne with crimson velvet cushions in a sunlit palace hall, wearing an ornate gold crown and scarlet royal tunic with purple cape, rosy cheeks and curled mustache, smiling warmly, watercolor and soft gouache texture, vibrant fairytale lighting, wide angle 16:9, masterwork, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Di sebuah istana yang megah, hiduplah seorang raja yang sangat gemuk.",
+        "audioPath": "assets/id/scene_01.mp3",
+        "wordsPath": "assets/id/scene_01_words.json",
+        "sfxPath": "assets/sfx/sfx_01_throne.m4a",
+        "status": "ready",
+        "en": {
+          "text": "In a grand palace, there lived a very fat king.",
+          "audioPath": "assets/en/scene_01.mp3",
+          "wordsPath": "assets/en/scene_01_words.json",
+          "durationSeconds": 4.2,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      }
+    },
+    {
+      "index": 2,
+      "sceneId": "scene_02",
+      "type": "narrative",
+      "durationSeconds": 6,
+      "visual": {
+        "imagePath": "assets/scene_02.png",
+        "prompt": "Whimsical children's storybook watercolor art, the jovial fat king sitting on his throne looking down with affectionate smile at a very thin, slender, caramel-brown scruffy dog with floppy ears and red collar sitting at his feet wagging its tail, beautiful throne room background with arched windows, warm golden atmosphere, 16:9, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Sang raja punya seekor sahabat kecil... seekor anjing yang sangat kurus!",
+        "audioPath": "assets/id/scene_02.mp3",
+        "wordsPath": "assets/id/scene_02_words.json",
+        "sfxPath": "assets/sfx/sfx_02_dog.m4a",
+        "status": "ready",
+        "en": {
+          "text": "The fat king had a little companion... a very thin dog!",
+          "audioPath": "assets/en/scene_02.mp3",
+          "wordsPath": "assets/en/scene_02_words.json",
+          "durationSeconds": 4.6,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.16
+      }
+    },
+    {
+      "index": 3,
+      "sceneId": "scene_03",
+      "type": "narrative",
+      "durationSeconds": 7,
+      "visual": {
+        "imagePath": "assets/scene_03.png",
+        "prompt": "Children's storybook watercolor illustration, the jolly fat king in royal robes holding a red leash, strolling leisurely along a winding grey cobblestone garden path beside his cheerful skinny little dog, lush green hedges, blooming colorful flowerbeds, tall sunny trees, bright morning sunshine, 16:9 widescreen, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Suatu pagi yang cerah, sang raja gemuk dan anjing kurusnya pergi berjalan-jalan santai di taman.",
+        "audioPath": "assets/id/scene_03.mp3",
+        "wordsPath": "assets/id/scene_03_words.json",
+        "sfxPath": "assets/sfx/sfx_03_walk.m4a",
+        "status": "ready",
+        "en": {
+          "text": "One bright sunny morning, the fat king and his thin dog went for a leisurely walk in the park.",
+          "audioPath": "assets/en/scene_03.mp3",
+          "wordsPath": "assets/en/scene_03_words.json",
+          "durationSeconds": 6.9,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "pan_left",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.14
+      }
+    },
+    {
+      "index": 4,
+      "sceneId": "scene_04",
+      "type": "narrative",
+      "durationSeconds": 8.1,
+      "visual": {
+        "imagePath": "assets/scene_04.png",
+        "prompt": "Children's book watercolor illustration, dynamic close-up, the skinny little caramel dog standing on alert with ears perked up and big wide curious eyes, staring up intently at a tiny cheerful turquoise bluebird with yellow chest singing on a low rose bush branch, sunbeams filtering through leaves, 16:9 composition, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Tiba-tiba, si anjing kurus melihat seekor burung kecil yang cantik di atas ranting! Cip cip cip!",
+        "audioPath": "assets/id/scene_04.mp3",
+        "wordsPath": "assets/id/scene_04_words.json",
+        "sfxPath": "assets/sfx/sfx_04_bird.m4a",
+        "status": "ready",
+        "en": {
+          "text": "Suddenly, the thin dog spotted a lovely little bird perched on a branch! Chirp chirp chirp!",
+          "audioPath": "assets/en/scene_04.mp3",
+          "wordsPath": "assets/en/scene_04_words.json",
+          "durationSeconds": 7.6,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.1,
+        "scaleEnd": 1.22
+      }
+    },
+    {
+      "index": 5,
+      "sceneId": "scene_05",
+      "type": "narrative",
+      "durationSeconds": 5.7,
+      "visual": {
+        "imagePath": "assets/scene_05.png",
+        "prompt": "Energetic children's picture book watercolor, the skinny dog sprinting at high speed across the green garden lawn chasing the fluttering bluebird, red leash trailing in the air, paws kicking up little dust clouds, dynamic action lines, sunny meadow backdrop, 16:9 cinematic shot, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Guk guk! Si anjing kurus langsung lari kencang mengejar burung itu!",
+        "audioPath": "assets/id/scene_05.mp3",
+        "wordsPath": "assets/id/scene_05_words.json",
+        "sfxPath": "assets/sfx/sfx_05_dog_dash.m4a",
+        "status": "ready",
+        "en": {
+          "text": "Woof woof! The thin dog bolted forward and ran as fast as lightning after the bird!",
+          "audioPath": "assets/en/scene_05.mp3",
+          "wordsPath": "assets/en/scene_05_words.json",
+          "durationSeconds": 7.1,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26,
+        "sfxDelaySeconds": 0.2
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.16
+      }
+    },
+    {
+      "index": 6,
+      "sceneId": "scene_06",
+      "type": "narrative",
+      "durationSeconds": 9.5,
+      "visual": {
+        "imagePath": "assets/scene_06.png",
+        "prompt": "Humorous fairytale watercolor illustration, the jolly fat king running and sprinting with comical frantic expression, mouth open shouting 'Wait!', gold crown tilting precariously on his head, royal purple cape fluttering behind him, sweat drops flying, big belly bouncing, funny energetic cartoon action, sunny path, 16:9 widescreen, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Waduh! Sang raja kaget bukan main! 'Tunggu aku!' teriak raja sambil berlari mengejar anjingnya!",
+        "audioPath": "assets/id/scene_06.mp3",
+        "wordsPath": "assets/id/scene_06_words.json",
+        "sfxPath": "assets/sfx/sfx_06_king_pant.m4a",
+        "status": "ready",
+        "en": {
+          "text": "Oh no! The fat king was astonished! 'Wait for me!' yelled the king, running as fast as he could after his dog!",
+          "audioPath": "assets/en/scene_06.mp3",
+          "wordsPath": "assets/en/scene_06_words.json",
+          "durationSeconds": 9.6,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.2
+      }
+    },
+    {
+      "index": 7,
+      "sceneId": "scene_07",
+      "type": "narrative",
+      "durationSeconds": 11.4,
+      "visual": {
+        "imagePath": "assets/scene_07.png",
+        "prompt": "Panoramic whimsical watercolor landscape, the skinny dog running ahead and the fat king panting and chasing behind across undulating emerald green hills, winding country paths, past little wooden fences and wildflowers, sunny sky with puffy clouds, joyful comedic marathon, 16:9 wide shot, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Mereka lari dan lari! Menanjak bukit tinggi, menuruni lembah hijau, berhari-hari tanpa henti! Hosh... hosh... hosh!",
+        "audioPath": "assets/id/scene_07.mp3",
+        "wordsPath": "assets/id/scene_07_words.json",
+        "sfxPath": "assets/sfx/sfx_07_chase_loop.m4a",
+        "status": "ready",
+        "en": {
+          "text": "They ran and ran! Up steep hills, down rolling meadows, for days and days without stopping! Pant... puff... whew!",
+          "audioPath": "assets/en/scene_07.mp3",
+          "wordsPath": "assets/en/scene_07_words.json",
+          "durationSeconds": 10.8,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "pan_left",
+        "scaleStart": 1.15,
+        "scaleEnd": 1.05
+      }
+    },
+    {
+      "index": 8,
+      "sceneId": "scene_08",
+      "type": "narrative",
+      "durationSeconds": 7.6,
+      "visual": {
+        "imagePath": "assets/scene_08.png",
+        "prompt": "Warm heartwarming children's book watercolor, the king sitting on the soft grass under a majestic shady oak tree, happily embracing and hugging his skinny dog, both smiling joyfully, the dog happily licking the king's cheek, dandelion seeds floating in golden afternoon sunlight, 16:9, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Greb! Akhirnya, sang raja berhasil memeluk anjing kurusnya! Horeee!",
+        "audioPath": "assets/id/scene_08.mp3",
+        "wordsPath": "assets/id/scene_08_words.json",
+        "sfxPath": "assets/sfx/sfx_08_catch_cheer.m4a",
+        "status": "ready",
+        "en": {
+          "text": "Catch! At last, the king scooped up and hugged his beloved dog! Hooray!",
+          "audioPath": "assets/en/scene_08.mp3",
+          "wordsPath": "assets/en/scene_08_words.json",
+          "durationSeconds": 7.4,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.06,
+        "scaleEnd": 1.16
+      }
+    },
+    {
+      "index": 9,
+      "sceneId": "scene_09",
+      "type": "narrative",
+      "durationSeconds": 11.6,
+      "visual": {
+        "imagePath": "assets/scene_09.png",
+        "prompt": "Triumphant, joyful fairytale watercolor illustration, the king standing tall in front of a grand palace full-length mirror, admiring his newly fit, trim, athletic physique, smiling broadly with shining crown, his red tunic fitting him handsomely, his skinny dog standing beside him wagging tail with a proud smile, sparkling magical light, 16:9 widescreen, no text, no watermark, no typography, no letters",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Sekarang, coba lihat ke cermin! Sang raja gemuk sekarang menjadi langsing, sehat, dan bugar! Dan si anjing tersenyum gembira!",
+        "audioPath": "assets/id/scene_09.mp3",
+        "wordsPath": "assets/id/scene_09_words.json",
+        "sfxPath": "assets/sfx/sfx_09_mirror_sparkle.m4a",
+        "status": "ready",
+        "en": {
+          "text": "Now, take a look in the mirror! The fat king is now fit, healthy, and trim! And both of them are smiling with joy!",
+          "audioPath": "assets/en/scene_09.mp3",
+          "wordsPath": "assets/en/scene_09_words.json",
+          "durationSeconds": 10.4,
+          "status": "ready"
+        },
+        "sfxVolume": 0.26
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.2
+      }
+    },
+    {
+      "index": 10,
+      "sceneId": "scene_10",
+      "type": "moral",
+      "durationSeconds": 12.2,
+      "visual": {
+        "imagePath": "assets/scene_09.png",
+        "status": "ready"
+      },
+      "protagonistAvatar": "assets/protagonist_avatar.png",
+      "moralBadge": "PESAN MORAL CERITA",
+      "moralBadgeEn": "MORAL OF THE STORY",
+      "moralHeadline": "Tubuh Bugar & Sehat Lewat Bergerak Ceria!",
+      "moralHeadlineEn": "Staying Active Brings Health & Boundless Joy!",
+      "moralTakeaway": [
+        "Rajin bergerak dan aktif berolahraga membuat tubuh kita bugar, sehat, dan kuat!",
+        "Bermain dan beraktivitas bersama sahabat membawa kebiasaan baik dan tawa bahagia!"
+      ],
+      "moralTakeawayEn": [
+        "Staying active and exercising every day makes our bodies fit, healthy, and strong!",
+        "Playing and moving together with a loyal friend brings joyful habits and endless smiles!"
+      ],
+      "audio": {
+        "text": "Pesan moral cerita ini: Rajin bergerak dan berolahraga membuat tubuh kita bugar, sehat, dan kuat! Bergerak setiap hari bersama sahabat itu sangat menyenangkan!",
+        "audioPath": "assets/id/scene_10.mp3",
+        "wordsPath": "assets/id/scene_10_words.json",
+        "en": {
+          "text": "The moral of the story: Staying active and exercising every day makes our bodies fit, healthy, and strong! Running and playing with a friend brings endless joy!",
+          "audioPath": "assets/en/scene_10.mp3",
+          "wordsPath": "assets/en/scene_10_words.json",
+          "durationSeconds": 12.3,
+          "status": "ready"
+        },
+        "sfxPath": "assets/sfx/sfx_10_moral_harp.m4a",
+        "sfxVolume": 0.26,
+        "status": "ready"
+      }
+    },
+    {
+      "index": 11,
+      "sceneId": "scene_11",
+      "type": "outro",
+      "durationSeconds": 17.2,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "recommendation": {
+        "title": "Dongeng Seru Berikutnya!",
+        "titleEn": "Next Exciting Adventure!",
+        "subtitle": "Klik untuk Menonton Cerita Lengkap",
+        "subtitleEn": "Click to Watch Full Story",
+        "badge": "REKOMENDASI",
+        "badgeEn": "UP NEXT"
+      },
+      "channelHandle": "@ZaynAdyanRamadhan",
+      "audio": {
+        "text": "Wah, seru sekali ya ceritanya! Jangan lupa klik video di sebelah sini untuk menonton dongeng seru lainnya, dan klik tombol Subscribe agar kita bisa terus berpetualang bersama! Sampai jumpa di cerita berikutnya! Dadah!",
+        "audioPath": "assets/id/scene_11.mp3",
+        "wordsPath": "assets/id/scene_11_words.json",
+        "en": {
+          "text": "Did you enjoy the story? Click the video on your screen to watch another fun adventure, and don't forget to hit Subscribe so we can keep reading together! See you in the next story! Bye-bye!",
+          "audioPath": "assets/en/scene_11.mp3",
+          "wordsPath": "assets/en/scene_11_words.json",
+          "durationSeconds": 14.5,
+          "status": "ready"
+        },
+        "sfxPath": "assets/sfx/sfx_11_outro_pop.m4a",
+        "sfxVolume": 0.65,
+        "status": "ready"
+      }
+    }
+  ],
+  "thumbnails": {
+    "id": {
+      "popular": "exports/id/thumbnail-popular.png",
+      "primary": "exports/id/thumbnail.png",
+      "bedtime": "exports/id/thumbnail-bedtime.png",
+      "vertical": "exports/id/thumbnail-vertical.png"
+    },
+    "en": {
+      "popular": "exports/en/thumbnail-popular.png",
+      "primary": "exports/en/thumbnail.png",
+      "bedtime": "exports/en/thumbnail-bedtime.png",
+      "vertical": "exports/en/thumbnail-vertical.png"
+    },
+    "updatedAt": "2026-11-03T00:27:32.964Z"
+  },
+  "exports": {
+    "id": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-02T19:49:47.858Z",
+        "path": "exports/id/raja-gemuk-anjing-kurus-16x9.mp4",
+        "youtubeId": "qfpALMgjPhU",
+        "youtubeUrl": "https://youtu.be/qfpALMgjPhU"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-05T23:06:04.307Z",
+        "path": "exports/id/raja-gemuk-anjing-kurus-9x16.mp4",
+        "youtubeId": "Pjkcxxai7JY",
+        "youtubeUrl": "https://youtube.com/shorts/Pjkcxxai7JY"
+      }
+    },
+    "en": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-03T00:23:44.191Z",
+        "path": "exports/en/fat-king-thin-dog-16x9.mp4",
+        "youtubeId": "DJctEROJ7wo",
+        "youtubeUrl": "https://youtu.be/DJctEROJ7wo"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-05T23:09:22.468Z",
+        "path": "exports/en/fat-king-thin-dog-9x16.mp4",
+        "youtubeId": "XkTR_Or5B2U",
+        "youtubeUrl": "https://youtube.com/shorts/XkTR_Or5B2U"
+      }
+    }
+  },
+  "audio": {
+    "bgMusicPath": "assets/audio/bgm_whimsical_story.m4a",
+    "bgMusicVolume": 0.14
+  },
+  "publications": {
+    "youtube": {
+      "id": {
+        "landscape": {
+          "id": "qfpALMgjPhU",
+          "url": "https://youtu.be/qfpALMgjPhU",
+          "publishedAt": "2026-11-03T05:10:24.349Z",
+          "title": "RAJA GEMUK, ANJING KURUS! 👑🐕 Dongeng Cerita Anak Lucu Penuh Tawa (Ngejar Anjing Sampe...",
+          "status": "published"
+        },
+        "vertical": {
+          "id": "Pjkcxxai7JY",
+          "url": "https://youtube.com/shorts/Pjkcxxai7JY",
+          "publishedAt": "2026-11-05T23:06:16.277Z",
+          "title": "Ngejar Anjing Sampe Langsing?! 😂 Cerita Lucu Raja Gemuk & Anjing Kurus 👑🐕 #Shorts...",
+          "status": "published"
+        }
+      },
+      "en": {
+        "landscape": {
+          "id": "DJctEROJ7wo",
+          "url": "https://youtu.be/DJctEROJ7wo",
+          "publishedAt": "2026-11-03T05:11:18.059Z",
+          "title": "FAT KING, THIN DOG! 👑🐕 Hilarious Kids Animated Read-Aloud Storybook (Running For Days!)",
+          "status": "published"
+        },
+        "vertical": {
+          "id": "XkTR_Or5B2U",
+          "url": "https://youtube.com/shorts/XkTR_Or5B2U",
+          "publishedAt": "2026-11-05T23:09:34.320Z",
+          "title": "He Chased His Dog For Days And Got Fit! 😂👑🐕 Fat King, Thin Dog #Shorts #KidsBooks...",
+          "status": "published"
+        }
+      }
+    },
+    "facebook": {
+      "id": {
+        "vertical": {
+          "id": "992738057207627",
+          "url": "https://www.facebook.com/1473240609201601/videos/992738057207627/",
+          "publishedAt": "2026-11-04T21:39:36.039Z",
+          "title": "Raja Gemuk, Anjing Kurus!",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1485188206789748",
+          "url": "https://www.facebook.com/1473240609201601/videos/1485188206789748/",
+          "publishedAt": "2026-11-04T21:41:01.651Z",
+          "title": "Raja Gemuk, Anjing Kurus!",
+          "status": "published"
+        }
+      },
+      "en": {
+        "vertical": {
+          "id": "1160553539869262",
+          "url": "https://www.facebook.com/1473240609201601/videos/1160553539869262/",
+          "publishedAt": "2026-11-04T21:41:27.359Z",
+          "title": "Raja Gemuk, Anjing Kurus!",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1712421714034500",
+          "url": "https://www.facebook.com/1473240609201601/videos/1712421714034500/",
+          "publishedAt": "2026-11-04T21:43:10.482Z",
+          "title": "Raja Gemuk, Anjing Kurus!",
+          "status": "published"
+        }
+      }
+    },
+    "instagram": {
+      "id": {
+        "id": "18099437378222971",
+        "url": "https://www.instagram.com/reel/DfYS-6zke8c/",
+        "publishedAt": "2026-11-06T00:16:32.745Z",
+        "title": "Raja Gemuk, Anjing Kurus!",
+        "status": "published"
+      },
+      "en": {
+        "id": "17953572681049076",
+        "url": "https://www.instagram.com/reel/DfYTHzjm4jw/",
+        "publishedAt": "2026-11-06T00:17:42.467Z",
+        "title": "Raja Gemuk, Anjing Kurus!",
+        "status": "published"
+      }
+    }
+  }
+}

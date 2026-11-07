@@ -1,0 +1,116 @@
+{
+  "words": [
+    {
+      "word": "But",
+      "start": 0.1,
+      "end": 0.29,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "the",
+      "start": 0.3,
+      "end": 0.41,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "barber",
+      "start": 0.43,
+      "end": 0.85,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "said,",
+      "start": 0.86,
+      "end": 1.22,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "\"Today,",
+      "start": 1.48,
+      "end": 1.91,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "I",
+      "start": 2.22,
+      "end": 2.36,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "have",
+      "start": 2.37,
+      "end": 2.59,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "no",
+      "start": 2.6,
+      "end": 2.84,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "time",
+      "start": 2.85,
+      "end": 3.22,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "to",
+      "start": 3.23,
+      "end": 3.35,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "cut",
+      "start": 3.36,
+      "end": 3.64,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "such",
+      "start": 3.65,
+      "end": 3.93,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "long",
+      "start": 3.95,
+      "end": 4.29,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "hair!\"",
+      "start": 4.3,
+      "end": 4.7,
+      "speaker": "barber",
+      "speakerName": "Barber",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

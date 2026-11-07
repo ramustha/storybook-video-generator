@@ -1,0 +1,156 @@
+{
+  "words": [
+    {
+      "word": "Everyone",
+      "start": 0.1,
+      "end": 0.66,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "in",
+      "start": 0.67,
+      "end": 0.79,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "the",
+      "start": 0.8,
+      "end": 0.88,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "village",
+      "start": 0.9,
+      "end": 1.37,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "became",
+      "start": 1.38,
+      "end": 1.81,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "very",
+      "start": 1.82,
+      "end": 2.2,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "curious.",
+      "start": 2.22,
+      "end": 2.92,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "'Where",
+      "start": 3.74,
+      "end": 4,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "on",
+      "start": 4.01,
+      "end": 4.19,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "earth",
+      "start": 4.2,
+      "end": 4.52,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "are",
+      "start": 4.54,
+      "end": 4.75,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "all",
+      "start": 4.76,
+      "end": 4.99,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "his",
+      "start": 5,
+      "end": 5.18,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "bananas",
+      "start": 5.19,
+      "end": 5.71,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "going?'",
+      "start": 5.73,
+      "end": 6.12,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "they",
+      "start": 6.44,
+      "end": 6.6,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "wondered",
+      "start": 6.61,
+      "end": 7.05,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "in",
+      "start": 7.06,
+      "end": 7.21,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    },
+    {
+      "word": "whispers.",
+      "start": 7.23,
+      "end": 7.89,
+      "speaker": "neighbours",
+      "speakerName": "Neighbours",
+      "speakerColor": "#F97316"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "words": [
+    {
+      "word": "Tuesday",
+      "start": 0.1,
+      "end": 0.69,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "had",
+      "start": 0.71,
+      "end": 1.01,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "clear",
+      "start": 1.02,
+      "end": 1.38,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "blue",
+      "start": 1.4,
+      "end": 1.66,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "skies.",
+      "start": 1.68,
+      "end": 2.27,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Ma,",
+      "start": 3.11,
+      "end": 3.43,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "when",
+      "start": 3.69,
+      "end": 3.9,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "will",
+      "start": 3.91,
+      "end": 4.05,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "my",
+      "start": 4.07,
+      "end": 4.24,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "wish",
+      "start": 4.25,
+      "end": 4.53,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "come",
+      "start": 4.54,
+      "end": 4.77,
+      "speaker": "manu",
+      "speakerName": "Manu",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "true?",
+      "start": 4.78,
+      "end": 5.19,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "asked",
+      "start": 6.03,
+      "end": 6.43,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Manu.",
+      "start": 6.44,
+      "end": 6.93,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Not",
+      "start": 7.77,
+      "end": 8.07,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "today,",
+      "start": 8.08,
+      "end": 8.51,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "my",
+      "start": 8.77,
+      "end": 8.94,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "dear,",
+      "start": 8.96,
+      "end": 9.32,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "smiled",
+      "start": 9.55,
+      "end": 10.1,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "Ma.",
+      "start": 10.11,
+      "end": 10.41,
+      "speaker": "ibu",
+      "speakerName": "Ma",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

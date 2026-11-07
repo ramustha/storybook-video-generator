@@ -1,0 +1,228 @@
+{
+  "words": [
+    {
+      "word": "Dengan",
+      "start": 0.1,
+      "end": 0.47,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "hati",
+      "start": 0.47,
+      "end": 0.8,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "sedih,",
+      "start": 0.8,
+      "end": 1.31,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "Sringeri",
+      "start": 1.62,
+      "end": 2.23,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "Srinivas",
+      "start": 2.23,
+      "end": 2.78,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "pulang",
+      "start": 2.78,
+      "end": 3.14,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "ke",
+      "start": 3.14,
+      "end": 3.22,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "rumah",
+      "start": 3.23,
+      "end": 3.57,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "untuk",
+      "start": 3.57,
+      "end": 3.98,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "meminta",
+      "start": 3.98,
+      "end": 4.36,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "tolong",
+      "start": 4.36,
+      "end": 4.76,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "istrinya.",
+      "start": 4.76,
+      "end": 5.51,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "Tetapi",
+      "start": 6.3,
+      "end": 6.78,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "sang",
+      "start": 6.78,
+      "end": 6.98,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "istri",
+      "start": 6.98,
+      "end": 7.34,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "berkata,",
+      "start": 7.34,
+      "end": 8,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "\"Aduh,",
+      "start": 8.6,
+      "end": 9.11,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "hari",
+      "start": 9.4,
+      "end": 9.7,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "ini",
+      "start": 9.7,
+      "end": 10,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "aku",
+      "start": 10,
+      "end": 10.29,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "sibuk",
+      "start": 10.29,
+      "end": 10.67,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "memasak,",
+      "start": 10.68,
+      "end": 11.21,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "tidak",
+      "start": 11.51,
+      "end": 11.75,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "sempat",
+      "start": 11.75,
+      "end": 12.13,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "memotong",
+      "start": 12.13,
+      "end": 12.54,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "rambut",
+      "start": 12.54,
+      "end": 12.9,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "sepanjang",
+      "start": 12.9,
+      "end": 13.38,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    },
+    {
+      "word": "itu!\"",
+      "start": 13.38,
+      "end": 13.84,
+      "speaker": "wife",
+      "speakerName": "Istri",
+      "speakerColor": "#EC4899"
+    }
+  ]
+}

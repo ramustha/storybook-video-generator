@@ -1,0 +1,116 @@
+{
+  "words": [
+    {
+      "word": "Sekarang,",
+      "start": 0.1,
+      "end": 0.85,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Sringeri",
+      "start": 1.2,
+      "end": 1.8,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Srinivas",
+      "start": 1.8,
+      "end": 2.34,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "tidak",
+      "start": 2.34,
+      "end": 2.62,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "perlu",
+      "start": 2.62,
+      "end": 2.86,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "potong",
+      "start": 2.86,
+      "end": 3.2,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "rambut",
+      "start": 3.2,
+      "end": 3.53,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "lagi",
+      "start": 3.53,
+      "end": 3.85,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "untuk",
+      "start": 3.85,
+      "end": 4.23,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "waktu",
+      "start": 4.23,
+      "end": 4.52,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "yang",
+      "start": 4.52,
+      "end": 4.69,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sangat,",
+      "start": 4.69,
+      "end": 5.15,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sangat",
+      "start": 5.41,
+      "end": 5.84,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "lama!",
+      "start": 5.84,
+      "end": 6.37,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

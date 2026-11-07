@@ -1,0 +1,92 @@
+{
+  "words": [
+    {
+      "word": "Guk",
+      "start": 0.1,
+      "end": 0.41,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "guk!",
+      "start": 0.41,
+      "end": 0.7,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Si",
+      "start": 1.49,
+      "end": 1.78,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "anjing",
+      "start": 1.78,
+      "end": 2.29,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "kurus",
+      "start": 2.29,
+      "end": 2.63,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "langsung",
+      "start": 2.63,
+      "end": 3,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "lari",
+      "start": 3,
+      "end": 3.27,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "kencang",
+      "start": 3.27,
+      "end": 3.74,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "mengejar",
+      "start": 3.74,
+      "end": 4.12,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "burung",
+      "start": 4.12,
+      "end": 4.41,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "itu!",
+      "start": 4.41,
+      "end": 4.9,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

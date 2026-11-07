@@ -1,0 +1,92 @@
+{
+  "words": [
+    {
+      "word": "The",
+      "start": 0.1,
+      "end": 0.27,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Red",
+      "start": 0.28,
+      "end": 0.57,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Raincoat.",
+      "start": 0.58,
+      "end": 1.28,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Written",
+      "start": 2.11,
+      "end": 2.48,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 2.49,
+      "end": 2.69,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Kiran",
+      "start": 2.71,
+      "end": 3.13,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Kasturia,",
+      "start": 3.14,
+      "end": 3.91,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "illustrated",
+      "start": 4.16,
+      "end": 4.87,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "by",
+      "start": 4.88,
+      "end": 5.05,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Zainab",
+      "start": 5.06,
+      "end": 5.53,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Tambawalla.",
+      "start": 5.55,
+      "end": 6.37,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

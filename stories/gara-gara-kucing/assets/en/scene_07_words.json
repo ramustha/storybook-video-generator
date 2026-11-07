@@ -1,0 +1,108 @@
+{
+  "words": [
+    {
+      "word": "If",
+      "start": 0.1,
+      "end": 0.3,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "the",
+      "start": 0.31,
+      "end": 0.44,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "dog",
+      "start": 0.45,
+      "end": 0.81,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "hadn't",
+      "start": 0.82,
+      "end": 1.24,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "followed",
+      "start": 1.25,
+      "end": 1.68,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "him",
+      "start": 1.69,
+      "end": 1.88,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "home,",
+      "start": 1.89,
+      "end": 2.24,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "it",
+      "start": 2.56,
+      "end": 2.68,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "wouldn't",
+      "start": 2.7,
+      "end": 3.02,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "have",
+      "start": 3.03,
+      "end": 3.27,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "eaten",
+      "start": 3.29,
+      "end": 3.58,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "my",
+      "start": 3.59,
+      "end": 3.75,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "homework!",
+      "start": 3.76,
+      "end": 4.46,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    }
+  ]
+}

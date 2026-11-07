@@ -1,0 +1,632 @@
+{
+  "version": "1.0.0",
+  "id": "hari-cukur-rambut",
+  "slug": "hari-cukur-rambut",
+  "title": "Hari Cukur Rambut Sringeri Srinivas!",
+  "originalTitle": "Annual Haircut Day!",
+  "language": "id-ID",
+  "coverOrientation": "landscape",
+  "coverAspectRatio": 1.214,
+  "source": {
+    "repository": "Pratham Books (StoryWeaver / Wikimedia Commons)",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "originalAuthor": "Rohini Nilekani (Noni)",
+    "originalIllustrator": "Angie & Upesh (The Other Design Studio)",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Annual-Haircut-Day-English.pdf"
+  },
+  "stylePreset": {
+    "artMedium": "Authentic Whimsical Cartoon Illustration with Warm Tropical Gouache",
+    "artistInfluences": "Angie & Upesh, The Other Design Studio",
+    "renderingConstraints": "authentic 16:9 plates from open-license source, inpaint typography and page numbers, preserve full illustrator expression"
+  },
+  "thumbnailConfig": {
+    "heroImage": "assets/scene_08.png",
+    "backdropImage": "assets/scene_09.png",
+    "id": {
+      "headlineTop": "HARI CUKUR RAMBUT",
+      "headlineBottom": "RAMBUT RONTOK KAGET! 😂🦁",
+      "hook": "KAGET SAMA HARIMAU SAMPE BOTAK LICIN?!",
+      "hookEmoji": "😱💥",
+      "badge": "DONGENG CERITA ANAK SERU",
+      "sticker": "Rambut Rontok Sekaligus! 🤣",
+      "bedtimeTitle": "Hari Cukur Rambut Sringeri Srinivas",
+      "bedtimeHook": "Kisah Jenaka Menghadapi Masalah dengan Penuh Tawa"
+    },
+    "en": {
+      "headlineTop": "ANNUAL HAIRCUT",
+      "headlineBottom": "HAIR FELL OFF! 😂🦁",
+      "hook": "SCARED BY A TIGER TILL TOTALLY BALD?!",
+      "hookEmoji": "😱💥",
+      "badge": "HILARIOUS KIDS ANIMATED STORY",
+      "sticker": "All Hair Flew Off! 🤣",
+      "bedtimeTitle": "Annual Haircut Day",
+      "bedtimeHook": "A Hilarious Bedtime Tale of Unexpected Solutions"
+    }
+  },
+  "characterBible": {
+    "protagonists": [
+      {
+        "id": "sringeri",
+        "name": "Sringeri Srinivas",
+        "role": "Gentle Village Farmer",
+        "voice": {
+          "id": "id-ID-ArdiNeural",
+          "en": "en-US-AnaNeural",
+          "color": "#FDE047",
+          "badge": "👨 Sringeri"
+        }
+      },
+      {
+        "id": "tiger",
+        "name": "Harimau Gua / The Sleeping Tiger",
+        "role": "Startled Wild Tiger",
+        "voice": {
+          "id": "id-ID-ArdiNeural",
+          "en": "en-US-GuyNeural",
+          "color": "#EF4444",
+          "badge": "🐯 Harimau"
+        }
+      }
+    ]
+  },
+  "worldBible": {
+    "village": "Sringeri Village & Forest Cave",
+    "palette": {
+      "warmGold": "#F59E0B",
+      "jungleGreen": "#15803D",
+      "terracotta": "#D97706",
+      "skyBlue": "#38BDF8"
+    }
+  },
+  "scenes": [
+    {
+      "index": 0,
+      "sceneId": "cover",
+      "type": "cover",
+      "durationSeconds": 8.8,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Hari Cukur Rambut Sringeri Srinivas! Karya Rohini Nilekani, ilustrasi oleh Angie dan Upesh.",
+        "audioPath": "assets/id/cover.mp3",
+        "wordsPath": "assets/id/cover_words.json",
+        "en": {
+          "text": "Annual Haircut Day! Written by Noni, illustrated by Angie and Upesh.",
+          "audioPath": "assets/en/cover.mp3",
+          "wordsPath": "assets/en/cover_words.json",
+          "durationSeconds": 6.7,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_00_opener.m4a",
+        "sfxVolume": 0.65
+      }
+    },
+    {
+      "index": 1,
+      "sceneId": "scene_01",
+      "type": "story",
+      "durationSeconds": 13.4,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "visual": {
+        "imagePath": "assets/scene_01.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Hari ini adalah Hari Cukur Rambut Tahunan bagi Sringeri Srinivas. Rambutnya sudah sangat panjang dan lebat. Seperti biasa, ia berangkat menuju tukang cukur desa.",
+        "audioPath": "assets/id/scene_01.mp3",
+        "wordsPath": "assets/id/scene_01_words.json",
+        "en": {
+          "text": "It was the Annual Haircut Day for Sringeri Srinivas. Sringeri Srinivas left home as usual to go to the local barber.",
+          "audioPath": "assets/en/scene_01.mp3",
+          "wordsPath": "assets/en/scene_01_words.json",
+          "durationSeconds": 9.3,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_01_morning_walk.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 2,
+      "sceneId": "scene_02",
+      "type": "story",
+      "durationSeconds": 8.1,
+      "camera": {
+        "motion": "pan_right"
+      },
+      "visual": {
+        "imagePath": "assets/scene_02.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Tetapi tukang cukur berkata, \"Aduh, hari ini aku tidak punya waktu untuk memotong rambut sepanjang itu!\"",
+        "audioPath": "assets/id/scene_02.mp3",
+        "wordsPath": "assets/id/scene_02_words.json",
+        "en": {
+          "text": "But the barber said, \"Today, I have no time to cut such long hair!\"",
+          "audioPath": "assets/en/scene_02.mp3",
+          "wordsPath": "assets/en/scene_02_words.json",
+          "durationSeconds": 5.5,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_02_scissors.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 3,
+      "sceneId": "scene_03",
+      "type": "story",
+      "durationSeconds": 14.6,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "visual": {
+        "imagePath": "assets/scene_03.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Dengan hati sedih, Sringeri Srinivas pulang ke rumah untuk meminta tolong istrinya. Tetapi sang istri berkata, \"Aduh, hari ini aku sibuk memasak, tidak sempat memotong rambut sepanjang itu!\"",
+        "audioPath": "assets/id/scene_03.mp3",
+        "wordsPath": "assets/id/scene_03_words.json",
+        "en": {
+          "text": "Feeling sad, Sringeri Srinivas went back home to ask his wife for help. But his wife said, \"Today, I have no time to cut such long hair!\"",
+          "audioPath": "assets/en/scene_03.mp3",
+          "wordsPath": "assets/en/scene_03_words.json",
+          "durationSeconds": 11.3,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_03_kitchen.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 4,
+      "sceneId": "scene_04",
+      "type": "story",
+      "durationSeconds": 16.3,
+      "camera": {
+        "motion": "pan_right"
+      },
+      "visual": {
+        "imagePath": "assets/scene_04.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Mulai agak kesal, Sringeri Srinivas pergi menemui sahabatnya, si penjahit. Tetapi tukang jahit berkata, \"Aduh, jahitanku menumpuk! Hari ini aku tidak punya waktu memotong rambut sepanjang itu!\"",
+        "audioPath": "assets/id/scene_04.mp3",
+        "wordsPath": "assets/id/scene_04_words.json",
+        "en": {
+          "text": "Feeling a little angry, Sringeri Srinivas went to his friend, the tailor. But the tailor said, \"Today, I have no time to cut such long hair!\"",
+          "audioPath": "assets/en/scene_04.mp3",
+          "wordsPath": "assets/en/scene_04_words.json",
+          "durationSeconds": 11.3,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_04_tailor.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 5,
+      "sceneId": "scene_05",
+      "type": "story",
+      "durationSeconds": 17.1,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "visual": {
+        "imagePath": "assets/scene_05.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Sekarang mulai cemas, Sringeri Srinivas pergi menemui sahabatnya yang lain, si tukang kayu. Tetapi tukang kayu berkata, \"Aduh, kayuku masih banyak! Hari ini aku tidak punya waktu memotong rambut sepanjang itu!\"",
+        "audioPath": "assets/id/scene_05.mp3",
+        "wordsPath": "assets/id/scene_05_words.json",
+        "en": {
+          "text": "Now a little worried, Sringeri Srinivas went to one more friend, the carpenter. But the carpenter said, \"Today, I have no time to cut such long hair!\"",
+          "audioPath": "assets/en/scene_05.mp3",
+          "wordsPath": "assets/en/scene_05_words.json",
+          "durationSeconds": 11.7,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_05_carpenter.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 6,
+      "sceneId": "scene_06",
+      "type": "story",
+      "durationSeconds": 15.4,
+      "camera": {
+        "motion": "pan_right"
+      },
+      "atmosphere": {
+        "weather": "leaves",
+        "intensity": "medium"
+      },
+      "visual": {
+        "imagePath": "assets/scene_06.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Kasihan sekali Sringeri Srinivas. Rasanya tidak ada satu pun orang yang mau memotong rambutnya di Hari Cukur Rambut ini. Sambil meneteskan air mata, ia berjalan sendirian melewati hutan desa.",
+        "audioPath": "assets/id/scene_06.mp3",
+        "wordsPath": "assets/id/scene_06_words.json",
+        "en": {
+          "text": "Poor Sringeri Srinivas. It seemed no one would cut his hair on this Annual Haircut Day. In tears, he walked off by himself past the village forest.",
+          "audioPath": "assets/en/scene_06.mp3",
+          "wordsPath": "assets/en/scene_06_words.json",
+          "durationSeconds": 12.4,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_06_forest_leaves.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 7,
+      "sceneId": "scene_07",
+      "type": "story",
+      "durationSeconds": 13.9,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "atmosphere": {
+        "weather": "rain",
+        "intensity": "light"
+      },
+      "visual": {
+        "imagePath": "assets/scene_07.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Ia duduk di dekat sebuah gua batu dan menangis tersedu-sedu: \"Hari sudah hampir sore... Bagaimana aku bisa menepati janjiku untuk potong rambut? Ya Tuhan, tolonglah aku!\"",
+        "audioPath": "assets/id/scene_07.mp3",
+        "wordsPath": "assets/id/scene_07_words.json",
+        "en": {
+          "text": "He sat near a cave and cried loudly: \"The day is nearly over. How can I keep my promise to cut my hair? Oh God, help me!\"",
+          "audioPath": "assets/en/scene_07.mp3",
+          "wordsPath": "assets/en/scene_07_words.json",
+          "durationSeconds": 10.6,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_07_cave_rain.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 8,
+      "sceneId": "scene_08",
+      "type": "story",
+      "durationSeconds": 15.4,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "atmosphere": {
+        "weather": "lightning",
+        "intensity": "heavy"
+      },
+      "visual": {
+        "imagePath": "assets/scene_08.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Seekor harimau yang sedang tidur nyenyak di dalam gua merasa sangat terganggu oleh suara tangisan itu. Harimau itu keluar sambil mengaum keras, mengayunkan cakar raksasanya ke arah Sringeri Srinivas! Auummm!",
+        "audioPath": "assets/id/scene_08.mp3",
+        "wordsPath": "assets/id/scene_08_words.json",
+        "en": {
+          "text": "The tiger sleeping peacefully inside the cave was very disturbed by all the noise. He came out, roaring, waving his giant paws at Sringeri Srinivas!",
+          "audioPath": "assets/en/scene_08.mp3",
+          "wordsPath": "assets/en/scene_08_words.json",
+          "durationSeconds": 11.8,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_08_tiger_thunder.m4a",
+        "sfxVolume": 0.26,
+        "sfxDelaySeconds": 0.2
+      }
+    },
+    {
+      "index": 9,
+      "sceneId": "scene_09",
+      "type": "story",
+      "durationSeconds": 13.5,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "visual": {
+        "imagePath": "assets/scene_09.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Sringeri Srinivas begitu kaget dan ketakutan... Sangat takut, teramat takut, sampai-sampai... PLOP! Seluruh rambut di kepalanya rontok sekaligus!",
+        "audioPath": "assets/id/scene_09.mp3",
+        "wordsPath": "assets/id/scene_09_words.json",
+        "en": {
+          "text": "Poor Sringeri Srinivas was so scared, so scared, so scared that... all the hair fell off his head!",
+          "audioPath": "assets/en/scene_09.mp3",
+          "wordsPath": "assets/en/scene_09_words.json",
+          "durationSeconds": 7.8,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_09_hair_pop.m4a",
+        "sfxVolume": 0.26,
+        "sfxDelaySeconds": 0.3
+      }
+    },
+    {
+      "index": 10,
+      "sceneId": "scene_10",
+      "type": "story",
+      "durationSeconds": 11.9,
+      "camera": {
+        "motion": "pan_right"
+      },
+      "visual": {
+        "imagePath": "assets/scene_10.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Sambil memegang kepalanya yang botak licin, Sringeri Srinivas berlari secepat kilat kembali ke desa dengan wajah gembira! Harimau pun kembali tidur dengan tenang.",
+        "audioPath": "assets/id/scene_10.mp3",
+        "wordsPath": "assets/id/scene_10_words.json",
+        "en": {
+          "text": "Sringeri Srinivas ran all the way back to the village! The tiger went back to sleep.",
+          "audioPath": "assets/en/scene_10.mp3",
+          "wordsPath": "assets/en/scene_10_words.json",
+          "durationSeconds": 7,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_10_running.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 11,
+      "sceneId": "scene_11",
+      "type": "story",
+      "durationSeconds": 7.2,
+      "camera": {
+        "motion": "slow_zoom_in"
+      },
+      "visual": {
+        "imagePath": "assets/scene_11.png",
+        "status": "ready"
+      },
+      "audio": {
+        "text": "Sekarang, Sringeri Srinivas tidak perlu potong rambut lagi untuk waktu yang sangat, sangat lama!",
+        "audioPath": "assets/id/scene_11.mp3",
+        "wordsPath": "assets/id/scene_11_words.json",
+        "en": {
+          "text": "Now, Sringeri Srinivas will not need a haircut for a very, very long time!",
+          "audioPath": "assets/en/scene_11.mp3",
+          "wordsPath": "assets/en/scene_11_words.json",
+          "durationSeconds": 6.3,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_11_head_shine.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 12,
+      "sceneId": "scene_12",
+      "type": "moral",
+      "durationSeconds": 13.3,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "avatarPath": "assets/protagonist_avatar.png",
+        "status": "ready"
+      },
+      "atmosphere": {
+        "weather": "fireflies",
+        "intensity": "light"
+      },
+      "moral": {
+        "headline": "Masalah Sulit Bisa Selesai dengan Cara Tak Terduga!",
+        "headlineEn": "Big Worries Can Solve Themselves in Funny Ways!"
+      },
+      "audio": {
+        "text": "Pesan moral cerita ini: Jangan pernah berputus asa saat menghadapi kesulitan! Terkadang hal yang paling tidak kita duga justru membawa jalan keluar terbaik dengan penuh tawa dan kebahagiaan!",
+        "audioPath": "assets/id/scene_12.mp3",
+        "wordsPath": "assets/id/scene_12_words.json",
+        "en": {
+          "text": "The moral of the story: Never give up when things don't go your way! Sometimes, life's biggest worries solve themselves in unexpected ways that bring us pure joy and laughter!",
+          "audioPath": "assets/en/scene_12.mp3",
+          "wordsPath": "assets/en/scene_12_words.json",
+          "durationSeconds": 12.9,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_12_moral_sparkle.m4a",
+        "sfxVolume": 0.26
+      }
+    },
+    {
+      "index": 13,
+      "sceneId": "scene_13",
+      "type": "outro",
+      "durationSeconds": 17.2,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "recommendation": {
+        "title": "Dongeng Seru Berikutnya!",
+        "titleEn": "Next Exciting Adventure!",
+        "subtitle": "Klik untuk Menonton Cerita Lengkap",
+        "subtitleEn": "Click to Watch Full Story",
+        "badge": "REKOMENDASI",
+        "badgeEn": "UP NEXT"
+      },
+      "channelHandle": "@ZaynAdyanRamadhan",
+      "audio": {
+        "text": "Wah, seru sekali ya ceritanya! Jangan lupa klik video di sebelah sini untuk menonton dongeng seru lainnya, dan klik tombol Subscribe agar kita bisa terus berpetualang bersama! Sampai jumpa di cerita berikutnya! Dadah!",
+        "audioPath": "assets/id/scene_13.mp3",
+        "wordsPath": "assets/id/scene_13_words.json",
+        "en": {
+          "text": "Did you enjoy the story? Click the video on your screen to watch another fun adventure, and don't forget to hit Subscribe so we can keep reading together! See you in the next story! Bye-bye!",
+          "audioPath": "assets/en/scene_13.mp3",
+          "wordsPath": "assets/en/scene_13_words.json",
+          "durationSeconds": 14.5,
+          "status": "ready"
+        },
+        "status": "ready",
+        "sfxPath": "assets/sfx/sfx_13_outro_pop.m4a",
+        "sfxVolume": 0.65
+      }
+    }
+  ],
+  "exports": {
+    "id": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-02T19:15:16.676Z",
+        "path": "exports/id/hari-cukur-rambut-16x9.mp4",
+        "youtubeId": "W_s0hTXPYfw",
+        "youtubeUrl": "https://youtu.be/W_s0hTXPYfw"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-06T00:27:01.825Z",
+        "path": "exports/id/hari-cukur-rambut-9x16.mp4"
+      }
+    },
+    "en": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-02T19:25:58.803Z",
+        "path": "exports/en/annual-haircut-day-16x9.mp4",
+        "youtubeId": "U1Bi31IWBzI",
+        "youtubeUrl": "https://youtu.be/U1Bi31IWBzI"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-05T22:57:03.054Z",
+        "path": "exports/en/annual-haircut-day-9x16.mp4",
+        "youtubeId": "cXcfE2qbFTY",
+        "youtubeUrl": "https://youtube.com/shorts/cXcfE2qbFTY"
+      }
+    }
+  },
+  "thumbnails": {
+    "id": {
+      "popular": "exports/id/thumbnail-popular.png",
+      "primary": "exports/id/thumbnail.png",
+      "bedtime": "exports/id/thumbnail-bedtime.png",
+      "vertical": "exports/id/thumbnail-vertical.png"
+    },
+    "en": {
+      "popular": "exports/en/thumbnail-popular.png",
+      "primary": "exports/en/thumbnail.png",
+      "bedtime": "exports/en/thumbnail-bedtime.png",
+      "vertical": "exports/en/thumbnail-vertical.png"
+    },
+    "updatedAt": "2026-11-02T17:34:16.683Z"
+  },
+  "audio": {
+    "bgMusicPath": "assets/audio/bgm_whimsical_story.m4a",
+    "bgMusicVolume": 0.14
+  },
+  "publications": {
+    "youtube": {
+      "id": {
+        "landscape": {
+          "id": "W_s0hTXPYfw",
+          "url": "https://youtu.be/W_s0hTXPYfw",
+          "publishedAt": "2026-11-02T19:38:00.722Z",
+          "title": "HARI CUKUR RAMBUT! 🦁✂️ Dongeng Cerita Anak Lucu Penuh Tawa (Kaget Harimau Sampe Botak!) |...",
+          "status": "published"
+        }
+      },
+      "en": {
+        "landscape": {
+          "id": "U1Bi31IWBzI",
+          "url": "https://youtu.be/U1Bi31IWBzI",
+          "publishedAt": "2026-11-02T19:38:27.990Z",
+          "title": "ANNUAL HAIRCUT DAY! 🦁✂️ Hilarious Animated Kids Storybook (Scared by a Tiger Till Totally...",
+          "status": "published"
+        },
+        "vertical": {
+          "id": "cXcfE2qbFTY",
+          "url": "https://youtube.com/shorts/cXcfE2qbFTY",
+          "publishedAt": "2026-11-05T22:57:29.188Z",
+          "title": "Scared by a Tiger Till All Hair Flew Off?! 😂🦁 Annual Haircut Day #Shorts #KidsStories",
+          "status": "published"
+        }
+      }
+    },
+    "facebook": {
+      "id": {
+        "vertical": {
+          "id": "2459985614808046",
+          "url": "https://www.facebook.com/1473240609201601/videos/2459985614808046/",
+          "publishedAt": "2026-11-04T21:32:11.111Z",
+          "title": "Hari Cukur Rambut Sringeri Srinivas!",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1817025729617280",
+          "url": "https://www.facebook.com/1473240609201601/videos/1817025729617280/",
+          "publishedAt": "2026-11-04T21:34:16.292Z",
+          "title": "Hari Cukur Rambut Sringeri Srinivas!",
+          "status": "published"
+        }
+      },
+      "en": {
+        "vertical": {
+          "id": "1636294957984746",
+          "url": "https://www.facebook.com/1473240609201601/videos/1636294957984746/",
+          "publishedAt": "2026-11-04T21:34:48.708Z",
+          "title": "Hari Cukur Rambut Sringeri Srinivas!",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "2034736543691807",
+          "url": "https://www.facebook.com/1473240609201601/videos/2034736543691807/",
+          "publishedAt": "2026-11-04T21:36:34.159Z",
+          "title": "Hari Cukur Rambut Sringeri Srinivas!",
+          "status": "published"
+        }
+      }
+    },
+    "instagram": {
+      "id": {
+        "id": "18125455933905850",
+        "url": "https://www.instagram.com/reel/DfVbgehjOAX/",
+        "publishedAt": "2026-11-04T21:33:38.246Z",
+        "title": "Hari Cukur Rambut Sringeri Srinivas!",
+        "status": "published"
+      },
+      "en": {
+        "id": "17914920093506777",
+        "url": "https://www.instagram.com/reel/DfVbzfTis7f/",
+        "publishedAt": "2026-11-04T21:35:59.281Z",
+        "title": "Hari Cukur Rambut Sringeri Srinivas!",
+        "status": "published"
+      }
+    }
+  }
+}

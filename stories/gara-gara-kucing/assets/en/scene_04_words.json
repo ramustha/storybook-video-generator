@@ -1,0 +1,220 @@
+{
+  "words": [
+    {
+      "word": "If",
+      "start": 0.1,
+      "end": 0.3,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "the",
+      "start": 0.31,
+      "end": 0.42,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "baby",
+      "start": 0.43,
+      "end": 0.79,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "hadn't",
+      "start": 0.8,
+      "end": 1.2,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "woken",
+      "start": 1.21,
+      "end": 1.58,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "up,",
+      "start": 1.59,
+      "end": 1.84,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "my",
+      "start": 2.13,
+      "end": 2.29,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "mother",
+      "start": 2.3,
+      "end": 2.72,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "wouldn't",
+      "start": 2.73,
+      "end": 3.04,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "have",
+      "start": 3.05,
+      "end": 3.32,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "run",
+      "start": 3.33,
+      "end": 3.59,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "out",
+      "start": 3.6,
+      "end": 3.76,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "of",
+      "start": 3.78,
+      "end": 3.87,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "the",
+      "start": 3.89,
+      "end": 3.98,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "kitchen.",
+      "start": 4,
+      "end": 4.52,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "If",
+      "start": 5.37,
+      "end": 5.55,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "mother",
+      "start": 5.56,
+      "end": 5.94,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "hadn't",
+      "start": 5.96,
+      "end": 6.37,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "left",
+      "start": 6.38,
+      "end": 6.72,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "the",
+      "start": 6.73,
+      "end": 6.84,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "kitchen,",
+      "start": 6.85,
+      "end": 7.33,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "the",
+      "start": 7.63,
+      "end": 7.73,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "monkey",
+      "start": 7.75,
+      "end": 8.2,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "wouldn't",
+      "start": 8.21,
+      "end": 8.54,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "have",
+      "start": 8.55,
+      "end": 8.81,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "got",
+      "start": 8.82,
+      "end": 9.09,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    },
+    {
+      "word": "in.",
+      "start": 9.11,
+      "end": 9.39,
+      "speaker": "budi",
+      "speakerName": "Budi",
+      "speakerColor": "#FDE047"
+    }
+  ]
+}

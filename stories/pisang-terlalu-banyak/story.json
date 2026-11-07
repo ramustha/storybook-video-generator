@@ -1,0 +1,613 @@
+{
+  "version": "1.0.0",
+  "id": "pisang-terlalu-banyak",
+  "slug": "pisang-terlalu-banyak",
+  "title": "Pisang Terlalu Banyak!",
+  "originalTitle": "Too Many Bananas!",
+  "language": "id-ID",
+  "coverOrientation": "landscape",
+  "coverAspectRatio": 1.214,
+  "source": {
+    "repository": "Pratham Books (StoryWeaver / Internet Archive)",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "originalAuthor": "Rohini Nilekani (Noni)",
+    "originalIllustrator": "Angie & Upesh (The Other Design Studio)",
+    "sourceUrl": "https://archive.org/details/TooManyBananas-English-Pratham"
+  },
+  "stylePreset": {
+    "artMedium": "Authentic Whimsical Cartoon Illustration with Warm Tropical Gouache",
+    "artistInfluences": "Angie & Upesh, The Other Design Studio",
+    "renderingConstraints": "authentic 16:9 plates from open-license source, inpaint typography and page numbers"
+  },
+  "audio": {
+    "bgMusicPath": "assets/audio/bgm_whimsical_story.m4a",
+    "bgMusicVolume": 0.14
+  },
+  "thumbnailConfig": {
+    "heroImage": "assets/scene_11.png",
+    "backdropImage": "assets/scene_01.png",
+    "id": {
+      "headlineTop": "PISANG TERLALU BANYAK!",
+      "headlineBottom": "DODOL PISANG EMAS! 🍌✨",
+      "hook": "PANEN PISANG BANJIR DESA, SAPI AJA GAMAU?!",
+      "hookEmoji": "🍌🤣",
+      "badge": "DONGENG CERITA ANAK SERU",
+      "sticker": "Rahasia 108 Pisang! 🍯",
+      "bedtimeTitle": "Pisang Terlalu Banyak!",
+      "bedtimeHook": "Kisah Jenaka Mengubah Masalah Menjadi Manis & Bahagia"
+    },
+    "en": {
+      "headlineTop": "TOO MANY BANANAS!",
+      "headlineBottom": "GOLDEN BANANA HALWA! 🍌✨",
+      "hook": "TOO MANY BANANAS EVEN COWS SAID NO?!",
+      "hookEmoji": "🍌🤣",
+      "badge": "HILARIOUS KIDS ANIMATED STORY",
+      "sticker": "Secret of 108 Bananas! 🍯",
+      "bedtimeTitle": "Too Many Bananas!",
+      "bedtimeHook": "A Hilarious Bedtime Tale of Turning Trouble Into Sweet Joy"
+    }
+  },
+  "characterBible": {
+    "protagonists": [
+      {
+        "id": "sringeri",
+        "name": "Sringeri Srinivas",
+        "role": "Gentle Village Farmer",
+        "voice": {
+          "id": "id-ID-ArdiNeural",
+          "en": "en-US-AnaNeural",
+          "color": "#FDE047",
+          "badge": "👨 Sringeri"
+        }
+      }
+    ]
+  },
+  "worldBible": {
+    "village": "Sringeri Village & Doddooru Town",
+    "palette": {
+      "bananaGold": "#FDE047",
+      "ripeAmber": "#F59E0B",
+      "tropicalGreen": "#15803D",
+      "terracotta": "#D97706",
+      "skyBlue": "#38BDF8"
+    }
+  },
+  "scenes": [
+    {
+      "index": 0,
+      "sceneId": "cover",
+      "type": "cover",
+      "durationSeconds": 11.07,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Zayn Storybook mempersembahkan: Pisang Terlalu Banyak! Cerita jenaka karya Rohini Nilekani, diilustrasikan oleh Angie dan Upesh.",
+        "audioPath": "assets/id/cover.mp3",
+        "wordsPath": "assets/id/cover_words.json",
+        "durationSeconds": 10.47,
+        "sfxPath": "assets/sfx/sfx_00_opener.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Zayn Storybook presents: Too Many Bananas! A fun story by Rohini Nilekani, illustrated by Angie and Upesh.",
+          "audioPath": "assets/en/cover.mp3",
+          "wordsPath": "assets/en/cover_words.json",
+          "durationSeconds": 10.1
+        }
+      }
+    },
+    {
+      "index": 1,
+      "sceneId": "scene_01",
+      "type": "story",
+      "durationSeconds": 14.38,
+      "visual": {
+        "imagePath": "assets/scene_01.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Pak Sringeri Srinivas sedang mengalami hari yang aneh. Panen pisang di kebunnya melimpah ruah, manis, dan wangi sekali! Tapi... tidak ada satu orang pun yang mau membelinya!",
+        "audioPath": "assets/id/scene_01.mp3",
+        "wordsPath": "assets/id/scene_01_words.json",
+        "durationSeconds": 13.78,
+        "sfxPath": "assets/sfx/sfx_01_morning_walk.m4a",
+        "sfxDelaySeconds": 0.2,
+        "en": {
+          "text": "Sringeri Srinivas was having a very strange day. His farm was full of sweet, ripe bananas! But... nobody wanted to buy them!",
+          "audioPath": "assets/en/scene_01.mp3",
+          "wordsPath": "assets/en/scene_01_words.json",
+          "durationSeconds": 11.28
+        }
+      }
+    },
+    {
+      "index": 2,
+      "sceneId": "scene_02",
+      "type": "story",
+      "durationSeconds": 11.07,
+      "visual": {
+        "imagePath": "assets/scene_02.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "pan_right",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Keluarganya menolak. 'Waduh Pak, pisangnya manis banget, tapi kami sudah kenyang makan pisang tiap hari!' kata istrinya sambil tersenyum.",
+        "audioPath": "assets/id/scene_02.mp3",
+        "wordsPath": "assets/id/scene_02_words.json",
+        "durationSeconds": 10.47,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Not his family. 'Oh, they are very sweet, but we have eaten bananas every day and we are completely full!' they said.",
+          "audioPath": "assets/en/scene_02.mp3",
+          "wordsPath": "assets/en/scene_02_words.json",
+          "durationSeconds": 9.42
+        }
+      }
+    },
+    {
+      "index": 3,
+      "sceneId": "scene_03",
+      "type": "story",
+      "durationSeconds": 14.02,
+      "visual": {
+        "imagePath": "assets/scene_03.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "tilt_up",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Pak Srinivas berkeliling ke tetangga dan teman-temannya. 'Tidak mau lagi, Pak Srinivas! Pohon pisang kami di halaman juga lagi berbuah lebat!' kata mereka sambil tertawa.",
+        "audioPath": "assets/id/scene_03.mp3",
+        "wordsPath": "assets/id/scene_03_words.json",
+        "durationSeconds": 13.42,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "He offered them to his neighbours and friends. 'No thank you, Sringeri! Our banana trees in the garden are bursting with fruit too!' they said with a laugh.",
+          "audioPath": "assets/en/scene_03.mp3",
+          "wordsPath": "assets/en/scene_03_words.json",
+          "durationSeconds": 12.11
+        }
+      }
+    },
+    {
+      "index": 4,
+      "sceneId": "scene_04",
+      "type": "story",
+      "durationSeconds": 12.61,
+      "visual": {
+        "imagePath": "assets/scene_04.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Pedagang pasar menggeleng: 'Di kota lagi banjir pisang!' Bahkan sapi-sapi peliharaannya melengos dan menolak memakannya! Aduh, gawat!",
+        "audioPath": "assets/id/scene_04.mp3",
+        "wordsPath": "assets/id/scene_04_words.json",
+        "durationSeconds": 12.01,
+        "sfxPath": "assets/sfx/sfx_02_dog.m4a",
+        "sfxDelaySeconds": 1.5,
+        "en": {
+          "text": "Market traders shook their heads. And not even his cows wanted them! They turned their heads away and swished their tails. Oh dear!",
+          "audioPath": "assets/en/scene_04.mp3",
+          "wordsPath": "assets/en/scene_04_words.json",
+          "durationSeconds": 11.47
+        }
+      }
+    },
+    {
+      "index": 5,
+      "sceneId": "scene_05",
+      "type": "story",
+      "durationSeconds": 9.7,
+      "visual": {
+        "imagePath": "assets/scene_05.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "pan_right",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Kasihan sekali Pak Srinivas! Apa yang harus ia lakukan dengan bertumpuk-tumpuk pisang manis ini? Kalau dibiarkan, semuanya bisa membusuk sia-sia!",
+        "audioPath": "assets/id/scene_05.mp3",
+        "wordsPath": "assets/id/scene_05_words.json",
+        "durationSeconds": 9.1,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Poor Sringeri Srinivas! What could he possibly do with so many bananas before they went bad?",
+          "audioPath": "assets/en/scene_05.mp3",
+          "wordsPath": "assets/en/scene_05_words.json",
+          "durationSeconds": 7.68
+        }
+      }
+    },
+    {
+      "index": 6,
+      "sceneId": "scene_06",
+      "type": "story",
+      "durationSeconds": 11.88,
+      "visual": {
+        "imagePath": "assets/scene_06.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "tilt_up",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Aha! Pak Srinivas memutuskan pergi ke Pusat Pertanian di kota Doddooru untuk meminta saran. Pasti para ahli di sana punya ide cemerlang!",
+        "audioPath": "assets/id/scene_06.mp3",
+        "wordsPath": "assets/id/scene_06_words.json",
+        "durationSeconds": 11.28,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "He decided to seek help from the Farmer's Centre in Doddooru. Surely someone there would have a brilliant idea!",
+          "audioPath": "assets/en/scene_06.mp3",
+          "wordsPath": "assets/en/scene_06_words.json",
+          "durationSeconds": 8.28
+        }
+      }
+    },
+    {
+      "index": 7,
+      "sceneId": "scene_07",
+      "type": "story",
+      "durationSeconds": 13.14,
+      "visual": {
+        "imagePath": "assets/scene_07.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Beberapa hari kemudian, Pak Srinivas pulang sambil bersiul riang. Ia kembali berkebun dengan gembira, tapi anehnya... ia tidak lagi menawarkan pisang kepada siapa pun!",
+        "audioPath": "assets/id/scene_07.mp3",
+        "wordsPath": "assets/id/scene_07_words.json",
+        "durationSeconds": 12.54,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "A few days later, he returned home beaming with joy. He went back to farming, but curiously, he stopped offering bananas to anyone!",
+          "audioPath": "assets/en/scene_07.mp3",
+          "wordsPath": "assets/en/scene_07_words.json",
+          "durationSeconds": 10.9
+        }
+      }
+    },
+    {
+      "index": 8,
+      "sceneId": "scene_08",
+      "type": "story",
+      "durationSeconds": 10.5,
+      "visual": {
+        "imagePath": "assets/scene_08.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "pan_right",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Semua orang di desa jadi sangat penasaran! 'Ke mana perginya pisang-pisang lebat Pak Srinivas?' bisik para tetangga penuh tanda tanya.",
+        "audioPath": "assets/id/scene_08.mp3",
+        "wordsPath": "assets/id/scene_08_words.json",
+        "durationSeconds": 9.9,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Everyone in the village became very curious. 'Where on earth are all his bananas going?' they wondered in whispers.",
+          "audioPath": "assets/en/scene_08.mp3",
+          "wordsPath": "assets/en/scene_08_words.json",
+          "durationSeconds": 8.99
+        }
+      }
+    },
+    {
+      "index": 9,
+      "sceneId": "scene_09",
+      "type": "story",
+      "durationSeconds": 20.77,
+      "visual": {
+        "imagePath": "assets/scene_09.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "tilt_up",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Suatu hari, tetangga Shivanna mengadakan upacara syukuran besar di desa. Sang pendeta berkata: 'Kita membutuhkan 108 buah pisang ranum!' Pak Shivanna panik dan berlari ke rumah Pak Srinivas: 'Tolong bantu aku! Aku butuh 108 pisang!'",
+        "audioPath": "assets/id/scene_09.mp3",
+        "wordsPath": "assets/id/scene_09_words.json",
+        "durationSeconds": 20.17,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "One day, neighbour Shivanna held a big village ceremony. The priest needed 108 ripe bananas! Shivanna rushed to Sringeri: 'Please help me! I need 108 bananas!'",
+          "audioPath": "assets/en/scene_09.mp3",
+          "wordsPath": "assets/en/scene_09_words.json",
+          "durationSeconds": 15.4
+        }
+      }
+    },
+    {
+      "index": 10,
+      "sceneId": "scene_10",
+      "type": "story",
+      "durationSeconds": 12.66,
+      "visual": {
+        "imagePath": "assets/scene_10.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Pak Srinivas tersenyum: 'Tentu, mulailah upacaranya, aku pasti datang!' Di tengah upacara, Pak Srinivas tiba membawa keranjang besar berisi 27 bungkusan rapi dari daun pisang hijau segar.",
+        "audioPath": "assets/id/scene_10.mp3",
+        "wordsPath": "assets/id/scene_10_words.json",
+        "durationSeconds": 12.06,
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Sringeri Srinivas smiled: 'Start your ceremony, I will surely come!' Just then, in came Sringeri carrying a big bag with 27 neat packets wrapped in fresh banana leaves.",
+          "audioPath": "assets/en/scene_10.mp3",
+          "wordsPath": "assets/en/scene_10_words.json",
+          "durationSeconds": 13.91
+        }
+      }
+    },
+    {
+      "index": 11,
+      "sceneId": "scene_11",
+      "type": "story",
+      "durationSeconds": 19.28,
+      "visual": {
+        "imagePath": "assets/scene_11.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Tertulis di bungkusnya: 'Dodol Pisang Manis Istimewa Kebun Srinivas!' Tiap bungkus berisi sari 4 pisang matang, pas untuk 108 pisang! Seluruh warga tertawa gembira, bertepuk tangan, dan menikmati hidangan manis bersama-sama!",
+        "audioPath": "assets/id/scene_11.mp3",
+        "wordsPath": "assets/id/scene_11_words.json",
+        "durationSeconds": 18.68,
+        "sfxPath": "assets/sfx/sfx_08_catch_cheer.m4a",
+        "sfxDelaySeconds": 3,
+        "en": {
+          "text": "On each packet was written: 'High Quality Banana Halwa, S.S. Farms!' Each packet held the pulp of 4 bananas—totalling exactly 108 bananas! The whole village clapped, laughed, and enjoyed the delicious sweet treat together!",
+          "audioPath": "assets/en/scene_11.mp3",
+          "wordsPath": "assets/en/scene_11_words.json",
+          "durationSeconds": 18.41
+        }
+      }
+    },
+    {
+      "index": 12,
+      "sceneId": "moral",
+      "type": "moral",
+      "durationSeconds": 16.44,
+      "visual": {
+        "imagePath": "assets/scene_12.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Nah teman-teman, nilai moral dari cerita ini adalah: saat kita menghadapi kesulitan atau masalah, jangan pernah putus asa! Gunakan akal dan kreativitas kita untuk mencari solusi yang bermanfaat dan membahagiakan semua orang!",
+        "audioPath": "assets/id/moral.mp3",
+        "wordsPath": "assets/id/moral_words.json",
+        "durationSeconds": 15.84,
+        "sfxPath": "assets/sfx/sfx_10_moral_harp.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "The moral of the story: when faced with a difficult challenge, never give up! With creative thinking and sharing, we can turn any problem into a sweet success that brings joy to everyone!",
+          "audioPath": "assets/en/moral.mp3",
+          "wordsPath": "assets/en/moral_words.json",
+          "durationSeconds": 13.62
+        }
+      },
+      "moralHeadline": "Kreativitas Mengubah Masalah Menjadi Berkah Manis!",
+      "moralHeadlineEn": "Creative Thinking Turns Problems into Sweet Success!"
+    },
+    {
+      "index": 13,
+      "sceneId": "outro",
+      "type": "outro",
+      "durationSeconds": 17.48,
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Wah, seru sekali ya ceritanya! Jangan lupa klik video di sebelah sini untuk menonton dongeng seru lainnya, dan klik tombol Subscribe agar kita bisa terus berpetualang bersama! Sampai jumpa di cerita berikutnya! Dadah!",
+        "audioPath": "assets/id/outro.mp3",
+        "wordsPath": "assets/id/outro_words.json",
+        "durationSeconds": 16.88,
+        "sfxPath": "assets/sfx/sfx_11_outro_pop.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Did you enjoy the story? Click the video on your screen to watch another fun adventure, and don't forget to hit Subscribe so we can keep reading together! See you in the next story! Bye-bye!",
+          "audioPath": "assets/en/outro.mp3",
+          "wordsPath": "assets/en/outro_words.json",
+          "durationSeconds": 14.54
+        }
+      }
+    }
+  ],
+  "thumbnails": {
+    "id": {
+      "popular": "exports/id/thumbnail-popular.png",
+      "primary": "exports/id/thumbnail.png",
+      "bedtime": "exports/id/thumbnail-bedtime.png",
+      "vertical": "exports/id/thumbnail-vertical.png"
+    },
+    "en": {
+      "popular": "exports/en/thumbnail-popular.png",
+      "primary": "exports/en/thumbnail.png",
+      "bedtime": "exports/en/thumbnail-bedtime.png",
+      "vertical": "exports/en/thumbnail-vertical.png"
+    },
+    "updatedAt": "2026-11-05T05:14:01.814Z"
+  },
+  "exports": {
+    "id": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-05T01:20:31.169Z",
+        "path": "exports/id/pisang-terlalu-banyak-16x9.mp4",
+        "youtubeId": "8d1N51G2Py8",
+        "youtubeUrl": "https://youtu.be/8d1N51G2Py8",
+        "localStatus": "cleaned_up_after_publish",
+        "cleanedUpAt": "2026-11-05T06:51:38.330Z",
+        "reproducibleVia": "npm run render -- --book pisang-terlalu-banyak --lang id --format landscape"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-06T00:36:50.421Z",
+        "path": "exports/id/pisang-terlalu-banyak-9x16.mp4"
+      }
+    },
+    "en": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-05T01:31:18.194Z",
+        "path": "exports/en/too-many-bananas-16x9.mp4",
+        "youtubeId": "Kb3pN9MtxVg",
+        "youtubeUrl": "https://youtu.be/Kb3pN9MtxVg",
+        "localStatus": "cleaned_up_after_publish",
+        "cleanedUpAt": "2026-11-05T06:51:38.367Z",
+        "reproducibleVia": "npm run render -- --book pisang-terlalu-banyak --lang en --format landscape"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-05T23:02:29.783Z",
+        "path": "exports/en/too-many-bananas-9x16.mp4",
+        "youtubeId": "AL3URKYnEn4",
+        "youtubeUrl": "https://youtube.com/shorts/AL3URKYnEn4"
+      }
+    }
+  },
+  "publications": {
+    "facebook": {
+      "id": {
+        "vertical": {
+          "id": "1121555703939909",
+          "url": "https://www.facebook.com/1473240609201601/videos/1121555703939909/",
+          "publishedAt": "2026-11-05T01:55:39.682Z",
+          "title": "Pisang Terlalu Banyak!",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1148399937534781",
+          "url": "https://www.facebook.com/1473240609201601/videos/1148399937534781/",
+          "publishedAt": "2026-11-05T01:57:52.614Z",
+          "title": "Pisang Terlalu Banyak!",
+          "status": "published"
+        }
+      },
+      "en": {
+        "vertical": {
+          "id": "1526407702581920",
+          "url": "https://www.facebook.com/1473240609201601/videos/1526407702581920/",
+          "publishedAt": "2026-11-05T01:58:28.453Z",
+          "title": "Pisang Terlalu Banyak!",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1758153918631101",
+          "url": "https://www.facebook.com/1473240609201601/videos/1758153918631101/",
+          "publishedAt": "2026-11-05T02:00:21.748Z",
+          "title": "Pisang Terlalu Banyak!",
+          "status": "published"
+        }
+      }
+    },
+    "instagram": {
+      "id": {
+        "id": "18650700574043587",
+        "url": "https://www.instagram.com/reel/DfV5qMUCVd8/",
+        "publishedAt": "2026-11-05T01:57:13.387Z",
+        "title": "Pisang Terlalu Banyak!",
+        "status": "published"
+      },
+      "en": {
+        "id": "18119358566073500",
+        "url": "https://www.instagram.com/reel/DfV5-fxlOG6/",
+        "publishedAt": "2026-11-05T01:59:44.437Z",
+        "title": "Pisang Terlalu Banyak!",
+        "status": "published"
+      }
+    },
+    "youtube": {
+      "id": {
+        "landscape": {
+          "id": "8d1N51G2Py8",
+          "url": "https://youtu.be/8d1N51G2Py8",
+          "publishedAt": "2026-11-05T05:40:07.316Z",
+          "title": "PISANG TERLALU BANYAK!! 📖 Dongeng Cerita Anak Bergambar",
+          "status": "published"
+        }
+      },
+      "en": {
+        "landscape": {
+          "id": "Kb3pN9MtxVg",
+          "url": "https://youtu.be/Kb3pN9MtxVg",
+          "publishedAt": "2026-11-05T05:40:27.806Z",
+          "title": "TOO MANY BANANAS!! 📖 Fun Kids Animated Read-Aloud Storybook",
+          "status": "published"
+        },
+        "vertical": {
+          "id": "AL3URKYnEn4",
+          "url": "https://youtube.com/shorts/AL3URKYnEn4",
+          "publishedAt": "2026-11-05T23:02:51.897Z",
+          "title": "Kids Animated Storybook: Too Many Bananas!! 📖 #Shorts #BedtimeStories",
+          "status": "published"
+        }
+      }
+    }
+  }
+}

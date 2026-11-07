@@ -1,0 +1,356 @@
+{
+  "words": [
+    {
+      "word": "Kini,",
+      "start": 0.1,
+      "end": 0.62,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "saat",
+      "start": 0.96,
+      "end": 1.32,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Srinivas",
+      "start": 1.32,
+      "end": 1.85,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "merasa",
+      "start": 1.85,
+      "end": 2.16,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "terganggu",
+      "start": 2.16,
+      "end": 2.69,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "oleh",
+      "start": 2.69,
+      "end": 2.94,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "suara",
+      "start": 2.94,
+      "end": 3.24,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "mobil",
+      "start": 3.24,
+      "end": 3.58,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "atau",
+      "start": 3.58,
+      "end": 3.88,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "katak,",
+      "start": 3.88,
+      "end": 4.33,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "ia",
+      "start": 4.7,
+      "end": 4.87,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "cukup",
+      "start": 4.87,
+      "end": 5.3,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "memasang",
+      "start": 5.3,
+      "end": 5.68,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "headphonenya",
+      "start": 5.68,
+      "end": 6.57,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "dan",
+      "start": 6.57,
+      "end": 6.78,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "menikmati",
+      "start": 6.78,
+      "end": 7.3,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "musik",
+      "start": 7.3,
+      "end": 7.74,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "damai.",
+      "start": 7.74,
+      "end": 8.33,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Di",
+      "start": 9.08,
+      "end": 9.27,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "desa,",
+      "start": 9.27,
+      "end": 9.8,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sapi-sapi",
+      "start": 10.11,
+      "end": 10.74,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "kembali",
+      "start": 10.74,
+      "end": 11.16,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "melenguh",
+      "start": 11.16,
+      "end": 11.55,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "riang,",
+      "start": 11.55,
+      "end": 12.03,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "dan",
+      "start": 12.36,
+      "end": 12.57,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "burung-burung",
+      "start": 12.57,
+      "end": 13.13,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "berkicau",
+      "start": 13.13,
+      "end": 13.7,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "gembira.",
+      "start": 13.7,
+      "end": 14.32,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Namun",
+      "start": 15.08,
+      "end": 15.49,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "mobil",
+      "start": 15.49,
+      "end": 15.91,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "di",
+      "start": 15.91,
+      "end": 16.04,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "jalan",
+      "start": 16.04,
+      "end": 16.37,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "raya",
+      "start": 16.37,
+      "end": 16.69,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "masih",
+      "start": 16.69,
+      "end": 17.14,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "berisik.",
+      "start": 17.14,
+      "end": 17.62,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Srinivas",
+      "start": 18.38,
+      "end": 19.15,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "menatap",
+      "start": 19.15,
+      "end": 19.55,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sapi-sapinya...",
+      "start": 19.55,
+      "end": 20.61,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Mungkinkah",
+      "start": 21.37,
+      "end": 22.03,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sapi-sapi",
+      "start": 22.03,
+      "end": 22.55,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "itu",
+      "start": 22.55,
+      "end": 22.88,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "juga",
+      "start": 22.88,
+      "end": 23.2,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "butuh",
+      "start": 23.2,
+      "end": 23.52,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "headphone?",
+      "start": 23.52,
+      "end": 24.05,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

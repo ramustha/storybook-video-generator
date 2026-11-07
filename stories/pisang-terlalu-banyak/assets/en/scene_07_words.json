@@ -1,0 +1,188 @@
+{
+  "words": [
+    {
+      "word": "A",
+      "start": 0.1,
+      "end": 0.2,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "few",
+      "start": 0.22,
+      "end": 0.48,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "days",
+      "start": 0.49,
+      "end": 0.84,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "later,",
+      "start": 0.85,
+      "end": 1.28,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "he",
+      "start": 1.6,
+      "end": 1.74,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "returned",
+      "start": 1.75,
+      "end": 2.22,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "home",
+      "start": 2.23,
+      "end": 2.57,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "beaming",
+      "start": 2.59,
+      "end": 2.99,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "with",
+      "start": 3,
+      "end": 3.2,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "joy.",
+      "start": 3.22,
+      "end": 3.6,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "He",
+      "start": 4.42,
+      "end": 4.6,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "went",
+      "start": 4.61,
+      "end": 4.87,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "back",
+      "start": 4.88,
+      "end": 5.15,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "to",
+      "start": 5.17,
+      "end": 5.29,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "farming,",
+      "start": 5.3,
+      "end": 5.83,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "but",
+      "start": 6.13,
+      "end": 6.33,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "curiously,",
+      "start": 6.35,
+      "end": 7.1,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "he",
+      "start": 7.39,
+      "end": 7.51,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "stopped",
+      "start": 7.52,
+      "end": 7.96,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "offering",
+      "start": 7.98,
+      "end": 8.45,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "bananas",
+      "start": 8.46,
+      "end": 9.04,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "to",
+      "start": 9.05,
+      "end": 9.19,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    },
+    {
+      "word": "anyone!",
+      "start": 9.2,
+      "end": 9.8,
+      "speaker": "narrator",
+      "speakerName": "Narrator",
+      "speakerColor": "#38BDF8"
+    }
+  ]
+}

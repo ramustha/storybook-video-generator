@@ -1,0 +1,140 @@
+{
+  "words": [
+    {
+      "word": "Zayn",
+      "start": 0.1,
+      "end": 0.46,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Storybook",
+      "start": 0.46,
+      "end": 1,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "mempersembahkan:",
+      "start": 1,
+      "end": 1.93,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Bulan",
+      "start": 2.25,
+      "end": 2.66,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "dan",
+      "start": 2.66,
+      "end": 2.86,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Topi",
+      "start": 2.86,
+      "end": 3.16,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Biru!",
+      "start": 3.16,
+      "end": 3.68,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Cerita",
+      "start": 4.44,
+      "end": 4.85,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "manis",
+      "start": 4.85,
+      "end": 5.15,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "karya",
+      "start": 5.15,
+      "end": 5.48,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Rohini",
+      "start": 5.48,
+      "end": 5.88,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Nilekani,",
+      "start": 5.88,
+      "end": 6.65,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "diilustrasikan",
+      "start": 7,
+      "end": 7.95,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "oleh",
+      "start": 7.95,
+      "end": 8.25,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Angie",
+      "start": 8.25,
+      "end": 8.74,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "dan",
+      "start": 8.74,
+      "end": 8.97,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Upesh.",
+      "start": 8.97,
+      "end": 9.67,
+      "speaker": "narrator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

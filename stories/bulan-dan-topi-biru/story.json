@@ -1,0 +1,627 @@
+{
+  "version": "1.0.0",
+  "id": "bulan-dan-topi-biru",
+  "slug": "bulan-dan-topi-biru",
+  "title": "Bulan dan Topi Biru",
+  "originalTitle": "The Moon and the Cap",
+  "language": "id-ID",
+  "coverOrientation": "landscape",
+  "coverAspectRatio": 1.15,
+  "source": {
+    "repository": "Pratham Books (StoryWeaver / Wikimedia Commons)",
+    "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+    "originalAuthor": "Rohini Nilekani (Noni)",
+    "originalIllustrator": "Angie & Upesh (The Other Design Studio)",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:The-Moon-and-the-Cap-English.pdf"
+  },
+  "stylePreset": {
+    "artMedium": "Authentic Whimsical Cartoon Illustration with Warm Gouache",
+    "artistInfluences": "Angie & Upesh, The Other Design Studio",
+    "renderingConstraints": "authentic 16:9 plates from open-license source, inpaint typography and page numbers"
+  },
+  "audio": {
+    "bgMusicPath": "assets/audio/bgm_whimsical_story.m4a",
+    "bgMusicVolume": 0.14
+  },
+  "voiceCast": {
+    "narrator": "narrator",
+    "child_protagonist": "child_protagonist",
+    "child_boy": "child_boy",
+    "mother": "mother",
+    "father": "father",
+    "moon": "magical_entity"
+  },
+  "thumbnailConfig": {
+    "heroImage": "assets/scene_07.png",
+    "backdropImage": "assets/scene_09.png",
+    "id": {
+      "headlineTop": "BULAN DAN TOPI BIRU!",
+      "headlineBottom": "BULAN BISA PAKE TOPI?! 🌙🧢",
+      "hook": "TOPI HILANG TERTIUP ANGIN, BULAN YANG PAKE?!",
+      "hookEmoji": "🌙🤣",
+      "badge": "DONGENG CERITA ANAK SEBELUM TIDUR",
+      "sticker": "Rahasia Topi Merah! ✨",
+      "bedtimeTitle": "Bulan dan Topi Biru",
+      "bedtimeHook": "Kisah Menenangkan Menemukan Senyuman di Bawah Cahaya Bulan"
+    },
+    "en": {
+      "headlineTop": "THE MOON AND THE CAP!",
+      "headlineBottom": "THE MOON WEARS A HAT?! 🌙🧢",
+      "hook": "LOST CAP BLOWN AWAY, FOUND ON THE MOON?!",
+      "hookEmoji": "🌙🤣",
+      "badge": "CALMING BEDTIME ANIMATED STORYBOOK",
+      "sticker": "Moonlight Surprise! ✨",
+      "bedtimeTitle": "The Moon and the Cap",
+      "bedtimeHook": "A Comforting Bedtime Tale of Friendship Under the Stars"
+    }
+  },
+  "characterBible": {
+    "protagonists": [
+      {
+        "id": "aku",
+        "name": "Aku",
+        "role": "Sweet young child who loves caps",
+        "voice": {
+          "id": "id-ID-GadisNeural",
+          "en": "en-US-AnaNeural",
+          "color": "#FACC15",
+          "badge": "👧 Aku"
+        }
+      },
+      {
+        "id": "ibu",
+        "name": "Ibu",
+        "role": "Gentle loving mother",
+        "voice": {
+          "id": "id-ID-GadisNeural",
+          "en": "en-US-JennyNeural",
+          "color": "#38BDF8",
+          "badge": "👩 Ibu"
+        }
+      },
+      {
+        "id": "bulan",
+        "name": "Sang Bulan",
+        "role": "Magical friendly moon smiling in the sky",
+        "voice": {
+          "id": "id-ID-ArdiNeural",
+          "en": "en-US-BrianNeural",
+          "color": "#FEF08A",
+          "badge": "🌙 Sang Bulan"
+        }
+      }
+    ]
+  },
+  "worldBible": {
+    "village": "Rural Village & Night Starfield",
+    "palette": {
+      "twilightBlue": "#1E1B4B",
+      "moonlitGold": "#FDE047",
+      "skyBlue": "#38BDF8",
+      "rubyRed": "#EF4444",
+      "foliageGreen": "#15803D"
+    }
+  },
+  "scenes": [
+    {
+      "index": 0,
+      "sceneId": "cover",
+      "type": "cover",
+      "speakerRole": "narrator",
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Zayn Storybook mempersembahkan: Bulan dan Topi Biru! Cerita manis karya Rohini Nilekani, diilustrasikan oleh Angie dan Upesh.",
+        "speakerRole": "narrator",
+        "sfxPath": "assets/sfx/sfx_00_opener.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Zayn Storybook presents: The Moon and the Cap! A heartwarming tale by Rohini Nilekani, illustrated by Angie and Upesh.",
+          "speakerRole": "narrator",
+          "audioPath": "assets/en/cover.mp3",
+          "wordsPath": "assets/en/cover_words.json",
+          "durationSeconds": 9.13
+        },
+        "audioPath": "assets/id/cover.mp3",
+        "wordsPath": "assets/id/cover_words.json",
+        "durationSeconds": 9.92
+      },
+      "durationSeconds": 9.92
+    },
+    {
+      "index": 1,
+      "sceneId": "scene_01",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_01.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Suatu sore yang cerah, kami sekeluarga pergi bertualang ke pekan raya desa yang sangat ramai dan meriah!",
+        "speakerRole": "child_protagonist",
+        "sfxPath": "assets/sfx/sfx_01_morning_walk.m4a",
+        "sfxDelaySeconds": 0.2,
+        "en": {
+          "text": "One sunny afternoon, all of us went on an exciting family trip to the lively village fair!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_01.mp3",
+          "wordsPath": "assets/en/scene_01_words.json",
+          "durationSeconds": 6.12
+        },
+        "audioPath": "assets/id/scene_01.mp3",
+        "wordsPath": "assets/id/scene_01_words.json",
+        "durationSeconds": 6.62
+      },
+      "durationSeconds": 6.62
+    },
+    {
+      "index": 2,
+      "sceneId": "scene_02",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_02.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "pan_right",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Papa membelikan Kak Chintu kacamata keren. Ibu membelikanku sebuah topi biru yang indah, dan adik kecil mendapatkan permen gula-gula yang manis!",
+        "speakerRole": "child_protagonist",
+        "audioPath": "assets/id/scene_02.mp3",
+        "wordsPath": "assets/id/scene_02_words.json",
+        "en": {
+          "text": "Papa bought Chintu fancy glasses. Mother bought me a bright, beautiful blue cap, and our sweet baby got delicious sugar candy!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_02.mp3",
+          "wordsPath": "assets/en/scene_02_words.json",
+          "durationSeconds": 9.43
+        },
+        "durationSeconds": 10.52
+      },
+      "durationSeconds": 10.52
+    },
+    {
+      "index": 3,
+      "sceneId": "scene_03",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_03.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "tilt_up",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Dalam perjalanan pulang, tiba-tiba angin kencang berhembus wuuussshh! Angin itu meniup topi biruku hingga melayang tinggi ke udara!",
+        "speakerRole": "child_protagonist",
+        "sfxPath": "assets/sfx/sfx_07_cave_rain.m4a",
+        "sfxDelaySeconds": 0.5,
+        "en": {
+          "text": "On our way home, a very strong wind came rushing by—whoooosh! It blew my shiny new cap right off my head and into the sky!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_03.mp3",
+          "wordsPath": "assets/en/scene_03_words.json",
+          "durationSeconds": 9.31
+        },
+        "audioPath": "assets/id/scene_03.mp3",
+        "wordsPath": "assets/id/scene_03_words.json",
+        "durationSeconds": 9.61
+      },
+      "durationSeconds": 9.61
+    },
+    {
+      "index": 4,
+      "sceneId": "scene_04",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_04.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Aduh gawat! Topi biruku yang cantik tersangkut tinggi di dahan pohon beringin tua, dan tidak bisa dijangkau sama sekali!",
+        "speakerRole": "child_protagonist",
+        "sfxPath": "assets/sfx/sfx_06_forest_leaves.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "Oh dear! My wonderful blue cap got stuck high up on a branch of the old Pipal tree, far out of reach!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_04.mp3",
+          "wordsPath": "assets/en/scene_04_words.json",
+          "durationSeconds": 7.76
+        },
+        "audioPath": "assets/id/scene_04.mp3",
+        "wordsPath": "assets/id/scene_04_words.json",
+        "durationSeconds": 8.87
+      },
+      "durationSeconds": 8.87
+    },
+    {
+      "index": 5,
+      "sceneId": "scene_05",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_05.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "pan_right",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Aku menangis tersedu-sedu karena sedih sekali kehilangan topi baruku. Malam itu, aku bahkan tidak mau makan malam.",
+        "speakerRole": "child_protagonist",
+        "sfxPath": "assets/sfx/sfx_03_kitchen.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "I cried so much because I was heartbroken over my lost cap. That night, I was too sad to even eat my dinner.",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_05.mp3",
+          "wordsPath": "assets/en/scene_05_words.json",
+          "durationSeconds": 8.22
+        },
+        "audioPath": "assets/id/scene_05.mp3",
+        "wordsPath": "assets/id/scene_05_words.json",
+        "durationSeconds": 8.89
+      },
+      "durationSeconds": 8.89
+    },
+    {
+      "index": 6,
+      "sceneId": "scene_06",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_06.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Larut malam di kamarku, bulan purnama yang bulat dan terang mulai terbit di langit. Sang Bulan melihat topi biruku yang tersangkut di atas pohon tua.",
+        "speakerRole": "child_protagonist",
+        "sfxPath": "assets/sfx/sfx_11_head_shine.m4a",
+        "sfxDelaySeconds": 1,
+        "en": {
+          "text": "Late that night, the big round moon came up into the quiet sky. It looked down gently at my blue cap resting in the old tree branches.",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_06.mp3",
+          "wordsPath": "assets/en/scene_06_words.json",
+          "durationSeconds": 9.75
+        },
+        "audioPath": "assets/id/scene_06.mp3",
+        "wordsPath": "assets/id/scene_06_words.json",
+        "durationSeconds": 10.08
+      },
+      "durationSeconds": 10.08
+    },
+    {
+      "index": 7,
+      "sceneId": "scene_07",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_07.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "tilt_up",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Lihatlah! Sang Bulan perlahan mencoba memakai topi biruku di kepalanya. Sang Bulan tersenyum lebar dan bahagia sekali, hingga aku pun ikut tersenyum riang!",
+        "speakerRole": "child_protagonist",
+        "audioPath": "assets/id/scene_07.mp3",
+        "wordsPath": "assets/id/scene_07_words.json",
+        "en": {
+          "text": "Look! The moon gently tried on my cap. The moon smiled so brightly and happily, that I couldn't help but smile too!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_07.mp3",
+          "wordsPath": "assets/en/scene_07_words.json",
+          "durationSeconds": 9.53
+        },
+        "durationSeconds": 12.16
+      },
+      "durationSeconds": 12.16
+    },
+    {
+      "index": 8,
+      "sceneId": "scene_08",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_08.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Keesokan harinya sepulang sekolah, Ibu menyambutku dengan senyuman hangat dan sebuah kotak kado. Topi merah baru kiriman dari sang Bulan untukku!",
+        "speakerRole": "child_protagonist",
+        "audioPath": "assets/id/scene_08.mp3",
+        "wordsPath": "assets/id/scene_08_words.json",
+        "en": {
+          "text": "After school the next day, Mother greeted me with a warm hug and a lovely surprise: a shiny, brand-new red cap from the moon!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_08.mp3",
+          "wordsPath": "assets/en/scene_08_words.json",
+          "durationSeconds": 8.55
+        },
+        "durationSeconds": 10.53
+      },
+      "durationSeconds": 10.53
+    },
+    {
+      "index": 9,
+      "sceneId": "scene_09",
+      "type": "story",
+      "speakerRole": "child_protagonist",
+      "visual": {
+        "imagePath": "assets/scene_09.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "pan_right",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Malam itu, sang Bulan mengenakan topi birunya, dan aku mengenakan topi merah baruku. Kami berdua tersenyum riang gembira di bawah langit malam yang bertabur bintang!",
+        "speakerRole": "child_protagonist",
+        "sfxPath": "assets/sfx/sfx_12_moral_sparkle.m4a",
+        "sfxDelaySeconds": 2,
+        "en": {
+          "text": "That night, the moon wore its blue cap, and I proudly wore my new red cap. We both smiled happily under the sparkling starry sky!",
+          "speakerRole": "child_protagonist",
+          "audioPath": "assets/en/scene_09.mp3",
+          "wordsPath": "assets/en/scene_09_words.json",
+          "durationSeconds": 9.83
+        },
+        "audioPath": "assets/id/scene_09.mp3",
+        "wordsPath": "assets/id/scene_09_words.json",
+        "durationSeconds": 12.01
+      },
+      "durationSeconds": 12.01
+    },
+    {
+      "index": 10,
+      "sceneId": "moral",
+      "type": "moral",
+      "speakerRole": "narrator",
+      "visual": {
+        "imagePath": "assets/scene_10.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Nah teman-teman, pesan moral dari cerita ini adalah: saat kita kehilangan barang kesayangan, jangan berlarut-larut dalam kesedihan ya! Belajarlah ikhlas dan tetap tersenyum, karena kasih sayang keluarga akan selalu menghadirkan kebahagiaan baru yang lebih indah!",
+        "speakerRole": "narrator",
+        "sfxPath": "assets/sfx/sfx_10_moral_harp.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "The moral of the story: when we lose something dear to us, don't let sadness stay in your heart! When you smile and let go, the love of family will always bring new joy and brighter days!",
+          "speakerRole": "narrator",
+          "audioPath": "assets/en/moral.mp3",
+          "wordsPath": "assets/en/moral_words.json",
+          "durationSeconds": 12.51
+        },
+        "audioPath": "assets/id/moral.mp3",
+        "wordsPath": "assets/id/moral_words.json",
+        "durationSeconds": 16.89
+      },
+      "moralHeadline": "Ikhlas dan Senyuman Menghadirkan Kebahagiaan Baru!",
+      "moralHeadlineEn": "A Smile and Letting Go Bring Brighter Days!",
+      "durationSeconds": 16.89
+    },
+    {
+      "index": 11,
+      "sceneId": "outro",
+      "type": "outro",
+      "speakerRole": "narrator",
+      "visual": {
+        "imagePath": "assets/cover.png",
+        "status": "ready"
+      },
+      "camera": {
+        "motion": "slow_zoom_in",
+        "scaleStart": 1.08,
+        "scaleEnd": 1.18
+      },
+      "audio": {
+        "text": "Wah, manis sekali ya ceritanya! Jangan lupa klik video di layar untuk menonton dongeng seru lainnya, dan klik Subscribe agar kita bisa berpetualang bersama setiap hari! Sampai jumpa di dongeng berikutnya! Dadah!",
+        "speakerRole": "narrator",
+        "sfxPath": "assets/sfx/sfx_13_outro_pop.m4a",
+        "sfxDelaySeconds": 0,
+        "en": {
+          "text": "What a sweet and comforting bedtime story! Click the video on your screen to enjoy another magical adventure, and don't forget to hit Subscribe so we can keep reading together! See you next time! Bye-bye!",
+          "speakerRole": "narrator",
+          "audioPath": "assets/en/outro.mp3",
+          "wordsPath": "assets/en/outro_words.json",
+          "durationSeconds": 14.41
+        },
+        "audioPath": "assets/id/outro.mp3",
+        "wordsPath": "assets/id/outro_words.json",
+        "durationSeconds": 15.74
+      },
+      "durationSeconds": 15.74
+    }
+  ],
+  "thumbnails": {
+    "id": {
+      "popular": "exports/id/thumbnail-popular.png",
+      "primary": "exports/id/thumbnail.png",
+      "bedtime": "exports/id/thumbnail-bedtime.png",
+      "vertical": "exports/id/thumbnail-vertical.png"
+    },
+    "en": {
+      "popular": "exports/en/thumbnail-popular.png",
+      "primary": "exports/en/thumbnail.png",
+      "bedtime": "exports/en/thumbnail-bedtime.png",
+      "vertical": "exports/en/thumbnail-vertical.png"
+    },
+    "updatedAt": "2026-11-05T07:30:50.242Z"
+  },
+  "exports": {
+    "id": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-05T09:45:34.969Z",
+        "path": "exports/id/bulan-dan-topi-biru-16x9.mp4",
+        "youtubeId": "2wIHNkjegd0",
+        "youtubeUrl": "https://youtu.be/2wIHNkjegd0"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-05T09:49:27.483Z",
+        "path": "exports/id/bulan-dan-topi-biru-9x16.mp4",
+        "youtubeId": "aEVbwiAM_h8",
+        "youtubeUrl": "https://youtube.com/shorts/aEVbwiAM_h8"
+      }
+    },
+    "en": {
+      "landscape": {
+        "status": "rendered",
+        "resolution": "1920x1080",
+        "renderedAt": "2026-11-05T09:52:56.507Z",
+        "path": "exports/en/the-moon-and-the-cap-16x9.mp4",
+        "youtubeId": "jyQ4sbXJZAs",
+        "youtubeUrl": "https://youtu.be/jyQ4sbXJZAs"
+      },
+      "vertical": {
+        "status": "rendered",
+        "resolution": "1080x1920",
+        "renderedAt": "2026-11-05T09:56:09.992Z",
+        "path": "exports/en/the-moon-and-the-cap-9x16.mp4",
+        "youtubeId": "YLLhBToycek",
+        "youtubeUrl": "https://youtube.com/shorts/YLLhBToycek"
+      }
+    }
+  },
+  "publications": {
+    "youtube": {
+      "id": {
+        "landscape": {
+          "id": "2wIHNkjegd0",
+          "url": "https://youtu.be/2wIHNkjegd0",
+          "publishedAt": "2026-11-05T10:02:55.568Z",
+          "title": "BULAN DAN TOPI BIRU! 📖 Dongeng Cerita Anak Bergambar",
+          "status": "published"
+        },
+        "vertical": {
+          "id": "aEVbwiAM_h8",
+          "url": "https://youtube.com/shorts/aEVbwiAM_h8",
+          "publishedAt": "2026-11-05T22:37:10.075Z",
+          "title": "Buku Cerita Anak: Bulan dan Topi Biru! 📖 #Shorts #DongengAnak",
+          "status": "published",
+          "privacy": "public"
+        }
+      },
+      "en": {
+        "landscape": {
+          "id": "jyQ4sbXJZAs",
+          "url": "https://youtu.be/jyQ4sbXJZAs",
+          "publishedAt": "2026-11-05T10:08:12.760Z",
+          "title": "THE MOON AND THE CAP! 📖 Fun Kids Animated Read-Aloud Storybook",
+          "status": "published"
+        },
+        "vertical": {
+          "id": "YLLhBToycek",
+          "url": "https://youtube.com/shorts/YLLhBToycek",
+          "publishedAt": "2026-11-05T22:37:49.087Z",
+          "title": "Kids Animated Storybook: The Moon and the Cap! 📖 #Shorts #BedtimeStories",
+          "status": "published"
+        }
+      }
+    },
+    "facebook": {
+      "id": {
+        "vertical": {
+          "id": "990461313498225",
+          "url": "https://www.facebook.com/1473240609201601/videos/990461313498225/",
+          "publishedAt": "2026-11-05T10:05:07.293Z",
+          "title": "Bulan dan Topi Biru",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1520718406558418",
+          "url": "https://www.facebook.com/1473240609201601/videos/1520718406558418/",
+          "publishedAt": "2026-11-05T10:07:19.962Z",
+          "title": "Bulan dan Topi Biru",
+          "status": "published"
+        }
+      },
+      "en": {
+        "vertical": {
+          "id": "2410623723074279",
+          "url": "https://www.facebook.com/1473240609201601/videos/2410623723074279/",
+          "publishedAt": "2026-11-05T10:11:33.029Z",
+          "title": "Bulan dan Topi Biru",
+          "status": "published"
+        },
+        "landscape": {
+          "id": "1471091548284839",
+          "url": "https://www.facebook.com/1473240609201601/videos/1471091548284839/",
+          "publishedAt": "2026-11-05T10:13:53.500Z",
+          "title": "Bulan dan Topi Biru",
+          "status": "published"
+        }
+      }
+    },
+    "instagram": {
+      "id": {
+        "id": "18082174070754341",
+        "url": "https://www.instagram.com/reel/DfYTQuyjfL_/",
+        "publishedAt": "2026-11-06T00:19:13.875Z",
+        "title": "Bulan dan Topi Biru",
+        "status": "published"
+      },
+      "en": {
+        "id": "17941901157397263",
+        "url": "https://www.instagram.com/reel/DfYTiJ1jrP6/",
+        "publishedAt": "2026-11-06T00:21:37.540Z",
+        "title": "Bulan dan Topi Biru",
+        "status": "published"
+      }
+    }
+  }
+}

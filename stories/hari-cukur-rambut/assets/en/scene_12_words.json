@@ -1,0 +1,244 @@
+{
+  "words": [
+    {
+      "word": "The",
+      "start": 0.1,
+      "end": 0.24,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "moral",
+      "start": 0.26,
+      "end": 0.71,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "of",
+      "start": 0.72,
+      "end": 0.85,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 0.86,
+      "end": 0.96,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "story:",
+      "start": 0.97,
+      "end": 1.48,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Never",
+      "start": 1.81,
+      "end": 2.17,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "give",
+      "start": 2.19,
+      "end": 2.4,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "up",
+      "start": 2.42,
+      "end": 2.63,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "when",
+      "start": 2.65,
+      "end": 2.87,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "things",
+      "start": 2.88,
+      "end": 3.21,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "don't",
+      "start": 3.22,
+      "end": 3.48,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "go",
+      "start": 3.5,
+      "end": 3.68,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "your",
+      "start": 3.69,
+      "end": 3.9,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "way!",
+      "start": 3.91,
+      "end": 4.24,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Sometimes,",
+      "start": 5.07,
+      "end": 5.89,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "life's",
+      "start": 6.15,
+      "end": 6.52,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "biggest",
+      "start": 6.53,
+      "end": 7.03,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "worries",
+      "start": 7.04,
+      "end": 7.45,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "solve",
+      "start": 7.46,
+      "end": 7.83,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "themselves",
+      "start": 7.84,
+      "end": 8.42,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "in",
+      "start": 8.43,
+      "end": 8.64,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "unexpected",
+      "start": 8.65,
+      "end": 9.41,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "ways",
+      "start": 9.42,
+      "end": 9.79,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "that",
+      "start": 9.81,
+      "end": 10.02,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "bring",
+      "start": 10.04,
+      "end": 10.28,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "us",
+      "start": 10.29,
+      "end": 10.49,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "pure",
+      "start": 10.5,
+      "end": 10.89,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "joy",
+      "start": 10.9,
+      "end": 11.24,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "and",
+      "start": 11.25,
+      "end": 11.5,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "laughter!",
+      "start": 11.52,
+      "end": 12.11,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

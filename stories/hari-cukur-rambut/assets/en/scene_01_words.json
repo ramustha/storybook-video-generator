@@ -1,0 +1,172 @@
+{
+  "words": [
+    {
+      "word": "It",
+      "start": 0.1,
+      "end": 0.26,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "was",
+      "start": 0.27,
+      "end": 0.45,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 0.46,
+      "end": 0.6,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Annual",
+      "start": 0.61,
+      "end": 1.11,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Haircut",
+      "start": 1.12,
+      "end": 1.59,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Day",
+      "start": 1.6,
+      "end": 1.87,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "for",
+      "start": 1.88,
+      "end": 2.08,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Sringeri",
+      "start": 2.09,
+      "end": 2.66,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Srinivas.",
+      "start": 2.67,
+      "end": 3.46,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Sringeri",
+      "start": 4.3,
+      "end": 4.94,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "Srinivas",
+      "start": 4.95,
+      "end": 5.63,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "left",
+      "start": 5.64,
+      "end": 5.95,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "home",
+      "start": 5.96,
+      "end": 6.27,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "as",
+      "start": 6.29,
+      "end": 6.48,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "usual",
+      "start": 6.49,
+      "end": 6.99,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "to",
+      "start": 7,
+      "end": 7.14,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "go",
+      "start": 7.15,
+      "end": 7.38,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "to",
+      "start": 7.39,
+      "end": 7.5,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "the",
+      "start": 7.51,
+      "end": 7.65,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "local",
+      "start": 7.66,
+      "end": 8.03,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "barber.",
+      "start": 8.05,
+      "end": 8.54,
+      "speaker": "narator",
+      "speakerName": "Narrator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}

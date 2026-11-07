@@ -1,0 +1,124 @@
+{
+  "words": [
+    {
+      "word": "Suatu",
+      "start": 0.1,
+      "end": 0.57,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "pagi",
+      "start": 0.57,
+      "end": 0.87,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "yang",
+      "start": 0.87,
+      "end": 1.01,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "cerah,",
+      "start": 1.01,
+      "end": 1.44,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "sang",
+      "start": 1.76,
+      "end": 2.06,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "raja",
+      "start": 2.06,
+      "end": 2.35,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "gemuk",
+      "start": 2.35,
+      "end": 2.75,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "dan",
+      "start": 2.75,
+      "end": 2.92,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "anjing",
+      "start": 2.92,
+      "end": 3.38,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "kurusnya",
+      "start": 3.38,
+      "end": 3.84,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "pergi",
+      "start": 3.84,
+      "end": 4.22,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "berjalan-jalan",
+      "start": 4.22,
+      "end": 4.96,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "santai",
+      "start": 4.96,
+      "end": 5.45,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "di",
+      "start": 5.45,
+      "end": 5.58,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    },
+    {
+      "word": "taman.",
+      "start": 5.58,
+      "end": 6.17,
+      "speaker": "narator",
+      "speakerName": "Narator",
+      "speakerColor": "#34D399"
+    }
+  ]
+}
