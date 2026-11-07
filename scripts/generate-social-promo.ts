@@ -199,6 +199,44 @@ Selamat menonton dan selamat bermimpi indah adik-adik! 🌙💤
 Waaah seru banget! 😱 ${hookId.slice(0, 80)}... Tonton cerita lengkap "${titleId}" di YouTube Zayn Storybook yuk! Link di bio! 🎈✨ #DongengAnak #CeritaLucu #AnimasiAnak #BedtimeStory
 \`\`\`
 
+---
+
+## 🧵 5. META THREADS (Conversational Announcement ≤ 500 Chars)
+
+### Visual Asset:
+- Attach \`thumbnail-portrait.png\` (1080x1350, 4:5 Aspect Ratio) or 9:16 Short Video Teaser.
+
+### 🇮🇩 Indonesian Edition (≤ 500 Chars):
+\`\`\`text
+HOREEE! 🎈 Cerita baru "${titleId}" sudah tayang! 📖✨
+
+"${hookId}"
+
+💡 Pesan Cerita:
+"${moralId.length > 130 ? moralId.slice(0, 127).trim() + "..." : moralId}"
+
+🎬 Tonton selengkapnya di YouTube:
+${ytIdUrl}
+
+#ZaynStorybook #DongengAnak #CeritaAnakBergambar #KidsBedtimeStories
+\`\`\`
+
+### 🇺🇸 English Edition (≤ 500 Chars):
+\`\`\`text
+YAY! 🎈 New storybook "${titleEn}" is now live! 📖✨
+
+"${hookEn}"
+
+💡 Moral of the story:
+"${moralEn.length > 130 ? moralEn.slice(0, 127).trim() + "..." : moralEn}"
+
+🎬 Watch full animated story on YouTube:
+${ytEnUrl}
+
+#ZaynStorybook #KidsBedtimeStories #ReadAloud #ChildrenBooks
+\`\`\`
+
+
 `;
 }
 

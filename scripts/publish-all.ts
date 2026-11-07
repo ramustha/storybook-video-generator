@@ -327,7 +327,17 @@ async function main() {
       console.warn("⚠️ Instagram promotion post warning:", igErr.message);
     }
 
-    // 4C. YouTube Community Tab (Explicit Skip Policy)
+    // 4C. Meta Threads Promotional Post
+    try {
+      console.log(`\n🧵 Publishing Promotional Post to Meta Threads...`);
+      const threadsArgs = ["scripts/publish-threads.ts", "--book", options.bookSlug, "--lang", options.lang === "all" ? "id" : options.lang];
+      if (options.dryRun) threadsArgs.push("--dry-run");
+      await runCommand("npx", ["tsx", ...threadsArgs]);
+    } catch (threadsErr: any) {
+      console.warn("⚠️ Threads promotion post warning:", threadsErr.message);
+    }
+
+    // 4D. YouTube Community Tab (Explicit Skip Policy)
     console.log(`\n▶️ YouTube Community Tab:`);
     console.log(`ℹ️ SKIPPED from automated API distribution (Google YouTube Data API v3 does not provide an official Community Tab endpoint).`);
     console.log(`👉 Copy-paste text is preserved in stories/${options.bookSlug}/exports/social-promotion-posts.md for optional manual use.`);
@@ -352,6 +362,10 @@ async function main() {
     if (updatedStory.publications?.instagram) {
       console.log("\n📸 Instagram:");
       console.log(JSON.stringify(updatedStory.publications.instagram, null, 2));
+    }
+    if (updatedStory.publications?.threads) {
+      console.log("\n🧵 Threads:");
+      console.log(JSON.stringify(updatedStory.publications.threads, null, 2));
     }
   }
 
