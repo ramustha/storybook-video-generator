@@ -34,6 +34,11 @@ on:
           - '1080p'
           - '4k'
         default: '1080p'
+      reingest:
+        description: 'Force re-ingest story (re-extract plates & original cover) even if in R2'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -89,11 +94,13 @@ jobs:
           EOF
 
           echo "Checking if [${{ inputs.book }}] exists in Cloudflare R2..."
-          npx tsx scripts/manage-story-storage.ts pull "${{ inputs.book }}" || true
+          if [ "${{ inputs.reingest }}" != "true" ]; then
+            npx tsx scripts/manage-story-storage.ts pull "${{ inputs.book }}" || true
+          fi
 
-          if [ ! -f "stories/${{ inputs.book }}/story.json" ]; then
-            echo "Story manifest not found in R2. Executing automated ingestion on Ubuntu runner..."
-            npx tsx scripts/ingest-story.ts --book "${{ inputs.book }}"
+          if [ "${{ inputs.reingest }}" = "true" ] || [ ! -f "stories/${{ inputs.book }}/story.json" ]; then
+            echo "Executing automated ingestion on Ubuntu runner (reingest=${{ inputs.reingest }})..."
+            npx tsx scripts/ingest-story.ts --book "${{ inputs.book }}" --force
           fi
 
       - name: 🎬 Render Storybook Video
