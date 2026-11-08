@@ -574,5 +574,164 @@
         "en": "My nose can smell sweet treats frying in mother's kitchen. It is so fun listening to my body today!"
       }
     ]
+  },
+  {
+    "slug": "di-bawah-tempat-tidurku",
+    "title": "Ada Harimau di Bawah Tempat Tidurku!",
+    "originalTitle": "Under My Bed",
+    "author": "Anupa Lal",
+    "illustrator": "Suvidha Mistry",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/1029-under-my-bed",
+    "pdfUrl": "https://archive.org/download/UnderMyBed-English-Pratham/1029-under-my-bed.pdf",
+    "coverPage": 1,
+    "avatarPage": 11,
+    "theme": "Mengatasi Ketakutan Tidur Anak: Mengira Ada Harimau di Kolong Kasur, Ternyata Baju Hangat Sendiri",
+    "characterBible": {
+      "protagonists": [
+        {
+          "id": "bocah",
+          "name": "Bocah Pemberani / The Brave Boy",
+          "role": "Curious Brave Child",
+          "voice": {
+            "id": "id-ID-ArdiNeural",
+            "en": "en-US-AnaNeural",
+            "color": "#38BDF8",
+            "badge": "👦 Bocah"
+          }
+        },
+        {
+          "id": "ibu",
+          "name": "Ibu / Loving Mother",
+          "role": "Gentle Loving Mother",
+          "voice": {
+            "id": "id-ID-GadisNeural",
+            "en": "en-US-JennyNeural",
+            "color": "#EC4899",
+            "badge": "👩 Ibu"
+          }
+        }
+      ]
+    },
+    "worldBible": {
+      "village": "Cozy Dark Bedroom with Mystery Shadows",
+      "palette": {
+        "deepNavy": "#1E293B",
+        "warmAmber": "#F59E0B",
+        "softYellow": "#FEF08A",
+        "tigerOrange": "#EA580C"
+      }
+    },
+    "moral": {
+      "headlineId": "Jangan Takut pada Bayangan di Kegelapan!",
+      "spokenId": "Ketika kita melihat sesuatu yang menakutkan di dalam kamar gelap, jangan panik atau menangis. Seringkali itu hanyalah bayangan atau barang kita sendiri. Nyalakan lampu dan pastikan bersama orang tua!",
+      "headlineEn": "Don't Be Afraid of Shadows in the Dark!",
+      "spokenEn": "When something looks scary in a dark room, don't panic or cry. Most often it is just harmless shadows or our own clothes. Turn on the light and ask your parents!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_02.png",
+      "backdropImage": "assets/scene_06.png",
+      "id": {
+        "headlineTop": "ADA HARIMAU DI KOLONG KASUR?!",
+        "headlineBottom": "TERNYATA BENDA INI! 😱🐅",
+        "hook": "MATA KUNING MENYALA DI KEGELAPAN MALAM, TERNYATA...",
+        "hookEmoji": "👀😂",
+        "badge": "DONGENG CERITA ANAK SERU",
+        "sticker": "Kisah Lucu Sebelum Tidur! 🛏️",
+        "bedtimeTitle": "Ada Harimau di Bawah Tempat Tidurku",
+        "bedtimeHook": "Kisah Jenaka Menghadapi Rasa Takut di Tengah Malam"
+      },
+      "en": {
+        "headlineTop": "A TIGER UNDER MY BED?!",
+        "headlineBottom": "IT WAS JUST THIS! 😱🐅",
+        "hook": "GLOWING EYES IN THE DARK, TURNED OUT TO BE...",
+        "hookEmoji": "👀😂",
+        "badge": "HILARIOUS KIDS ANIMATED STORY",
+        "sticker": "Silly Bedtime Tale! 🛏️",
+        "bedtimeTitle": "Under My Bed",
+        "bedtimeHook": "A Fun Bedtime Tale of Conquering Nighttime Shadows"
+      }
+    },
+    "scenes": [
+      {
+        "index": 1,
+        "type": "story",
+        "pageNumber": 2,
+        "id": "Tengah malam, aku terbangun karena merasa haus sekali. Aku ingin mengambil segelas air minum. Lalu aku mulai mencari sandal rumahku di bawah kolong tempat tidur.",
+        "en": "I wake up at night feeling thirsty. I want to get some water. I start looking for my slippers under the bed."
+      },
+      {
+        "index": 2,
+        "type": "story",
+        "pageNumber": 3,
+        "id": "Astaga! Ya ampun! Ada seekor harimau belang bersembunyi tepat di bawah tempat tidurku!",
+        "en": "Oh my God! There is a tiger under my bed."
+      },
+      {
+        "index": 3,
+        "type": "story",
+        "pageNumber": 4,
+        "id": "Aduh, sekarang apa yang harus kulakukan? Jantungku berdegup sangat kencang!",
+        "en": "Now what should I do?"
+      },
+      {
+        "index": 4,
+        "type": "story",
+        "pageNumber": 5,
+        "id": "Haruskah aku berteriak memanggil Ibu? Tapi bagaimana jika harimau itu mendadak mengaum keras?",
+        "en": "Should I call Ma? What if the tiger roars?"
+      },
+      {
+        "index": 5,
+        "type": "story",
+        "pageNumber": 6,
+        "id": "Haruskah aku menarik selimut dan tidur lagi? Tapi rasa kantukku sudah hilang sama sekali!",
+        "en": "Should I just go back to sleep? But I am not sleepy any more."
+      },
+      {
+        "index": 6,
+        "type": "story",
+        "pageNumber": 7,
+        "id": "Tiba-tiba, cling! Lampu kamar menyala terang. Ibu tampak berdiri tersenyum lembut di depan pintu.",
+        "en": "Then someone turns on the light. Ma is standing at the door."
+      },
+      {
+        "index": 7,
+        "type": "story",
+        "pageNumber": 8,
+        "id": "'Ada apa, sayangku? Apakah tadi kamu memanggil Ibu?' tanya Ibu sambil menghampiriku.",
+        "en": "\"What happened dear? Did you call me?\" asks Ma."
+      },
+      {
+        "index": 8,
+        "type": "story",
+        "pageNumber": 9,
+        "id": "Dengan gemetar aku menunjuk ke kolong ranjang. Ibu membungkuk santai dan menarik sang harimau keluar!",
+        "en": "I point towards the tiger. Ma bends and pulls the tiger out from under the bed!"
+      },
+      {
+        "index": 9,
+        "type": "story",
+        "pageNumber": 10,
+        "id": "Wah, ternyata ini sama sekali bukan harimau! Ini hanyalah baju hangat tebal belang kuning hitam kesayanganku. Kancing bajunya berkilau mirip mata harimau!",
+        "en": "Hey, this is no tiger. This is my thick yellow and black sweater. Its buttons shine like a tiger's eyes."
+      },
+      {
+        "index": 10,
+        "type": "story",
+        "pageNumber": 11,
+        "id": "Hahaha! Ternyata aku cuma takut pada bayanganku sendiri! Ibu lalu membawakanku segelas air segar.",
+        "en": "I got scared for nothing! Ma gets me some water."
+      },
+      {
+        "index": 11,
+        "type": "story",
+        "pageNumber": 12,
+        "id": "Sekarang aku bisa tidur nyenyak kembali. Dan bermimpi bertualang bersama harimau ramah di dalam hutan!",
+        "en": "Now I will sleep. And dream about real tigers in a jungle!"
+      }
+    ]
   }
 ]
