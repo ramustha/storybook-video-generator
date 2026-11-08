@@ -1,0 +1,31 @@
+scripts/publish-all.ts
+  698ac31901cd73e0 381,383-395
+docs/index.html
+  698ac31901cd73e0 1042-1043
+scripts/publish-announcement.ts
+  698ac31901cd73e0 69-90,93,101-111,113,116,118-119,121-124,127-128,132,134,137,139-141,145-146,148,150,152,155,157-158,160-162,166,168,171,173-175,200,202,207-208,215-217,219,438-447
+docs/privacy-policy.html
+  698ac31901cd73e0 1-160
+docs/terms-of-service.html
+  698ac31901cd73e0 1-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "a2438eb62d5cb2bdb8c47f38073617403baeb3fb",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 431,
+      "total_deletions": 67,
+      "accepted_lines": 430,
+      "overriden_lines": 0
+    }
+  }
+}
