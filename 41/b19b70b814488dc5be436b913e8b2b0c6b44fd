@@ -1,0 +1,29 @@
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 188-198
+scripts/content-calendar.ts
+  698ac31901cd73e0 5,801-857,885-894
+scripts/publish-all.ts
+  698ac31901cd73e0 6,124,202,243,271,295,313,423-439,455,457-473
+scripts/notify-telegram.ts
+  698ac31901cd73e0 17-27,237-324,351-378
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "41b19b70b814488dc5be436b913e8b2b0c6b44fd",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 253,
+      "total_deletions": 43,
+      "accepted_lines": 253,
+      "overriden_lines": 0
+    }
+  }
+}
