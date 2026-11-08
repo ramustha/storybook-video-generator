@@ -37,3 +37,6 @@ stories/*
 stories/**/exports/**/*.mp4
 stories/**/raw/
 stories/**/cache/
+
+# Local POC experimental scripts
+scripts/poc-*.ts
