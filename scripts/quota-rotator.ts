@@ -125,6 +125,41 @@ export class QuotaRotator {
       }
     }
 
+    // 1.5 Auto-seed 'default' project from environment variables (CI / GitHub Actions / Docker)
+    if (
+      !existsSync(path.join(defaultProjDir, "credentials.json")) &&
+      process.env.YOUTUBE_CLIENT_ID &&
+      process.env.YOUTUBE_CLIENT_SECRET
+    ) {
+      await fs.mkdir(defaultProjDir, { recursive: true });
+      await fs.writeFile(
+        path.join(defaultProjDir, "credentials.json"),
+        JSON.stringify(
+          {
+            installed: {
+              client_id: process.env.YOUTUBE_CLIENT_ID,
+              client_secret: process.env.YOUTUBE_CLIENT_SECRET,
+              redirect_uris: ["http://localhost:3000/oauth2callback"],
+            },
+          },
+          null,
+          2
+        )
+      );
+      if (process.env.YOUTUBE_REFRESH_TOKEN) {
+        await fs.writeFile(
+          path.join(defaultProjDir, "token.json"),
+          JSON.stringify(
+            {
+              refresh_token: process.env.YOUTUBE_REFRESH_TOKEN,
+            },
+            null,
+            2
+          )
+        );
+      }
+    }
+
     // 2. Scan all project directories
     await this.scanProjects();
 
