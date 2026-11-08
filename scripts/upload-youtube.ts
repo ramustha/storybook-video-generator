@@ -1077,7 +1077,9 @@ async function main() {
           ].join("\n"));
 
     // 4. Upload Landscape (16:9) with Duration Policy & Pre-Upload Deduplication Check
-    if ((effectiveFormat === "landscape" || effectiveFormat === "all") && existsSync(landscapeVideo)) {
+    if ((effectiveFormat === "landscape" || effectiveFormat === "all") && !existsSync(landscapeVideo)) {
+      console.warn(`\n⚠️ [YOUTUBE] Landscape video file not found at: ${landscapeVideo}. Skipping 16:9 upload.`);
+    } else if ((effectiveFormat === "landscape" || effectiveFormat === "all") && existsSync(landscapeVideo)) {
       if (durationTier === "tier1" && !allowShortLandscape) {
         console.log(`\n🛑 DURATION POLICY: Total duration is ${totalDurationSeconds.toFixed(1)}s (< 20s).`);
         console.log(`   Best practices recommend publishing <20s videos ONLY as YouTube Shorts / Reels / TikTok (9:16).`);
@@ -1266,6 +1268,8 @@ async function main() {
       console.log(`\n🛑 DURATION POLICY: [${lang.toUpperCase()}] Story duration is ${langDuration.toFixed(1)}s (> 180s).`);
       console.log(`   YouTube Shorts strictly limits vertical videos to <=180s (anything longer is forced into the Videos tab).`);
       console.log(`   Skipping Shorts upload for this edition to prevent channel video duplication.`);
+    } else if ((effectiveFormat === "vertical" || effectiveFormat === "all") && !existsSync(verticalVideo)) {
+      console.warn(`\n⚠️ [YOUTUBE] Vertical Shorts video file not found at: ${verticalVideo}. Skipping 9:16 Shorts upload.`);
     } else if ((effectiveFormat === "vertical" || effectiveFormat === "all") && existsSync(verticalVideo)) {
       console.log(`\n📱 Checking Shorts (9:16) publication status for ${lang.toUpperCase()}...`);
 
