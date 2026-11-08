@@ -154,32 +154,48 @@ Analyze this book page:
     },
   };
 
-  const t0 = Date.now();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestBody),
-  });
+  const candidateModels = [
+    "models/gemini-3.5-flash",
+    "models/gemini-3.5-flash-lite",
+    "models/gemini-flash-lite-latest",
+  ];
 
-  const durationMs = Date.now() - t0;
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini Vision API error (HTTP ${response.status}): ${errorText}`);
+  let lastError: Error | null = null;
+  const t0 = Date.now();
+
+  for (const model of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Model ${model} returned HTTP ${response.status}: ${errorText}`);
+      }
+
+      const json = await response.json();
+      const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) throw new Error("Empty candidate response from Gemini Vision API");
+
+      const parsed = JSON.parse(rawText);
+      return {
+        textElements: parsed.textElements || [],
+        artwork_box_2d: parsed.artwork_box_2d || [0, 0, 1000, 1000],
+        is_off_center: Boolean(parsed.is_off_center),
+        dominant_bg_hex: parsed.dominant_bg_hex || "#FFFFFF",
+        durationMs: Date.now() - t0,
+      };
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`⚠️ Gemini model [${model}] attempt failed: ${err.message}. Trying next candidate model...`);
+    }
   }
 
-  const json = await response.json();
-  const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) throw new Error("Empty candidate response from Gemini Vision API");
-
-  const parsed = JSON.parse(rawText);
-  return {
-    textElements: parsed.textElements || [],
-    artwork_box_2d: parsed.artwork_box_2d || [0, 0, 1000, 1000],
-    is_off_center: Boolean(parsed.is_off_center),
-    dominant_bg_hex: parsed.dominant_bg_hex || "#FFFFFF",
-    durationMs,
-  };
+  throw lastError || new Error("All Gemini Vision candidate models failed.");
 }
 
 /**
@@ -357,7 +373,19 @@ export async function prepareStoryPlatesHybrid(
   const coverPageFile = getPageFile(coverPageNum);
   console.log(`\n🖼️  [1/3] Processing Cover Plate from ${path.basename(coverPageFile)}...`);
   const coverRaw = await fs.readFile(coverPageFile);
-  const coverAnalysis = await analyzePageWithGemini(coverRaw, apiKey!);
+  let coverAnalysis: PageOcrAnalysis;
+  try {
+    coverAnalysis = await analyzePageWithGemini(coverRaw, apiKey!);
+  } catch (err: any) {
+    console.warn(`⚠️ Cover OCR analysis failed: ${err.message}. Using fallback ambient plate.`);
+    coverAnalysis = {
+      textElements: [],
+      artwork_box_2d: [0, 0, 1000, 1000],
+      is_off_center: false,
+      dominant_bg_hex: "#FFFFFF",
+      durationMs: 0,
+    };
+  }
   const cleanCover = await inpaintAndCenterPlate(coverRaw, coverAnalysis, { smartCenter: false });
   await fs.writeFile(path.join(assetsDir, "cover.png"), cleanCover);
   console.log(`✔ Cover plate saved: assets/cover.png (${coverAnalysis.textElements.length} text elements inpainted)`);
@@ -382,10 +410,21 @@ export async function prepareStoryPlatesHybrid(
 
     console.log(`▶️  [${sceneId}] Processing page ${pageNum} (${path.basename(pageFile)})...`);
     const pageRaw = await fs.readFile(pageFile);
-    const analysis = await analyzePageWithGemini(pageRaw, apiKey!);
-
-    if (analysis.is_off_center) {
-      console.log(`   ✨ Smart Re-Centering triggered! Artwork bounds: [${analysis.artwork_box_2d.join(",")}]`);
+    let analysis: PageOcrAnalysis;
+    try {
+      analysis = await analyzePageWithGemini(pageRaw, apiKey!);
+      if (analysis.is_off_center) {
+        console.log(`   ✨ Smart Re-Centering triggered! Artwork bounds: [${analysis.artwork_box_2d.join(",")}]`);
+      }
+    } catch (err: any) {
+      console.warn(`⚠️ Scene [${sceneId}] OCR analysis failed: ${err.message}. Using fallback ambient plate.`);
+      analysis = {
+        textElements: [],
+        artwork_box_2d: [0, 0, 1000, 1000],
+        is_off_center: false,
+        dominant_bg_hex: "#FFFFFF",
+        durationMs: 0,
+      };
     }
 
     const finalPlate = await inpaintAndCenterPlate(pageRaw, analysis, {
