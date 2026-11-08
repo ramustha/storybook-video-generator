@@ -429,10 +429,10 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   }
   console.log(`✔ Standard audio pack copied.`);
 
-  // 5. Plate Extraction & Text Inpainting via Swift & Apple Vision OCR
+  // 5. Plate Extraction & Text Inpainting via Hybrid Engine (Gemini Vision OCR + Smart Centering + Apple Fallback)
   if (!options.skipPlates) {
-    console.log(`\n🎨 Executing Apple Vision OCR Plate Inpainting & Widescreen Engine...`);
-    execSync(`swift scripts/prepare-plates.swift --book ${slug}`, {
+    console.log(`\n🎨 Executing Hybrid Plate Inpainting & Smart Re-Centering Engine...`);
+    execSync(`npx tsx scripts/prepare-plates-hybrid.ts --book ${slug}`, {
       stdio: "inherit",
     });
   } else {

@@ -6,6 +6,7 @@
   "scripts": {
     "manage": "tsx scripts/manage-story.ts",
     "plates": "swift scripts/prepare-plates.swift",
+    "plates:hybrid": "tsx scripts/prepare-plates-hybrid.ts",
     "render": "tsx scripts/render-book.ts",
     "thumbnail": "tsx scripts/render-thumbnail.ts",
     "thumbnail:verify": "tsx scripts/render-thumbnail.ts --verify --all-books",
@@ -77,6 +78,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remotion": "^4.0.244",
+    "sharp": "^0.35.5",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
