@@ -14,6 +14,17 @@ export interface TelegramNotifyOptions {
   dryRun?: boolean;
 }
 
+export interface TelegramFailureOptions {
+  bookSlug?: string;
+  lang?: "id" | "en";
+  slot?: string;
+  platform?: string;
+  error: string | Error;
+  runUrl?: string;
+  runId?: string;
+  dryRun?: boolean;
+}
+
 /**
  * Formats a date into a clean, human-readable Indonesian/English timestamp in Western Indonesia Time (WIB, UTC+7).
  * Example ID: "Minggu, 8 November 2026 pukul 16:54 WIB"
@@ -223,6 +234,96 @@ export async function notifyTelegramPublish(options: TelegramNotifyOptions): Pro
   return await sendTelegramMessage(config, captionHtml, photoUrl);
 }
 
+/**
+ * Dispatches an urgent failure alert to Telegram when publishing, rendering, or scheduling fails.
+ */
+export async function notifyTelegramFailure(options: TelegramFailureOptions): Promise<boolean> {
+  const config = getTelegramConfig();
+  if (!config) {
+    console.warn("⚠️ Cannot send Telegram failure alert: Credentials not configured.");
+    return false;
+  }
+
+  const lang = options.lang || "id";
+  const errorMessage =
+    typeof options.error === "string" ? options.error : options.error?.message || String(options.error);
+  const wibTime = formatWibTimestamp(new Date(), lang);
+
+  // Construct GitHub Actions Run URL if runId is available or running in CI
+  let runUrl = options.runUrl;
+  if (!runUrl && options.runId) {
+    runUrl = `https://github.com/ramustha/storybook-video-generator/actions/runs/${options.runId}`;
+  } else if (!runUrl && process.env.GITHUB_RUN_ID) {
+    const server = process.env.GITHUB_SERVER_URL || "https://github.com";
+    const repo = process.env.GITHUB_REPOSITORY || "ramustha/storybook-video-generator";
+    runUrl = `${server}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+  }
+
+  const lines: string[] = [
+    `🚨 <b>Zayn Storybook: Publikasi Gagal!</b> ⚠️\n`,
+    `Terjadi kendala saat proses publikasi atau rendering video cerita anak.`,
+    `\n⏰ <b>Waktu Kejadian:</b> ${wibTime}`,
+  ];
+
+  if (options.bookSlug && options.bookSlug !== "auto") {
+    lines.push(`📖 <b>Target Buku:</b> <code>${options.bookSlug}</code> [${lang.toUpperCase()}]`);
+  }
+  if (options.slot && options.slot !== "auto") {
+    lines.push(`🎯 <b>Jadwal Slot:</b> ${options.slot}`);
+  }
+  if (options.platform) {
+    lines.push(`🛑 <b>Komponen / Platform:</b> ${options.platform}`);
+  }
+
+  // Sanitize and trim error message for Telegram HTML
+  const safeError = errorMessage
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .slice(0, 600);
+
+  lines.push(`\n❌ <b>Pesan Error:</b>\n<pre>${safeError}</pre>`);
+
+  // Actionable automated suggestions
+  const lowerErr = errorMessage.toLowerCase();
+  if (lowerErr.includes("quota") || lowerErr.includes("quotaexceeded")) {
+    lines.push(
+      `\n💡 <b>Saran Tindakan:</b> Kuota YouTube Data API harian (10.000 unit) habis. Tambahkan project cadangan via <code>npm run project:add</code> atau tunggu reset kuota pada pukul 15:00 WIB.`
+    );
+  } else if (
+    lowerErr.includes("token") ||
+    lowerErr.includes("invalid_grant") ||
+    lowerErr.includes("expired") ||
+    lowerErr.includes("revoked")
+  ) {
+    lines.push(
+      `\n💡 <b>Saran Tindakan:</b> Token autentikasi kedaluwarsa atau dicabut. Jalankan <code>npm run auth:youtube</code> atau <code>npm run refresh:meta</code> untuk memperbarui kredensial.`
+    );
+  } else if (lowerErr.includes("remotion") || lowerErr.includes("render")) {
+    lines.push(
+      `\n💡 <b>Saran Tindakan:</b> Remotion video render gagal. Periksa integritas file audio/gambar di <code>stories/${options.bookSlug || ""}/</code> atau memori runner.`
+    );
+  }
+
+  if (runUrl) {
+    lines.push(`\n🔗 <a href="${runUrl}">Lihat Detail Log di GitHub Actions ➔</a>`);
+  }
+
+  const alertHtml = lines.join("\n");
+
+  if (options.dryRun) {
+    console.log("\n=======================================================");
+    console.log("✈️  [DRY RUN] TELEGRAM FAILURE NOTIFICATION PREVIEW");
+    console.log("=======================================================");
+    console.log(`Chat ID   : ${config.chatId}`);
+    console.log("Message   :\n" + alertHtml);
+    console.log("=======================================================\n");
+    return true;
+  }
+
+  return await sendTelegramMessage(config, alertHtml);
+}
+
 // ── CLI Runner ─────────────────────────────────────────────────────────────
 async function main() {
   const args = process.argv.slice(2);
@@ -244,6 +345,37 @@ async function main() {
 
     const success = await sendTelegramMessage(config, testHtml);
     if (!success) process.exit(1);
+    return;
+  }
+
+  if (args.includes("--failure") || args.includes("--fail") || args.includes("--error")) {
+    const errorIdx = args.indexOf("--error");
+    const errorMsg = errorIdx !== -1 && args[errorIdx + 1] ? args[errorIdx + 1] : "Unknown pipeline error occurred";
+    const bookIdx = args.indexOf("--book");
+    const bookSlug = bookIdx !== -1 && args[bookIdx + 1] ? args[bookIdx + 1] : undefined;
+    const langIdx = args.indexOf("--lang");
+    const lang =
+      langIdx !== -1 && (args[langIdx + 1] === "en" || args[langIdx + 1] === "id")
+        ? (args[langIdx + 1] as "id" | "en")
+        : "id";
+    const slotIdx = args.indexOf("--slot");
+    const slot = slotIdx !== -1 ? args[slotIdx + 1] : undefined;
+    const platformIdx = args.indexOf("--platform");
+    const platform = platformIdx !== -1 ? args[platformIdx + 1] : undefined;
+    const runIdIdx = args.indexOf("--run-id");
+    const runId = runIdIdx !== -1 ? args[runIdIdx + 1] : undefined;
+    const dryRun = args.includes("--dry-run");
+
+    const ok = await notifyTelegramFailure({
+      bookSlug,
+      lang,
+      slot,
+      platform,
+      error: errorMsg,
+      runId,
+      dryRun,
+    });
+    if (!ok && !dryRun) process.exit(1);
     return;
   }
 

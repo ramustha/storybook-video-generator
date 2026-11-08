@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync, spawn } from "child_process";
+import { notifyTelegramFailure } from "./notify-telegram";
 
 export interface ScheduledSlot {
   date?: string; // "YYYY-MM-DD" e.g. "2026-11-07"
@@ -797,45 +798,63 @@ async function publishToday(
   for (const slot of slots) {
     console.log(`\n🚀 Memproses Jadwal: ${slot.bookSlug} [${slot.lang.toUpperCase()}] (${slot.timeSlot})`);
 
-    // Ensure story assets exist locally, pull from Cloudflare R2 if missing
-    const storyDir = path.resolve("./stories", slot.bookSlug);
-    const storyPath = path.join(storyDir, "story.json");
-    if (!existsSync(storyPath)) {
-      console.log(`📥 Story assets not found locally for [${slot.bookSlug}]. Pulling from Cloudflare R2...`);
-      await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug]);
-    }
+    try {
+      // Ensure story assets exist locally, pull from Cloudflare R2 if missing
+      const storyDir = path.resolve("./stories", slot.bookSlug);
+      const storyPath = path.join(storyDir, "story.json");
+      if (!existsSync(storyPath)) {
+        console.log(`📥 Story assets not found locally for [${slot.bookSlug}]. Pulling from Cloudflare R2...`);
+        await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug]);
+      }
 
-    const status = checkPublicationStatus(slot.bookSlug, slot.lang);
+      const status = checkPublicationStatus(slot.bookSlug, slot.lang);
 
-    if (status.yt && status.fb && status.ig && !dryRun) {
-      console.log(`✔ [ALREADY LIVE] Buku ${slot.bookSlug} (${slot.lang}) sudah terbit di semua platform. Lewati.`);
-      continue;
-    }
+      if (status.yt && status.fb && status.ig && !dryRun) {
+        console.log(`✔ [ALREADY LIVE] Buku ${slot.bookSlug} (${slot.lang}) sudah terbit di semua platform. Lewati.`);
+        continue;
+      }
 
-    // Step 1: Cek apakah file video sudah ada; jika belum, render otomatis!
-    const storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
-    const vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
-    const landPath = storyJson.exports?.[slot.lang]?.landscape?.path ? path.join(storyDir, storyJson.exports[slot.lang].landscape.path) : null;
+      // Step 1: Cek apakah file video sudah ada; jika belum, render otomatis!
+      const storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
+      const vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
+      const landPath = storyJson.exports?.[slot.lang]?.landscape?.path ? path.join(storyDir, storyJson.exports[slot.lang].landscape.path) : null;
 
-    const needRender = !vertPath || !existsSync(vertPath) || !landPath || !existsSync(landPath);
+      const needRender = !vertPath || !existsSync(vertPath) || !landPath || !existsSync(landPath);
 
-    if (needRender) {
-      console.log(`⚙️ Video belum ada di disk. Menjalankan render Remotion otomatis...`);
-      const renderArgs = ["scripts/render-book.ts", "--book", slot.bookSlug, "--lang", slot.lang, "--format", slot.format];
-      await runChildCommand("npx", ["tsx", ...renderArgs]);
-    }
+      if (needRender) {
+        console.log(`⚙️ Video belum ada di disk. Menjalankan render Remotion otomatis...`);
+        const renderArgs = ["scripts/render-book.ts", "--book", slot.bookSlug, "--lang", slot.lang, "--format", slot.format];
+        await runChildCommand("npx", ["tsx", ...renderArgs]);
+      }
 
-    // Step 2: Jalankan sync & upload ke semua platform
-    console.log(`📡 Mempublikasikan ke platform tujuan...`);
-    const publishArgs = ["scripts/publish-all.ts", "--book", slot.bookSlug, "--lang", slot.lang];
-    if (dryRun) publishArgs.push("--dry-run");
+      // Step 2: Jalankan sync & upload ke semua platform
+      console.log(`📡 Mempublikasikan ke platform tujuan...`);
+      const publishArgs = ["scripts/publish-all.ts", "--book", slot.bookSlug, "--lang", slot.lang];
+      if (dryRun) publishArgs.push("--dry-run");
 
-    await runChildCommand("npx", ["tsx", ...publishArgs]);
+      await runChildCommand("npx", ["tsx", ...publishArgs]);
 
-    // Step 3: Sinkronkan kembali manifest story.json yang baru ke Cloudflare R2
-    if (!dryRun) {
-      console.log(`☁️ Syncing updated story manifest back to Cloudflare R2...`);
-      await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "push", slot.bookSlug, "--manifest-only"]);
+      // Step 3: Sinkronkan kembali manifest story.json yang baru ke Cloudflare R2
+      if (!dryRun) {
+        console.log(`☁️ Syncing updated story manifest back to Cloudflare R2...`);
+        await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "push", slot.bookSlug, "--manifest-only"]);
+      }
+    } catch (slotErr: any) {
+      console.error(`\n❌ Gagal memproses jadwal siaran untuk [${slot.bookSlug}] [${slot.lang}]:`, slotErr.message);
+      try {
+        console.log(`✈️ Mengirimkan notifikasi kegagalan siaran ke Telegram...`);
+        await notifyTelegramFailure({
+          bookSlug: slot.bookSlug,
+          lang: slot.lang,
+          slot: `${slot.dayName}, ${slot.timeSlot} (${slot.slotType})`,
+          platform: "Daily Broadcast Pipeline",
+          error: slotErr,
+          dryRun,
+        });
+      } catch (tgErr: any) {
+        console.warn("⚠️ Telegram failure alert dispatch warning:", tgErr.message);
+      }
+      throw slotErr;
     }
   }
 }
@@ -863,4 +882,13 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+main().catch(async (err) => {
+  console.error("❌ Fatal error in Content Calendar Scheduler:", err);
+  try {
+    await notifyTelegramFailure({
+      platform: "Content Calendar Scheduler (Fatal)",
+      error: err,
+    });
+  } catch {}
+  process.exit(1);
+});

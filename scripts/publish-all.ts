@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { verifyStoryThumbnails, renderStoryThumbnails } from "./render-thumbnail";
-import { notifyTelegramPublish } from "./notify-telegram";
+import { notifyTelegramPublish, notifyTelegramFailure } from "./notify-telegram";
 
 interface PublishAllOptions {
   bookSlug: string;
@@ -121,6 +121,7 @@ async function main() {
   // ─────────────────────────────────────────────────────────────────────────
 
   let anyUploadOccurred = false;
+  const allFailures: Array<{ platform: string; lang: string; error: string }> = [];
 
   for (const currentLang of langsToProcess) {
     console.log(`\n======================================================`);
@@ -198,6 +199,7 @@ async function main() {
           anyUploadOccurred = true;
         } catch (err: any) {
           console.error("⚠️ YouTube upload warning:", err.message);
+          allFailures.push({ platform: "YouTube", lang: currentLang, error: err.message });
         }
       }
     } else {
@@ -238,6 +240,7 @@ async function main() {
             anyUploadOccurred = true;
           } catch (err: any) {
             console.error("⚠️ Meta vertical reel upload warning:", err.message);
+            allFailures.push({ platform: `Meta Reels (${targetPlatform})`, lang: currentLang, error: err.message });
           }
         } else {
           console.log(`\n⏩ Skipping Vertical Reel: Already live on Instagram (${igId}) and Facebook Reels (${fbVertId}).`);
@@ -265,6 +268,7 @@ async function main() {
             anyUploadOccurred = true;
           } catch (err: any) {
             console.error("⚠️ Facebook landscape upload warning:", err.message);
+            allFailures.push({ platform: "Facebook Watch (16:9)", lang: currentLang, error: err.message });
           }
         } else {
           console.log(`\n⏩ Skipping Facebook Landscape: Already live on Facebook Watch (${fbLandId}).`);
@@ -288,6 +292,7 @@ async function main() {
           await runCommand("npx", ["tsx", ...tiktokArgs]);
         } catch (err: any) {
           console.error("⚠️ TikTok API upload warning:", err.message);
+          allFailures.push({ platform: "TikTok (API)", lang: currentLang, error: err.message });
         }
       } else if (hasBrowserSession) {
         console.log(`\n--- [3/3] PUBLISHING TO TIKTOK (PUPPETEER HEADLESS BROWSER) ---`);
@@ -305,6 +310,7 @@ async function main() {
           await runCommand("npx", ["tsx", ...tiktokBrowserArgs]);
         } catch (err: any) {
           console.error("⚠️ TikTok Puppeteer browser upload warning:", err.message);
+          allFailures.push({ platform: "TikTok (Browser)", lang: currentLang, error: err.message });
         }
       } else {
         console.log(`\n--- [3/3] TIKTOK STATUS ---`);
@@ -414,7 +420,23 @@ async function main() {
       console.log(JSON.stringify(updatedStory.publications.threads, null, 2));
     }
 
-    // 5. Telegram Publication Notification
+    // 5. Telegram Notifications (Failure Alert or Success Broadcast)
+    if (allFailures.length > 0) {
+      console.warn(`\n⚠️ ${allFailures.length} platform(s) encountered failure during publish.`);
+      try {
+        console.log(`✈️ Dispatching Telegram Failure Alert...`);
+        await notifyTelegramFailure({
+          bookSlug: options.bookSlug,
+          lang: options.lang === "all" ? "id" : options.lang,
+          platform: Array.from(new Set(allFailures.map((f) => f.platform))).join(", "),
+          error: allFailures.map((f) => `• [${f.platform} ${f.lang.toUpperCase()}]: ${f.error}`).join("\n"),
+          dryRun: options.dryRun,
+        });
+      } catch (tgFailErr: any) {
+        console.warn("⚠️ Telegram failure alert dispatch warning:", tgFailErr.message);
+      }
+    }
+
     try {
       console.log(`\n✈️ Dispatching Telegram Broadcast Notification...`);
       await notifyTelegramPublish({
@@ -430,7 +452,24 @@ async function main() {
   console.log("\n✨ Done! You can monitor live performance anytime with: npm run stats:meta & npm run stats\n");
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error("❌ Fatal error in Multi-Platform Publisher:", err);
+  try {
+    const bookIdx = process.argv.indexOf("--book");
+    const bookSlug = bookIdx !== -1 ? process.argv[bookIdx + 1] : undefined;
+    const langIdx = process.argv.indexOf("--lang");
+    const lang =
+      langIdx !== -1 && (process.argv[langIdx + 1] === "en" || process.argv[langIdx + 1] === "id")
+        ? (process.argv[langIdx + 1] as "id" | "en")
+        : "id";
+    const dryRun = process.argv.includes("--dry-run");
+    await notifyTelegramFailure({
+      bookSlug,
+      lang,
+      platform: "Multi-Platform Publisher (Fatal)",
+      error: err,
+      dryRun,
+    });
+  } catch {}
   process.exit(1);
 });
