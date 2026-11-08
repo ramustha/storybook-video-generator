@@ -185,6 +185,17 @@ jobs:
             git push
           fi
 
+      - name: 🚨 Notify Telegram on Workflow Failure
+        if: failure()
+        run: |
+          npx tsx scripts/notify-telegram.ts --failure \
+            --book "${{ inputs.book || 'auto' }}" \
+            --lang "${{ inputs.lang || 'auto' }}" \
+            --slot "${{ inputs.slot || 'auto' }}" \
+            --platform "GitHub Actions Broadcast Job" \
+            --error "GitHub Actions daily broadcast workflow execution failed. Check run details." \
+            --run-id "${{ github.run_id }}"
+
       - name: 📊 Post Job Summary
         run: |
           echo "### 🌟 Zayn Storybook Broadcast Execution Summary" >> $GITHUB_STEP_SUMMARY
