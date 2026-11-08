@@ -368,27 +368,15 @@ export async function prepareStoryPlatesHybrid(
     return pageFiles[Math.min(pageNumber - 1, pageFiles.length - 1)];
   };
 
-  // 2. Process Cover Plate
+  // 2. Process Cover Plate (Preserve 100% Authentic Original Cover)
   const coverPageNum = manifest.coverPage || 1;
   const coverPageFile = getPageFile(coverPageNum);
-  console.log(`\n🖼️  [1/3] Processing Cover Plate from ${path.basename(coverPageFile)}...`);
+  console.log(`\n🖼️  [1/3] Processing Cover Plate from ${path.basename(coverPageFile)} (Preserving Original Book Cover)...`);
   const coverRaw = await fs.readFile(coverPageFile);
-  let coverAnalysis: PageOcrAnalysis;
-  try {
-    coverAnalysis = await analyzePageWithGemini(coverRaw, apiKey!);
-  } catch (err: any) {
-    console.warn(`⚠️ Cover OCR analysis failed: ${err.message}. Using fallback ambient plate.`);
-    coverAnalysis = {
-      textElements: [],
-      artwork_box_2d: [0, 0, 1000, 1000],
-      is_off_center: false,
-      dominant_bg_hex: "#FFFFFF",
-      durationMs: 0,
-    };
-  }
-  const cleanCover = await inpaintAndCenterPlate(coverRaw, coverAnalysis, { smartCenter: false });
-  await fs.writeFile(path.join(assetsDir, "cover.png"), cleanCover);
-  console.log(`✔ Cover plate saved: assets/cover.png (${coverAnalysis.textElements.length} text elements inpainted)`);
+  // Keep the cover 100% original without text inpainting (preserves book title lettering & artist styling)
+  const originalCover = await sharp(coverRaw).png().toBuffer();
+  await fs.writeFile(path.join(assetsDir, "cover.png"), originalCover);
+  console.log(`✔ Cover plate saved: assets/cover.png (100% authentic original cover preserved)`);
 
   // 3. Process Story Scenes
   console.log(`\n🎬 [2/3] Processing 16:9 Scene Plates...`);

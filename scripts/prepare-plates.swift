@@ -231,10 +231,10 @@ if FileManager.default.fileExists(atPath: coverPath),
     )
     NSGraphicsContext.restoreGraphicsState()
 
-    let inpainted = inpaintPlate(rep: coverOutRep)
+    // Preserve authentic original cover without text inpainting
     let pngData = coverOutRep.representation(using: .png, properties: [:])!
     try? pngData.write(to: URL(fileURLWithPath: "\(assetsDir)/cover.png"))
-    print("✔ [cover] Clean cover created: \(targetCoverW)x\(targetCoverH) (\(inpainted) text elements inpainted) from \(coverFileName)")
+    print("✔ [cover] Authentic original cover preserved: \(targetCoverW)x\(targetCoverH) from \(coverFileName)")
 } else {
     print("⚠️ Warning: Cover source page not found at \(coverPath)")
 }
