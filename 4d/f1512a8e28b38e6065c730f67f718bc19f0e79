@@ -1,0 +1,25 @@
+scripts/audit-story-quality.ts
+  698ac31901cd73e0 241
+scripts/prepare-plates-hybrid.ts
+  698ac31901cd73e0 157-163,165-195,198,376-388,413-427
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "4df1512a8e28b38e6065c730f67f718bc19f0e79",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 68,
+      "total_deletions": 29,
+      "accepted_lines": 68,
+      "overriden_lines": 0
+    }
+  }
+}
