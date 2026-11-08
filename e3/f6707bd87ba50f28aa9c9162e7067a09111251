@@ -1,0 +1,31 @@
+.env.example
+  698ac31901cd73e0 27-31
+package.json
+  698ac31901cd73e0 55
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 90-91,109-110,130-134
+scripts/publish-all.ts
+  698ac31901cd73e0 6,371-381
+scripts/notify-telegram.ts
+  698ac31901cd73e0 1-245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "e3f6707bd87ba50f28aa9c9162e7067a09111251",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 276,
+      "total_deletions": 0,
+      "accepted_lines": 276,
+      "overriden_lines": 0
+    }
+  }
+}
