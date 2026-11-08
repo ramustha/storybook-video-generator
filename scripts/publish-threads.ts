@@ -358,11 +358,11 @@ export function generateThreadsCaption(
     rawMoral = rawMoral.slice(0, 127).trim() + "...";
   }
 
-  const link = youtubeUrl || "https://youtube.com/@ZaynStorybook";
+  const link = youtubeUrl || "https://youtube.com/@Zayn.Storybook";
 
   const caption = isId
-    ? `HOREEE! 🎈 Cerita baru "${title}" sudah tayang! 📖✨\n\n"${hook}"\n\n💡 Pesan Cerita:\n"${rawMoral}"\n\n🎬 Tonton selengkapnya di YouTube:\n${link}\n\n#ZaynStorybook #DongengAnak #CeritaAnakBergambar #KidsBedtimeStories`
-    : `YAY! 🎈 New storybook "${title}" is now live! 📖✨\n\n"${hook}"\n\n💡 Moral of the story:\n"${rawMoral}"\n\n🎬 Watch full animated story on YouTube:\n${link}\n\n#ZaynStorybook #KidsBedtimeStories #ReadAloud #ChildrenBooks`;
+    ? `HOREEE! 🎈 Cerita baru "${title}" sudah tayang! 📖✨\n\n"${hook}"\n\n💡 Pesan Cerita:\n"${rawMoral}"\n\n🎬 Tonton selengkapnya di kanal YouTube @Zayn.Storybook:\n${link}\n\n#ZaynStorybook #DongengAnak #CeritaAnakBergambar #KidsBedtimeStories`
+    : `YAY! 🎈 New storybook "${title}" is now live! 📖✨\n\n"${hook}"\n\n💡 Moral of the story:\n"${rawMoral}"\n\n🎬 Watch full animated story on YouTube @Zayn.Storybook:\n${link}\n\n#ZaynStorybook #KidsBedtimeStories #ReadAloud #ChildrenBooks`;
 
   if (caption.length <= 500) {
     return caption;
@@ -482,7 +482,7 @@ Yuk ikuti petualangan seru kami di YouTube & Instagram @zayn.storybook! 🎬🧸
       containerId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
         mediaType: "TEXT",
         text: introText,
-        linkAttachment: "https://youtube.com/@ZaynStorybook",
+        linkAttachment: "https://youtube.com/@Zayn.Storybook",
       });
     }
 
@@ -597,7 +597,7 @@ export async function publishStoryToThreads(options: {
   const ytUrl =
     (lang === "id"
       ? manifest.publications?.youtube?.id?.landscape?.url
-      : manifest.publications?.youtube?.en?.landscape?.url) || "https://youtube.com/@ZaynStorybook";
+      : manifest.publications?.youtube?.en?.landscape?.url) || "https://youtube.com/@Zayn.Storybook";
 
   const caption = generateThreadsCaption(manifest, lang, ytUrl);
   console.log(`\n📝 Caption preview (${caption.length}/500 chars):`);
@@ -736,7 +736,7 @@ async function main() {
   const isForce = args.includes("--force");
   const requestedBook = getArg("--book") || "terlalu-banyak-suara";
   const langArg = (getArg("--lang") || "id") as "id" | "en" | "all";
-  const modeArg = (getArg("--mode") || "video") as "image" | "video" | "text";
+  const modeArg = (getArg("--mode") || "image") as "image" | "video" | "text";
 
   if (isVerify) {
     const config = await loadThreadsConfig();
