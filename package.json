@@ -44,6 +44,8 @@
     "stats:meta": "tsx scripts/meta-stats.ts",
     "sync:meta": "tsx scripts/sync-platforms.ts",
     "publish:all": "tsx scripts/publish-all.ts",
+    "announce": "tsx scripts/publish-announcement.ts",
+    "announce:today": "tsx scripts/publish-announcement.ts --slot auto",
     "promo:social": "tsx scripts/generate-social-promo.ts",
     "promo:launch": "tsx scripts/publish-launch-posts.ts",
     "promo:instagram": "tsx scripts/publish-instagram-post.ts",

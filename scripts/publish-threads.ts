@@ -506,6 +506,46 @@ Yuk ikuti petualangan seru kami di YouTube & Instagram @zayn.storybook! 🎬🧸
 }
 
 /**
+ * Publishes a single image post to Meta Threads (e.g. for teaser announcements).
+ */
+export async function publishThreadsPhotoPost(options: {
+  imagePath: string;
+  text: string;
+  dryRun?: boolean;
+}): Promise<{
+  success: boolean;
+  postId?: string;
+  permalink?: string;
+  dryRun?: boolean;
+}> {
+  const config = await loadThreadsConfig();
+  if (!config.threadsAccessToken || !config.threadsUserId) {
+    throw new Error("Threads credentials not configured (missing threadsUserId or threadsAccessToken).");
+  }
+
+  if (options.dryRun) {
+    console.log("\n[DRY RUN] Threads Announcement Caption:\n", options.text);
+    return { success: true, dryRun: true };
+  }
+
+  const { publicUrl, cleanup } = await uploadImageToR2(options.imagePath, "threads-announcements");
+  try {
+    const containerId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
+      mediaType: "IMAGE",
+      text: options.text,
+      imageUrl: publicUrl,
+      isMadeWithAi: true,
+    });
+    await waitForThreadsContainer(containerId, config.threadsAccessToken);
+    const postId = await publishThreadsContainer(config.threadsUserId, containerId, config.threadsAccessToken);
+    const postDetails = await getThreadsPostDetails(postId, config.threadsAccessToken);
+    return { success: true, postId, permalink: postDetails.permalink };
+  } finally {
+    await cleanup();
+  }
+}
+
+/**
  * Main execution routine for publishing to Threads
  */
 export async function publishStoryToThreads(options: {
