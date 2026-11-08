@@ -1,6 +1,7 @@
 name = "zayn-storybook-cron-trigger"
 main = "src/index.js"
 compatibility_date = "2024-09-23"
+account_id = "e5c0394bca4b8239f091b55cb3e9d3e6"
 
 # Cron Triggers (UTC)
 # 01:30 UTC = 08:30 WIB (Morning Slot)
