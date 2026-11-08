@@ -15,6 +15,30 @@ export interface TelegramNotifyOptions {
 }
 
 /**
+ * Formats a date into a clean, human-readable Indonesian/English timestamp in Western Indonesia Time (WIB, UTC+7).
+ * Example ID: "Minggu, 8 November 2026 pukul 16:54 WIB"
+ * Example EN: "Sunday, 8 November 2026 at 16:54 WIB"
+ */
+export function formatWibTimestamp(date: Date = new Date(), lang: "id" | "en" = "id"): string {
+  const locale = lang === "en" ? "en-GB" : "id-ID";
+  const formatted = new Intl.DateTimeFormat(locale, {
+    timeZone: "Asia/Jakarta",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+
+  if (lang === "en") {
+    return `${formatted} WIB`;
+  }
+  return `${formatted.replace(/\./g, ":")} WIB`;
+}
+
+/**
  * Resolves Telegram credentials from environment variables or config/telegram-config.json.
  */
 export function getTelegramConfig(): TelegramConfig | null {
@@ -152,15 +176,14 @@ export async function notifyTelegramPublish(options: TelegramNotifyOptions): Pro
       : (story.moral?.headlineId || "Belajar hal baru dan berbuat baik setiap hari!");
 
   // Build message HTML
+  const wibTime = formatWibTimestamp(new Date(), lang);
+  const timeLabel = lang === "en" ? "Broadcast Time" : "Waktu Tayang";
   const lines: string[] = [
     `🚀 <b>Zayn Storybook: Cerita Baru Mengudara!</b> 🌟\n`,
     `📖 <b>Judul:</b> <i>${title}</i> [${lang.toUpperCase()}]`,
     `💡 <b>Pesan Moral:</b> ${moralText}`,
+    `⏰ <b>${timeLabel}:</b> ${wibTime}${options.slot ? ` • ${options.slot}` : ""}`,
   ];
-
-  if (options.slot) {
-    lines.push(`⏰ <b>Slot Tayang:</b> ${options.slot}`);
-  }
 
   lines.push(`\n🔗 <b>Tonton & Nikmati Bersama:</b>`);
   if (ytLandscape) lines.push(`▶️ <a href="${ytLandscape}">YouTube (Video 16:9 Full HD)</a>`);
@@ -216,7 +239,7 @@ async function main() {
       `🤖 <b>Zayn Storybook Bot: Uji Koneksi Berhasil!</b> ✅`,
       `\nBot notifikasi publikasi cerita anak kini telah terhubung secara resmi ke Telegram.`,
       `Setiap kali video cerita tayang di YouTube, Instagram, Facebook, atau Threads, notifikasi instan akan dikirimkan ke sini! 🚀`,
-      `\n⏰ <i>Timestamp: ${new Date().toISOString()}</i>`,
+      `\n⏰ <b>Waktu Sistem:</b> ${formatWibTimestamp(new Date(), "id")}`,
     ].join("\n");
 
     const success = await sendTelegramMessage(config, testHtml);

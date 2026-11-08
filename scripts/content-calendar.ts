@@ -618,15 +618,23 @@ async function showToday() {
   printHeader();
   const now = new Date();
   const todayName = DAYS_ID[now.getDay()];
-  const dateStr = now.toLocaleDateString("id-ID", {
+  const dateStr = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+  }).format(now);
+  const timeStr = new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(now).replace(/\./g, ":");
 
   console.log(`📍 Hari Ini     : ${dateStr}`);
-  console.log(`⏰ Waktu Lokal  : ${now.toLocaleTimeString("id-ID")} WIB`);
+  console.log(`⏰ Waktu Jakarta : ${timeStr} WIB`);
   console.log("==================================================================\n");
 
   const todaySlots = getTodaySlot();

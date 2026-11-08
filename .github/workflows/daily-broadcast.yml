@@ -191,5 +191,6 @@ jobs:
           echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Target**: ${{ inputs.book || 'Auto (from Calendar)' }} [${{ inputs.lang || 'Auto' }}]" >> $GITHUB_STEP_SUMMARY
           echo "- **Dry Run**: ${{ inputs.dry_run || false }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp**: $(date -u) UTC" >> $GITHUB_STEP_SUMMARY
+          echo "- **Waktu Rilis (WIB)**: $(TZ='Asia/Jakarta' date '+%A, %d %B %Y pukul %H:%M WIB')" >> $GITHUB_STEP_SUMMARY
+          echo "- **UTC Reference**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "✔ Daily broadcast automation completed!" >> $GITHUB_STEP_SUMMARY
