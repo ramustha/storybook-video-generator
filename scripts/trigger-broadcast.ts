@@ -41,13 +41,29 @@ async function main() {
   const cmd = `gh workflow run daily-broadcast.yml -R ramustha/storybook-video-generator -f book=${options.book} -f lang=${options.lang} -f slot=${options.slot} -f dry_run=${options.dryRun}`;
 
   console.log(`Executing: ${cmd}`);
+  let switched = false;
   try {
+    try {
+      execSync("gh auth switch -u ramustha", { stdio: "ignore" });
+      switched = true;
+    } catch {
+      // ignore
+    }
+
     const out = execSync(cmd, { encoding: "utf-8" });
     console.log(out);
     console.log("✔ Broadcast workflow triggered successfully on GitHub Actions!");
   } catch (err: any) {
     console.error("❌ Failed to trigger workflow:", err.message);
     process.exit(1);
+  } finally {
+    if (switched) {
+      try {
+        execSync("gh auth switch -u gdncomm-ramadhani-musthofa", { stdio: "ignore" });
+      } catch {
+        // ignore
+      }
+    }
   }
 }
 
