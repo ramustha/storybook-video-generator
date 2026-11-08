@@ -378,15 +378,21 @@ async function main() {
       console.warn("⚠️ Threads promotion post warning:", threadsErr.message);
     }
 
-    // Record social promotion state in story.json
+    // Record social promotion state in story.json (re-read to avoid clobbering child process updates)
     if (!options.dryRun) {
-      if (!story.publications) story.publications = {};
-      if (!story.publications.socialPromotion) story.publications.socialPromotion = {};
-      story.publications.socialPromotion[options.lang === "all" ? "id" : options.lang] = {
-        published: true,
-        publishedAt: new Date().toISOString(),
-      };
-      await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2), "utf-8");
+      try {
+        const freshRaw = await fs.readFile(storyJsonPath, "utf-8");
+        const freshStory = JSON.parse(freshRaw);
+        if (!freshStory.publications) freshStory.publications = {};
+        if (!freshStory.publications.socialPromotion) freshStory.publications.socialPromotion = {};
+        freshStory.publications.socialPromotion[options.lang === "all" ? "id" : options.lang] = {
+          published: true,
+          publishedAt: new Date().toISOString(),
+        };
+        await fs.writeFile(storyJsonPath, JSON.stringify(freshStory, null, 2), "utf-8");
+      } catch (saveErr: any) {
+        console.warn("⚠️ Failed updating socialPromotion in story.json:", saveErr.message);
+      }
     }
 
     // 4D. YouTube Community Tab (Explicit Skip Policy)

@@ -66,7 +66,31 @@ export function getJakartaHour(): number {
 }
 
 /**
+ * Extracts moral lesson with fallback across schema versions.
+ */
+function extractMoral(story: any, lang: "id" | "en"): string {
+  if (lang === "id") {
+    if (story.moral?.headlineId) return story.moral.headlineId;
+    const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+    if (moralScene?.audio?.text) {
+      const cleaned = moralScene.audio.text.replace(/^Pesan moral cerita ini:\s*/i, "").split(".")[0].trim();
+      return cleaned.endsWith("!") ? cleaned : `${cleaned}!`;
+    }
+    return "Belajar kebaikan budi pekerti, kejujuran, dan kehangatan keluarga.";
+  } else {
+    if (story.moral?.headlineEn) return story.moral.headlineEn;
+    const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+    if (moralScene?.audio?.en?.text) {
+      const cleaned = moralScene.audio.en.text.replace(/^The moral of the story:\s*/i, "").split(".")[0].trim();
+      return cleaned.endsWith("!") ? cleaned : `${cleaned}!`;
+    }
+    return "Learning kindness, empathy, and family warmth together.";
+  }
+}
+
+/**
  * Generates engaging, cheerful teaser copy for 1-hour-in-advance announcement feeds.
+ * Guarantees 100% single-language consistency matching the language of the attached image.
  */
 export function generateTeaserCopy(
   story: any,
@@ -74,77 +98,81 @@ export function generateTeaserCopy(
   slotTime: string
 ): { captionSocial: string; captionTelegramHtml: string } {
   const isId = lang === "id";
-  const title = isId ? story.title : (story.originalTitle || story.title);
-  const hook = isId
-    ? (story.thumbnailConfig?.id?.hook || `${title}! Petualangan penuh tawa dan kehangatan keluarga!`)
-    : (story.thumbnailConfig?.en?.hook || `${title}! A joyful, heartwarming tale children will adore!`);
-  const moral = isId
-    ? (story.moral?.headlineId || "Belajar kebaikan budi pekerti dan kasih sayang setiap hari.")
-    : (story.moral?.headlineEn || "Learning kindness, empathy, and family warmth together.");
+  const rawTitle = isId ? story.title : (story.originalTitle || story.title);
+  const cleanTitle = rawTitle.replace(/[!]+$/, "").trim();
 
-  // Social feed caption for Instagram, Facebook, and Threads (concise & engaging)
+  // Extract thumbnail typography details corresponding directly to the cover image
+  const thumbConf = isId ? story.thumbnailConfig?.id : story.thumbnailConfig?.en;
+  const headlineTop = thumbConf?.headlineTop;
+  const headlineBottom = thumbConf?.headlineBottom;
+  const hook = thumbConf?.hook || (isId ? "Petualangan seru dan penuh tawa untuk si kecil!" : "A joyful, heartwarming tale children will adore!");
+  const badge = thumbConf?.badge;
+  const sticker = thumbConf?.sticker;
+  const moral = extractMoral(story, lang);
+
+  // Social feed caption for Instagram, Facebook, and Threads (100% single-language, zero bilingual bleed)
   const captionSocial = isId
     ? `⏰ SEBENTAR LAGI TAYANG! (1 JAM LAGI) 🌟✨
-Kisah Pengantar Tidur: ${title}! 🌙💤
+${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 🌙💤
 
-Halo Ayah Bunda dan adik-adik tersayang! 🥰👋
-Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${title}" akan tayang perdana di YouTube Zayn Storybook!
+Halo Ayah, Bunda, dan adik-adik tersayang! 🥰👋
+Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @ZaynStorybook!
 
-📖 Cuplikan Kisah:
-${hook}
-
-💡 Pesan Cerita:
+🎨 Sorotan Cerita (Sesuai Gambar):
+👉 ${hook}
+${sticker ? `✨ Catatan Seru: ${sticker}\n` : ""}
+💡 Pesan Kebaikan:
 ${moral}
 
-🔔 Siapkan selimut hangat, kumpulkan keluarga, dan nyalakan lonceng notifikasi di YouTube @ZaynStorybook sekarang biar nggak ketinggalan ya!
-👉 Tautan nonton resmi akan aktif pukul ${slotTime} di bio & channel kami!
+🔔 Siapkan selimut hangat, kumpulkan keluarga, dan nyalakan lonceng notifikasi di kanal YouTube @ZaynStorybook sekarang agar tidak ketinggalan ya!
+👉 Tautan tontonan resmi akan langsung aktif pukul ${slotTime} di bio profil & kanal YouTube kami.
 
 💬 Siapa yang sudah siap mendongeng sebelum tidur malam ini? Tulis di kolom komentar ya! 👇❤️
 
-#ZaynStorybook #DongengSebelumTidur #CeritaAnakBergambar #DongengAnak #BukuCeritaAnak #ParentingCeria #DongengKeluarga #1JamLagi`
+#ZaynStorybook #DongengSebelumTidur #CeritaAnakBergambar #DongengAnak #BukuCeritaAnak #ParentingCeria #DongengKeluarga #EdukasiAnak #1JamLagi`
     : `⏰ PREMIERING IN 1 HOUR! 🌟✨
-Kids Animated Storybook: ${title}! 📖🎈
+${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 📖🎈
 
 Hello wonderful parents and curious little ones! 🥰👋
-In just 1 hour (at ${slotTime}), our brand-new animated storybook "${title}" is premiering on YouTube @ZaynStorybook!
+In just 1 hour (at ${slotTime}), our brand-new animated read-aloud storybook "${cleanTitle}" is premiering on YouTube @ZaynStorybook!
 
-📖 Story Hook:
-${hook}
-
+🎨 Story Highlight (As Seen on the Cover):
+👉 ${hook}
+${sticker ? `✨ Fun Highlight: ${sticker}\n` : ""}
 💡 Heartwarming Lesson:
 ${moral}
 
-🔔 Get cozy, gather the family, and tap the notification bell on YouTube @ZaynStorybook right now!
-👉 Video read-aloud link will go live at ${slotTime} on our channel and link in bio!
+🔔 Get cozy, gather the family, and tap the notification bell on YouTube @ZaynStorybook right now so you don't miss out!
+👉 The official watch link will go live at ${slotTime} on our channel and link in bio.
 
-💬 Who is ready for today's adventure? Let us know in the comments below! 👇❤️
+💬 Who is ready for today's magical storytime? Let us know in the comments below! 👇❤️
 
-#ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #AnimatedStorybook #ChildrenBooks #FamilyStorytime #ComingSoon`;
+#ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #AnimatedStorybook #ChildrenBooks #KidsAnimation #FamilyStorytime #FamilyReading #ComingSoon`;
 
-  // Rich Telegram HTML caption
+  // Rich Telegram HTML caption (100% pure single language)
   const captionTelegramHtml = isId
     ? `⏰ <b>PENGUMUMAN: 1 JAM LAGI TAYANG!</b> 🌟✨
-<i>Dongeng Pengantar Tidur: ${title}</i> 🌙
+${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 🌙
 
-Halo Ayah Bunda & adik-adik tersayang! 🥰
-Tepat pukul <b>${slotTime}</b>, video dongeng animasi terbaru kita akan tayang perdana!
+Halo Ayah, Bunda, & adik-adik tersayang! 🥰
+Tepat pukul <b>${slotTime}</b>, video dongeng animasi terbaru kita "<b>${cleanTitle}</b>" akan tayang perdana!
 
-📖 <b>Cuplikan Cerita:</b>
-${hook}
-
+🎨 <b>Sorotan Cerita (Sesuai Gambar):</b>
+👉 ${hook}
+${sticker ? `✨ <i>${sticker}</i>\n` : ""}
 💡 <b>Pesan Kebaikan:</b>
 ${moral}
 
-🔔 <i>Nyalakan lonceng notifikasi YouTube @ZaynStorybook dan siapkan waktu santai bersama si kecil! Link tontonan resmi akan dibagikan di sini tepat saat tayang.</i>`
+🔔 <i>Nyalakan lonceng notifikasi kanal YouTube @ZaynStorybook dan siapkan waktu santai bersama si kecil! Tautan tontonan resmi akan dibagikan di sini tepat saat tayang.</i>`
     : `⏰ <b>ANNOUNCEMENT: PREMIERING IN 1 HOUR!</b> 🌟✨
-<i>Animated Storybook: ${title}</i> 📖🎈
+${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 📖🎈
 
 Hello parents and lovely kids! 🥰
-In just 1 hour (at <b>${slotTime}</b>), our newest animated read-aloud storybook is premiering!
+In just 1 hour (at <b>${slotTime}</b>), our newest animated read-aloud storybook "<b>${cleanTitle}</b>" is premiering!
 
-📖 <b>Story Hook:</b>
-${hook}
-
+🎨 <b>Story Highlight (As Seen on the Cover):</b>
+👉 ${hook}
+${sticker ? `✨ <i>${sticker}</i>\n` : ""}
 💡 <b>Life Lesson:</b>
 ${moral}
 
@@ -169,23 +197,26 @@ async function runChild(bin: string, args: string[]): Promise<void> {
 
 /**
  * Finds the optimal 4:5 portrait or popular cover photo for feed distribution.
+ * Strictly guarantees language isolation: only selects images matching target language typography.
  */
-function resolveBestPhoto(storyDir: string, lang: string): string {
+function resolveBestPhoto(storyDir: string, lang: "id" | "en"): string {
   const candidates = [
     path.join(storyDir, "exports", lang, "thumbnail-portrait.png"),
-    path.join(storyDir, "exports", "id", "thumbnail-portrait.png"),
     path.join(storyDir, "exports", lang, "thumbnail-popular.png"),
-    path.join(storyDir, "exports", "id", "thumbnail-popular.png"),
     path.join(storyDir, "exports", lang, "thumbnail.png"),
-    path.join(storyDir, "exports", "thumbnail.png"),
-    path.join(storyDir, "assets", "cover.png"),
+    path.join(storyDir, "exports", lang, "thumbnail-vertical.png"),
+    path.join(storyDir, "exports", lang, "thumbnail-bedtime.png"),
   ];
 
   for (const p of candidates) {
     if (existsSync(p)) return p;
   }
 
-  throw new Error(`No image asset found for announcement in ${storyDir}`);
+  // Fallback to neutral book cover only if language exports are missing
+  const neutralCover = path.join(storyDir, "assets", "cover.png");
+  if (existsSync(neutralCover)) return neutralCover;
+
+  throw new Error(`No image asset found for announcement in language [${lang.toUpperCase()}] at ${storyDir}`);
 }
 
 /**
@@ -404,12 +435,16 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
           console.log("\n[DRY RUN] Telegram Announcement HTML:\n", captionTelegramHtml);
           console.log(`Photo CDN URL: ${photoUrl || "(No photo URL)"}`);
         } else {
-          await sendTelegramMessage(tgConfig, captionTelegramHtml, photoUrl);
-          existingAnn.telegram = {
-            status: "sent",
-            sentAt: new Date().toISOString(),
-          };
-          console.log(`✔ Telegram teaser broadcast sent!`);
+          const sent = await sendTelegramMessage(tgConfig, captionTelegramHtml, photoUrl);
+          if (sent) {
+            existingAnn.telegram = {
+              status: "sent",
+              sentAt: new Date().toISOString(),
+            };
+            console.log(`✔ Telegram teaser broadcast sent!`);
+          } else {
+            errors.push(`[Telegram] Delivery failed`);
+          }
         }
       } else {
         console.log(`ℹ️ Telegram skipped: Credentials not configured.`);
