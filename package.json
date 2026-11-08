@@ -52,6 +52,7 @@
     "schedule:remind": "tsx scripts/content-calendar.ts --remind",
     "schedule:cron": "tsx scripts/content-calendar.ts --cron",
     "broadcast:trigger": "tsx scripts/trigger-broadcast.ts",
+    "notify:telegram": "tsx scripts/notify-telegram.ts",
     "deploy:worker": "tsx scripts/setup-cloudflare-worker.ts",
     "secrets:github": "tsx scripts/sync-github-secrets.ts",
     "render:tiktok-demo": "tsx scripts/render-tiktok-demo.ts",

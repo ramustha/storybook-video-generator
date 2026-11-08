@@ -87,6 +87,8 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
         run: |
           mkdir -p config
 
@@ -104,6 +106,8 @@ jobs:
           YOUTUBE_CLIENT_ID="${YOUTUBE_CLIENT_ID}"
           YOUTUBE_CLIENT_SECRET="${YOUTUBE_CLIENT_SECRET}"
           YOUTUBE_REFRESH_TOKEN="${YOUTUBE_REFRESH_TOKEN}"
+          TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN}"
+          TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID}"
           EOF
 
           # 2. Setup config/meta-config.json
@@ -120,6 +124,14 @@ jobs:
             "threadsAccessToken": "${THREADS_ACCESS_TOKEN}",
             "threadsAppId": "${THREADS_APP_ID:-1507655221210490}",
             "threadsAppSecret": "${THREADS_APP_SECRET:-0e476feb253e7a84a263e5a2c6069626}"
+          }
+          EOF
+
+          # 2.5 Setup config/telegram-config.json
+          cat <<EOF > config/telegram-config.json
+          {
+            "botToken": "${TELEGRAM_BOT_TOKEN}",
+            "chatId": "${TELEGRAM_CHAT_ID}"
           }
           EOF
 
