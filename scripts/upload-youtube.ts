@@ -331,22 +331,47 @@ async function uploadVideo(
 
 /**
  * Uploads custom thumbnail to a video.
+ * For YouTube Shorts, waiting until processing finishes guarantees YouTube generates the 9:16 'shortsAspectRatio' representation.
  */
-async function uploadThumbnail(youtube: any, videoId: string, thumbnailPath: string) {
+async function uploadThumbnail(youtube: any, videoId: string, thumbnailPath: string, waitForProcessing: boolean = false) {
   if (!existsSync(thumbnailPath)) {
     console.log(`⏭ No thumbnail found at ${thumbnailPath}, skipping.`);
     return;
   }
 
+  if (waitForProcessing) {
+    console.log(`⏳ Waiting for YouTube to process video ${videoId} so thumbnail can attach properly...`);
+    for (let i = 0; i < 12; i++) {
+      try {
+        const check = await youtube.videos.list({
+          part: ["status", "processingDetails"],
+          id: [videoId],
+        });
+        const item = check.data.items?.[0];
+        const isProcessed = item?.status?.uploadStatus === "processed";
+        const thumbsReady = item?.processingDetails?.thumbnailsAvailability === "available";
+        if (isProcessed || thumbsReady) {
+          console.log(`✔ Video processing complete (${i * 5}s)! Applying thumbnail...`);
+          break;
+        }
+      } catch {}
+      await new Promise((r) => setTimeout(r, 5000));
+    }
+  }
+
   console.log(`🖼 Uploading custom thumbnail from ${path.basename(thumbnailPath)}...`);
   try {
-    await youtube.thumbnails.set({
+    const res = await youtube.thumbnails.set({
       videoId,
       media: {
         body: createReadStream(thumbnailPath),
       },
     });
     console.log(`✔ Thumbnail uploaded successfully for video ${videoId}`);
+    const sar = res.data?.items?.[0]?.shortsAspectRatio;
+    if (sar) {
+      console.log(`   📱 Shorts 9:16 Aspect Ratio Thumbnail confirmed: ${sar.url} (${sar.width}x${sar.height})`);
+    }
   } catch (err: any) {
     console.warn(`⚠️ Thumbnail upload warning: ${err.message}`);
   }
@@ -1386,7 +1411,7 @@ async function main() {
                 publishAt: scheduleTime,
               });
 
-              await uploadThumbnail(client.youtube, shortsVideoId, verticalThumbnailPath);
+              await uploadThumbnail(client.youtube, shortsVideoId, verticalThumbnailPath, true);
             }
           );
           shortsUrl = `https://youtube.com/shorts/${shortsVideoId}`;
@@ -1401,7 +1426,7 @@ async function main() {
             publishAt: scheduleTime,
           });
 
-          await uploadThumbnail(youtube, shortsVideoId, verticalThumbnailPath);
+          await uploadThumbnail(youtube, shortsVideoId, verticalThumbnailPath, true);
           shortsUrl = `https://youtube.com/shorts/${shortsVideoId}`;
           console.log(`\n🎉 Shorts Video (${lang.toUpperCase()}) Live at: \x1b[36m${shortsUrl}\x1b[0m`);
         }
