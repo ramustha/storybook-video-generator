@@ -1,0 +1,31 @@
+scripts/trigger-broadcast.ts
+  698ac31901cd73e0 1-56
+scripts/content-calendar.ts
+  698ac31901cd73e0 46,50,57,61
+cloudflare/daily-broadcast-cron/wrangler.toml
+  698ac31901cd73e0 1-12
+cloudflare/daily-broadcast-cron/src/index.js
+  698ac31901cd73e0 1-103
+package.json
+  698ac31901cd73e0 53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "0e22c9276ba90c5ab9e1ca82d8a18175b8d9db14",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 176,
+      "total_deletions": 4,
+      "accepted_lines": 176,
+      "overriden_lines": 0
+    }
+  }
+}
