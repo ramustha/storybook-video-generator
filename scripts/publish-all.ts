@@ -3,6 +3,7 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { verifyStoryThumbnails, renderStoryThumbnails } from "./render-thumbnail";
+import { notifyTelegramPublish } from "./notify-telegram";
 
 interface PublishAllOptions {
   bookSlug: string;
@@ -366,6 +367,18 @@ async function main() {
     if (updatedStory.publications?.threads) {
       console.log("\n🧵 Threads:");
       console.log(JSON.stringify(updatedStory.publications.threads, null, 2));
+    }
+
+    // 5. Telegram Publication Notification
+    try {
+      console.log(`\n✈️ Dispatching Telegram Broadcast Notification...`);
+      await notifyTelegramPublish({
+        bookSlug: options.bookSlug,
+        lang: options.lang === "all" ? "id" : options.lang,
+        dryRun: options.dryRun,
+      });
+    } catch (tgErr: any) {
+      console.warn("⚠️ Telegram notification dispatch warning:", tgErr.message);
     }
   }
 
