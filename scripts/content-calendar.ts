@@ -868,6 +868,27 @@ async function main() {
     triggerReminder();
   } else if (args.includes("--cron")) {
     setupCrontab();
+  } else if (args.includes("--announce-today") || args.includes("--announce") || args.includes("--teaser")) {
+    const dryRun = args.includes("--dry-run");
+    const force = args.includes("--force");
+    const bookIdx = args.indexOf("--book");
+    const book = bookIdx !== -1 && args[bookIdx + 1] !== "auto" ? args[bookIdx + 1] : undefined;
+    const langIdx = args.indexOf("--lang");
+    const lang =
+      langIdx !== -1 && (args[langIdx + 1] === "id" || args[langIdx + 1] === "en")
+        ? (args[langIdx + 1] as "id" | "en")
+        : undefined;
+    const slotIdx = args.indexOf("--slot");
+    const slot = slotIdx !== -1 ? (args[slotIdx + 1] as "morning" | "evening" | "auto" | "all") : "auto";
+
+    const { publishAnnouncement } = await import("./publish-announcement");
+    await publishAnnouncement({
+      bookSlug: book,
+      lang,
+      slot: slot === "all" ? "auto" : slot,
+      dryRun,
+      force,
+    });
   } else if (args.includes("--publish-today") || args.includes("--run-today")) {
     const dryRun = args.includes("--dry-run");
     const bookIdx = args.indexOf("--book");
