@@ -72,8 +72,8 @@ export function generateBilingualSocialKit(manifest: StoryManifest): string {
   const moralEn = moralScene?.audio?.en?.text || "A gentle, heartwarming tale with a positive lesson for children.";
 
   // Extract links
-  const ytIdUrl = manifest.publications?.youtube?.id?.landscape?.url || "https://youtube.com/@ZaynStorybook";
-  const ytEnUrl = manifest.publications?.youtube?.en?.landscape?.url || "https://youtube.com/@ZaynStorybook";
+  const ytIdUrl = manifest.publications?.youtube?.id?.landscape?.url || "https://youtube.com/@Zayn.Storybook";
+  const ytEnUrl = manifest.publications?.youtube?.en?.landscape?.url || "https://youtube.com/@Zayn.Storybook";
   const igIdUrl = manifest.publications?.instagram?.id?.url || "https://instagram.com/zayn.storybook";
   const igEnUrl = manifest.publications?.instagram?.en?.url || "https://instagram.com/zayn.storybook";
   const fbIdUrl = manifest.publications?.facebook?.id?.landscape?.url || "https://facebook.com/1473240609201601";
@@ -95,7 +95,7 @@ export function generateBilingualSocialKit(manifest: StoryManifest): string {
 - **Slide 2**: Climactic / Funny Scene Still (e.g. Scene 4/5).
 - **Slide 3**: Warm / Happy Ending Scene Still (e.g. Scene 7/8).
 - **Slide 4**: Dedicated Moral Card (\`type: "moral"\` frame).
-- **Slide 5**: CTA Slide: *"Tonton Dongeng Lengkapnya di YouTube @ZaynStorybook! 🔔 Link di Bio!"*.
+- **Slide 5**: CTA Slide: *"Tonton Dongeng Lengkapnya di YouTube @Zayn.Storybook! 🔔 Link di Bio!"*.
 
 ### Single-Post Bilingual Caption (Playful & Joyful):
 \`\`\`text

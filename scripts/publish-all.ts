@@ -368,10 +368,18 @@ async function main() {
       console.warn("⚠️ Instagram promotion post warning:", igErr.message);
     }
 
-    // 4C. Meta Threads Promotional Post
+    // 4C. Meta Threads Promotional Post (Image Preview Only)
     try {
-      console.log(`\n🧵 Publishing Promotional Post to Meta Threads...`);
-      const threadsArgs = ["scripts/publish-threads.ts", "--book", options.bookSlug, "--lang", options.lang === "all" ? "id" : options.lang];
+      console.log(`\n🧵 Publishing Promotional Post to Meta Threads (Image Preview)...`);
+      const threadsArgs = [
+        "scripts/publish-threads.ts",
+        "--book",
+        options.bookSlug,
+        "--lang",
+        options.lang === "all" ? "id" : options.lang,
+        "--mode",
+        "image",
+      ];
       if (options.dryRun) threadsArgs.push("--dry-run");
       await runCommand("npx", ["tsx", ...threadsArgs]);
     } catch (threadsErr: any) {

@@ -116,7 +116,7 @@ export function generateTeaserCopy(
 ${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 🌙💤
 
 Halo Ayah, Bunda, dan adik-adik tersayang! 🥰👋
-Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @ZaynStorybook!
+Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @Zayn.Storybook!
 
 🎨 Sorotan Cerita (Sesuai Gambar):
 👉 ${hook}
@@ -124,7 +124,7 @@ ${sticker ? `✨ Catatan Seru: ${sticker}\n` : ""}
 💡 Pesan Kebaikan:
 ${moral}
 
-🔔 Siapkan selimut hangat, kumpulkan keluarga, dan nyalakan lonceng notifikasi di kanal YouTube @ZaynStorybook sekarang agar tidak ketinggalan ya!
+🔔 Siapkan selimut hangat, kumpulkan keluarga, dan nyalakan lonceng notifikasi di kanal YouTube @Zayn.Storybook sekarang agar tidak ketinggalan ya!
 👉 Tautan tontonan resmi akan langsung aktif pukul ${slotTime} di bio profil & kanal YouTube kami.
 
 💬 Siapa yang sudah siap mendongeng sebelum tidur malam ini? Tulis di kolom komentar ya! 👇❤️
@@ -134,7 +134,7 @@ ${moral}
 ${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 📖🎈
 
 Hello wonderful parents and curious little ones! 🥰👋
-In just 1 hour (at ${slotTime}), our brand-new animated read-aloud storybook "${cleanTitle}" is premiering on YouTube @ZaynStorybook!
+In just 1 hour (at ${slotTime}), our brand-new animated read-aloud storybook "${cleanTitle}" is premiering on YouTube @Zayn.Storybook!
 
 🎨 Story Highlight (As Seen on the Cover):
 👉 ${hook}
@@ -142,7 +142,7 @@ ${sticker ? `✨ Fun Highlight: ${sticker}\n` : ""}
 💡 Heartwarming Lesson:
 ${moral}
 
-🔔 Get cozy, gather the family, and tap the notification bell on YouTube @ZaynStorybook right now so you don't miss out!
+🔔 Get cozy, gather the family, and tap the notification bell on YouTube @Zayn.Storybook right now so you don't miss out!
 👉 The official watch link will go live at ${slotTime} on our channel and link in bio.
 
 💬 Who is ready for today's magical storytime? Let us know in the comments below! 👇❤️
@@ -163,7 +163,7 @@ ${sticker ? `✨ <i>${sticker}</i>\n` : ""}
 💡 <b>Pesan Kebaikan:</b>
 ${moral}
 
-🔔 <i>Nyalakan lonceng notifikasi kanal YouTube @ZaynStorybook dan siapkan waktu santai bersama si kecil! Tautan tontonan resmi akan dibagikan di sini tepat saat tayang.</i>`
+🔔 <i>Nyalakan lonceng notifikasi kanal YouTube @Zayn.Storybook dan siapkan waktu santai bersama si kecil! Tautan tontonan resmi akan dibagikan di sini tepat saat tayang.</i>`
     : `⏰ <b>ANNOUNCEMENT: PREMIERING IN 1 HOUR!</b> 🌟✨
 ${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 📖🎈
 
@@ -176,7 +176,7 @@ ${sticker ? `✨ <i>${sticker}</i>\n` : ""}
 💡 <b>Life Lesson:</b>
 ${moral}
 
-🔔 <i>Turn on your YouTube @ZaynStorybook notification bell! The official watch link will be shared here right at premiere time.</i>`;
+🔔 <i>Turn on your YouTube @Zayn.Storybook notification bell! The official watch link will be shared here right at premiere time.</i>`;
 
   return { captionSocial, captionTelegramHtml };
 }
