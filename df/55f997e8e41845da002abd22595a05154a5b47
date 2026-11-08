@@ -1,0 +1,33 @@
+package.json
+  698ac31901cd73e0 9,81
+scripts/poc-gemini-ocr-plate.ts
+  698ac31901cd73e0 1-337
+scripts/ingest-story.ts
+  698ac31901cd73e0 432,434-435
+scripts/prepare-plates-hybrid.ts
+  698ac31901cd73e0 1-452
+.github/workflows/cloud-render.yml
+  698ac31901cd73e0 7,9-10,18-19,27,59,61-62,70,76-77,90-95
+.github/workflows/daily-story-ingest.yml
+  698ac31901cd73e0 39,54-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "df55f997e8e41845da002abd22595a05154a5b47",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 818,
+      "total_deletions": 23,
+      "accepted_lines": 818,
+      "overriden_lines": 0
+    }
+  }
+}
