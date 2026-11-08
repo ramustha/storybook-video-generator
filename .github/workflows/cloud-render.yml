@@ -89,8 +89,10 @@ jobs:
           EOF
 
           echo "Checking if [${{ inputs.book }}] exists in Cloudflare R2..."
-          if ! npx tsx scripts/manage-story-storage.ts pull "${{ inputs.book }}"; then
-            echo "Story not found in R2. Executing automated ingestion on Ubuntu runner..."
+          npx tsx scripts/manage-story-storage.ts pull "${{ inputs.book }}" || true
+
+          if [ ! -f "stories/${{ inputs.book }}/story.json" ]; then
+            echo "Story manifest not found in R2. Executing automated ingestion on Ubuntu runner..."
             npx tsx scripts/ingest-story.ts --book "${{ inputs.book }}"
           fi
 
