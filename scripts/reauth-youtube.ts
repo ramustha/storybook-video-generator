@@ -69,6 +69,15 @@ async function main() {
   await fs.writeFile(TOKEN_PATH, JSON.stringify(tokens, null, 2));
   console.log(`\n✔ Token baru berhasil disimpan di: ${TOKEN_PATH}`);
 
+  const defaultProjectToken = path.resolve("./config/projects/default/token.json");
+  try {
+    await fs.mkdir(path.dirname(defaultProjectToken), { recursive: true });
+    await fs.writeFile(defaultProjectToken, JSON.stringify(tokens, null, 2));
+    console.log(`✔ Synced to QuotaRotator default project: ${defaultProjectToken}`);
+  } catch (err: any) {
+    console.warn(`⚠️ Warning syncing to default project token: ${err.message}`);
+  }
+
   if (tokens.refresh_token) {
     console.log("🔄 Memperbarui GitHub Secrets & .env...");
     const envPath = path.resolve("./.env");

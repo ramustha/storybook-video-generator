@@ -154,6 +154,25 @@ async function main() {
     }
     // ──────────────────────────────────────────────────────────────────────
 
+    // Ensure MP4 video files are rendered on disk before attempting to upload
+    const storyDir = path.resolve("./stories", options.bookSlug);
+    const candidateLand = [
+      story.exports?.[currentLang]?.landscape?.path ? path.join(storyDir, story.exports[currentLang].landscape.path) : null,
+      path.join(storyDir, `exports/${currentLang}/${options.bookSlug}-16x9.mp4`),
+      path.join(storyDir, `exports/${currentLang}/topsy-turvy-16x9.mp4`),
+    ].find((p) => p && existsSync(p));
+
+    const candidateVert = [
+      story.exports?.[currentLang]?.vertical?.path ? path.join(storyDir, story.exports[currentLang].vertical.path) : null,
+      path.join(storyDir, `exports/${currentLang}/${options.bookSlug}-9x16.mp4`),
+      path.join(storyDir, `exports/${currentLang}/topsy-turvy-9x16.mp4`),
+    ].find((p) => p && existsSync(p));
+
+    if ((!candidateLand || !candidateVert) && !options.dryRun) {
+      console.log(`\n⚙️ [AUTO-RENDER] MP4 video files not found on disk for [${currentLang.toUpperCase()}]. Rendering Remotion videos now...`);
+      await runCommand("npx", ["tsx", "scripts/render-book.ts", "--book", options.bookSlug, "--lang", currentLang, "--format", "both"]);
+    }
+
     // 1. YouTube Distribution (Dual-Format: 16:9 Landscape Video & 9:16 Shorts if <= 180s per policy)
     if (!options.skipYoutube) {
       if (ytId && !options.force) {
@@ -187,56 +206,68 @@ async function main() {
 
     // 2. Meta Distribution (Instagram Reels & Facebook Page Video/Reels via R2 Fan-Out)
     if (!options.skipMeta) {
-      const isMetaLive = igId && fbLandId && fbVertId;
-      if (isMetaLive && !options.force) {
-        console.log(`\n⏩ Skipping Meta: Video is already live on Instagram (${igId}) and Facebook to prevent duplicates.`);
+      const needIg = !igId || options.force;
+      const needFbVert = !fbVertId || options.force;
+      const needFbLand = !fbLandId || options.force;
+
+      if (!needIg && !needFbVert && !needFbLand) {
+        console.log(`\n⏩ Skipping Meta: Video is already live on Instagram (${igId}) and Facebook (Vert: ${fbVertId}, Land: ${fbLandId}) to prevent duplicates.`);
       } else {
         console.log(`\n--- [2/2] PUBLISHING TO META (INSTAGRAM REELS & FACEBOOK) ---`);
 
         // 2A. Vertical (9:16) Fan-out to Instagram Reels & Facebook Reels
-        const metaVerticalArgs = [
-          "scripts/upload-meta.ts",
-          "--book",
-          options.bookSlug,
-          "--lang",
-          currentLang,
-          "--platform",
-          "both",
-          "--format",
-          "vertical",
-        ];
-        if (options.dryRun) metaVerticalArgs.push("--dry-run");
-        if (options.force) metaVerticalArgs.push("--force");
+        if (needIg || needFbVert) {
+          const targetPlatform = needIg && needFbVert ? "both" : (needIg ? "instagram" : "facebook");
+          const metaVerticalArgs = [
+            "scripts/upload-meta.ts",
+            "--book",
+            options.bookSlug,
+            "--lang",
+            currentLang,
+            "--platform",
+            targetPlatform,
+            "--format",
+            "vertical",
+          ];
+          if (options.dryRun) metaVerticalArgs.push("--dry-run");
+          if (options.force) metaVerticalArgs.push("--force");
 
-        try {
-          console.log(`\n📲 Publishing 9:16 Vertical Reel (Instagram & Facebook)...`);
-          await runCommand("npx", ["tsx", ...metaVerticalArgs]);
-          anyUploadOccurred = true;
-        } catch (err: any) {
-          console.error("⚠️ Meta vertical reel upload warning:", err.message);
+          try {
+            console.log(`\n📲 Publishing 9:16 Vertical Reel (${targetPlatform.toUpperCase()})...`);
+            await runCommand("npx", ["tsx", ...metaVerticalArgs]);
+            anyUploadOccurred = true;
+          } catch (err: any) {
+            console.error("⚠️ Meta vertical reel upload warning:", err.message);
+          }
+        } else {
+          console.log(`\n⏩ Skipping Vertical Reel: Already live on Instagram (${igId}) and Facebook Reels (${fbVertId}).`);
         }
 
         // 2B. Landscape (16:9) to Facebook Page Video / Watch
-        const metaLandscapeArgs = [
-          "scripts/upload-meta.ts",
-          "--book",
-          options.bookSlug,
-          "--lang",
-          currentLang,
-          "--platform",
-          "facebook",
-          "--format",
-          "landscape",
-        ];
-        if (options.dryRun) metaLandscapeArgs.push("--dry-run");
-        if (options.force) metaLandscapeArgs.push("--force");
+        if (needFbLand) {
+          const metaLandscapeArgs = [
+            "scripts/upload-meta.ts",
+            "--book",
+            options.bookSlug,
+            "--lang",
+            currentLang,
+            "--platform",
+            "facebook",
+            "--format",
+            "landscape",
+          ];
+          if (options.dryRun) metaLandscapeArgs.push("--dry-run");
+          if (options.force) metaLandscapeArgs.push("--force");
 
-        try {
-          console.log(`\n📺 Publishing 16:9 Landscape Video to Facebook Page Watch...`);
-          await runCommand("npx", ["tsx", ...metaLandscapeArgs]);
-          anyUploadOccurred = true;
-        } catch (err: any) {
-          console.error("⚠️ Facebook landscape upload warning:", err.message);
+          try {
+            console.log(`\n📺 Publishing 16:9 Landscape Video to Facebook Page Watch...`);
+            await runCommand("npx", ["tsx", ...metaLandscapeArgs]);
+            anyUploadOccurred = true;
+          } catch (err: any) {
+            console.error("⚠️ Facebook landscape upload warning:", err.message);
+          }
+        } else {
+          console.log(`\n⏩ Skipping Facebook Landscape: Already live on Facebook Watch (${fbLandId}).`);
         }
       }
     } else {
@@ -299,7 +330,10 @@ async function main() {
   }
 
   // 4. Automated Multi-Platform Social Promotion (Facebook Page & Instagram Feed/Carousel)
-  if (!anyUploadOccurred && !options.force && !options.dryRun) {
+  const isSocialPromoLive = !!story.publications?.socialPromotion?.[options.lang === "all" ? "id" : options.lang];
+  if (isSocialPromoLive && !options.force) {
+    console.log(`\n⏩ Skipping Social Promotion: Feed announcement posts are already published for this book. (Pass --force to re-post).`);
+  } else if (!anyUploadOccurred && !options.force && !options.dryRun) {
     console.log(`\n🛡️ [ZERO DUPLICATE GATE] No new video uploads were performed because target editions are already live.`);
     console.log(`   ⏩ SKIPPING social promotion posts to avoid duplicate feed announcements.`);
     console.log(`   💡 Tip: Pass --force to broadcast social promotion posts anyway.`);
@@ -336,6 +370,17 @@ async function main() {
       await runCommand("npx", ["tsx", ...threadsArgs]);
     } catch (threadsErr: any) {
       console.warn("⚠️ Threads promotion post warning:", threadsErr.message);
+    }
+
+    // Record social promotion state in story.json
+    if (!options.dryRun) {
+      if (!story.publications) story.publications = {};
+      if (!story.publications.socialPromotion) story.publications.socialPromotion = {};
+      story.publications.socialPromotion[options.lang === "all" ? "id" : options.lang] = {
+        published: true,
+        publishedAt: new Date().toISOString(),
+      };
+      await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2), "utf-8");
     }
 
     // 4D. YouTube Community Tab (Explicit Skip Policy)
