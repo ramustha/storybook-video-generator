@@ -1,0 +1,53 @@
+scripts/generate-docs-portal.ts
+  698ac31901cd73e0 1146-1148,1293-1319
+functions/api/catalog.ts
+  698ac31901cd73e0 1-137
+scripts/publish-all.ts
+  698ac31901cd73e0 7,402-409
+scripts/migrate-to-d1.ts
+  698ac31901cd73e0 1-264
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 107-108,128-129,205-206,271,274-275
+cloudflare/schema.sql
+  698ac31901cd73e0 1-122
+wrangler.toml
+  698ac31901cd73e0 1-8
+package.json
+  698ac31901cd73e0 61-62
+scripts/content-calendar.ts
+  698ac31901cd73e0 6,1069,1071,1073-1080,1146-1157
+.gitignore
+  698ac31901cd73e0 16-17
+docs/index.html
+  698ac31901cd73e0 907-909,1054-1080
+scripts/sync-github-secrets.ts
+  698ac31901cd73e0 47-64
+scripts/ingest-story.ts
+  698ac31901cd73e0 10,414-421
+scripts/render-book.ts
+  698ac31901cd73e0 6,22-28,177-185
+config/d1-config.json
+  698ac31901cd73e0 1-6
+scripts/lib/db.ts
+  698ac31901cd73e0 1-822
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "5a3539708c75dfdd6d4e625fc1ae65ee249176f9",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 1509,
+      "total_deletions": 26,
+      "accepted_lines": 1509,
+      "overriden_lines": 0
+    }
+  }
+}
