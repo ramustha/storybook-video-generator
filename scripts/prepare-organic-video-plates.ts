@@ -2,7 +2,144 @@ import sharp from "sharp";
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
-import { getArtworkBounds, generateDelicateCloudMistSvg } from "./poc-cloud-kacamata-nenek";
+
+/**
+ * Detect non-white content boundaries inside an illustration canvas.
+ */
+export async function getArtworkBounds(
+  imageBuffer: Buffer,
+  threshold: number = 246
+): Promise<{
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  width: number;
+  height: number;
+  imgW: number;
+  imgH: number;
+}> {
+  const { data, info } = await sharp(imageBuffer).raw().toBuffer({ resolveWithObject: true });
+  let minX = info.width;
+  let minY = info.height;
+  let maxX = 0;
+  let maxY = 0;
+
+  for (let y = 0; y < info.height; y++) {
+    for (let x = 0; x < info.width; x++) {
+      const idx = (y * info.width + x) * info.channels;
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
+      const a = info.channels === 4 ? data[idx + 3] : 255;
+
+      if (a > 10 && (r < threshold || g < threshold || b < threshold)) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  if (maxX <= minX || maxY <= minY) {
+    return {
+      minX: 0,
+      minY: 0,
+      maxX: info.width,
+      maxY: info.height,
+      width: info.width,
+      height: info.height,
+      imgW: info.width,
+      imgH: info.height,
+    };
+  }
+
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+    imgW: info.width,
+    imgH: info.height,
+  };
+}
+
+/**
+ * Generate soft, organic cloud mist along the transition seam.
+ */
+export function generateDelicateCloudMistSvg(options: {
+  width: number;
+  height: number;
+  cloudStartY: number;
+  cloudEndY: number;
+  backgroundColor?: string;
+  seed?: number;
+  isLandscape?: boolean;
+}): string {
+  const {
+    width,
+    height,
+    cloudStartY,
+    cloudEndY,
+    backgroundColor = "#FFFFFF",
+    seed = 42,
+    isLandscape = false,
+  } = options;
+
+  let s = seed;
+  const rnd = () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+
+  const cloudSpan = Math.max(90, cloudEndY - cloudStartY);
+  const midY = cloudStartY + cloudSpan * 0.42;
+
+  const puffs: string[] = [];
+  const puffCount = isLandscape ? 16 : 12;
+  for (let i = 0; i <= puffCount; i++) {
+    const t = i / puffCount;
+    const wave =
+      Math.sin(t * Math.PI * 2.2) * (cloudSpan * 0.16) +
+      Math.cos(t * Math.PI * 4.4) * (cloudSpan * 0.06);
+    const cx = t * (width + 80) - 40 + (rnd() - 0.5) * 20;
+    const cy = midY + wave + (rnd() - 0.5) * 12;
+    const r = width * (isLandscape ? 0.08 : 0.11) + (rnd() - 0.5) * 15;
+    puffs.push(
+      `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" />`
+    );
+  }
+
+  return `
+  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="softPuff" x="-25%" y="-25%" width="150%" height="150%">
+        <feGaussianBlur stdDeviation="${(width * 0.018).toFixed(1)}" />
+      </filter>
+      <filter id="airyMist" x="-25%" y="-25%" width="150%" height="150%">
+        <feGaussianBlur stdDeviation="${(width * 0.038).toFixed(1)}" />
+      </filter>
+      <linearGradient id="delicateFade" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="${backgroundColor}" stop-opacity="0" />
+        <stop offset="35%" stop-color="${backgroundColor}" stop-opacity="0.30" />
+        <stop offset="70%" stop-color="${backgroundColor}" stop-opacity="0.80" />
+        <stop offset="100%" stop-color="${backgroundColor}" stop-opacity="1" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="${cloudStartY}" width="${width}" height="${height - cloudStartY}" fill="url(#delicateFade)" />
+    <g filter="url(#airyMist)" fill="${backgroundColor}" opacity="0.50">
+      ${puffs.join("\n      ")}
+    </g>
+    <g filter="url(#softPuff)" fill="${backgroundColor}" opacity="0.75">
+      ${puffs.join("\n      ")}
+    </g>
+    <rect x="0" y="${cloudEndY}" width="${width}" height="${height - cloudEndY}" fill="${backgroundColor}" />
+  </svg>
+  `;
+}
 
 /**
  * Generate an Organic Feathered Alpha Mask for Foreground Artwork.

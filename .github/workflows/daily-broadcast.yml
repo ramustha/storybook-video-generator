@@ -181,8 +181,21 @@ jobs:
           EOF
           fi
 
-          # 4. Export all variables to GITHUB_ENV so all subsequent steps inherit them
-          cat .env >> $GITHUB_ENV
+          # 4. Export all variables to GITHUB_ENV cleanly (no surrounding quotes)
+          echo "YOUTUBE_CLIENT_ID=${YOUTUBE_CLIENT_ID}" >> $GITHUB_ENV
+          echo "YOUTUBE_CLIENT_SECRET=${YOUTUBE_CLIENT_SECRET}" >> $GITHUB_ENV
+          echo "YOUTUBE_REFRESH_TOKEN=${YOUTUBE_REFRESH_TOKEN}" >> $GITHUB_ENV
+          echo "PERSONAL_META_ACCESS_TOKEN=${META_ACCESS_TOKEN}" >> $GITHUB_ENV
+          echo "PERSONAL_META_APP_ID=${META_APP_ID}" >> $GITHUB_ENV
+          echo "PERSONAL_META_APP_SECRET=${META_APP_SECRET}" >> $GITHUB_ENV
+          echo "PERSONAL_META_FACEBOOK_PAGE_ID=${META_PAGE_ID}" >> $GITHUB_ENV
+          echo "PERSONAL_META_INSTAGRAM_USER_ID=${META_IG_ID}" >> $GITHUB_ENV
+          echo "THREADS_ACCESS_TOKEN=${THREADS_ACCESS_TOKEN}" >> $GITHUB_ENV
+          echo "THREADS_USER_ID=${THREADS_USER_ID}" >> $GITHUB_ENV
+          echo "THREADS_APP_ID=${THREADS_APP_ID}" >> $GITHUB_ENV
+          echo "THREADS_APP_SECRET=${THREADS_APP_SECRET}" >> $GITHUB_ENV
+          echo "TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}" >> $GITHUB_ENV
+          echo "TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}" >> $GITHUB_ENV
 
       - name: 🚀 Execute Scheduled Daily Broadcast or Teaser Announcement
         id: run_broadcast
