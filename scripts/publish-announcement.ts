@@ -92,11 +92,28 @@ function extractMoral(story: any, lang: "id" | "en"): string {
  * Generates engaging, cheerful teaser copy for 1-hour-in-advance announcement feeds.
  * Guarantees 100% single-language consistency matching the language of the attached image.
  */
+export interface TailoredTeaserCopies {
+  captionSocial: string; // Generic fallback
+  captionInstagram: string;
+  captionFacebook: string;
+  captionThreads: string;
+  captionTelegramHtml: string;
+}
+
+/**
+ * Generates engaging, platform-tailored teaser copy for pre-broadcast announcement feeds.
+ * Follows best practices:
+ * - Instagram: Emotive parenting hook, save prompt, engagement question, focused hashtags.
+ * - Facebook: Warm community tone, benefits of mindful bedtime screen-time, family discussion.
+ * - Threads: Conversational micro-storytelling, bite-sized curiosity hook, zero hashtag spam.
+ * - Telegram: Clean HTML formatting, bullet highlights, actionable reminder prompt.
+ * Guarantees 100% single-language consistency matching the target language.
+ */
 export function generateTeaserCopy(
   story: any,
   lang: "id" | "en",
   slotTime: string
-): { captionSocial: string; captionTelegramHtml: string } {
+): TailoredTeaserCopies {
   const isId = lang === "id";
   const rawTitle = isId ? story.title : (story.originalTitle || story.title);
   const cleanTitle = rawTitle.replace(/[!]+$/, "").trim();
@@ -110,75 +127,149 @@ export function generateTeaserCopy(
   const sticker = thumbConf?.sticker;
   const moral = extractMoral(story, lang);
 
-  // Social feed caption for Instagram, Facebook, and Threads (100% single-language, zero bilingual bleed)
-  const captionSocial = isId
+  // 1. INSTAGRAM FEED CAPTION (Optimized for Saves & Meaningful Comments)
+  const captionInstagram = isId
     ? `⏰ SEBENTAR LAGI TAYANG! (1 JAM LAGI) 🌟✨
 ${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 🌙💤
 
-Halo Ayah, Bunda, dan adik-adik tersayang! 🥰👋
-Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @Zayn.Storybook!
+Halo Ayah Bunda dan adik-adik tersayang! 🥰👋
+Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @zayn.storybook!
 
-🎨 Sorotan Cerita (Sesuai Gambar):
+🎨 Sorotan Cerita Malam Ini:
 👉 ${hook}
 ${sticker ? `✨ Catatan Seru: ${sticker}\n` : ""}
-💡 Pesan Kebaikan:
+💡 Nilai Kebaikan untuk Si Kecil:
 ${moral}
 
-🔔 Siapkan selimut hangat, kumpulkan keluarga, dan nyalakan lonceng notifikasi di kanal YouTube @Zayn.Storybook sekarang agar tidak ketinggalan ya!
-👉 Tautan tontonan resmi akan langsung aktif pukul ${slotTime} di bio profil & kanal YouTube kami.
+📌 TIPS BEDTIME ROUTINE:
+Jadikan dongeng 15 menit ini sebagai momen transisi tenang sebelum si kecil terlelap. Redupkan lampu, siapkan selimut hangat, dan nikmati petualangan bersama.
 
-💬 Siapa yang sudah siap mendongeng sebelum tidur malam ini? Tulis di kolom komentar ya! 👇❤️
+🔔 Nyalakan lonceng pengingat di YouTube @zayn.storybook sekarang agar tidak terlewat saat tayang perdana!
+👉 Tautan tontonan resmi akan langsung aktif di bio profil @zayn.storybook tepat pukul ${slotTime}.
 
-#ZaynStorybook #DongengSebelumTidur #CeritaAnakBergambar #DongengAnak #BukuCeritaAnak #ParentingCeria #DongengKeluarga #EdukasiAnak #1JamLagi`
+💬 Siapa yang sudah siap menemani si kecil mendongeng malam ini? Tulis di kolom komentar ya! 👇❤️
+
+#ZaynStorybook #DongengSebelumTidur #ParentingIndonesia #CeritaAnakBergambar #BukuAnakBermutu #DongengAnak #MembacaSejakDini #BedtimeRoutine #FamilyStorytime`
     : `⏰ PREMIERING IN 1 HOUR! 🌟✨
 ${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 📖🎈
 
 Hello wonderful parents and curious little ones! 🥰👋
-In just 1 hour (at ${slotTime}), our brand-new animated read-aloud storybook "${cleanTitle}" is premiering on YouTube @Zayn.Storybook!
+In just 1 hour (at ${slotTime}), our brand-new animated read-aloud storybook "${cleanTitle}" is premiering on YouTube @zayn.storybook!
 
-🎨 Story Highlight (As Seen on the Cover):
+🎨 Tonight's Story Highlight:
 👉 ${hook}
 ${sticker ? `✨ Fun Highlight: ${sticker}\n` : ""}
-💡 Heartwarming Lesson:
+💡 Life Lesson for Young Minds:
 ${moral}
 
-🔔 Get cozy, gather the family, and tap the notification bell on YouTube @Zayn.Storybook right now so you don't miss out!
-👉 The official watch link will go live at ${slotTime} on our channel and link in bio.
+📌 BEDTIME ROUTINE TIP:
+Use this calming 15-minute story as a peaceful wind-down ritual before sleep. Dim the room lights, snuggle under a warm blanket, and share the journey together.
 
-💬 Who is ready for today's magical storytime? Let us know in the comments below! 👇❤️
+🔔 Tap the notification bell on YouTube @zayn.storybook right now so you don't miss the premiere!
+👉 The official watch link goes live in our bio @zayn.storybook at ${slotTime}.
 
-#ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #AnimatedStorybook #ChildrenBooks #KidsAnimation #FamilyStorytime #FamilyReading #ComingSoon`;
+💬 Ready for tonight's storytime adventure? Let us know in the comments below! 👇❤️
 
-  // Rich Telegram HTML caption (100% pure single language)
+#ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #AnimatedStorybook #ChildrenBooks #KidsAnimation #FamilyStorytime #MindfulParenting`;
+
+  // 2. FACEBOOK PAGE CAPTION (Optimized for Parents Community & Family Discussion)
+  const captionFacebook = isId
+    ? `⏰ PENGINGAT TAYANG: 1 JAM LAGI! (Pukul ${slotTime}) 🌟✨
+📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}
+
+Ayah Bunda, rutinitas mendongeng 15 menit sebelum tidur terbukti mempererat ikatan batin keluarga dan menenangkan pikiran anak setelah seharian aktif bermain. 🌙💤
+
+Malam ini di kanal YouTube Zayn Storybook, kita akan menyaksikan petualangan baru:
+"${cleanTitle}"
+
+✨ Sekilas Kisah:
+${hook}
+
+💡 Pesan Karakter:
+${moral}
+
+Mari ciptakan kenangan masa kecil yang hangat dan bermakna. Kumpulkan keluarga, siapkan suasana kamar yang nyaman, dan nikmati dongeng animasi penuh warna bersama kami.
+
+🔔 Kunjungi kanal YouTube kami @Zayn.Storybook dan nyalakan lonceng pengingat premiere.
+Tautan tontonan resmi akan dibagikan di halaman ini tepat pukul ${slotTime}!
+
+Ayah Bunda biasanya mendongeng jam berapa bersama si kecil? Yuk berbagi cerita di kolom komentar! 👇❤️`
+    : `⏰ PREMIERE REMINDER: 1 HOUR TO GO! (At ${slotTime}) 🌟✨
+📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}
+
+Dear parents, a 15-minute bedtime story ritual is one of the most effective ways to nurture emotional connection and help children unwind peacefully after an active day. 🌙💤
+
+Tonight on Zayn Storybook YouTube, we are premiering a wonderful new animated journey:
+"${cleanTitle}"
+
+✨ Story Glimpse:
+${hook}
+
+💡 Moral Lesson:
+${moral}
+
+Let's create warm, cherished childhood memories together. Gather the family, get cozy, and enjoy this beautifully illustrated adventure.
+
+🔔 Visit our YouTube channel @Zayn.Storybook and set your premiere reminder!
+The official watch link will be shared right here at ${slotTime}!
+
+What is your favorite bedtime routine with your little ones? Share with our parent community below! 👇❤️`;
+
+  // 3. META THREADS CAPTION (Optimized for Conversational Micro-Storytelling)
+  const captionThreads = isId
+    ? `Pernahkah si kecil merasa takut atau ragu mencoba hal baru? 🐒🌳
+
+Tepat 1 jam lagi (pukul ${slotTime}), cerita animasi bergambar terbaru kita "${cleanTitle}" akan tayang perdana di YouTube @zayn.storybook!
+
+👉 ${hook}
+💡 ${moral}
+
+Nyalakan pengingat di YouTube @zayn.storybook yuk, siapkan selimut hangat untuk dongeng pengantar tidur nanti malam! 🌙💤`
+    : `Has your child ever felt hesitant or scared of trying something new? 🐒🌳
+
+In just 1 hour (at ${slotTime}), our new animated read-aloud storybook "${cleanTitle}" premieres on YouTube @zayn.storybook!
+
+👉 ${hook}
+💡 ${moral}
+
+Set your premiere reminder on YouTube @zayn.storybook and snuggle up for bedtime storytime tonight! 🌙💤`;
+
+  // 4. TELEGRAM HTML CAPTION (Clean, Actionable Formatting with Direct Prompts)
   const captionTelegramHtml = isId
-    ? `⏰ <b>PENGUMUMAN: 1 JAM LAGI TAYANG!</b> 🌟✨
-${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 🌙
+    ? `⏰ <b>PENGUMUMAN: 1 JAM LAGI TAYANG PERDANA!</b> 🌟✨
+${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 🌙💤
 
 Halo Ayah, Bunda, & adik-adik tersayang! 🥰
-Tepat pukul <b>${slotTime}</b>, video dongeng animasi terbaru kita "<b>${cleanTitle}</b>" akan tayang perdana!
+Tepat pukul <b>${slotTime}</b>, video dongeng animasi terbaru "<b>${cleanTitle}</b>" akan tayang perdana di YouTube!
 
-🎨 <b>Sorotan Cerita (Sesuai Gambar):</b>
+🎨 <b>Sorotan Cerita Malam Ini:</b>
 👉 ${hook}
 ${sticker ? `✨ <i>${sticker}</i>\n` : ""}
-💡 <b>Pesan Kebaikan:</b>
+💡 <b>Pesan Kebaikan untuk Si Kecil:</b>
 ${moral}
 
-🔔 <i>Nyalakan lonceng notifikasi kanal YouTube @Zayn.Storybook dan siapkan waktu santai bersama si kecil! Tautan tontonan resmi akan dibagikan di sini tepat saat tayang.</i>`
+🔔 <i>Nyalakan pengingat di kanal YouTube @Zayn.Storybook dan siapkan waktu santai bersama si kecil! Tautan tontonan resmi akan langsung kami bagikan di sini tepat pukul ${slotTime}.</i>`
     : `⏰ <b>ANNOUNCEMENT: PREMIERING IN 1 HOUR!</b> 🌟✨
 ${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 📖🎈
 
-Hello parents and lovely kids! 🥰
-In just 1 hour (at <b>${slotTime}</b>), our newest animated read-aloud storybook "<b>${cleanTitle}</b>" is premiering!
+Hello parents and curious little ones! 🥰
+In just 1 hour (at <b>${slotTime}</b>), our new animated storybook "<b>${cleanTitle}</b>" is premiering on YouTube!
 
-🎨 <b>Story Highlight (As Seen on the Cover):</b>
+🎨 <b>Tonight's Story Highlight:</b>
 👉 ${hook}
 ${sticker ? `✨ <i>${sticker}</i>\n` : ""}
 💡 <b>Life Lesson:</b>
 ${moral}
 
-🔔 <i>Turn on your YouTube @Zayn.Storybook notification bell! The official watch link will be shared here right at premiere time.</i>`;
+🔔 <i>Turn on your reminder on YouTube @Zayn.Storybook! The official watch link will be shared here right at ${slotTime}.</i>`;
 
-  return { captionSocial, captionTelegramHtml };
+  return {
+    captionSocial: captionInstagram,
+    captionInstagram,
+    captionFacebook,
+    captionThreads,
+    captionTelegramHtml,
+  };
 }
 
 /**
@@ -327,18 +418,23 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
   const photoPath = resolveBestPhoto(storyDir, lang);
   console.log(`\n🖼️ Visual Asset Selected: ${path.basename(photoPath)} (${photoPath})`);
 
-  const { captionSocial, captionTelegramHtml } = generateTeaserCopy(story, lang, slotTime);
+  const {
+    captionInstagram,
+    captionFacebook,
+    captionThreads,
+    captionTelegramHtml,
+  } = generateTeaserCopy(story, lang, slotTime);
 
   const errors: string[] = [];
 
   // 5. Granular Publishing to Pending Platforms
-  // 5A. Facebook Page Feed Photo
+  // 5A. Facebook Page Feed Photo (Tailored for Parenting Community)
   if (!hasFb || options.force) {
     try {
       console.log(`\n📘 [1/4] Publishing Announcement to Facebook Page...`);
       const fbRes = await publishFacebookPhotoPost({
         photoPath,
-        caption: captionSocial,
+        caption: captionFacebook,
         dryRun: options.dryRun,
       });
 
@@ -360,13 +456,13 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     console.log(`\n⏩ [1/4] Skipping Facebook Page: Already published today (${existingAnn.facebook?.id}).`);
   }
 
-  // 5B. Instagram Feed Photo
+  // 5B. Instagram Feed Photo (Tailored for Saves & Engagement)
   if (!hasIg || options.force) {
     try {
       console.log(`\n📸 [2/4] Publishing Announcement to Instagram Feed...`);
       const igRes = await publishInstagramFeedPhoto({
         imagePath: photoPath,
-        caption: captionSocial,
+        caption: captionInstagram,
         dryRun: options.dryRun,
       });
 
@@ -387,13 +483,13 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     console.log(`\n⏩ [2/4] Skipping Instagram Feed: Already published today (${existingAnn.instagram?.id}).`);
   }
 
-  // 5C. Meta Threads Image Post
+  // 5C. Meta Threads Image Post (Tailored for Conversational Micro-Storytelling)
   if (!hasThreads || options.force) {
     try {
       console.log(`\n🧵 [3/4] Publishing Announcement to Meta Threads...`);
       const thRes = await publishThreadsPhotoPost({
         imagePath: photoPath,
-        text: captionSocial,
+        text: captionThreads,
         dryRun: options.dryRun,
       });
 
