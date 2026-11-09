@@ -13,6 +13,7 @@ config/projects/
 config/*.json
 !config/.gitkeep
 !config/curated-books.json
+!config/budi-catalog.json
 !config/d1-config.json
 .cache/
 .env
