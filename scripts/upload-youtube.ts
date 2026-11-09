@@ -7,6 +7,7 @@ import readline from "readline";
 import { google } from "googleapis";
 import { uploadVideoViaBrowser, launchInteractiveLogin } from "./playwright-youtube-uploader";
 import { QuotaRotator } from "./quota-rotator";
+import { generateSeoMetadata } from "./lib/seo-formatter";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
@@ -32,6 +33,12 @@ interface StoryManifest {
   title: string;
   originalTitle?: string;
   slug: string;
+  moral?: {
+    headlineId?: string;
+    headlineEn?: string;
+    summaryId?: string;
+    summaryEn?: string;
+  };
   source: {
     repository: string;
     license: string;
@@ -44,6 +51,7 @@ interface StoryManifest {
     landscape?: any;
     vertical?: any;
   };
+  [key: string]: any;
 }
 
 /**
@@ -1056,87 +1064,43 @@ async function main() {
     }
 
     const displayTitle = isEn ? (manifest.originalTitle || manifest.title) : manifest.title;
+    const chapters: string = generateChapters(manifest.scenes);
 
-    let chapters: string = generateChapters(manifest.scenes);
-    let coreTags: string[] = isEn
-      ? [
-          "children storybook",
-          "animated bedtime story",
-          "funny kids cartoon",
-          displayTitle.toLowerCase(),
-          "pratham books",
-          "storyweaver",
-          "english story for children",
-          "read aloud books",
-          "bedtime stories for kids",
-          "early reader animation",
-          "audiobook for children",
-        ]
-      : [
-          "dongeng anak",
-          "cerita anak bergambar",
-          displayTitle.toLowerCase(),
-          "cerita anak indonesia",
-          "dongeng sebelum tidur",
-          "animasi anak indonesia",
-          "buku cerita bergambar",
-          "storyweaver indonesia",
-          "pratham books",
-          "kartun anak lucu",
-          "audio book anak indonesia",
-        ];
+    // High-CTR, High-Intent SEO Metadata
+    const seoLandscape = generateSeoMetadata({
+      bookSlug,
+      title: manifest.title,
+      originalTitle: manifest.originalTitle,
+      lang,
+      format: "landscape",
+      author: manifest.source.originalAuthor,
+      illustrator: manifest.source.originalIllustrator,
+      moralHeadline: isEn ? manifest.moral?.headlineEn : manifest.moral?.headlineId,
+      moralDescription: isEn ? manifest.moral?.summaryEn : manifest.moral?.summaryId,
+      chapters,
+      license: manifest.source.license,
+      publisher: manifest.source.repository,
+    });
 
-    let landscapeTitle: string = sanitizeTitle(
-      kitMeta?.landscapeTitle ||
-      (isEn
-        ? `${displayTitle.toUpperCase()}! 📖 Fun Kids Animated Read-Aloud Storybook`
-        : `${displayTitle.toUpperCase()}! 📖 Dongeng Cerita Anak Bergambar`)
-    );
+    const seoVertical = generateSeoMetadata({
+      bookSlug,
+      title: manifest.title,
+      originalTitle: manifest.originalTitle,
+      lang,
+      format: "vertical",
+      author: manifest.source.originalAuthor,
+      illustrator: manifest.source.originalIllustrator,
+      moralHeadline: isEn ? manifest.moral?.headlineEn : manifest.moral?.headlineId,
+      moralDescription: isEn ? manifest.moral?.summaryEn : manifest.moral?.summaryId,
+      license: manifest.source.license,
+      publisher: manifest.source.repository,
+    });
 
-    let landscapeDesc: string =
-      kitMeta?.landscapeDesc ||
-      [
-        `📖 ${displayTitle} - Dongeng cerita anak bergambar yang hangat dan mendidik!`,
-        ``,
-        `Karya asli: ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
-        `Diterbitkan oleh: ${manifest.source.repository} under ${manifest.source.license}.`,
-        ``,
-        `---`,
-        ``,
-        `⏱️ TIMESTAMPS / CHAPTERS:`,
-        chapters,
-        ``,
-        `---`,
-        ``,
-        `🔔 Subscribe to @ZaynAdyanRamadhan for more animated storybooks!`,
-      ].join("\n");
-
-    let shortsTitle: string = sanitizeTitle(
-      kitMeta?.shortsTitle ||
-      (isEn
-        ? `Kids Animated Storybook: ${displayTitle}! 📖 #Shorts #BedtimeStories`
-        : `Buku Cerita Anak: ${displayTitle}! 📖 #Shorts #DongengAnak`)
-    );
-
-    let shortsDesc: string =
-      kitMeta?.shortsDesc ||
-      (isEn
-        ? [
-            `${displayTitle} - Animated children's picture book by ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
-            `License: ${manifest.source.license} (${manifest.source.repository})`,
-            ``,
-            `🔔 Subscribe to @ZaynAdyanRamadhan for more fun storybooks!`,
-            ``,
-            `#Shorts #AnimatedStorybook #KidsStories #Storytime #BedtimeStory`,
-          ].join("\n")
-        : [
-            `${displayTitle} - Cerita dongeng anak bergambar karya ${manifest.source.originalAuthor} & ${manifest.source.originalIllustrator}.`,
-            `Lisensi: ${manifest.source.license} (${manifest.source.repository})`,
-            ``,
-            `🔔 Subscribe ke @ZaynAdyanRamadhan untuk cerita animasi seru lainnya!`,
-            ``,
-            `#Shorts #DongengAnak #CeritaAnak #KartunAnak #AnimasiIndonesia`,
-          ].join("\n"));
+    let coreTags: string[] = (kitMeta as any)?.tags || seoLandscape.tags;
+    let landscapeTitle: string = sanitizeTitle(kitMeta?.landscapeTitle || seoLandscape.title);
+    let landscapeDesc: string = kitMeta?.landscapeDesc || seoLandscape.description;
+    let shortsTitle: string = sanitizeTitle(kitMeta?.shortsTitle || seoVertical.title);
+    let shortsDesc: string = kitMeta?.shortsDesc || seoVertical.description;
 
     // 4. Upload Landscape (16:9) with Duration Policy & Pre-Upload Deduplication Check
     if ((effectiveFormat === "landscape" || effectiveFormat === "all") && !existsSync(landscapeVideo)) {

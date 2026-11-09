@@ -62,7 +62,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
     : "🌟 TONTON DONGENG BERIKUTNYA 🌟");
 
   // Channel Branding (Configurable per book or fallback)
-  const channelHandle = book.channelHandle || scene.channelHandle || "@ZaynAdyanRamadhan";
+  const channelHandle = book.channelHandle || scene.channelHandle || "@zayn.storybook";
   const channelTagline = book.channelTagline || scene.channelTagline || (isEn
     ? "New Storybooks Every Week!"
     : "Dongeng Cerita Baru Tiap Minggu!");
