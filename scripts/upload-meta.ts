@@ -132,6 +132,19 @@ async function loadMetaConfig(): Promise<MetaConfig> {
   if (process.env.FACEBOOK_PAGE_ID) config.facebookPageId = process.env.FACEBOOK_PAGE_ID;
   if (process.env.INSTAGRAM_USER_ID) config.instagramUserId = process.env.INSTAGRAM_USER_ID;
 
+  if (config.pageAccessToken) {
+    config.pageAccessToken = config.pageAccessToken.replace(/^["']|["']$/g, "").trim();
+  }
+  if (config.appId) {
+    config.appId = config.appId.replace(/^["']|["']$/g, "").trim();
+  }
+  if (config.facebookPageId) {
+    config.facebookPageId = config.facebookPageId.replace(/^["']|["']$/g, "").trim();
+  }
+  if (config.instagramUserId) {
+    config.instagramUserId = config.instagramUserId.replace(/^["']|["']$/g, "").trim();
+  }
+
   if (!config.pageAccessToken || !config.instagramUserId || !config.facebookPageId) {
     throw new Error(
       "Incomplete Meta config. Missing pageAccessToken, instagramUserId, or facebookPageId."

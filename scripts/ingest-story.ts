@@ -435,6 +435,15 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     execSync(`npx tsx scripts/prepare-plates-hybrid.ts --book ${slug}`, {
       stdio: "inherit",
     });
+
+    console.log(`\n🌿 Applying Organic Ambient Vignette & Delicate Cloud Mist to Plates...`);
+    try {
+      execSync(`npx tsx scripts/prepare-organic-video-plates.ts --book ${slug}`, {
+        stdio: "inherit",
+      });
+    } catch (plateErr: any) {
+      console.warn(`⚠️ Organic plate preparation warning: ${plateErr.message}`);
+    }
   } else {
     console.log(`⏩ Skipping plates preparation (--skip-plates).`);
   }
