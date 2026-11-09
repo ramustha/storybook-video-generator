@@ -160,6 +160,30 @@ jobs:
           }
           EOF
 
+          # 3.5 Setup config/youtube-credentials.json & config/youtube-token.json
+          if [ -n "${YOUTUBE_CLIENT_ID}" ] && [ -n "${YOUTUBE_CLIENT_SECRET}" ]; then
+            cat <<EOF > config/youtube-credentials.json
+          {
+            "installed": {
+              "client_id": "${YOUTUBE_CLIENT_ID}",
+              "client_secret": "${YOUTUBE_CLIENT_SECRET}",
+              "redirect_uris": ["http://localhost:3000/oauth2callback"]
+            }
+          }
+          EOF
+          fi
+
+          if [ -n "${YOUTUBE_REFRESH_TOKEN}" ]; then
+            cat <<EOF > config/youtube-token.json
+          {
+            "refresh_token": "${YOUTUBE_REFRESH_TOKEN}"
+          }
+          EOF
+          fi
+
+          # 4. Export all variables to GITHUB_ENV so all subsequent steps inherit them
+          cat .env >> $GITHUB_ENV
+
       - name: 🚀 Execute Scheduled Daily Broadcast or Teaser Announcement
         id: run_broadcast
         env:
@@ -168,6 +192,24 @@ jobs:
           INPUT_LANG: ${{ inputs.lang || 'auto' }}
           INPUT_SLOT: ${{ inputs.slot || 'auto' }}
           INPUT_DRY_RUN: ${{ inputs.dry_run || false }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          META_ACCESS_TOKEN: ${{ secrets.PERSONAL_META_ACCESS_TOKEN }}
+          META_APP_ID: ${{ secrets.PERSONAL_META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.PERSONAL_META_APP_SECRET }}
+          META_PAGE_ID: ${{ secrets.PERSONAL_META_FACEBOOK_PAGE_ID }}
+          META_IG_ID: ${{ secrets.PERSONAL_META_INSTAGRAM_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.PERSONAL_THREADS_ACCESS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.PERSONAL_THREADS_USER_ID }}
+          THREADS_APP_ID: ${{ secrets.PERSONAL_THREADS_APP_ID }}
+          THREADS_APP_SECRET: ${{ secrets.PERSONAL_THREADS_APP_SECRET }}
+          R2_ACCOUNT_ID: ${{ secrets.PERSONAL_R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.PERSONAL_R2_ACCESS_KEY_ID }}
+          R2_SECRET_KEY: ${{ secrets.PERSONAL_R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
         run: |
           UTC_HOUR=$(date -u +%H)
           UTC_MIN=$(date -u +%M)

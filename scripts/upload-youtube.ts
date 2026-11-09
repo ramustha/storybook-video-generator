@@ -77,10 +77,45 @@ function generateChapters(scenes: StoryScene[]): string {
 }
 
 /**
+ * Loads .env file if present to populate process.env.
+ */
+async function loadEnvFiles() {
+  const envFiles = [
+    path.resolve(".env"),
+    path.join(process.env.HOME || "", ".zshenv"),
+  ];
+
+  for (const envPath of envFiles) {
+    if (existsSync(envPath)) {
+      try {
+        const envContent = await fs.readFile(envPath, "utf-8");
+        envContent.split("\n").forEach((line) => {
+          const match = line.match(/^\s*(?:export\s+)?([\w.-]+)\s*=\s*(.*)?\s*$/);
+          if (match) {
+            const key = match[1];
+            let val = (match[2] || "").trim();
+            if (
+              (val.startsWith('"') && val.endsWith('"')) ||
+              (val.startsWith("'") && val.endsWith("'"))
+            ) {
+              val = val.slice(1, -1);
+            }
+            if (!process.env[key]) {
+              process.env[key] = val;
+            }
+          }
+        });
+      } catch {}
+    }
+  }
+}
+
+/**
  * Loads OAuth2 client credentials from config or environment.
  */
 async function getOAuth2Client() {
   await fs.mkdir(CONFIG_DIR, { recursive: true });
+  await loadEnvFiles();
 
   let clientId = process.env.YOUTUBE_CLIENT_ID;
   let clientSecret = process.env.YOUTUBE_CLIENT_SECRET;
@@ -126,6 +161,8 @@ async function getOAuth2Client() {
  * Authorizes OAuth2 client, either from environment secrets, cached tokens, or interactive login.
  */
 async function authorizeClient(oauth2Client: any) {
+  await loadEnvFiles();
+
   // 1. Check environment secrets first (CI / Headless / Cloud)
   if (process.env.YOUTUBE_TOKEN_JSON) {
     try {
