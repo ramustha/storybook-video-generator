@@ -179,6 +179,38 @@ export const StorybookVideoComposition: React.FC<StorybookVideoCompositionProps>
           </Sequence>
         );
       })}
+
+      {/* Subtle Persistent Channel Watermark (For cross-platform discovery & attribution) */}
+      <div
+        style={{
+          position: "absolute",
+          top: isVertical ? 48 : 32,
+          right: isVertical ? 36 : 40,
+          zIndex: 90,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: isVertical ? "6px 12px" : "8px 16px",
+          borderRadius: 24,
+          backgroundColor: "rgba(10, 15, 30, 0.45)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          pointerEvents: "none",
+        }}
+      >
+        <span style={{ fontSize: isVertical ? 15 : 18 }}>🌙</span>
+        <span
+          style={{
+            fontFamily: "ui-rounded, 'Nunito', 'Comic Sans MS', sans-serif",
+            fontSize: isVertical ? 14 : 16,
+            fontWeight: 700,
+            color: "rgba(255, 255, 255, 0.9)",
+            letterSpacing: 0.3,
+            textShadow: "0 2px 4px rgba(0,0,0,0.6)",
+          }}
+        >
+          @zayn.storybook
+        </span>
+      </div>
     </>
   );
 };

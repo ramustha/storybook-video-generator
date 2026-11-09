@@ -44,6 +44,8 @@
     "stats:meta": "tsx scripts/meta-stats.ts",
     "analytics": "tsx scripts/performance-analytics.ts",
     "analytics:telegram": "tsx scripts/performance-analytics.ts --telegram",
+    "seo:refresh": "tsx scripts/refresh-youtube-seo.ts",
+    "seo:preview": "tsx scripts/refresh-youtube-seo.ts --dry-run",
     "sync:meta": "tsx scripts/sync-platforms.ts",
     "publish:all": "tsx scripts/publish-all.ts",
     "announce": "tsx scripts/publish-announcement.ts",

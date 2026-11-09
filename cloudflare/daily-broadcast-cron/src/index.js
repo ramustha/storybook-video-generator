@@ -47,55 +47,31 @@ export default {
     const now = new Date();
     console.log(`⏰ Triggered by Cloudflare Cron: "${cron}" at ${now.toISOString()}`);
 
-    // 1. Morning Teaser Announcement (00:30 UTC = 07:30 WIB)
-    if (cron === "30 0 * * *") {
-      ctx.waitUntil(
-        dispatchWorkflow(env, "daily-broadcast.yml", {
-          action: "announcement",
-          slot: "morning",
-          book: "auto",
-          lang: "auto",
-          dry_run: false,
-        })
-      );
-    }
-    // 2. Morning Full Broadcast (01:30 UTC = 08:30 WIB)
-    else if (cron === "30 1 * * *") {
-      ctx.waitUntil(
-        dispatchWorkflow(env, "daily-broadcast.yml", {
-          action: "broadcast",
-          slot: "morning",
-          book: "auto",
-          lang: "auto",
-          dry_run: false,
-        })
-      );
-    }
-    // 3. Evening Teaser Announcement (11:00 UTC = 18:00 WIB)
-    else if (cron === "0 11 * * *") {
+    // 1. Daily Teaser Announcement (10:30 UTC = 17:30 WIB) - Prioritize Indonesian Audience
+    if (cron === "30 10 * * *" || cron === "0 11 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {
           action: "announcement",
           slot: "evening",
           book: "auto",
-          lang: "auto",
+          lang: "id",
           dry_run: false,
         })
       );
     }
-    // 4. Evening Prime Bedtime Broadcast (12:00 UTC = 19:00 WIB)
-    else if (cron === "0 12 * * *") {
+    // 2. Daily Prime Bedtime Story Broadcast (11:30 UTC = 18:30 WIB) - 1x High-Quality Upload / Day
+    else if (cron === "30 11 * * *" || cron === "0 12 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {
           action: "broadcast",
           slot: "evening",
           book: "auto",
-          lang: "auto",
+          lang: "id",
           dry_run: false,
         })
       );
     }
-    // 5. Ingestion & Analytics (00:00 UTC = 07:00 WIB Mon & Thu)
+    // 3. Ingestion & Analytics (00:00 UTC = 07:00 WIB Mon & Thu)
     else if (cron === "0 0 * * 1,4") {
       // Ingest buffer on Monday & Thursday
       ctx.waitUntil(
