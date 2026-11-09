@@ -25,6 +25,34 @@ export interface TelegramFailureOptions {
   dryRun?: boolean;
 }
 
+export interface PlatformStatsSummary {
+  views: number;
+  likes: number;
+  comments: number;
+  shares?: number;
+  reach?: number;
+  videoCount: number;
+}
+
+export interface TopContentItem {
+  title: string;
+  platform: string;
+  format: string;
+  views: number;
+  likes: number;
+  url: string;
+}
+
+export interface AnalyticsReportOptions {
+  periodLabel?: string;
+  youtube?: PlatformStatsSummary & { subscribers?: number; totalChannelViews?: number };
+  facebook?: PlatformStatsSummary;
+  instagram?: PlatformStatsSummary;
+  threads?: PlatformStatsSummary;
+  topContent?: TopContentItem[];
+  dryRun?: boolean;
+}
+
 /**
  * Formats a date into a clean, human-readable Indonesian/English timestamp in Western Indonesia Time (WIB, UTC+7).
  * Example ID: "Minggu, 8 November 2026 pukul 16:54 WIB"
@@ -259,9 +287,15 @@ export async function notifyTelegramFailure(options: TelegramFailureOptions): Pr
     runUrl = `${server}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
   }
 
+  const isAnalytics = options.platform?.toLowerCase().includes("analytic");
+  const headerTitle = isAnalytics ? "Laporan Analitik Gagal!" : "Publikasi Gagal!";
+  const headerDesc = isAnalytics
+    ? "Terjadi kendala saat pengumpulan data analitik atau pembuatan laporan performa."
+    : "Terjadi kendala saat proses publikasi atau rendering video cerita anak.";
+
   const lines: string[] = [
-    `🚨 <b>Zayn Storybook: Publikasi Gagal!</b> ⚠️\n`,
-    `Terjadi kendala saat proses publikasi atau rendering video cerita anak.`,
+    `🚨 <b>Zayn Storybook: ${headerTitle}</b> ⚠️\n`,
+    `${headerDesc}`,
     `\n⏰ <b>Waktu Kejadian:</b> ${wibTime}`,
   ];
 
@@ -322,6 +356,119 @@ export async function notifyTelegramFailure(options: TelegramFailureOptions): Pr
   }
 
   return await sendTelegramMessage(config, alertHtml);
+}
+
+/**
+ * Dispatches an executive multi-platform weekly/daily performance report to Telegram.
+ */
+export async function notifyTelegramAnalytics(options: AnalyticsReportOptions): Promise<boolean> {
+  const config = getTelegramConfig();
+  if (!config) {
+    console.warn("⚠️ Cannot send Telegram analytics: Credentials not configured.");
+    return false;
+  }
+
+  const period = options.periodLabel || "Laporan Kinerja Mingguan (Weekly Analytics)";
+  const wibTime = formatWibTimestamp(new Date(), "id");
+
+  // Calculate Aggregates
+  const totalViews =
+    (options.youtube?.views || 0) +
+    (options.facebook?.views || 0) +
+    (options.instagram?.views || 0) +
+    (options.threads?.views || 0);
+
+  const totalLikes =
+    (options.youtube?.likes || 0) +
+    (options.facebook?.likes || 0) +
+    (options.instagram?.likes || 0) +
+    (options.threads?.likes || 0);
+
+  const totalComments =
+    (options.youtube?.comments || 0) +
+    (options.facebook?.comments || 0) +
+    (options.instagram?.comments || 0) +
+    (options.threads?.comments || 0);
+
+  const totalVideos =
+    (options.youtube?.videoCount || 0) +
+    (options.facebook?.videoCount || 0) +
+    (options.instagram?.videoCount || 0) +
+    (options.threads?.videoCount || 0);
+
+  const lines: string[] = [
+    `📊 <b>Zayn Storybook: ${period}</b> 📈\n`,
+    `🗓️ <b>Waktu Laporan:</b> ${wibTime}`,
+    `\n🌐 <b>Ringkasan Kinerja Agregat:</b>`,
+    `👀 <b>Total Tayangan / Views:</b> <b>${totalViews.toLocaleString("id-ID")}</b>`,
+    `❤️ <b>Total Suka / Likes:</b> <b>${totalLikes.toLocaleString("id-ID")}</b>`,
+    `💬 <b>Total Komentar:</b> <b>${totalComments.toLocaleString("id-ID")}</b>`,
+    `🎬 <b>Total Aset Terpublikasi:</b> ${totalVideos} konten`,
+  ];
+
+  // Breakdown Per Platform
+  lines.push(`\n📱 <b>Rincian Per Platform:</b>`);
+
+  if (options.youtube) {
+    const ytSub = options.youtube.subscribers !== undefined ? ` • ${options.youtube.subscribers} subs` : "";
+    lines.push(
+      `▶️ <b>YouTube:</b> ${options.youtube.views.toLocaleString("id-ID")} views • ${options.youtube.likes} likes • ${options.youtube.comments} komentar (${options.youtube.videoCount} video${ytSub})`
+    );
+  }
+
+  if (options.facebook) {
+    lines.push(
+      `📘 <b>Facebook:</b> ${options.facebook.views.toLocaleString("id-ID")} views • ${options.facebook.likes} likes • ${options.facebook.comments} komentar (${options.facebook.videoCount} video/reel)`
+    );
+  }
+
+  if (options.instagram) {
+    lines.push(
+      `📸 <b>Instagram:</b> ${options.instagram.views.toLocaleString("id-ID")} plays • ${options.instagram.likes} likes • ${options.instagram.comments} komentar (${options.instagram.videoCount} reel)`
+    );
+  }
+
+  if (options.threads) {
+    lines.push(
+      `🧵 <b>Threads:</b> ${options.threads.views.toLocaleString("id-ID")} views • ${options.threads.likes} likes (${options.threads.videoCount} post)`
+    );
+  }
+
+  // Top Performing Videos
+  if (options.topContent && options.topContent.length > 0) {
+    lines.push(`\n🏆 <b>Top Konten Terpopuler Pekan Ini:</b>`);
+    options.topContent.slice(0, 5).forEach((item, idx) => {
+      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "⭐";
+      const icon = item.platform.toLowerCase().includes("youtube")
+        ? "▶️"
+        : item.platform.toLowerCase().includes("facebook")
+        ? "📘"
+        : item.platform.toLowerCase().includes("instagram")
+        ? "📸"
+        : "🧵";
+      lines.push(
+        `${medal} <b>${item.title}</b> (${icon} ${item.platform} ${item.format})`
+      );
+      lines.push(
+        `    👀 ${item.views.toLocaleString("id-ID")} views • ❤️ ${item.likes} likes • <a href="${item.url}">Tonton ➔</a>`
+      );
+    });
+  }
+
+  lines.push(`\n✨ <i>Laporan dikirim otomatis oleh GitHub Actions & Cloudflare Scheduler.</i> 🌙`);
+  const captionHtml = lines.join("\n");
+
+  if (options.dryRun) {
+    console.log("\n=======================================================");
+    console.log("✈️  [DRY RUN] TELEGRAM ANALYTICS NOTIFICATION PREVIEW");
+    console.log("=======================================================");
+    console.log(`Chat ID : ${config.chatId}`);
+    console.log("Message :\n" + captionHtml);
+    console.log("=======================================================\n");
+    return true;
+  }
+
+  return await sendTelegramMessage(config, captionHtml);
 }
 
 // ── CLI Runner ─────────────────────────────────────────────────────────────

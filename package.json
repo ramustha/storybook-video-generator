@@ -42,6 +42,8 @@
     "upload:meta": "tsx scripts/upload-meta.ts",
     "upload:threads": "tsx scripts/publish-threads.ts",
     "stats:meta": "tsx scripts/meta-stats.ts",
+    "analytics": "tsx scripts/performance-analytics.ts",
+    "analytics:telegram": "tsx scripts/performance-analytics.ts --telegram",
     "sync:meta": "tsx scripts/sync-platforms.ts",
     "publish:all": "tsx scripts/publish-all.ts",
     "announce": "tsx scripts/publish-announcement.ts",
