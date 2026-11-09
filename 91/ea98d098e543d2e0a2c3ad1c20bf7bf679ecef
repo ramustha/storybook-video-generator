@@ -1,0 +1,25 @@
+docs/production-schedule-month-1.md
+  cd4b837cc23a86b3 9-18,24,26-52,57,59-120,130-138,141-144
+scripts/content-calendar.ts
+  cd4b837cc23a86b3 155-166,168,172,178-183,189-191,194-205,212,216-227,234,238-246,249,255-267,271,278,282-290,293,299-311,315,320,322,326,332-337,343-345,348-359,370-381,388,392-400,403,409-421,425,432,436-444,447,453-465,469,474-476,480,486-491,497-499,502-513,524-535,541-542,546-554,557,563-575,579,585-586,590-598,601,607-619,623,628-630,634,639-645,651-652,656-667
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "91ea98d098e543d2e0a2c3ad1c20bf7bf679ecef",
+  "prompts": {
+    "cd4b837cc23a86b3": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "7f62afe1-174a-4e1a-b8e6-5343c856c93d",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 430,
+      "total_deletions": 157,
+      "accepted_lines": 430,
+      "overriden_lines": 0
+    }
+  }
+}
