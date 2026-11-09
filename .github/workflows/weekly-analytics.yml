@@ -1,9 +1,11 @@
 name: Weekly Performance Analytics (Meta & Video Stats)
 
 on:
-  schedule:
-    # 00:00 UTC = 07:00 WIB Every Monday
-    - cron: '0 0 * * 1'
+  # Automated triggers migrated to Cloudflare Worker to avoid GitHub queue delays:
+  # https://zayn-storybook-cron-trigger.atkcollection110.workers.dev
+  # schedule:
+  #   # 00:00 UTC = 07:00 WIB Every Monday
+  #   - cron: '0 0 * * 1'
   workflow_dispatch:
 
 jobs:

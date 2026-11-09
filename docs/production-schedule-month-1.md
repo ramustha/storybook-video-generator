@@ -121,24 +121,28 @@ Menjawab target **produksi setiap hari dengan konten cerita baru yang segar tanp
 
 ---
 
-## 4. Cara Kerja Otomatisasi GitHub Actions Cron
+## 4. Arsitektur Otomatisasi: Cloudflare Worker Scheduler (Zero Queue Delay)
 
-File Workflow: `.github/workflows/daily-broadcast.yml`
+Seluruh cron scheduler telah dipindahkan ke **Cloudflare Worker** (`zayn-storybook-cron-trigger`) untuk menjamin presisi waktu tepat pada detik ke-0 tanpa antrean (*jitter*) bawaan GitHub Actions.
 
 ```mermaid
 flowchart TD
-    CronMorning["GitHub Actions Cron 01:30 UTC / 08:30 WIB"] --> RunnerM["Spin up Ubuntu Runner (Morning Slot)"]
-    RunnerM --> CheckCalM["Cek Jadwal Pagi (content-calendar.ts --slot morning)"]
-    CheckCalM --> PubEn["Rilis English Feature 16:9 & Shorts (YT, FB, IG)"]
-    PubEn --> SyncGitM["Commit & Push Status Publikasi ke Git"]
+    CF["Cloudflare Worker (zayn-storybook-cron-trigger)<br/>5 Cron Triggers di Edge Network"] -->|00:30 UTC / 07:30 WIB| D1["Dispatch: Morning Teaser Announcement"]
+    CF -->|01:30 UTC / 08:30 WIB| D2["Dispatch: Morning English Broadcast"]
+    CF -->|11:00 UTC / 18:00 WIB| D3["Dispatch: Evening Teaser Announcement"]
+    CF -->|12:00 UTC / 19:00 WIB| D4["Dispatch: Evening Bedtime Story Broadcast"]
+    CF -->|00:00 UTC / 07:00 WIB Mon & Thu| D5["Dispatch: Ingestion Buffer (4 stories) + Mon Analytics"]
 
-    CronEvening["GitHub Actions Cron 12:00 UTC / 19:00 WIB"] --> RunnerE["Spin up Ubuntu Runner (Evening Slot)"]
-    RunnerE --> CheckCalE["Cek Jadwal Malam (content-calendar.ts --slot evening)"]
-    CheckCalE --> PubId["Rilis Indonesian Bedtime Story / Sunday Marathon (YT, FB, IG)"]
-    PubId --> SyncGitE["Commit & Push Status Publikasi ke Git"]
+    D1 & D2 & D3 & D4 --> GHA["GitHub Actions Runner (workflow_dispatch)<br/>daily-broadcast.yml"]
+    D5 --> GHI["GitHub Actions Runner (workflow_dispatch)<br/>daily-story-ingest.yml & weekly-analytics.yml"]
+
+    GHA --> PubYT["Upload YouTube (16:9 & Shorts)"]
+    GHA --> PubFB["Fan-out Facebook Page (Watch & Reels)"]
+    GHA --> PubIG["Publish Instagram Reels (@zayn.storybook)"]
+    PubYT & PubFB & PubIG --> SyncGit["Commit & Push ID Publikasi ke Git"]
 ```
 
-1. **Jadwal Tanpa Laptop Nyala**: Dieksekusi otomatis di server GitHub Actions pada jam 08:30 WIB dan 19:00/19:30 WIB setiap hari.
-2. **Pagi & Malam Otomatis**: Script memfilter slot tayang berdasarkan jam Jakarta (`--slot morning` vs `--slot evening`).
+1. **Presisi Tinggi (Zero Jitter)**: Cloudflare Worker memicu webhook GitHub API tepat waktu tanpa delay 15-45 menit yang biasa terjadi pada GitHub Actions native cron.
+2. **Cron GitHub Dinonaktifkan**: Schedule native di file `.github/workflows/` dinonaktifkan (`workflow_dispatch` tetap aktif) agar tidak ada eksekusi ganda atau keterlambatan.
 3. **Instagram Reels Terjadwal**: API Instagram Container dipanggil tepat pada jam tayang melalui cloud runner.
 4. **Sinkronisasi Otomatis**: Setiap video yang berhasil tayang dicatat ke dalam `story.json` dan otomatis di-push kembali ke branch `main`.

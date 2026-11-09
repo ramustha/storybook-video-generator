@@ -1,9 +1,11 @@
 name: Zayn Storybook Daily Ingestion & Plate Cleaning Engine
 
 on:
-  schedule:
-    # 00:00 UTC = 07:00 WIB (Batch Buffer Ingestion on Monday & Thursday: 4 stories/batch to amortize macOS setup)
-    - cron: '0 0 * * 1,4'
+  # Automated triggers migrated to Cloudflare Worker to avoid GitHub queue delays:
+  # https://zayn-storybook-cron-trigger.atkcollection110.workers.dev
+  # schedule:
+  #   # 00:00 UTC = 07:00 WIB (Batch Buffer Ingestion on Monday & Thursday)
+  #   - cron: '0 0 * * 1,4'
   workflow_dispatch:
     inputs:
       book:
