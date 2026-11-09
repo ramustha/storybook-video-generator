@@ -1,0 +1,39 @@
+scripts/lib/db.ts
+  698ac31901cd73e0 263-267,269,271,273,275
+scripts/render-book.ts
+  698ac31901cd73e0 6,23-25,27,64,67-86,89-105,120-133
+config/curated-books.json
+  698ac31901cd73e0 810-811,816-818,823-825,830-832,837-839,844-846,851-853,858-954,957-958
+src/remotion/components/StoryScene.tsx
+  698ac31901cd73e0 276,281-282
+src/audio/tts-engine.ts
+  698ac31901cd73e0 3,138-150
+scripts/schedule-budi-calendar.ts
+  698ac31901cd73e0 1-250
+scripts/prepare-organic-video-plates.ts
+  698ac31901cd73e0 71,145-214,324-341,346-384,390,430-432
+scripts/schedule-full-budi-catalog.ts
+  698ac31901cd73e0 1-248
+scripts/ingest-story.ts
+  698ac31901cd73e0 539,541-601
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "cde6f2dacfcf8c2548224273006d0cd8a01a2fca",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 896,
+      "total_deletions": 71,
+      "accepted_lines": 896,
+      "overriden_lines": 0
+    }
+  }
+}
