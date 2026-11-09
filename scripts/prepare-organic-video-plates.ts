@@ -68,7 +68,7 @@ export async function getArtworkBounds(
 }
 
 /**
- * Generate soft, organic cloud mist along the transition seam.
+ * Generate soft, organic cloud mist along the transition seam for white-canvas books.
  */
 export function generateDelicateCloudMistSvg(options: {
   width: number;
@@ -137,6 +137,77 @@ export function generateDelicateCloudMistSvg(options: {
       ${puffs.join("\n      ")}
     </g>
     <rect x="0" y="${cloudEndY}" width="${width}" height="${height - cloudEndY}" fill="${backgroundColor}" />
+  </svg>
+  `;
+}
+
+/**
+ * Generate subtle, atmospheric morning mist & cinematic reading depth for colored/illustrated books.
+ * Harmonizes seamlessly with natural backgrounds (forest, night sky, ocean) without opaque white cuts.
+ */
+export function generateAtmosphericMistSvg(options: {
+  width: number;
+  height: number;
+  cloudStartY: number;
+  cloudEndY: number;
+  seed?: number;
+  isLandscape?: boolean;
+}): string {
+  const { width, height, cloudStartY, cloudEndY, seed = 42, isLandscape = false } = options;
+
+  let s = seed;
+  const rnd = () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+
+  const cloudSpan = Math.max(90, cloudEndY - cloudStartY);
+  const midY = cloudStartY + cloudSpan * 0.35;
+
+  const puffs: string[] = [];
+  const puffCount = isLandscape ? 14 : 10;
+  for (let i = 0; i <= puffCount; i++) {
+    const t = i / puffCount;
+    const wave =
+      Math.sin(t * Math.PI * 2.2) * (cloudSpan * 0.18) +
+      Math.cos(t * Math.PI * 4.4) * (cloudSpan * 0.08);
+    const cx = t * (width + 100) - 50 + (rnd() - 0.5) * 30;
+    const cy = midY + wave + (rnd() - 0.5) * 16;
+    const r = width * (isLandscape ? 0.09 : 0.12) + (rnd() - 0.5) * 20;
+    puffs.push(`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" />`);
+  }
+
+  return `
+  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="atmoBlurWide" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="${(width * 0.045).toFixed(1)}" />
+      </filter>
+      <filter id="atmoBlurSoft" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="${(width * 0.025).toFixed(1)}" />
+      </filter>
+      <linearGradient id="atmoMistGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0" />
+        <stop offset="40%" stop-color="#FFFFFF" stop-opacity="0.18" />
+        <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.05" />
+      </linearGradient>
+      <linearGradient id="lowerThirdShade" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#020617" stop-opacity="0" />
+        <stop offset="45%" stop-color="#020617" stop-opacity="0.25" />
+        <stop offset="80%" stop-color="#020617" stop-opacity="0.65" />
+        <stop offset="100%" stop-color="#020617" stop-opacity="0.82" />
+      </linearGradient>
+    </defs>
+    <!-- Soft atmospheric morning mist floating across canopy bottom -->
+    <rect x="0" y="${cloudStartY}" width="${width}" height="${height - cloudStartY}" fill="url(#atmoMistGrad)" />
+    <g filter="url(#atmoBlurWide)" fill="#FFFFFF" opacity="0.20">
+      ${puffs.join("\n      ")}
+    </g>
+    <g filter="url(#atmoBlurSoft)" fill="#FFFFFF" opacity="0.14">
+      ${puffs.join("\n      ")}
+    </g>
+    <!-- Velvety cinematic lower-third shadow for crystal clear subtitle reading -->
+    <rect x="0" y="${Math.round(height * 0.60)}" width="${width}" height="${Math.round(height * 0.40)}" fill="url(#lowerThirdShade)" />
   </svg>
   `;
 }
@@ -250,33 +321,73 @@ export async function createOrganicVideoPlate16x9(
   const ambLeft = Math.max(0, Math.round((targetW - ambW) / 2));
   const ambTop = Math.max(0, Math.round(artTop + (H - ambH) / 2));
 
-  // 6. DELICATE CLOUD MIST (Climbs only ~40px so characters are NOT covered!)
+  // 6. ADAPTIVE ATMOSPHERIC MIST & DEPTH
+  // Detect whether image is a white-page illustration (e.g. Kacamata Nenek) or full-bleed artwork (e.g. Ayo, Berayun, Momo!)
+  const cornerSample = await sharp(rawImage)
+    .extract({ left: 0, top: 0, width: Math.min(50, bounds.imgW), height: Math.min(50, bounds.imgH) })
+    .stats();
+  const bottomSample = await sharp(rawImage)
+    .extract({
+      left: Math.round(bounds.imgW * 0.2),
+      top: Math.max(0, bounds.imgH - 50),
+      width: Math.round(bounds.imgW * 0.6),
+      height: Math.min(45, bounds.imgH),
+    })
+    .stats();
+
+  const isWhiteTheme =
+    cornerSample.channels.slice(0, 3).every((c) => c.mean > 238) &&
+    bottomSample.channels.slice(0, 3).every((c) => c.mean > 238);
+
   const mistRise = Math.min(Math.round(H * 0.08), 45);
   const cloudStartY = artBottom - mistRise;
   const cloudEndY = Math.min(960, artBottom + 50);
 
-  const cloudSvg = generateDelicateCloudMistSvg({
-    width: targetW,
-    height: targetH,
-    cloudStartY,
-    cloudEndY,
-    backgroundColor: "#FFFFFF",
-    seed: 42,
-    isLandscape: true,
-  });
+  let mistSvg: string;
+  let baseCanvas: Buffer;
 
-  // 7. Base Canvas (NO static burned-in text! Pure clean canvas for Remotion subtitles)
-  const baseCanvas = await sharp({
-    create: { width: targetW, height: targetH, channels: 4, background: "#FFFFFF" },
-  })
-    .png()
-    .toBuffer();
+  if (isWhiteTheme) {
+    // White Theme: Pure white canvas + delicate white cloud mist (preserves Kacamata Nenek style)
+    mistSvg = generateDelicateCloudMistSvg({
+      width: targetW,
+      height: targetH,
+      cloudStartY,
+      cloudEndY,
+      backgroundColor: "#FFFFFF",
+      seed: 42,
+      isLandscape: true,
+    });
+
+    baseCanvas = await sharp({
+      create: { width: targetW, height: targetH, channels: 4, background: "#FFFFFF" },
+    })
+      .png()
+      .toBuffer();
+  } else {
+    // Illustrated / Full-Bleed Theme: Natural atmospheric morning canopy mist + cinematic lower-third reading shadow
+    // NEVER put stark white canvas on rich forest/colored artwork!
+    mistSvg = generateAtmosphericMistSvg({
+      width: targetW,
+      height: targetH,
+      cloudStartY,
+      cloudEndY,
+      seed: 42,
+      isLandscape: true,
+    });
+
+    baseCanvas = await sharp(cropped)
+      .resize(targetW, targetH, { fit: "cover" })
+      .blur(42)
+      .modulate({ brightness: 0.90, saturation: 1.05 })
+      .png()
+      .toBuffer();
+  }
 
   const finalVideoPlate = await sharp(baseCanvas)
     .composite([
       { input: softAmbient, top: ambTop, left: ambLeft },
       { input: featheredArt, top: artTop, left: artLeft },
-      { input: Buffer.from(cloudSvg), top: 0, left: 0 },
+      { input: Buffer.from(mistSvg), top: 0, left: 0 },
     ])
     .png()
     .toBuffer();
@@ -316,8 +427,9 @@ async function main() {
     const origPath = path.join(storyDir, imgRel);
     const backupPath = path.join(backupDir, path.basename(imgRel));
 
-    // Backup if not backed up
-    if (!existsSync(backupPath) && existsSync(origPath)) {
+    const isForce = args.includes("--force");
+    // Backup if not backed up or if --force is requested
+    if ((isForce || !existsSync(backupPath)) && existsSync(origPath)) {
       await fs.copyFile(origPath, backupPath);
       console.log(`   📦 Backed up ${path.basename(imgRel)} -> raw_backup/`);
     }

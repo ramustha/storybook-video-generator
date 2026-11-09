@@ -260,17 +260,19 @@ class StorybookDB {
   }
 
   private queryViaWrangler<T>(sql: string, params: any[] = []): T[] {
-    // Escape single quotes for shell-embedded SQL
-    let formattedSql = sql;
-    for (const p of params) {
+    // Escape single quotes for shell-embedded SQL without clobbering '?' inside text strings
+    let paramIndex = 0;
+    const formattedSql = sql.replace(/\?/g, () => {
+      if (paramIndex >= params.length) return "?";
+      const p = params[paramIndex++];
       if (typeof p === "string") {
-        formattedSql = formattedSql.replace("?", `'${p.replace(/'/g, "''")}'`);
+        return `'${p.replace(/'/g, "''")}'`;
       } else if (p === null || p === undefined) {
-        formattedSql = formattedSql.replace("?", "NULL");
+        return "NULL";
       } else {
-        formattedSql = formattedSql.replace("?", String(p));
+        return String(p);
       }
-    }
+    });
 
     const cmd = `npx --yes wrangler d1 execute ${this.config.databaseName || "zayn-storybook-db"} --command="${formattedSql.replace(/"/g, '\\"')}" --remote --json`;
     const stdout = execSync(cmd, { encoding: "utf-8", maxBuffer: 10 * 1024 * 1024 });

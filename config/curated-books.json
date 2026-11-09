@@ -807,57 +807,155 @@
         "index": 1,
         "type": "story",
         "pageNumber": 7,
-        "id": "Momo adalah seekor siamang Sumatra berbulu hitam. Lengannya panjang dan kuat, namun ia tidak pernah mau berayun di pepohonan.",
-        "en": "Momo is a Sumatran siamang with shiny black fur. His arms are long and strong, but he never ever dares to swing through the trees."
+        "id": "Momo adalah seekor siamang Sumatra. Namun, ia tidak pernah mau berayun.",
+        "en": "Momo is a Sumatran siamang. But he never, ever wants to swing."
       },
       {
         "index": 2,
         "type": "story",
-        "pageNumber": 11,
-        "id": "Momo sangat takut berayun karena pernah hampir terjatuh. Saat teman-temannya asyik memetik buah ara di seberang hutan, Momo hanya diam sendirian memetik dedaunan.",
-        "en": "Momo was terrified because he had once slipped and almost tumbled down. When his friends leaped across the forest to pick sweet figs, Momo stayed behind eating leaves all alone."
+        "pageNumber": 8,
+        "id": "Momo sering mengeluh. Mengapa mereka tinggal di pohon yang tinggi?",
+        "en": "Momo often complains. Why do they have to live high up in the trees?"
       },
       {
         "index": 3,
         "type": "story",
-        "pageNumber": 18,
-        "id": "Tiba-tiba terdengar suara rintihan, cuit! cuit! Seekor anak burung malang terjatuh dari sarangnya yang tinggi dan tergeletak tak berdaya di tanah.",
-        "en": "Suddenly, a soft cry echoed, chirp! chirp! A helpless little baby bird had tumbled from its high nest, lying vulnerable on the forest floor."
+        "pageNumber": 9,
+        "id": "Siamang tinggal di pedalaman hutan. Di sana ada banyak hewan buas berkeliaran. Tinggal di atas pohon membuat siamang aman.",
+        "en": "Siamangs live deep in the dense forest where many wild beasts roam. Living high in the trees keeps them safe."
       },
       {
         "index": 4,
         "type": "story",
-        "pageNumber": 19,
-        "id": "Gawat! Seekor ular melata mendekat hendak memangsa anak burung itu. Momo panik berteriak melengking minta tolong, namun seluruh keluarganya sedang pergi jauh.",
-        "en": "Danger! A sneaky snake slithered closer, ready to strike the baby bird. Momo shrieked in alarm calling for help, but the deep forest was completely empty."
+        "pageNumber": 11,
+        "id": "Momo tidak berani berayun. Ia pernah hampir terjatuh. Momo takut itu akan terulang lagi.",
+        "en": "Momo does not dare to swing. He once slipped and almost fell. Momo is terrified it might happen again."
       },
       {
         "index": 5,
         "type": "story",
-        "pageNumber": 23,
-        "id": "Ular itu semakin dekat! Momo mondar-mandir bingung dan cemas. Haruskah ia berayun dan melompat dari dahan tinggi demi menolong sahabat kecilnya?",
-        "en": "The snake was getting closer and closer! Momo paced anxiously. Should he dare to swing and leap across the dizzying canopy to rescue his tiny friend?"
+        "pageNumber": 12,
+        "id": "Teman-teman mengajak Momo bermain. Pohon ara di pinggir hutan sedang berbuah. Mereka akan ke sana untuk memetiknya.",
+        "en": "His friends invite Momo to play. The fig tree at the edge of the forest is fruiting, and they are going to harvest the sweet figs."
       },
       {
         "index": 6,
         "type": "story",
-        "pageNumber": 26,
-        "id": "Demi menyelamatkan anak burung, Momo melupakan rasa takutnya! Ia melompat dan berayun kencang melayang di udara, wing! wing! Hap! Ia mendarat dengan selamat di seberang!",
-        "en": "To save the helpless chick, Momo forgot all his fears! He leaped and swung bravely through the open air, whoosh! whoosh! Snap! He landed safely on the far tree!"
+        "pageNumber": 13,
+        "id": "Uh, Momo langsung menelan ludah. Ia sangat suka buah ara. Namun, Momo tidak berani meninggalkan pohonnya.",
+        "en": "Uh, Momo's mouth immediately waters. He loves sweet figs! But Momo does not dare to leave his tree."
       },
       {
         "index": 7,
         "type": "story",
-        "pageNumber": 28,
-        "id": "Momo langsung menyambar anak burung itu lalu memanjat gesit kembali ke puncak pohon, jauh dari jangkauan ular yang kelaparan!",
-        "en": "Momo gently scooped up the little chick and climbed swiftly back up to the treetops, safely out of the hungry snake's reach!"
+        "pageNumber": 14,
+        "id": "Momo memilih tidak ikut. Ia memetik daun muda saja di sekitarnya.",
+        "en": "Momo chooses to stay behind. He simply plucks tender young leaves around him instead."
       },
       {
         "index": 8,
         "type": "story",
+        "pageNumber": 15,
+        "id": "Daun-daunan juga rasanya enak meskipun tidak seenak buah ara.",
+        "en": "The leaves taste quite nice too, even though they are not as sweet as fresh figs."
+      },
+      {
+        "index": 9,
+        "type": "story",
+        "pageNumber": 16,
+        "id": "Siang itu hutan terasa sepi. Keluarga dan teman-temannya sudah pergi. Momo tinggal sendiri.",
+        "en": "That afternoon, the forest feels quiet and still. His family and friends have gone, leaving Momo all by himself."
+      },
+      {
+        "index": 10,
+        "type": "story",
+        "pageNumber": 17,
+        "id": "Cuit, cuit. Momo tersentak. Suara apa itu? Ia mengintip ke bawah.",
+        "en": "Chirp, chirp! Momo is startled. What could that sound be? He peers down below the canopy."
+      },
+      {
+        "index": 11,
+        "type": "story",
+        "pageNumber": 18,
+        "id": "Seekor anak burung mencicit. Ia terjatuh dari sarangnya di atas pohon. Momo terbelalak.",
+        "en": "A helpless baby bird is crying. It has tumbled from its nest high in the tree! Momo's eyes widen with alarm."
+      },
+      {
+        "index": 12,
+        "type": "story",
+        "pageNumber": 19,
+        "id": "Cuit, cuit! Induk burung ribut mencicit. Ya, ampun, seekor ular datang mendekat. Ia mengincar anak burung itu.",
+        "en": "Chirp, chirp! The mother bird flutters frantically. Oh no, a sneaky snake is slithering near, targeting the little chick!"
+      },
+      {
+        "index": 13,
+        "type": "story",
+        "pageNumber": 20,
+        "id": "Momo segera berteriak panik. Kantung tenggorokannya membulat besar. Jeritannya melengking kencang. Ia harus meminta bantuan.",
+        "en": "Momo shouts out in sheer panic. His throat sac expands round and huge. His shrieks ring out loud through the jungle, desperately calling for help."
+      },
+      {
+        "index": 14,
+        "type": "story",
+        "pageNumber": 21,
+        "id": "Kantung tenggorokan Momo membulat dan mengempis. Ini adalah cara siamang bersuara nyaring untuk berkomunikasi satu dengan yang lain.",
+        "en": "Momo's throat sac swells and deflates. This is the special way siamangs make booming sounds to talk across long distances."
+      },
+      {
+        "index": 15,
+        "type": "story",
+        "pageNumber": 22,
+        "id": "Sayangnya, tidak ada yang kunjung datang. Keluarga dan teman-temannya pasti sibuk memetik buah ara di tepi hutan.",
+        "en": "Sadly, nobody comes to help. His family and friends must be busy enjoying sweet figs far away at the forest border."
+      },
+      {
+        "index": 16,
+        "type": "story",
+        "pageNumber": 23,
+        "id": "Apa yang harus Momo lakukan? Momo mondar-mandir kebingungan. Ular itu makin mendekat. Kasihan anak burung itu.",
+        "en": "What should Momo do? Momo paces back and forth, deeply worried. The snake creeps closer and closer. Poor little bird!"
+      },
+      {
+        "index": 17,
+        "type": "story",
+        "pageNumber": 24,
+        "id": "Momo memegang dahan dengan ragu. Haruskah ia berayun dan melompat? Uh, tetapi ia masih takut.",
+        "en": "Momo grasps the branch with trembling hands. Should he dare to swing and leap across? Oh, but he is still so scared!"
+      },
+      {
+        "index": 18,
+        "type": "story",
+        "pageNumber": 25,
+        "id": "Eh, mendadak Momo sudah menggelantung. Harus bagaimana sekarang? Tempat anak burung terjatuh cukup jauh.",
+        "en": "Whoa, suddenly Momo is already dangling in midair! What now? The spot where the chick fell is quite far away."
+      },
+      {
+        "index": 19,
+        "type": "story",
+        "pageNumber": 26,
+        "id": "Ayo, melompat! Ular itu makin mendekat! Momo melupakan rasa takutnya. Berayun, Momo terus berayun. Wing, wing.",
+        "en": "Come on, leap! The snake is right there! Momo forgets all of his fears. Swinging, Momo swings onward and forward! Whoosh, whoosh!"
+      },
+      {
+        "index": 20,
+        "type": "story",
+        "pageNumber": 27,
+        "id": "Hap. Momo mendarat di seberang pohon. Ia mencengkeram batangnya kuat-kuat.",
+        "en": "Hap! Momo lands safely on the tree across the gap. He holds on to the trunk tightly with all his strength."
+      },
+      {
+        "index": 21,
+        "type": "story",
+        "pageNumber": 28,
+        "id": "Momo meraih anak burung. Kemudian, ia memanjat cepat. Ia memanjat terus menuju sarang burung di atas pohon.",
+        "en": "Momo gently scoops up the baby bird. Then, he scurries swiftly up the branches, climbing straight toward the high nest."
+      },
+      {
+        "index": 22,
+        "type": "story",
         "pageNumber": 29,
-        "id": "Cuit, cuit! Anak burung bersiul gembira kembali ke pelukan induknya. Momo tersenyum bangga—ia berhasil mengalahkan rasa takutnya dan kini berani berayun lagi!",
-        "en": "Chirp, chirp! The baby bird was safe and happy in its warm nest. Momo beamed with joy—he had conquered his fear and found his courage to swing once more!"
+        "id": "Cuit, cuit. Anak burung sudah kembali ke sarangnya. Momo berseru senang. Ia berani berayun lagi!",
+        "en": "Chirp, chirp! The baby bird is safely home in its nest. Momo cheers with immense joy. He has found the courage to swing again!"
       }
     ]
   }

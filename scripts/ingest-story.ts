@@ -536,9 +536,69 @@ async function main() {
   const booksToProcess: CuratedBook[] = [];
 
   if (requestedSlug) {
-    const found = curatedPool.find((b) => b.slug === requestedSlug);
+    let found = curatedPool.find((b) => b.slug === requestedSlug);
     if (!found) {
-      throw new Error(`Requested book slug "${requestedSlug}" not found in config/curated-books.json!`);
+      const budiPath = path.resolve("./config/budi-catalog.json");
+      if (existsSync(budiPath)) {
+        try {
+          const budiCat = JSON.parse(await fs.readFile(budiPath, "utf-8"));
+          const b = (budiCat.books || []).find((x: any) => x.slug === requestedSlug);
+          if (b) {
+            found = {
+              slug: b.slug,
+              title: b.title,
+              originalTitle: b.title,
+              author: b.author || "Penulis BUDI Kemendikdasmen RI",
+              illustrator: b.illustrator && b.illustrator !== "-" ? b.illustrator : "Ilustrator BUDI Kemendikdasmen RI",
+              publisher: "Badan Pengembangan dan Pembinaan Bahasa, Kemendikdasmen RI",
+              license: "Lisensi Terbuka Kemendikdasmen RI",
+              readingLevel: b.level === "PAUD" ? 1 : 2,
+              sourceUrl: b.budiPageUrl || `https://budi.kemendikdasmen.go.id/baca/digital/${b.slug}`,
+              pdfUrl: b.pdfDownloadUrl || `https://budi.kemendikdasmen.go.id/unduh-file/${b.slug}/digital`,
+              theme: b.theme || "Cerita Anak Indonesia",
+              characterBible: { protagonists: [] },
+              worldBible: { village: "Indonesia", palette: {} },
+              moral: {
+                headlineId: "Budi Pekerti Anak",
+                spokenId: "Cerita ini mengajarkan kebaikan, keberanian, dan budi pekerti yang luhur.",
+                headlineEn: "Character & Courage",
+                spokenEn: "This story teaches kindness, courage, and great character.",
+              },
+              thumbnailConfig: {
+                heroImage: "assets/cover.png",
+                backdropImage: "assets/cover.png",
+                id: {
+                  headlineTop: b.title.toUpperCase(),
+                  headlineBottom: "CERITA NUSANTARA 🌟📖",
+                  hook: "Petualangan Seru Penuh Nilai Kebaikan!",
+                  hookEmoji: "🌟📖💖",
+                  badge: "Kisah Pilihan",
+                  sticker: "Cerita Edukatif! 🌟",
+                  bedtimeTitle: b.title,
+                  bedtimeHook: "Dongeng Pengantar Tidur Penuh Ketenangan",
+                },
+                en: {
+                  headlineTop: b.title.toUpperCase(),
+                  headlineBottom: "INDONESIAN TALE 🌟📖",
+                  hook: "A Heartwarming Journey of Kindness!",
+                  hookEmoji: "🌟📖💖",
+                  badge: "Featured Story",
+                  sticker: "Bedtime Classic! 🌟",
+                  bedtimeTitle: b.title,
+                  bedtimeHook: "A Soothing Bedtime Story for Sweet Dreams",
+                },
+              },
+              scenes: [],
+            };
+            console.log(`   ✔ Resolved "${requestedSlug}" dynamically from BUDI catalog.`);
+          }
+        } catch (e) {
+          console.warn("BUDI catalog parse error:", e);
+        }
+      }
+    }
+    if (!found) {
+      throw new Error(`Requested book slug "${requestedSlug}" not found in config/curated-books.json or config/budi-catalog.json!`);
     }
     booksToProcess.push(found);
   } else if (allFlag || autoNext || limitArg) {

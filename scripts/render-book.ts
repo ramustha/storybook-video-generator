@@ -3,6 +3,7 @@ import { renderMedia, selectComposition } from "@remotion/renderer";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync } from "fs";
+import { execSync } from "child_process";
 import { db } from "./lib/db";
 
 async function main() {
@@ -19,12 +20,11 @@ async function main() {
 
   const storyDir = path.resolve(`./stories/${bookSlug}`);
   const manifestPath = path.join(storyDir, "story.json");
-  let rawManifest = await db.getStory(bookSlug);
-  if (!rawManifest && existsSync(manifestPath)) {
-    rawManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
-  }
+  let rawManifest = existsSync(manifestPath)
+    ? JSON.parse(await fs.readFile(manifestPath, "utf-8"))
+    : await db.getStory(bookSlug);
   if (!rawManifest) {
-    throw new Error(`Storybook manifest for [${bookSlug}] could not be found in D1 or local disk.`);
+    throw new Error(`Storybook manifest for [${bookSlug}] could not be found in local disk or D1.`);
   }
 
   const languages: Array<"id" | "en"> = langArg === "all" ? ["id", "en"] : [langArg];
@@ -61,20 +61,48 @@ async function main() {
       }
     }
 
-    // Load words json for active language
+    // Load words json for active language with robust fallbacks
     const wordsMap: Record<string, any[]> = {};
     for (const scene of storyData.scenes) {
-      const wordsRelPath = scene.audio?.wordsPath;
-      if (wordsRelPath) {
-        const wordsFile = path.join(storyDir, wordsRelPath);
-        try {
-          const raw = await fs.readFile(wordsFile, "utf-8");
-          const parsed = JSON.parse(raw);
-          wordsMap[scene.sceneId] = Array.isArray(parsed) ? parsed : (parsed.words || []);
-        } catch (err) {
-          wordsMap[scene.sceneId] = [];
+      const candidatePaths = [
+        scene.audio?.wordsPath,
+        `assets/${lang}/${scene.sceneId}_words.json`,
+      ].filter(Boolean) as string[];
+
+      let loadedWords: any[] = [];
+      for (const relPath of candidatePaths) {
+        const wordsFile = path.join(storyDir, relPath);
+        if (existsSync(wordsFile)) {
+          try {
+            const raw = await fs.readFile(wordsFile, "utf-8");
+            const parsed = JSON.parse(raw);
+            const wordsList = Array.isArray(parsed) ? parsed : (parsed.words || []);
+            if (wordsList.length > 0) {
+              loadedWords = wordsList;
+              break;
+            }
+          } catch {
+            // Try next candidate
+          }
         }
       }
+
+      // If no aligned words file exists, synthesize word timings from narration text so subtitles NEVER disappear
+      if (loadedWords.length === 0 && scene.audio?.text) {
+        const textWords = scene.audio.text.trim().split(/\s+/).filter(Boolean);
+        const duration = scene.durationSeconds || scene.audio?.durationSeconds || 6.0;
+        const wordDuration = Math.max(0.15, (duration - 0.5) / Math.max(1, textWords.length));
+        loadedWords = textWords.map((word: string, i: number) => ({
+          word,
+          start: Math.max(0, 0.2 + i * wordDuration),
+          end: Math.max(0.1, 0.2 + (i + 1) * wordDuration),
+          speaker: "narator",
+          speakerName: "Narator",
+          speakerColor: "#FDE047",
+        }));
+      }
+
+      wordsMap[scene.sceneId] = loadedWords;
     }
 
     // Sanitize missing audio / sfx assets to prevent 404 in Remotion
@@ -89,6 +117,20 @@ async function main() {
         const fullAudio = path.join(storyDir, scene.audio.audioPath);
         if (!existsSync(fullAudio)) {
           console.warn(`⚠️ Warning: Voiceover audio missing for scene ${scene.sceneId}: ${fullAudio}`);
+        } else {
+          // Guarantee NO audio truncation and provide natural breathing room (1.2s tail buffer)
+          try {
+            const out = execSync(`afinfo "${fullAudio}" 2>/dev/null`).toString();
+            const m = out.match(/estimated duration:\s*([\d.]+)\s*sec/);
+            if (m) {
+              const audioDur = parseFloat(m[1]);
+              const safeDur = parseFloat((audioDur + 1.2).toFixed(2));
+              scene.durationSeconds = Math.max(scene.durationSeconds || 0, safeDur);
+              if (scene.audio) scene.audio.durationSeconds = audioDur;
+            }
+          } catch {
+            // fallback gracefully
+          }
         }
       }
     }

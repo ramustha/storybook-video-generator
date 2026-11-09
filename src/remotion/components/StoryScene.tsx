@@ -273,12 +273,13 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
             />
           </div>
 
-          {/* Subtle Top & Bottom Cinematic Vignette */}
+          {/* Subtle Top & Bottom Cinematic Vignette for Enhanced Contrast */}
           <div
             style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(to bottom, rgba(2,6,23,0.4) 0%, transparent 15%, transparent 75%, rgba(2,6,23,0.6) 100%)",
+              background:
+                "linear-gradient(to bottom, rgba(2,6,23,0.45) 0%, transparent 18%, transparent 68%, rgba(2,6,23,0.78) 100%)",
               pointerEvents: "none",
             }}
           />
