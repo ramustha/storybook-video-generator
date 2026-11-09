@@ -1,0 +1,35 @@
+package.json
+  cd4b837cc23a86b3 60
+scripts/deploy-cloudflare-pages.ts
+  cd4b837cc23a86b3 1-114
+.github/workflows/deploy-cloudflare-pages.yml
+  cd4b837cc23a86b3 1-54
+scripts/sync-github-secrets.ts
+  cd4b837cc23a86b3 22,37-40
+README.md
+  cd4b837cc23a86b3 121
+docs/audit-data.json
+  cd4b837cc23a86b3 405-407,1403-1721,1745,1769,1793
+docs/index.html
+  cd4b837cc23a86b3 1042-1043,1051
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "85b24db988f8fcd8fc4faf15086ead75718c9434",
+  "prompts": {
+    "cd4b837cc23a86b3": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "7f62afe1-174a-4e1a-b8e6-5343c856c93d",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 503,
+      "total_deletions": 11,
+      "accepted_lines": 503,
+      "overriden_lines": 0
+    }
+  }
+}
