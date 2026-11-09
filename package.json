@@ -58,6 +58,8 @@
     "notify:telegram": "tsx scripts/notify-telegram.ts",
     "deploy:worker": "tsx scripts/setup-cloudflare-worker.ts",
     "deploy:portal": "tsx scripts/deploy-cloudflare-pages.ts",
+    "deploy:pages": "tsx scripts/deploy-cloudflare-pages.ts",
+    "migrate:d1": "tsx scripts/migrate-to-d1.ts",
     "secrets:github": "tsx scripts/sync-github-secrets.ts",
     "render:tiktok-demo": "tsx scripts/render-tiktok-demo.ts",
     "upload:tiktok": "tsx scripts/upload-tiktok.ts",

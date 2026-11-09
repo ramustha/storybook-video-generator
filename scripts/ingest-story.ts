@@ -7,6 +7,7 @@ import { Readable } from "stream";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { loadR2Config, pushStory } from "./manage-story-storage";
 import { auditAndRefineStoryQuality, QualityAuditResult } from "./audit-story-quality";
+import { db } from "./lib/db";
 
 export interface CuratedScene {
   index: number;
@@ -409,6 +410,15 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
 
   await fs.writeFile(manifestPath, JSON.stringify(fullManifest, null, 2), "utf-8");
   console.log(`✔ Manifest created at ${manifestPath} (${scenesPayload.length} scenes)`);
+
+  // Sync ingested book to Cloudflare D1
+  try {
+    await db.saveStory(fullManifest);
+    await db.markCuratedBookStatus(slug, "ingested");
+    console.log(`☁️ Cloudflare D1 database synchronized for newly ingested book [${slug}].`);
+  } catch (d1Err: any) {
+    console.warn("⚠️ Cloudflare D1 ingestion sync warning:", d1Err.message);
+  }
 
   // 4. Copy shared templates audio and SFX
   console.log(`\n🎵 Copying shared BGM & SFX audio pack...`);

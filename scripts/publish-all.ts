@@ -4,6 +4,7 @@ import { existsSync } from "fs";
 import path from "path";
 import { verifyStoryThumbnails, renderStoryThumbnails } from "./render-thumbnail";
 import { notifyTelegramPublish, notifyTelegramFailure } from "./notify-telegram";
+import { db } from "./lib/db";
 
 interface PublishAllOptions {
   bookSlug: string;
@@ -398,6 +399,14 @@ async function main() {
           publishedAt: new Date().toISOString(),
         };
         await fs.writeFile(storyJsonPath, JSON.stringify(freshStory, null, 2), "utf-8");
+
+        // Sync publications and state to Cloudflare D1
+        try {
+          await db.saveStory(freshStory);
+          console.log(`\n☁️ Synchronized publications to Cloudflare D1 serverless database.`);
+        } catch (d1Err: any) {
+          console.warn("⚠️ Cloudflare D1 synchronization warning:", d1Err.message);
+        }
       } catch (saveErr: any) {
         console.warn("⚠️ Failed updating socialPromotion in story.json:", saveErr.message);
       }

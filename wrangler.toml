@@ -1,0 +1,8 @@
+name = "storybook-catalog"
+pages_build_output_dir = "docs"
+compatibility_date = "2024-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zayn-storybook-db"
+database_id = "a979ff27-bed2-4428-a4af-eae976a24253"

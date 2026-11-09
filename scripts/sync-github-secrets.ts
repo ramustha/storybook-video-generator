@@ -44,6 +44,24 @@ async function main() {
     } catch {}
   }
 
+  // 2.5 Resolve Wrangler token for Cloudflare D1
+  const home = process.env.HOME || "";
+  const candidatePaths = [
+    path.join(home, "Library/Preferences/.wrangler/config/default.toml"),
+    path.join(home, ".wrangler/config/default.toml"),
+  ];
+  for (const p of candidatePaths) {
+    if (existsSync(p)) {
+      try {
+        const content = readFileSync(p, "utf-8");
+        const match = content.match(/oauth_token\s*=\s*"([^"]+)"/);
+        if (match && match[1] && !secrets["CLOUDFLARE_API_TOKEN"]) {
+          secrets["CLOUDFLARE_API_TOKEN"] = match[1];
+        }
+      } catch {}
+    }
+  }
+
   // 3. Read config/meta-config.json
   const metaPath = path.resolve("./config/meta-config.json");
   if (existsSync(metaPath)) {
