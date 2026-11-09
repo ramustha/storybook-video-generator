@@ -103,7 +103,6 @@ for (const s of stories) {
     for (const fmt of ["landscape", "vertical"] as const) {
       const item = fb[lang][fmt];
       if (item && item.url) {
-        // Find corresponding youtube thumbnail for visual preview if available
         const fallbackYt = yt[lang]?.[fmt]?.id;
         auditRecords.push({
           id: padId(counter++),
@@ -236,6 +235,26 @@ const auditJsonPath = path.join(docsDir, "audit-data.json");
 fs.writeFileSync(auditJsonPath, JSON.stringify(auditRecords, null, 2));
 console.log(`Saved ${auditRecords.length} audit records to ${auditJsonPath}`);
 
+// Precompute summary metrics for build-time HTML injection
+const initialTotal = auditRecords.length;
+const initialYt = auditRecords.filter((r) => r.platform === "YouTube").length;
+const initialFb = auditRecords.filter((r) => r.platform === "Facebook").length;
+const initialIg = auditRecords.filter((r) => r.platform === "Instagram").length;
+const initialStorySlugs = new Set(
+  auditRecords.filter((r) => r.category !== "Compilation Marathon").map((r) => r.storySlug)
+);
+const initialStoriesCount = initialStorySlugs.size;
+
+// Precompute unique story options for build-time dropdown
+const initialStoryMap = new Map<string, string>();
+for (const r of auditRecords) {
+  if (r.category === "Compilation Marathon") continue;
+  if (!initialStoryMap.has(r.storySlug)) {
+    initialStoryMap.set(r.storySlug, r.storyTitleId || r.storySlug);
+  }
+}
+const initialStoryOptions = Array.from(initialStoryMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+
 // Generate docs/index.html
 const indexHtmlContent = `<!DOCTYPE html>
 <html lang="en">
@@ -252,40 +271,42 @@ const indexHtmlContent = `<!DOCTYPE html>
       --bg-primary: #0b0f19;
       --bg-secondary: #111827;
       --bg-tertiary: #1f2937;
-      --card-bg: rgba(26, 34, 52, 0.7);
+      --card-bg: rgba(22, 30, 46, 0.75);
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-hover: rgba(37, 48, 73, 0.9);
+      --card-hover: rgba(30, 41, 62, 0.95);
       --text-main: #f3f4f6;
       --text-muted: #9ca3af;
       --text-dim: #6b7280;
       --accent-primary: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-glow: rgba(56, 189, 248, 0.22);
       --yt-color: #ef4444;
       --fb-color: #3b82f6;
       --ig-color: #ec4899;
       --success-green: #10b981;
       --gold: #f59e0b;
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
+      --purple: #a855f7;
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
       --radius-full: 9999px;
-      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.35);
-      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+      --transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     [data-theme="light"] {
       --bg-primary: #f8fafc;
       --bg-secondary: #ffffff;
       --bg-tertiary: #f1f5f9;
-      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-bg: rgba(255, 255, 255, 0.92);
       --card-border: rgba(0, 0, 0, 0.08);
       --card-hover: #ffffff;
       --text-main: #0f172a;
       --text-muted: #475569;
       --text-dim: #94a3b8;
       --accent-primary: #0284c7;
-      --accent-glow: rgba(2, 132, 199, 0.18);
-      --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --accent-glow: rgba(2, 132, 199, 0.16);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.05);
     }
 
     * {
@@ -299,51 +320,51 @@ const indexHtmlContent = `<!DOCTYPE html>
       background-color: var(--bg-primary);
       color: var(--text-main);
       min-height: 100vh;
-      line-height: 1.5;
+      line-height: 1.45;
       -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      max-width: 1440px;
+      max-width: 1560px;
       margin: 0 auto;
-      padding: 2rem 1.5rem;
+      padding: 0.85rem 1.15rem;
     }
 
     /* Header styling */
     header {
-      margin-bottom: 2.5rem;
+      margin-bottom: 0.75rem;
       border-bottom: 1px solid var(--card-border);
-      padding-bottom: 2rem;
+      padding-bottom: 0.65rem;
     }
 
     .header-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
+      gap: 0.65rem;
     }
 
     .brand-title {
       display: flex;
       align-items: center;
-      gap: 0.875rem;
+      gap: 0.65rem;
     }
 
     .brand-logo {
-      font-size: 2.25rem;
+      font-size: 1.5rem;
       line-height: 1;
-      filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.4));
+      filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.35));
     }
 
     .brand-heading h1 {
-      font-size: 1.85rem;
+      font-size: 1.22rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.015em;
       background: linear-gradient(135deg, #ffffff 40%, var(--accent-primary) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      display: inline-block;
     }
 
     [data-theme="light"] .brand-heading h1 {
@@ -354,53 +375,32 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     .brand-heading p {
       color: var(--text-muted);
-      font-size: 0.95rem;
-      margin-top: 0.25rem;
+      font-size: 0.76rem;
+      margin-top: 0.1rem;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .badge-verified {
-      display: inline-flex;
-      align-items: center;
       gap: 0.4rem;
-      padding: 0.35rem 0.75rem;
-      border-radius: var(--radius-full);
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: var(--success-green);
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .badge-verified::before {
-      content: '';
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--success-green);
-      box-shadow: 0 0 8px var(--success-green);
+      flex-wrap: wrap;
     }
 
     .btn-action {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.95rem;
-      border-radius: var(--radius-md);
+      gap: 0.35rem;
+      padding: 0.32rem 0.65rem;
+      border-radius: var(--radius-sm);
       background: var(--bg-secondary);
       border: 1px solid var(--card-border);
       color: var(--text-main);
-      font-size: 0.85rem;
+      font-size: 0.76rem;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
       transition: var(--transition);
+      height: 30px;
     }
 
     .btn-action:hover {
@@ -413,33 +413,32 @@ const indexHtmlContent = `<!DOCTYPE html>
       background: linear-gradient(135deg, #0284c7, #2563eb);
       border: none;
       color: #ffffff;
-      box-shadow: 0 4px 14px var(--accent-glow);
+      box-shadow: 0 2px 8px var(--accent-glow);
     }
 
     .btn-accent:hover {
       background: linear-gradient(135deg, #0369a1, #1d4ed8);
       color: #ffffff;
-      box-shadow: 0 6px 20px var(--accent-glow);
     }
 
     /* Channel badges */
     .channel-strip {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.4rem;
       flex-wrap: wrap;
       align-items: center;
-      margin-top: 1rem;
-      padding-top: 1rem;
+      margin-top: 0.5rem;
+      padding-top: 0.45rem;
       border-top: 1px dashed var(--card-border);
     }
 
     .channel-pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.85rem;
+      gap: 0.35rem;
+      padding: 0.18rem 0.55rem;
       border-radius: var(--radius-full);
-      font-size: 0.82rem;
+      font-size: 0.72rem;
       font-weight: 600;
       text-decoration: none;
       transition: var(--transition);
@@ -459,12 +458,69 @@ const indexHtmlContent = `<!DOCTYPE html>
     .channel-pill.ig { border-color: rgba(236, 72, 153, 0.4); color: #f472b6; }
     .channel-pill.gh { border-color: rgba(156, 163, 175, 0.4); color: #d1d5db; }
 
+    /* Live Data Status Indicator */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .status-badge:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .status-badge.status-live {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: rgba(16, 185, 129, 0.1);
+      color: #34d399;
+    }
+
+    .status-badge.status-snapshot {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+    }
+
+    .status-badge.status-embedded {
+      border-color: rgba(168, 85, 247, 0.4);
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-dot.pulsing {
+      animation: pulseAnim 1.5s infinite;
+    }
+
+    @keyframes pulseAnim {
+      0% { opacity: 0.3; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.3; transform: scale(0.9); }
+    }
+
     /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 0.55rem;
+      margin-bottom: 0.75rem;
     }
 
     .stat-card {
@@ -472,7 +528,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md);
-      padding: 1.15rem 1.25rem;
+      padding: 0.55rem 0.75rem;
       transition: var(--transition);
       position: relative;
       overflow: hidden;
@@ -484,72 +540,79 @@ const indexHtmlContent = `<!DOCTYPE html>
       top: 0;
       left: 0;
       right: 0;
-      height: 3px;
+      height: 2px;
       background: var(--accent-primary);
-      opacity: 0.6;
+      opacity: 0.7;
     }
 
     .stat-card.yt::after { background: var(--yt-color); }
     .stat-card.fb::after { background: var(--fb-color); }
     .stat-card.ig::after { background: var(--ig-color); }
+    .stat-card.stories::after { background: var(--purple); }
     .stat-card.cc::after { background: var(--success-green); }
 
     .stat-title {
-      font-size: 0.775rem;
-      font-weight: 600;
+      font-size: 0.67rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 0.4rem;
+      color: var(--text-dim);
+      margin-bottom: 0.2rem;
     }
 
     .stat-value {
-      font-size: 1.75rem;
+      font-size: 1.35rem;
       font-weight: 800;
       color: var(--text-main);
       display: flex;
       align-items: baseline;
-      gap: 0.4rem;
+      gap: 0.3rem;
+      line-height: 1.15;
     }
 
     .stat-desc {
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      margin-top: 0.25rem;
+      font-size: 0.69rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Filter & Controls Toolbar */
     .toolbar {
       background: var(--bg-secondary);
       border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      margin-bottom: 2rem;
+      border-radius: var(--radius-md);
+      padding: 0.55rem 0.75rem;
+      margin-bottom: 0.65rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.45rem;
     }
 
     .search-row {
       display: flex;
-      gap: 1rem;
+      gap: 0.55rem;
+      align-items: center;
       flex-wrap: wrap;
     }
 
     .search-box {
-      flex: 1;
-      min-width: 280px;
+      flex: 1 1 240px;
+      min-width: 200px;
       position: relative;
     }
 
     .search-input {
       width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.6rem;
-      border-radius: var(--radius-md);
+      height: 32px;
+      padding: 0.25rem 0.65rem 0.25rem 2rem;
+      border-radius: var(--radius-sm);
       background: var(--bg-primary);
       border: 1px solid var(--card-border);
       color: var(--text-main);
-      font-size: 0.925rem;
+      font-size: 0.81rem;
       font-family: inherit;
       transition: var(--transition);
     }
@@ -557,14 +620,15 @@ const indexHtmlContent = `<!DOCTYPE html>
     .search-input:focus {
       outline: none;
       border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px var(--accent-glow);
+      box-shadow: 0 0 0 2px var(--accent-glow);
     }
 
     .search-icon {
       position: absolute;
-      left: 0.9rem;
+      left: 0.65rem;
       top: 50%;
       transform: translateY(-50%);
+      font-size: 0.75rem;
       color: var(--text-dim);
       pointer-events: none;
     }
@@ -572,58 +636,60 @@ const indexHtmlContent = `<!DOCTYPE html>
     .view-toggles {
       display: inline-flex;
       background: var(--bg-primary);
-      padding: 0.25rem;
-      border-radius: var(--radius-md);
+      padding: 2px;
+      border-radius: var(--radius-sm);
       border: 1px solid var(--card-border);
+      height: 32px;
     }
 
     .view-btn {
-      padding: 0.5rem 0.9rem;
+      padding: 0.2rem 0.55rem;
       border: none;
       background: transparent;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.74rem;
       font-weight: 600;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-xs);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
       transition: var(--transition);
     }
 
     .view-btn.active {
       background: var(--bg-tertiary);
       color: var(--text-main);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .filter-chips-row {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.35rem;
       flex-wrap: wrap;
       align-items: center;
     }
 
     .filter-label {
-      font-size: 0.775rem;
+      font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-dim);
-      margin-right: 0.25rem;
+      margin-right: 0.15rem;
     }
 
     .filter-chip {
-      padding: 0.35rem 0.8rem;
+      padding: 0.18rem 0.52rem;
       border-radius: var(--radius-full);
       background: var(--bg-primary);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      line-height: 1.3;
     }
 
     .filter-chip:hover {
@@ -644,14 +710,16 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     /* Filter dropdowns */
     .filter-select {
-      padding: 0.4rem 0.85rem;
-      border-radius: var(--radius-md);
+      height: 26px;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
       background: var(--bg-primary);
       border: 1px solid var(--card-border);
       color: var(--text-main);
-      font-size: 0.82rem;
+      font-size: 0.74rem;
       font-family: inherit;
       cursor: pointer;
+      max-width: 260px;
     }
 
     .filter-select:focus {
@@ -664,12 +732,12 @@ const indexHtmlContent = `<!DOCTYPE html>
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.25rem;
-      padding: 0 0.25rem;
+      margin-bottom: 0.55rem;
+      padding: 0 0.2rem;
     }
 
     .results-count {
-      font-size: 0.9rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
     }
 
@@ -680,15 +748,15 @@ const indexHtmlContent = `<!DOCTYPE html>
     /* Card Grid View */
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+      gap: 0.65rem;
     }
 
     .video-card {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-md);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -697,21 +765,21 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     .video-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 255, 255, 0.2);
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     .card-thumb-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 56.25%; /* 16:9 ratio */
-      background: #111827;
+      padding-top: 52%; /* 16:9 compact */
+      background: #0b0f19;
       overflow: hidden;
     }
 
     .card-thumb-wrapper.ratio-vertical {
-      padding-top: 60%; /* Compact representation */
+      padding-top: 56%;
     }
 
     .card-thumb-img {
@@ -721,31 +789,31 @@ const indexHtmlContent = `<!DOCTYPE html>
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
+      transition: transform 0.3s ease;
     }
 
     .video-card:hover .card-thumb-img {
-      transform: scale(1.04);
+      transform: scale(1.03);
     }
 
     .thumb-overlay-badge {
       position: absolute;
-      top: 0.75rem;
-      left: 0.75rem;
+      top: 0.4rem;
+      left: 0.4rem;
       display: flex;
-      gap: 0.4rem;
+      gap: 0.25rem;
       z-index: 2;
     }
 
     .thumb-duration-badge {
       position: absolute;
-      bottom: 0.75rem;
-      right: 0.75rem;
+      bottom: 0.4rem;
+      right: 0.4rem;
       background: rgba(0, 0, 0, 0.85);
       color: #ffffff;
-      padding: 0.2rem 0.5rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
+      padding: 0.12rem 0.35rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.67rem;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 500;
       z-index: 2;
@@ -754,13 +822,14 @@ const indexHtmlContent = `<!DOCTYPE html>
     .platform-badge {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.25rem 0.65rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.75rem;
+      gap: 0.25rem;
+      padding: 0.12rem 0.42rem;
+      border-radius: var(--radius-xs);
+      font-size: 0.67rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.03em;
+      line-height: 1.3;
     }
 
     .platform-badge.yt { background: #ef4444; color: #ffffff; }
@@ -768,65 +837,71 @@ const indexHtmlContent = `<!DOCTYPE html>
     .platform-badge.ig { background: #ec4899; color: #ffffff; }
 
     .lang-badge {
-      padding: 0.25rem 0.55rem;
-      border-radius: var(--radius-sm);
+      padding: 0.12rem 0.38rem;
+      border-radius: var(--radius-xs);
       background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(4px);
       color: #ffffff;
-      font-size: 0.75rem;
+      font-size: 0.67rem;
       font-weight: 700;
       border: 1px solid rgba(255, 255, 255, 0.2);
+      line-height: 1.3;
     }
 
     .format-badge {
-      padding: 0.25rem 0.55rem;
-      border-radius: var(--radius-sm);
+      padding: 0.12rem 0.38rem;
+      border-radius: var(--radius-xs);
       background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(4px);
       color: #38bdf8;
-      font-size: 0.75rem;
+      font-size: 0.67rem;
       font-weight: 600;
       border: 1px solid rgba(56, 189, 248, 0.3);
+      line-height: 1.3;
     }
 
     .card-content {
-      padding: 1.25rem;
+      padding: 0.65rem 0.75rem;
       display: flex;
       flex-direction: column;
       flex: 1;
     }
 
     .card-story-title {
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.69rem;
+      font-weight: 700;
       color: var(--accent-primary);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.18rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card-video-title {
-      font-size: 1.05rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      line-height: 1.35;
+      line-height: 1.28;
       color: var(--text-main);
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.45rem;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      height: 2.1rem;
     }
 
     .card-meta-list {
       margin-top: auto;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      font-size: 0.8rem;
+      gap: 0.22rem;
+      font-size: 0.71rem;
       color: var(--text-muted);
       border-top: 1px solid var(--card-border);
-      padding-top: 0.85rem;
-      margin-bottom: 1rem;
+      padding-top: 0.45rem;
+      margin-bottom: 0.55rem;
     }
 
     .card-meta-row {
@@ -837,15 +912,15 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     .meta-id-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
+      font-size: 0.69rem;
       color: var(--text-muted);
       background: var(--bg-tertiary);
-      padding: 0.15rem 0.45rem;
-      border-radius: var(--radius-sm);
+      padding: 0.1rem 0.35rem;
+      border-radius: var(--radius-xs);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.25rem;
     }
 
     .meta-id-tag:hover {
@@ -854,7 +929,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     .card-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.35rem;
     }
 
     .btn-card {
@@ -862,10 +937,10 @@ const indexHtmlContent = `<!DOCTYPE html>
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.4rem;
-      padding: 0.55rem 0.85rem;
-      border-radius: var(--radius-md);
-      font-size: 0.825rem;
+      gap: 0.25rem;
+      padding: 0.32rem 0.55rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.74rem;
       font-weight: 600;
       text-decoration: none;
       cursor: pointer;
@@ -873,6 +948,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       border: 1px solid var(--card-border);
       background: var(--bg-secondary);
       color: var(--text-main);
+      height: 28px;
     }
 
     .btn-card:hover {
@@ -901,7 +977,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       background: var(--card-bg);
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-md);
       overflow-x: auto;
       box-shadow: var(--shadow-card);
     }
@@ -909,7 +985,7 @@ const indexHtmlContent = `<!DOCTYPE html>
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.875rem;
+      font-size: 0.78rem;
       text-align: left;
     }
 
@@ -917,17 +993,20 @@ const indexHtmlContent = `<!DOCTYPE html>
       background: var(--bg-secondary);
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 0.775rem;
+      font-size: 0.69rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      padding: 1rem 1.15rem;
+      padding: 0.45rem 0.65rem;
       border-bottom: 1px solid var(--card-border);
       white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     tbody tr {
       border-bottom: 1px solid var(--card-border);
-      transition: background 0.15s ease;
+      transition: background 0.12s ease;
     }
 
     tbody tr:hover {
@@ -935,22 +1014,23 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     tbody td {
-      padding: 1rem 1.15rem;
+      padding: 0.42rem 0.65rem;
       color: var(--text-main);
       vertical-align: middle;
     }
 
     .table-cell-title {
       font-weight: 600;
-      max-width: 320px;
+      max-width: 280px;
+      font-size: 0.77rem;
     }
 
     .table-cell-title small {
       display: block;
       color: var(--text-muted);
       font-weight: 400;
-      font-size: 0.775rem;
-      margin-top: 0.15rem;
+      font-size: 0.69rem;
+      margin-top: 0.1rem;
     }
 
     .table-link {
@@ -959,7 +1039,8 @@ const indexHtmlContent = `<!DOCTYPE html>
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.2rem;
+      font-size: 0.74rem;
     }
 
     .table-link:hover {
@@ -979,7 +1060,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       z-index: 1000;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 1rem;
     }
 
     .modal-backdrop.open {
@@ -990,10 +1071,10 @@ const indexHtmlContent = `<!DOCTYPE html>
       background: var(--bg-secondary);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
-      max-width: 900px;
+      max-width: 820px;
       width: 100%;
       overflow: hidden;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
       display: flex;
       flex-direction: column;
     }
@@ -1002,24 +1083,27 @@ const indexHtmlContent = `<!DOCTYPE html>
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem 1.25rem;
+      padding: 0.75rem 1rem;
       border-bottom: 1px solid var(--card-border);
     }
 
     .modal-title {
-      font-size: 1rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .modal-close {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       cursor: pointer;
       line-height: 1;
-      padding: 0.25rem;
+      padding: 0.2rem;
     }
 
     .modal-close:hover {
@@ -1045,23 +1129,23 @@ const indexHtmlContent = `<!DOCTYPE html>
     /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 2rem;
-      right: 2rem;
+      bottom: 1.5rem;
+      right: 1.5rem;
       background: var(--bg-tertiary);
       border: 1px solid var(--card-border);
       color: var(--text-main);
-      padding: 0.75rem 1.25rem;
+      padding: 0.6rem 1rem;
       border-radius: var(--radius-md);
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
       z-index: 1100;
-      transform: translateY(100px);
+      transform: translateY(80px);
       opacity: 0;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .toast.show {
@@ -1071,21 +1155,21 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     /* Footer */
     footer {
-      margin-top: 4rem;
+      margin-top: 2rem;
       border-top: 1px solid var(--card-border);
-      padding: 2.5rem 0;
+      padding: 1.25rem 0;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.76rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 1.5rem;
+      gap: 0.85rem;
     }
 
     .footer-links {
       display: flex;
-      gap: 1.25rem;
+      gap: 0.85rem;
       flex-wrap: wrap;
     }
 
@@ -1100,10 +1184,10 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     @media (max-width: 768px) {
-      .container { padding: 1rem; }
-      .brand-heading h1 { font-size: 1.45rem; }
+      .container { padding: 0.65rem 0.75rem; }
+      .brand-heading h1 { font-size: 1.1rem; }
       .cards-grid { grid-template-columns: 1fr; }
-      .toolbar { padding: 1rem; }
+      .toolbar { padding: 0.5rem; }
       .search-box { min-width: 100%; }
       footer { flex-direction: column; align-items: flex-start; }
     }
@@ -1122,30 +1206,30 @@ const indexHtmlContent = `<!DOCTYPE html>
           </div>
         </div>
         <div class="header-actions">
-          <span class="badge-verified">100% Audit Verified</span>
-          <button class="btn-action" id="themeToggleBtn" onclick="toggleTheme()">🌓 Theme</button>
-          <button class="btn-action" onclick="exportToCsv()">📥 Export CSV</button>
-          <button class="btn-action btn-accent" onclick="exportToJson()">📋 Export JSON</button>
+          <span class="status-badge status-live" id="d1-status-pill" onclick="syncCatalog(true)" title="Click to refresh data from Cloudflare D1">
+            <span class="status-dot"></span>
+            <span id="d1StatusText">⚡ Cloudflare D1</span>
+          </span>
+          <button class="btn-action" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark mode">🌓 Theme</button>
+          <button class="btn-action" onclick="exportToCsv()" title="Download complete audit catalog in CSV format">📥 CSV</button>
+          <button class="btn-action btn-accent" onclick="exportToJson()" title="Download structured JSON audit dataset">📋 JSON</button>
         </div>
       </div>
 
       <div class="channel-strip">
-        <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Official Channels:</span>
+        <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Official Channels:</span>
         <a href="https://www.youtube.com/@zayn.storybook" target="_blank" rel="noopener noreferrer" class="channel-pill yt">
           <span>📺</span> YouTube (@zayn.storybook)
         </a>
         <a href="https://www.facebook.com/1473240609201601" target="_blank" rel="noopener noreferrer" class="channel-pill fb">
-          <span>📘</span> Facebook Page (Zayn Storybook)
+          <span>📘</span> Facebook Page
         </a>
         <a href="https://www.instagram.com/zayn.storybook" target="_blank" rel="noopener noreferrer" class="channel-pill ig">
           <span>📸</span> Instagram (@zayn.storybook)
         </a>
         <a href="https://github.com/ramustha/storybook-video-generator" target="_blank" rel="noopener noreferrer" class="channel-pill gh">
-          <span>💻</span> GitHub Repository
+          <span>💻</span> GitHub
         </a>
-        <span id="d1-status-pill" class="channel-pill" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1); color: #38bdf8; font-weight: 600;">
-          <span>⛅</span> Cloudflare D1
-        </span>
       </div>
     </header>
 
@@ -1153,27 +1237,32 @@ const indexHtmlContent = `<!DOCTYPE html>
     <section class="stats-grid">
       <div class="stat-card">
         <div class="stat-title">Total Publications</div>
-        <div class="stat-value" id="kpiTotal">53</div>
+        <div class="stat-value" id="kpiTotal">${initialTotal}</div>
         <div class="stat-desc">Published & verified assets</div>
       </div>
       <div class="stat-card yt">
         <div class="stat-title">YouTube Videos</div>
-        <div class="stat-value" id="kpiYt">22</div>
-        <div class="stat-desc">10 Landscape · 10 Shorts · 2 Marathons</div>
+        <div class="stat-value" id="kpiYt">${initialYt}</div>
+        <div class="stat-desc">Landscape, Shorts & Marathons</div>
       </div>
       <div class="stat-card fb">
         <div class="stat-title">Facebook Videos</div>
-        <div class="stat-value" id="kpiFb">21</div>
-        <div class="stat-desc">10 Watch · 9 Reels · 2 Specials</div>
+        <div class="stat-value" id="kpiFb">${initialFb}</div>
+        <div class="stat-desc">Watch Videos, Reels & Specials</div>
       </div>
       <div class="stat-card ig">
         <div class="stat-title">Instagram Reels</div>
-        <div class="stat-value" id="kpiIg">10</div>
-        <div class="stat-desc">5 ID Reels · 5 EN Reels (9:16)</div>
+        <div class="stat-value" id="kpiIg">${initialIg}</div>
+        <div class="stat-desc">Bilingual Reels (9:16)</div>
+      </div>
+      <div class="stat-card stories">
+        <div class="stat-title">Story Books</div>
+        <div class="stat-value" id="kpiStories">${initialStoriesCount}</div>
+        <div class="stat-desc">Active Children's Titles</div>
       </div>
       <div class="stat-card cc">
         <div class="stat-title">License & Rights</div>
-        <div class="stat-value" style="font-size: 1.35rem; color: var(--success-green);">CC BY 4.0</div>
+        <div class="stat-value" style="font-size: 1.15rem; color: var(--success-green);">CC BY 4.0</div>
         <div class="stat-desc">StoryWeaver / Pratham Books</div>
       </div>
     </section>
@@ -1187,35 +1276,31 @@ const indexHtmlContent = `<!DOCTYPE html>
         </div>
         <div class="view-toggles">
           <button id="viewCardBtn" class="view-btn active" onclick="setViewMode('card')">
-            <span>⊞</span> Card Grid
+            <span>⊞</span> Grid
           </button>
           <button id="viewTableBtn" class="view-btn" onclick="setViewMode('table')">
-            <span>☰</span> Audit Table
+            <span>☰</span> Table
           </button>
         </div>
       </div>
 
       <div class="filter-chips-row">
         <span class="filter-label">Platform:</span>
-        <button class="filter-chip active" data-filter="platform" data-value="all" onclick="setPlatformFilter('all', this)">All (53)</button>
-        <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">YouTube (22)</button>
-        <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">Facebook (21)</button>
-        <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">Instagram (10)</button>
+        <button class="filter-chip active" data-filter="platform" data-value="all" onclick="setPlatformFilter('all', this)">All (${initialTotal})</button>
+        <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">YouTube (${initialYt})</button>
+        <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">Facebook (${initialFb})</button>
+        <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">Instagram (${initialIg})</button>
 
-        <span class="filter-label" style="margin-left: 0.75rem;">Language:</span>
+        <span class="filter-label" style="margin-left: 0.5rem;">Lang:</span>
         <button class="filter-chip active" data-filter="lang" data-value="all" onclick="setLangFilter('all', this)">All</button>
-        <button class="filter-chip" data-filter="lang" data-value="id" onclick="setLangFilter('id', this)">🇮🇩 Indonesian (ID)</button>
-        <button class="filter-chip" data-filter="lang" data-value="en" onclick="setLangFilter('en', this)">🇬🇧 English (EN)</button>
+        <button class="filter-chip" data-filter="lang" data-value="id" onclick="setLangFilter('id', this)">🇮🇩 ID</button>
+        <button class="filter-chip" data-filter="lang" data-value="en" onclick="setLangFilter('en', this)">🇬🇧 EN</button>
 
-        <span class="filter-label" style="margin-left: 0.75rem;">Story:</span>
+        <span class="filter-label" style="margin-left: 0.5rem;">Story:</span>
         <select id="storySelect" class="filter-select" onchange="handleStoryChange()">
-          <option value="all">All Stories & Marathons</option>
-          <option value="pisang-terlalu-banyak">🍌 Pisang Terlalu Banyak! / Too Many Bananas!</option>
-          <option value="gara-gara-kucing">🐱 Gara-Gara Kucing! / It's All the Cat's Fault!</option>
-          <option value="hari-cukur-rambut">✂️ Hari Cukur Rambut / Annual Haircut Day</option>
-          <option value="jas-hujan-merah">🌧️ Jas Hujan Merah / The Red Raincoat</option>
-          <option value="raja-gemuk-anjing-kurus">👑 Raja Gemuk, Anjing Kurus / Fat King, Thin Dog</option>
+          <option value="all">All Stories & Marathons (${initialTotal})</option>
           <option value="compilation">🌙 Bedtime Story Marathons (Compilations)</option>
+          ${initialStoryOptions.map(([slug, title]) => `<option value="${slug}">${title}</option>`).join("")}
         </select>
       </div>
     </section>
@@ -1223,8 +1308,9 @@ const indexHtmlContent = `<!DOCTYPE html>
     <!-- Results Status Bar -->
     <div class="results-bar">
       <div class="results-count">
-        Showing <strong id="visibleCount">53</strong> of <strong>53</strong> verified video assets
+        Showing <strong id="visibleCount">${initialTotal}</strong> of <strong id="totalCount">${initialTotal}</strong> verified video assets
       </div>
+      <div style="font-size: 0.72rem; color: var(--text-dim);" id="filterNotice"></div>
     </div>
 
     <!-- Card Grid View Container -->
@@ -1244,7 +1330,7 @@ const indexHtmlContent = `<!DOCTYPE html>
             <th>Story Title</th>
             <th>Published Video Title</th>
             <th>Video ID</th>
-            <th>Date Published (UTC)</th>
+            <th>Date (UTC)</th>
             <th>Status</th>
             <th>Direct Link</th>
           </tr>
@@ -1275,7 +1361,7 @@ const indexHtmlContent = `<!DOCTYPE html>
     <footer>
       <div>
         <strong>Zayn Storybook</strong> &copy; 2026. Automated Production Engine for Children's Literature.
-        <div style="font-size: 0.775rem; color: var(--text-dim); margin-top: 0.25rem;">
+        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 0.15rem;">
           All stories adapted under Creative Commons Attribution 4.0 International (CC BY 4.0) from Pratham Books / StoryWeaver.
         </div>
       </div>
@@ -1292,32 +1378,6 @@ const indexHtmlContent = `<!DOCTYPE html>
     // Embedded Complete Audit Dataset
     let RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
 
-    // Real-Time D1 Live Hydration (Cloudflare Pages Functions /api/catalog)
-    async function hydrateLiveCatalog() {
-      try {
-        const res = await fetch('/api/catalog');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data && data.success && Array.isArray(data.auditRecords) && data.auditRecords.length > 0) {
-          console.log('⚡ Hydrated', data.auditRecords.length, 'records from Cloudflare D1');
-          RAW_AUDIT_DATA = data.auditRecords;
-          populateStoryDropdown();
-          renderKPIs();
-          applyFilters();
-          const pill = document.getElementById('d1-status-pill');
-          if (pill) {
-            pill.style.display = 'inline-flex';
-            pill.innerHTML = '<span>⚡</span> D1 Live Hydrated (' + data.auditRecords.length + ')';
-            pill.style.borderColor = 'rgba(16, 185, 129, 0.6)';
-            pill.style.color = '#34d399';
-          }
-        }
-      } catch (e) {
-        console.log('D1 live sync fallback to pre-rendered snapshot.');
-      }
-    }
-    hydrateLiveCatalog();
-
     let state = {
       searchQuery: '',
       platformFilter: 'all',
@@ -1325,6 +1385,170 @@ const indexHtmlContent = `<!DOCTYPE html>
       storyFilter: 'all',
       viewMode: 'card'
     };
+
+    // Calculate and render all KPIs dynamically
+    function renderKPIs() {
+      const total = RAW_AUDIT_DATA.length;
+      const yt = RAW_AUDIT_DATA.filter(d => d.platform === 'YouTube').length;
+      const fb = RAW_AUDIT_DATA.filter(d => d.platform === 'Facebook').length;
+      const ig = RAW_AUDIT_DATA.filter(d => d.platform === 'Instagram').length;
+      
+      const storySlugs = new Set(
+        RAW_AUDIT_DATA.filter(d => d.category !== 'Compilation Marathon').map(d => d.storySlug)
+      );
+      const storiesCount = storySlugs.size;
+
+      const elTotal = document.getElementById('kpiTotal');
+      if (elTotal) elTotal.textContent = total;
+
+      const elYt = document.getElementById('kpiYt');
+      if (elYt) elYt.textContent = yt;
+
+      const elFb = document.getElementById('kpiFb');
+      if (elFb) elFb.textContent = fb;
+
+      const elIg = document.getElementById('kpiIg');
+      if (elIg) elIg.textContent = ig;
+
+      const elStories = document.getElementById('kpiStories');
+      if (elStories) elStories.textContent = storiesCount;
+
+      const elTotalCount = document.getElementById('totalCount');
+      if (elTotalCount) elTotalCount.textContent = total;
+
+      // Update counts inside platform filter chips
+      const chipAll = document.querySelector('[data-filter="platform"][data-value="all"]');
+      if (chipAll) chipAll.textContent = 'All (' + total + ')';
+
+      const chipYt = document.querySelector('[data-filter="platform"][data-value="YouTube"]');
+      if (chipYt) chipYt.textContent = 'YouTube (' + yt + ')';
+
+      const chipFb = document.querySelector('[data-filter="platform"][data-value="Facebook"]');
+      if (chipFb) chipFb.textContent = 'Facebook (' + fb + ')';
+
+      const chipIg = document.querySelector('[data-filter="platform"][data-value="Instagram"]');
+      if (chipIg) chipIg.textContent = 'Instagram (' + ig + ')';
+    }
+
+    // Populate the story dropdown dynamically from the loaded dataset
+    function populateStoryDropdown() {
+      const select = document.getElementById('storySelect');
+      if (!select) return;
+      const currentVal = select.value;
+
+      const storyMap = new Map();
+      let hasCompilation = false;
+
+      RAW_AUDIT_DATA.forEach(item => {
+        if (item.category === 'Compilation Marathon' || (item.storySlug && item.storySlug.includes('compilation'))) {
+          hasCompilation = true;
+        } else if (item.storySlug && !storyMap.has(item.storySlug)) {
+          storyMap.set(item.storySlug, item.storyTitleId || item.storySlug);
+        }
+      });
+
+      const sorted = Array.from(storyMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+
+      let html = '<option value="all">All Stories & Marathons (' + RAW_AUDIT_DATA.length + ')</option>';
+      if (hasCompilation) {
+        html += '<option value="compilation">🌙 Bedtime Story Marathons (Compilations)</option>';
+      }
+      for (const [slug, title] of sorted) {
+        html += '<option value="' + slug + '">' + title + '</option>';
+      }
+
+      select.innerHTML = html;
+      if (currentVal && (currentVal === 'all' || currentVal === 'compilation' || storyMap.has(currentVal))) {
+        select.value = currentVal;
+      }
+    }
+
+    // Apply active filters and refresh render
+    function applyFilters() {
+      render();
+    }
+
+    // 3-Tier Robust Hydration System:
+    // Tier 1: /api/catalog (Cloudflare D1 live database)
+    // Tier 2: ./audit-data.json (GitHub Pages / static preview fallback)
+    // Tier 3: embedded RAW_AUDIT_DATA (Guaranteed bundle snapshot)
+    async function hydrateLiveCatalog(manual = false) {
+      const pill = document.getElementById('d1-status-pill');
+      const text = document.getElementById('d1StatusText');
+      const dot = pill ? pill.querySelector('.status-dot') : null;
+
+      if (dot) dot.classList.add('pulsing');
+      if (text) text.textContent = 'Syncing...';
+
+      // 1. Try Cloudflare Pages Function /api/catalog
+      try {
+        const res = await fetch('/api/catalog');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && Array.isArray(data.auditRecords) && data.auditRecords.length > 0) {
+            console.log('⚡ Live D1 hydration successful:', data.auditRecords.length, 'records');
+            RAW_AUDIT_DATA = data.auditRecords;
+            populateStoryDropdown();
+            renderKPIs();
+            render();
+            if (pill) {
+              pill.className = 'status-badge status-live';
+              pill.title = 'Live from Cloudflare D1 SQLite database (Click to refresh)';
+            }
+            if (text) text.textContent = '⚡ D1 Live (' + data.auditRecords.length + ')';
+            if (dot) dot.classList.remove('pulsing');
+            if (manual) showToast('Synchronized ' + data.auditRecords.length + ' records from Cloudflare D1!');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('/api/catalog not reachable, checking static audit-data.json fallback...', err);
+      }
+
+      // 2. Try static audit-data.json (GitHub Pages / local preview fallback)
+      try {
+        const res = await fetch('./audit-data.json');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            console.log('📁 Static audit-data.json loaded:', data.length, 'records');
+            RAW_AUDIT_DATA = data;
+            populateStoryDropdown();
+            renderKPIs();
+            render();
+            if (pill) {
+              pill.className = 'status-badge status-snapshot';
+              pill.title = 'Snapshot from audit-data.json (Click to refresh)';
+            }
+            if (text) text.textContent = '📁 Snapshot (' + data.length + ')';
+            if (dot) dot.classList.remove('pulsing');
+            if (manual) showToast('Loaded ' + data.length + ' records from audit-data.json');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('audit-data.json not reachable, using embedded snapshot...', err);
+      }
+
+      // 3. Embedded snapshot fallback
+      populateStoryDropdown();
+      renderKPIs();
+      render();
+      if (pill) {
+        pill.className = 'status-badge status-embedded';
+        pill.title = 'Pre-rendered in HTML bundle (Click to refresh)';
+      }
+      if (text) text.textContent = '📦 Embedded (' + RAW_AUDIT_DATA.length + ')';
+      if (dot) dot.classList.remove('pulsing');
+      if (manual) showToast('Using embedded dataset (' + RAW_AUDIT_DATA.length + ' records)');
+    }
+
+    function syncCatalog(manual) {
+      hydrateLiveCatalog(manual);
+    }
+
+    // Auto-hydrate on startup
+    hydrateLiveCatalog(false);
 
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme');
@@ -1339,6 +1563,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
+      if (!toast) return;
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2200);
@@ -1446,7 +1671,6 @@ const indexHtmlContent = `<!DOCTYPE html>
       const platIcon = isYt ? '📺' : isFb ? '📘' : '📸';
       const isVertical = item.aspectRatio === '9:16';
 
-      // Fallback poster image if no thumbnail
       const thumbSrc = item.thumbnailUrl || 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80';
 
       return \`
@@ -1462,25 +1686,20 @@ const indexHtmlContent = `<!DOCTYPE html>
           </div>
 
           <div class="card-content">
-            <div class="card-story-title">\${item.storyTitleId}</div>
+            <div class="card-story-title" title="\${item.storyTitleId}">\${item.storyTitleId}</div>
             <h3 class="card-video-title" title="\${item.videoTitle}">\${item.videoTitle}</h3>
 
             <div class="card-meta-list">
               <div class="card-meta-row">
-                <span>Audit ID:</span>
-                <span class="meta-id-tag" onclick="copyToClipboard('\${item.id}', 'Audit ID')">\${item.id} 📋</span>
-              </div>
-              <div class="card-meta-row">
-                <span>Video ID:</span>
-                <span class="meta-id-tag" onclick="copyToClipboard('\${item.videoId}', 'Video ID')">\${item.videoId} 📋</span>
+                <span>Audit / Video:</span>
+                <span style="display: inline-flex; gap: 0.25rem;">
+                  <span class="meta-id-tag" onclick="copyToClipboard('\${item.id}', 'Audit ID')">\${item.id}</span>
+                  <span class="meta-id-tag" onclick="copyToClipboard('\${item.videoId}', 'Video ID')">\${item.videoId}</span>
+                </span>
               </div>
               <div class="card-meta-row">
                 <span>Published:</span>
-                <span>\${formatDate(item.publishedAt)}</span>
-              </div>
-              <div class="card-meta-row">
-                <span>License:</span>
-                <span style="color: var(--success-green); font-size: 0.75rem;">CC BY 4.0</span>
+                <span>\${formatDate(item.publishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>
               </div>
             </div>
 
@@ -1513,8 +1732,8 @@ const indexHtmlContent = `<!DOCTYPE html>
             <small>By \${item.author}</small>
           </td>
           <td><span class="meta-id-tag" onclick="copyToClipboard('\${item.videoId}', 'Video ID')">\${item.videoId}</span></td>
-          <td style="white-space: nowrap; font-size: 0.8rem;">\${formatDate(item.publishedAt)}</td>
-          <td><span style="color: var(--success-green); font-weight: 600;">\${item.status.toUpperCase()}</span></td>
+          <td style="white-space: nowrap; font-size: 0.74rem;">\${formatDate(item.publishedAt)}</td>
+          <td><span style="color: var(--success-green); font-weight: 600; font-size: 0.72rem;">\${item.status.toUpperCase()}</span></td>
           <td>
             <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="table-link">
               View ↗
@@ -1526,15 +1745,23 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function render() {
       const data = getFilteredData();
-      document.getElementById('visibleCount').textContent = data.length;
+      const visibleEl = document.getElementById('visibleCount');
+      if (visibleEl) visibleEl.textContent = data.length;
+
+      // Notice when filters active
+      const noticeEl = document.getElementById('filterNotice');
+      if (noticeEl) {
+        const isFiltered = state.platformFilter !== 'all' || state.langFilter !== 'all' || state.storyFilter !== 'all' || state.searchQuery;
+        noticeEl.textContent = isFiltered ? '(Filters Active)' : '';
+      }
 
       // Card Grid
       const cardsHtml = data.map(renderCard).join('');
-      document.getElementById('cardViewContainer').innerHTML = cardsHtml || '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-dim);">No published videos match your filter.</div>';
+      document.getElementById('cardViewContainer').innerHTML = cardsHtml || '<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-dim); font-size: 0.85rem;">No published videos match your filter.</div>';
 
       // Table View
       const rowsHtml = data.map(renderTableRow).join('');
-      document.getElementById('tableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 2rem;">No published videos match your filter.</td></tr>';
+      document.getElementById('tableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 1.5rem; color: var(--text-dim); font-size: 0.85rem;">No published videos match your filter.</td></tr>';
     }
 
     function openYoutubeModal(videoId, title) {
@@ -1602,6 +1829,8 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     // Initial render
+    populateStoryDropdown();
+    renderKPIs();
     render();
   </script>
 </body>
