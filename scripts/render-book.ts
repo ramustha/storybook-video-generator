@@ -3,6 +3,7 @@ import { renderMedia, selectComposition } from "@remotion/renderer";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync } from "fs";
+import { db } from "./lib/db";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -18,7 +19,13 @@ async function main() {
 
   const storyDir = path.resolve(`./stories/${bookSlug}`);
   const manifestPath = path.join(storyDir, "story.json");
-  const rawManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
+  let rawManifest = await db.getStory(bookSlug);
+  if (!rawManifest && existsSync(manifestPath)) {
+    rawManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
+  }
+  if (!rawManifest) {
+    throw new Error(`Storybook manifest for [${bookSlug}] could not be found in D1 or local disk.`);
+  }
 
   const languages: Array<"id" | "en"> = langArg === "all" ? ["id", "en"] : [langArg];
 
@@ -167,7 +174,15 @@ async function main() {
     }
   }
 
-  await fs.writeFile(manifestPath, JSON.stringify(rawManifest, null, 2));
+  try {
+    await fs.writeFile(manifestPath, JSON.stringify(rawManifest, null, 2));
+  } catch {}
+  try {
+    await db.saveStory(rawManifest);
+    console.log(`☁️ Cloudflare D1 story manifest synchronized.`);
+  } catch (d1Err: any) {
+    console.warn("⚠️ Cloudflare D1 sync warning:", d1Err.message);
+  }
   console.log(`\n🎉 All renders completed successfully for "${rawManifest.title}"!`);
 }
 

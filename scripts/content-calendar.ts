@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { execSync, spawn } from "child_process";
 import { notifyTelegramFailure } from "./notify-telegram";
+import { db } from "./lib/db";
 
 export interface ScheduledSlot {
   date?: string; // "YYYY-MM-DD" e.g. "2026-11-07"
@@ -1065,10 +1066,18 @@ async function publishToday(
 
       await runChildCommand("npx", ["tsx", ...publishArgs]);
 
-      // Step 3: Sinkronkan kembali manifest story.json yang baru ke Cloudflare R2
+      // Step 3: Sinkronkan kembali manifest story.json yang baru ke Cloudflare R2 & D1
       if (!dryRun) {
-        console.log(`☁️ Syncing updated story manifest back to Cloudflare R2...`);
+        console.log(`☁️ Syncing updated story manifest back to Cloudflare R2 & D1...`);
         await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "push", slot.bookSlug, "--manifest-only"]);
+        try {
+          if (slot.date) {
+            await db.markCalendarSlotCompleted(slot.date, slot.timeSlot, slot.lang);
+            console.log(`✔ Marked calendar slot as completed in Cloudflare D1 (${slot.date} ${slot.timeSlot})`);
+          }
+        } catch (d1Err: any) {
+          console.warn("⚠️ Failed marking calendar slot in D1:", d1Err.message);
+        }
       }
     } catch (slotErr: any) {
       console.error(`\n❌ Gagal memproses jadwal siaran untuk [${slot.bookSlug}] [${slot.lang}]:`, slotErr.message);
@@ -1134,13 +1143,15 @@ async function main() {
   }
 }
 
-main().catch(async (err) => {
-  console.error("❌ Fatal error in Content Calendar Scheduler:", err);
-  try {
-    await notifyTelegramFailure({
-      platform: "Content Calendar Scheduler (Fatal)",
-      error: err,
-    });
-  } catch {}
-  process.exit(1);
-});
+if (process.argv[1]?.endsWith("content-calendar.ts") || process.argv[1]?.endsWith("content-calendar.js")) {
+  main().catch(async (err) => {
+    console.error("❌ Fatal error in Content Calendar Scheduler:", err);
+    try {
+      await notifyTelegramFailure({
+        platform: "Content Calendar Scheduler (Fatal)",
+        error: err,
+      });
+    } catch {}
+    process.exit(1);
+  });
+}

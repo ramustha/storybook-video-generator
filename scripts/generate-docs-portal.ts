@@ -1143,6 +1143,9 @@ const indexHtmlContent = `<!DOCTYPE html>
         <a href="https://github.com/ramustha/storybook-video-generator" target="_blank" rel="noopener noreferrer" class="channel-pill gh">
           <span>💻</span> GitHub Repository
         </a>
+        <span id="d1-status-pill" class="channel-pill" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(56, 189, 248, 0.1); color: #38bdf8; font-weight: 600;">
+          <span>⛅</span> Cloudflare D1
+        </span>
       </div>
     </header>
 
@@ -1287,7 +1290,33 @@ const indexHtmlContent = `<!DOCTYPE html>
 
   <script>
     // Embedded Complete Audit Dataset
-    const RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
+    let RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
+
+    // Real-Time D1 Live Hydration (Cloudflare Pages Functions /api/catalog)
+    async function hydrateLiveCatalog() {
+      try {
+        const res = await fetch('/api/catalog');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.auditRecords) && data.auditRecords.length > 0) {
+          console.log('⚡ Hydrated', data.auditRecords.length, 'records from Cloudflare D1');
+          RAW_AUDIT_DATA = data.auditRecords;
+          populateStoryDropdown();
+          renderKPIs();
+          applyFilters();
+          const pill = document.getElementById('d1-status-pill');
+          if (pill) {
+            pill.style.display = 'inline-flex';
+            pill.innerHTML = '<span>⚡</span> D1 Live Hydrated (' + data.auditRecords.length + ')';
+            pill.style.borderColor = 'rgba(16, 185, 129, 0.6)';
+            pill.style.color = '#34d399';
+          }
+        }
+      } catch (e) {
+        console.log('D1 live sync fallback to pre-rendered snapshot.');
+      }
+    }
+    hydrateLiveCatalog();
 
     let state = {
       searchQuery: '',
