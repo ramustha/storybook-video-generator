@@ -1,0 +1,39 @@
+scripts/refresh-youtube-seo.ts
+  698ac31901cd73e0 1-206
+docs/audit-data.json
+  698ac31901cd73e0 13,36,59,82,243,266,289,312,450,473,496,655,678,701,724,885,908,931,1090,1113,1136,1159,1320,1366,1412,1435,1547,1570,1593,1616
+package.json
+  698ac31901cd73e0 47-48
+cloudflare/daily-broadcast-cron/src/index.js
+  698ac31901cd73e0 50-51,57,62-63,69,74
+src/remotion/components/OutroScene.tsx
+  698ac31901cd73e0 65
+cloudflare/daily-broadcast-cron/wrangler.toml
+  698ac31901cd73e0 7-9,11
+scripts/lib/seo-formatter.ts
+  698ac31901cd73e0 1-191
+scripts/upload-youtube.ts
+  698ac31901cd73e0 10,36-41,54,1067-1083,1085-1097,1099-1103
+src/remotion/components/StorybookVideoComposition.tsx
+  698ac31901cd73e0 182-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "a4996c30a936b33ba5e2ea34a534a1c2ee6fbb64",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 516,
+      "total_deletions": 147,
+      "accepted_lines": 516,
+      "overriden_lines": 0
+    }
+  }
+}
