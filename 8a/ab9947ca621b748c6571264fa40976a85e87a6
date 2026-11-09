@@ -1,0 +1,29 @@
+scripts/notify-telegram.ts
+  698ac31901cd73e0 28-55,290-295,297-298,361-471
+scripts/performance-analytics.ts
+  698ac31901cd73e0 1-421
+.github/workflows/weekly-analytics.yml
+  698ac31901cd73e0 10-15,19,36,39,42-50,53-71,74,79-102,105-110,113-128,130-131,133-136,139,142-148
+package.json
+  698ac31901cd73e0 45-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "8aab9947ca621b748c6571264fa40976a85e87a6",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 672,
+      "total_deletions": 11,
+      "accepted_lines": 672,
+      "overriden_lines": 0
+    }
+  }
+}
