@@ -19,7 +19,7 @@ async function main() {
         if (match) {
           const k = match[1];
           const v = match[2];
-          if (k.startsWith("PERSONAL_META_") || k.startsWith("PERSONAL_R2_")) {
+          if (k.startsWith("PERSONAL_META_") || k.startsWith("PERSONAL_R2_") || k.startsWith("CLOUDFLARE_")) {
             secrets[k] = v;
           }
         }
@@ -34,7 +34,10 @@ async function main() {
   if (existsSync(r2Path)) {
     try {
       const r2 = JSON.parse(readFileSync(r2Path, "utf-8"));
-      if (r2.accountId) secrets["PERSONAL_R2_ACCOUNT_ID"] = r2.accountId;
+      if (r2.accountId) {
+        secrets["PERSONAL_R2_ACCOUNT_ID"] = r2.accountId;
+        secrets["CLOUDFLARE_ACCOUNT_ID"] = r2.accountId;
+      }
       if (r2.accessKeyId) secrets["PERSONAL_R2_ACCESS_KEY_ID"] = r2.accessKeyId;
       if (r2.secretAccessKey) secrets["PERSONAL_R2_SECRET_ACCESS_KEY"] = r2.secretAccessKey;
       if (r2.publicDomain) secrets["PERSONAL_R2_PUBLIC_DOMAIN"] = r2.publicDomain;

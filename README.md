@@ -118,6 +118,7 @@ View the interactive, filterable multi-platform catalog and Creative Commons com
 * 🌐 **Live GitHub Pages Portal**: [https://ramustha.github.io/storybook-video-generator/](https://ramustha.github.io/storybook-video-generator/)
 * 📁 **Source & Audit Data**: [`docs/index.html`](./docs/index.html) and [`docs/audit-data.json`](./docs/audit-data.json)
 * ⚡ **Rebuild Portal**: `npm run docs:portal`
+* ⛅ **Deploy to Cloudflare Pages**: `npm run deploy:portal`
 
 ---
 
