@@ -1,0 +1,29 @@
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 184-198
+scripts/prepare-organic-video-plates.ts
+  698ac31901cd73e0 5-142
+scripts/ingest-story.ts
+  698ac31901cd73e0 438-446
+scripts/upload-meta.ts
+  698ac31901cd73e0 135-147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "a891e23ec24f30e3e91ae991c90a83db94fa216e",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 175,
+      "total_deletions": 3,
+      "accepted_lines": 175,
+      "overriden_lines": 0
+    }
+  }
+}
