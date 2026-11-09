@@ -518,22 +518,30 @@ async function uploadThumbnailToFacebook(
 }
 
 /**
- * Verifies if an Instagram media object is currently live and active by querying user's media collection.
+ * Verifies if an Instagram Reel video object is currently live and active by querying user's media collection.
  */
 async function findLiveInstagramMediaByTitle(
   instagramUserId: string,
   title: string,
-  accessToken: string
+  accessToken: string,
+  requireVideo: boolean = true
 ): Promise<{ id: string; permalink: string } | null> {
   try {
     const res = await fetch(
-      `https://graph.facebook.com/v21.0/${instagramUserId}/media?fields=id,permalink,caption&limit=50&access_token=${accessToken}`
+      `https://graph.facebook.com/v21.0/${instagramUserId}/media?fields=id,permalink,caption,media_type,media_product_type&limit=50&access_token=${accessToken}`
     );
     const data = await res.json();
     if (!data.data || !Array.isArray(data.data)) return null;
 
     const target = title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     for (const item of data.data) {
+      if (requireVideo) {
+        const isVideo =
+          item.media_type === "VIDEO" ||
+          item.media_product_type === "REELS" ||
+          (typeof item.permalink === "string" && item.permalink.includes("/reel/"));
+        if (!isVideo) continue;
+      }
       const caption = (item.caption || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
       if (caption.includes(target)) {
         return { id: item.id, permalink: item.permalink };
