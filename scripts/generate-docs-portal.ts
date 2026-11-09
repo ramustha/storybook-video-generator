@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { DAILY_CALENDAR_MONTH_1, ScheduledSlot } from "./content-calendar";
 
 interface AuditRecord {
   id: string; // unique audit id e.g. "AUD-001"
@@ -26,13 +27,35 @@ interface AuditRecord {
   sourceUrl: string;
 }
 
+export interface EnrichedCalendarSlot {
+  id: string; // e.g. "SLOT-001"
+  date: string; // "2026-11-07"
+  dayName: string; // "Sabtu"
+  timeSlot: string; // "19:30 WIB"
+  slotType: string;
+  bookSlug: string;
+  storyTitleId: string;
+  storyTitleEn: string;
+  lang: "id" | "en";
+  format: string;
+  targetPlatforms: string[];
+  theme: string;
+  status: "completed" | "today" | "upcoming";
+  isCompleted: boolean;
+  hasPublishedAsset: boolean;
+}
+
 const workspaceRoot = path.resolve(__dirname, "..");
 const storiesDir = path.join(workspaceRoot, "stories");
 const docsDir = path.join(workspaceRoot, "docs");
+const curatedPath = path.join(workspaceRoot, "config", "curated-books.json");
 
 if (!fs.existsSync(docsDir)) {
   fs.mkdirSync(docsDir, { recursive: true });
 }
+
+// 1. Build Story Titles Map
+const storyTitlesMap = new Map<string, { id: string; en: string }>();
 
 const stories = fs.readdirSync(storiesDir).filter((f) => {
   try {
@@ -43,6 +66,40 @@ const stories = fs.readdirSync(storiesDir).filter((f) => {
   }
 }).sort();
 
+for (const s of stories) {
+  const jsonPath = path.join(storiesDir, s, "story.json");
+  if (!fs.existsSync(jsonPath)) continue;
+  try {
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    const id = typeof data.title === "object" ? data.title.id : data.title;
+    const en = data.originalTitle || (typeof data.title === "object" ? data.title.en : id);
+    storyTitlesMap.set(s, { id, en });
+  } catch {
+    // Ignore parse error
+  }
+}
+
+if (fs.existsSync(curatedPath)) {
+  try {
+    const list = JSON.parse(fs.readFileSync(curatedPath, "utf-8"));
+    for (const b of list) {
+      if (!storyTitlesMap.has(b.slug)) {
+        storyTitlesMap.set(b.slug, { id: b.title, en: b.originalTitle || b.title });
+      }
+    }
+  } catch {
+    // Ignore parse error
+  }
+}
+
+function formatSlugToTitle(slug: string): string {
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+// 2. Build Audit Records
 const auditRecords: AuditRecord[] = [];
 let counter = 1;
 
@@ -62,7 +119,7 @@ for (const s of stories) {
   const license = data.source?.license || "Creative Commons Attribution 4.0 International (CC BY 4.0)";
   const sourceUrl = data.source?.sourceUrl || "https://storyweaver.org.in";
 
-  // 1. YouTube Publications
+  // YouTube Publications
   const yt = data.publications?.youtube || {};
   for (const lang of ["id", "en"] as const) {
     if (!yt[lang]) continue;
@@ -96,7 +153,7 @@ for (const s of stories) {
     }
   }
 
-  // 2. Facebook Publications
+  // Facebook Publications
   const fb = data.publications?.facebook || {};
   for (const lang of ["id", "en"] as const) {
     if (!fb[lang]) continue;
@@ -131,7 +188,7 @@ for (const s of stories) {
     }
   }
 
-  // 3. Instagram Publications
+  // Instagram Publications
   const ig = data.publications?.instagram || {};
   for (const lang of ["id", "en"] as const) {
     const item = ig[lang];
@@ -164,7 +221,7 @@ for (const s of stories) {
   }
 }
 
-// 4. Compilation Marathons
+// Compilation Marathons
 const compPath = path.join(workspaceRoot, "exports/compilations/publication-status.json");
 if (fs.existsSync(compPath)) {
   const comps = JSON.parse(fs.readFileSync(compPath, "utf-8"));
@@ -172,7 +229,6 @@ if (fs.existsSync(compPath)) {
     const lang: "id" | "en" = key.includes("-en") ? "en" : "id";
     const title = comp.title;
 
-    // Facebook Marathon
     if (comp.permalink && comp.videoId) {
       auditRecords.push({
         id: padId(counter++),
@@ -200,7 +256,6 @@ if (fs.existsSync(compPath)) {
       });
     }
 
-    // YouTube Marathon
     if (comp.youtube && comp.youtube.url) {
       auditRecords.push({
         id: padId(counter++),
@@ -230,10 +285,65 @@ if (fs.existsSync(compPath)) {
   }
 }
 
-// Write audit-data.json
+// 3. Enrich Calendar Slots
+const publishedStorySlugs = new Set(auditRecords.map((r) => r.storySlug));
+const todayIso = "2026-11-09";
+
+const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, idx) => {
+  const dateStr = slot.date || "2026-11-07";
+  const titles = storyTitlesMap.get(slot.bookSlug) || {
+    id: formatSlugToTitle(slot.bookSlug),
+    en: formatSlugToTitle(slot.bookSlug),
+  };
+
+  let status: "completed" | "today" | "upcoming" = "upcoming";
+  let isCompleted = false;
+
+  if (dateStr < todayIso) {
+    status = "completed";
+    isCompleted = true;
+  } else if (dateStr === todayIso) {
+    status = "today";
+    isCompleted = false;
+  } else {
+    status = "upcoming";
+    isCompleted = false;
+  }
+
+  const hasPublishedAsset = publishedStorySlugs.has(slot.bookSlug);
+
+  return {
+    id: `SLOT-${String(idx + 1).padStart(3, "0")}`,
+    date: dateStr,
+    dayName: slot.dayName,
+    timeSlot: slot.timeSlot,
+    slotType: slot.slotType,
+    bookSlug: slot.bookSlug,
+    storyTitleId: titles.id,
+    storyTitleEn: titles.en,
+    lang: slot.lang,
+    format:
+      slot.format === "both"
+        ? "Landscape (16:9) & Shorts (9:16)"
+        : slot.format === "vertical"
+        ? "Shorts / Reels (9:16)"
+        : "Landscape (16:9)",
+    targetPlatforms: slot.targetPlatforms,
+    theme: slot.theme,
+    status,
+    isCompleted,
+    hasPublishedAsset,
+  };
+});
+
+// Write audit-data.json and calendar-data.json
 const auditJsonPath = path.join(docsDir, "audit-data.json");
 fs.writeFileSync(auditJsonPath, JSON.stringify(auditRecords, null, 2));
 console.log(`Saved ${auditRecords.length} audit records to ${auditJsonPath}`);
+
+const calendarJsonPath = path.join(docsDir, "calendar-data.json");
+fs.writeFileSync(calendarJsonPath, JSON.stringify(calendarSlots, null, 2));
+console.log(`Saved ${calendarSlots.length} calendar slots to ${calendarJsonPath}`);
 
 // Precompute summary metrics for build-time HTML injection
 const initialTotal = auditRecords.length;
@@ -255,14 +365,22 @@ for (const r of auditRecords) {
 }
 const initialStoryOptions = Array.from(initialStoryMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
 
+// Precompute calendar metrics
+const initialCalTotal = calendarSlots.length;
+const initialCalCompleted = calendarSlots.filter((s) => s.status === "completed" || s.isCompleted).length;
+const initialCalToday = calendarSlots.filter((s) => s.status === "today").length;
+const initialCalUpcoming = calendarSlots.filter((s) => s.status === "upcoming").length;
+const initialCalProgress = ((initialCalCompleted / initialCalTotal) * 100).toFixed(1);
+const nextUpSlot = calendarSlots.find((s) => s.status === "today") || calendarSlots.find((s) => s.status === "upcoming");
+
 // Generate docs/index.html
 const indexHtmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zayn Storybook — Multi-Platform Publication & Compliance Audit Catalog</title>
-  <meta name="description" content="Comprehensive audit directory, live catalog, and licensing tracker of all published storybook videos across YouTube, Facebook, and Instagram by Zayn Storybook.">
+  <title>Zayn Storybook — Multi-Platform Publication Registry & Release Timeline</title>
+  <meta name="description" content="Comprehensive audit directory, live catalog, 30-day release timeline, and licensing tracker of all published storybook videos by Zayn Storybook.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -332,9 +450,9 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     /* Header styling */
     header {
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.65rem;
       border-bottom: 1px solid var(--card-border);
-      padding-bottom: 0.65rem;
+      padding-bottom: 0.6rem;
     }
 
     .header-top {
@@ -427,7 +545,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       gap: 0.4rem;
       flex-wrap: wrap;
       align-items: center;
-      margin-top: 0.5rem;
+      margin-top: 0.45rem;
       padding-top: 0.45rem;
       border-top: 1px dashed var(--card-border);
     }
@@ -515,6 +633,57 @@ const indexHtmlContent = `<!DOCTYPE html>
       100% { opacity: 0.3; transform: scale(0.9); }
     }
 
+    /* Main Navigation Tabs */
+    .main-nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      border-bottom: 2px solid var(--card-border);
+      padding-bottom: 0.45rem;
+    }
+
+    .nav-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: var(--bg-secondary);
+    }
+
+    .nav-tab-btn.active {
+      background: var(--bg-secondary);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .tab-badge {
+      font-size: 0.72rem;
+      padding: 0.12rem 0.45rem;
+      border-radius: var(--radius-full);
+      background: var(--bg-tertiary);
+      color: var(--text-muted);
+    }
+
+    .nav-tab-btn.active .tab-badge {
+      background: var(--accent-primary);
+      color: #0b0f19;
+      font-weight: 800;
+    }
+
     /* Stats Grid */
     .stats-grid {
       display: grid;
@@ -550,6 +719,7 @@ const indexHtmlContent = `<!DOCTYPE html>
     .stat-card.ig::after { background: var(--ig-color); }
     .stat-card.stories::after { background: var(--purple); }
     .stat-card.cc::after { background: var(--success-green); }
+    .stat-card.gold::after { background: var(--gold); }
 
     .stat-title {
       font-size: 0.67rem;
@@ -708,7 +878,6 @@ const indexHtmlContent = `<!DOCTYPE html>
       color: #ffffff;
     }
 
-    /* Filter dropdowns */
     .filter-select {
       height: 26px;
       padding: 0.15rem 0.5rem;
@@ -1047,6 +1216,276 @@ const indexHtmlContent = `<!DOCTYPE html>
       text-decoration: underline;
     }
 
+    /* =========================================================================
+       TIMELINE & SCHEDULE SPECIFIC STYLES
+       ========================================================================= */
+    .timeline-progress-banner {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.75rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .progress-bar-wrapper {
+      margin: 0.6rem 0 0.2rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-primary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #0284c7, #38bdf8);
+      border-radius: var(--radius-full);
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 0.35rem;
+    }
+
+    .progress-labels strong {
+      color: var(--text-main);
+    }
+
+    /* Next Up Spotlight */
+    .next-up-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.08));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: var(--radius-md);
+      padding: 0.7rem 0.95rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .next-up-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .next-up-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #f59e0b;
+      color: #0b0f19;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.25rem 0.55rem;
+      border-radius: var(--radius-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .next-up-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .next-up-meta {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    /* Timeline Day Grouping */
+    .timeline-day-group {
+      margin-bottom: 1.15rem;
+    }
+
+    .timeline-day-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.55rem;
+      background: var(--bg-secondary);
+      border-left: 3px solid var(--accent-primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 0.55rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .timeline-day-header.today {
+      border-left-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .day-today-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      background: #f59e0b;
+      color: #0b0f19;
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--radius-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .timeline-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .slot-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 0.7rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .slot-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .slot-card.today-card {
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+
+    .slot-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.45rem;
+    }
+
+    .slot-time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 0.12rem 0.45rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .slot-status-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.12rem 0.45rem;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .slot-status-pill.completed {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .slot-status-pill.today {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .slot-status-pill.upcoming {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .slot-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+      line-height: 1.25;
+    }
+
+    .slot-type-label {
+      font-size: 0.71rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 0.45rem;
+    }
+
+    .slot-badges {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+
+    .slot-theme-box {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      background: var(--bg-primary);
+      border-radius: var(--radius-xs);
+      padding: 0.4rem 0.55rem;
+      border-left: 2px solid var(--accent-primary);
+      margin-top: auto;
+      margin-bottom: 0.5rem;
+      line-height: 1.35;
+      font-style: italic;
+    }
+
+    .slot-action-btn {
+      width: 100%;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      font-size: 0.74rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--card-border);
+      background: var(--bg-secondary);
+      color: var(--text-main);
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .slot-action-btn:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--accent-primary);
+    }
+
+    .slot-action-btn.active-btn {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #0b0f19;
+      font-weight: 700;
+    }
+
     /* Modal Player */
     .modal-backdrop {
       display: none;
@@ -1187,6 +1626,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       .container { padding: 0.65rem 0.75rem; }
       .brand-heading h1 { font-size: 1.1rem; }
       .cards-grid { grid-template-columns: 1fr; }
+      .timeline-slots-grid { grid-template-columns: 1fr; }
       .toolbar { padding: 0.5rem; }
       .search-box { min-width: 100%; }
       footer { flex-direction: column; align-items: flex-start; }
@@ -1201,8 +1641,8 @@ const indexHtmlContent = `<!DOCTYPE html>
         <div class="brand-title">
           <div class="brand-logo">📚</div>
           <div class="brand-heading">
-            <h1>Zayn Storybook Catalog & Audit</h1>
-            <p>Official Multi-Platform Publication Registry & Creative Commons Compliance Tracker</p>
+            <h1>Zayn Storybook Catalog & Release Hub</h1>
+            <p>Official Multi-Platform Publication Registry & 30-Day Bedtime Broadcast Timeline</p>
           </div>
         </div>
         <div class="header-actions">
@@ -1211,8 +1651,8 @@ const indexHtmlContent = `<!DOCTYPE html>
             <span id="d1StatusText">⚡ Cloudflare D1</span>
           </span>
           <button class="btn-action" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark mode">🌓 Theme</button>
-          <button class="btn-action" onclick="exportToCsv()" title="Download complete audit catalog in CSV format">📥 CSV</button>
-          <button class="btn-action btn-accent" onclick="exportToJson()" title="Download structured JSON audit dataset">📋 JSON</button>
+          <button class="btn-action" onclick="exportActiveCsv()" title="Download current view in CSV format">📥 CSV</button>
+          <button class="btn-action btn-accent" onclick="exportActiveJson()" title="Download structured JSON dataset">📋 JSON</button>
         </div>
       </div>
 
@@ -1233,112 +1673,266 @@ const indexHtmlContent = `<!DOCTYPE html>
       </div>
     </header>
 
-    <!-- Stats KPI Section -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-title">Total Publications</div>
-        <div class="stat-value" id="kpiTotal">${initialTotal}</div>
-        <div class="stat-desc">Published & verified assets</div>
-      </div>
-      <div class="stat-card yt">
-        <div class="stat-title">YouTube Videos</div>
-        <div class="stat-value" id="kpiYt">${initialYt}</div>
-        <div class="stat-desc">Landscape, Shorts & Marathons</div>
-      </div>
-      <div class="stat-card fb">
-        <div class="stat-title">Facebook Videos</div>
-        <div class="stat-value" id="kpiFb">${initialFb}</div>
-        <div class="stat-desc">Watch Videos, Reels & Specials</div>
-      </div>
-      <div class="stat-card ig">
-        <div class="stat-title">Instagram Reels</div>
-        <div class="stat-value" id="kpiIg">${initialIg}</div>
-        <div class="stat-desc">Bilingual Reels (9:16)</div>
-      </div>
-      <div class="stat-card stories">
-        <div class="stat-title">Story Books</div>
-        <div class="stat-value" id="kpiStories">${initialStoriesCount}</div>
-        <div class="stat-desc">Active Children's Titles</div>
-      </div>
-      <div class="stat-card cc">
-        <div class="stat-title">License & Rights</div>
-        <div class="stat-value" style="font-size: 1.15rem; color: var(--success-green);">CC BY 4.0</div>
-        <div class="stat-desc">StoryWeaver / Pratham Books</div>
-      </div>
-    </section>
+    <!-- Main Navigation View Switcher (Tabs) -->
+    <nav class="main-nav-tabs">
+      <button class="nav-tab-btn active" id="tabCatalogBtn" onclick="switchMainTab('catalog')">
+        <span>📚</span> Published Video Assets
+        <span class="tab-badge" id="tabCatalogCount">${initialTotal}</span>
+      </button>
+      <button class="nav-tab-btn" id="tabTimelineBtn" onclick="switchMainTab('timeline')">
+        <span>📅</span> 30-Day Release Timeline
+        <span class="tab-badge" id="tabTimelineBadge">${initialCalCompleted}/${initialCalTotal} (${initialCalProgress}%)</span>
+      </button>
+    </nav>
 
-    <!-- Toolbar Filters -->
-    <section class="toolbar">
-      <div class="search-row">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" class="search-input" placeholder="Search by story, video title, ID, author, or keyword..." oninput="handleSearch()">
+    <!-- =========================================================================
+         SECTION 1: PUBLISHED ASSETS CATALOG
+         ========================================================================= -->
+    <div id="catalogViewSection">
+      <!-- Stats KPI Section -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">Total Publications</div>
+          <div class="stat-value" id="kpiTotal">${initialTotal}</div>
+          <div class="stat-desc">Published & verified assets</div>
         </div>
-        <div class="view-toggles">
-          <button id="viewCardBtn" class="view-btn active" onclick="setViewMode('card')">
-            <span>⊞</span> Grid
-          </button>
-          <button id="viewTableBtn" class="view-btn" onclick="setViewMode('table')">
-            <span>☰</span> Table
-          </button>
+        <div class="stat-card yt">
+          <div class="stat-title">YouTube Videos</div>
+          <div class="stat-value" id="kpiYt">${initialYt}</div>
+          <div class="stat-desc">Landscape, Shorts & Marathons</div>
         </div>
+        <div class="stat-card fb">
+          <div class="stat-title">Facebook Videos</div>
+          <div class="stat-value" id="kpiFb">${initialFb}</div>
+          <div class="stat-desc">Watch Videos, Reels & Specials</div>
+        </div>
+        <div class="stat-card ig">
+          <div class="stat-title">Instagram Reels</div>
+          <div class="stat-value" id="kpiIg">${initialIg}</div>
+          <div class="stat-desc">Bilingual Reels (9:16)</div>
+        </div>
+        <div class="stat-card stories">
+          <div class="stat-title">Story Books</div>
+          <div class="stat-value" id="kpiStories">${initialStoriesCount}</div>
+          <div class="stat-desc">Active Children's Titles</div>
+        </div>
+        <div class="stat-card cc">
+          <div class="stat-title">License & Rights</div>
+          <div class="stat-value" style="font-size: 1.15rem; color: var(--success-green);">CC BY 4.0</div>
+          <div class="stat-desc">StoryWeaver / Pratham Books</div>
+        </div>
+      </section>
+
+      <!-- Toolbar Filters -->
+      <section class="toolbar">
+        <div class="search-row">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by story, video title, ID, author, or keyword..." oninput="handleSearch()">
+          </div>
+          <div class="view-toggles">
+            <button id="viewCardBtn" class="view-btn active" onclick="setViewMode('card')">
+              <span>⊞</span> Grid
+            </button>
+            <button id="viewTableBtn" class="view-btn" onclick="setViewMode('table')">
+              <span>☰</span> Table
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-chips-row">
+          <span class="filter-label">Platform:</span>
+          <button class="filter-chip active" data-filter="platform" data-value="all" onclick="setPlatformFilter('all', this)">All (${initialTotal})</button>
+          <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">YouTube (${initialYt})</button>
+          <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">Facebook (${initialFb})</button>
+          <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">Instagram (${initialIg})</button>
+
+          <span class="filter-label" style="margin-left: 0.5rem;">Lang:</span>
+          <button class="filter-chip active" data-filter="lang" data-value="all" onclick="setLangFilter('all', this)">All</button>
+          <button class="filter-chip" data-filter="lang" data-value="id" onclick="setLangFilter('id', this)">🇮🇩 ID</button>
+          <button class="filter-chip" data-filter="lang" data-value="en" onclick="setLangFilter('en', this)">🇬🇧 EN</button>
+
+          <span class="filter-label" style="margin-left: 0.5rem;">Story:</span>
+          <select id="storySelect" class="filter-select" onchange="handleStoryChange()">
+            <option value="all">All Stories & Marathons (${initialTotal})</option>
+            <option value="compilation">🌙 Bedtime Story Marathons (Compilations)</option>
+            ${initialStoryOptions.map(([slug, title]) => `<option value="${slug}">${title}</option>`).join("")}
+          </select>
+        </div>
+      </section>
+
+      <!-- Results Status Bar -->
+      <div class="results-bar">
+        <div class="results-count">
+          Showing <strong id="visibleCount">${initialTotal}</strong> of <strong id="totalCount">${initialTotal}</strong> verified video assets
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-dim);" id="filterNotice"></div>
       </div>
 
-      <div class="filter-chips-row">
-        <span class="filter-label">Platform:</span>
-        <button class="filter-chip active" data-filter="platform" data-value="all" onclick="setPlatformFilter('all', this)">All (${initialTotal})</button>
-        <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">YouTube (${initialYt})</button>
-        <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">Facebook (${initialFb})</button>
-        <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">Instagram (${initialIg})</button>
-
-        <span class="filter-label" style="margin-left: 0.5rem;">Lang:</span>
-        <button class="filter-chip active" data-filter="lang" data-value="all" onclick="setLangFilter('all', this)">All</button>
-        <button class="filter-chip" data-filter="lang" data-value="id" onclick="setLangFilter('id', this)">🇮🇩 ID</button>
-        <button class="filter-chip" data-filter="lang" data-value="en" onclick="setLangFilter('en', this)">🇬🇧 EN</button>
-
-        <span class="filter-label" style="margin-left: 0.5rem;">Story:</span>
-        <select id="storySelect" class="filter-select" onchange="handleStoryChange()">
-          <option value="all">All Stories & Marathons (${initialTotal})</option>
-          <option value="compilation">🌙 Bedtime Story Marathons (Compilations)</option>
-          ${initialStoryOptions.map(([slug, title]) => `<option value="${slug}">${title}</option>`).join("")}
-        </select>
+      <!-- Card Grid View Container -->
+      <div id="cardViewContainer" class="cards-grid">
+        <!-- Injected by JavaScript -->
       </div>
-    </section>
 
-    <!-- Results Status Bar -->
-    <div class="results-bar">
-      <div class="results-count">
-        Showing <strong id="visibleCount">${initialTotal}</strong> of <strong id="totalCount">${initialTotal}</strong> verified video assets
+      <!-- Table View Container -->
+      <div id="tableViewContainer" class="table-container" style="display: none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Audit ID</th>
+              <th>Platform</th>
+              <th>Lang</th>
+              <th>Format</th>
+              <th>Story Title</th>
+              <th>Published Video Title</th>
+              <th>Video ID</th>
+              <th>Date (UTC)</th>
+              <th>Status</th>
+              <th>Direct Link</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Injected by JavaScript -->
+          </tbody>
+        </table>
       </div>
-      <div style="font-size: 0.72rem; color: var(--text-dim);" id="filterNotice"></div>
     </div>
 
-    <!-- Card Grid View Container -->
-    <div id="cardViewContainer" class="cards-grid">
-      <!-- Injected by JavaScript -->
-    </div>
+    <!-- =========================================================================
+         SECTION 2: 30-DAY RELEASE TIMELINE & PRODUCTION PROGRESS
+         ========================================================================= -->
+    <div id="timelineViewSection" style="display: none;">
+      <!-- Timeline Progress Overview Banner -->
+      <div class="timeline-progress-banner">
+        <section class="stats-grid" style="margin-bottom: 0.6rem;">
+          <div class="stat-card">
+            <div class="stat-title">Planned Slots</div>
+            <div class="stat-value" id="kpiCalTotal">${initialCalTotal}</div>
+            <div class="stat-desc">30 Days Editorial Roadmap</div>
+          </div>
+          <div class="stat-card cc">
+            <div class="stat-title">Completed</div>
+            <div class="stat-value" id="kpiCalCompleted" style="color: var(--success-green);">${initialCalCompleted}</div>
+            <div class="stat-desc">Broadcasted & Archived</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-title">Today's Schedule</div>
+            <div class="stat-value" id="kpiCalToday" style="color: #f59e0b;">${initialCalToday}</div>
+            <div class="stat-desc">Active Production Broadcasts</div>
+          </div>
+          <div class="stat-card yt">
+            <div class="stat-title">Upcoming</div>
+            <div class="stat-value" id="kpiCalUpcoming">${initialCalUpcoming}</div>
+            <div class="stat-desc">Queued in D1 Scheduler</div>
+          </div>
+          <div class="stat-card stories">
+            <div class="stat-title">Roadmap Progress</div>
+            <div class="stat-value" id="kpiCalProgress" style="color: var(--accent-primary);">${initialCalProgress}%</div>
+            <div class="stat-desc" id="kpiCalProgressDesc">${initialCalCompleted} of ${initialCalTotal} Slots Broadcasted</div>
+          </div>
+        </section>
 
-    <!-- Table View Container -->
-    <div id="tableViewContainer" class="table-container" style="display: none;">
-      <table>
-        <thead>
-          <tr>
-            <th>Audit ID</th>
-            <th>Platform</th>
-            <th>Lang</th>
-            <th>Format</th>
-            <th>Story Title</th>
-            <th>Published Video Title</th>
-            <th>Video ID</th>
-            <th>Date (UTC)</th>
-            <th>Status</th>
-            <th>Direct Link</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <!-- Injected by JavaScript -->
-        </tbody>
-      </table>
+        <!-- Progress Bar -->
+        <div class="progress-bar-wrapper">
+          <div class="progress-track">
+            <div class="progress-fill" id="timelineProgressBar" style="width: ${initialCalProgress}%;"></div>
+          </div>
+          <div class="progress-labels">
+            <span>🚀 Launch: 07 Nov 2026</span>
+            <span id="progressBarLabel"><strong>${initialCalCompleted} of ${initialCalTotal} Slots</strong> (${initialCalProgress}%)</span>
+            <span>🏁 Finale: 06 Dec 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Up Spotlight Banner -->
+      ${
+        nextUpSlot
+          ? `
+      <div class="next-up-card" id="nextUpBanner">
+        <div class="next-up-info">
+          <span class="next-up-badge">🔥 Next Up Today</span>
+          <div>
+            <div class="next-up-title">${nextUpSlot.storyTitleId} (${nextUpSlot.lang.toUpperCase()})</div>
+            <div class="next-up-meta">
+              📅 ${nextUpSlot.dayName}, ${nextUpSlot.date} · ⏰ ${nextUpSlot.timeSlot} · ${nextUpSlot.slotType}
+            </div>
+          </div>
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-muted); font-style: italic; max-width: 480px;">
+          "${nextUpSlot.theme}"
+        </div>
+      </div>
+      `
+          : ""
+      }
+
+      <!-- Timeline Toolbar -->
+      <section class="toolbar">
+        <div class="search-row">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="timelineSearchInput" class="search-input" placeholder="Search scheduled story, date, theme, or slot type..." oninput="handleTimelineSearch()">
+          </div>
+          <div class="view-toggles">
+            <button id="viewCalFlowBtn" class="view-btn active" onclick="setTimelineViewMode('flow')">
+              <span>⊞</span> Day Cards
+            </button>
+            <button id="viewCalTableBtn" class="view-btn" onclick="setTimelineViewMode('table')">
+              <span>☰</span> Schedule Table
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-chips-row">
+          <span class="filter-label">Status:</span>
+          <button class="filter-chip active" data-cal-filter="status" data-value="all" onclick="setTimelineStatusFilter('all', this)">All (${initialCalTotal})</button>
+          <button class="filter-chip" data-cal-filter="status" data-value="today" onclick="setTimelineStatusFilter('today', this)">🔥 Today (${initialCalToday})</button>
+          <button class="filter-chip" data-cal-filter="status" data-value="upcoming" onclick="setTimelineStatusFilter('upcoming', this)">⏳ Upcoming (${initialCalUpcoming})</button>
+          <button class="filter-chip" data-cal-filter="status" data-value="completed" onclick="setTimelineStatusFilter('completed', this)">✅ Completed (${initialCalCompleted})</button>
+
+          <span class="filter-label" style="margin-left: 0.5rem;">Lang:</span>
+          <button class="filter-chip active" data-cal-filter="lang" data-value="all" onclick="setTimelineLangFilter('all', this)">All</button>
+          <button class="filter-chip" data-cal-filter="lang" data-value="id" onclick="setTimelineLangFilter('id', this)">🇮🇩 ID</button>
+          <button class="filter-chip" data-cal-filter="lang" data-value="en" onclick="setTimelineLangFilter('en', this)">🇬🇧 EN</button>
+        </div>
+      </section>
+
+      <!-- Timeline Results Bar -->
+      <div class="results-bar">
+        <div class="results-count">
+          Showing <strong id="timelineVisibleCount">${initialCalTotal}</strong> of <strong id="timelineTotalCount">${initialCalTotal}</strong> scheduled broadcasts
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-dim);" id="timelineFilterNotice"></div>
+      </div>
+
+      <!-- Timeline Card Flow Container -->
+      <div id="timelineFlowContainer">
+        <!-- Injected by JavaScript -->
+      </div>
+
+      <!-- Timeline Table View Container -->
+      <div id="timelineTableContainer" class="table-container" style="display: none;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Day</th>
+              <th>Status</th>
+              <th>Story Title</th>
+              <th>Lang</th>
+              <th>Format</th>
+              <th>Slot Type</th>
+              <th>Platforms</th>
+              <th>Theme / Notes</th>
+            </tr>
+          </thead>
+          <tbody id="timelineTableBody">
+            <!-- Injected by JavaScript -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Video Modal Preview -->
@@ -1375,8 +1969,11 @@ const indexHtmlContent = `<!DOCTYPE html>
   </div>
 
   <script>
-    // Embedded Complete Audit Dataset
+    // Embedded Datasets
     let RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
+    let RAW_CALENDAR_DATA = ${JSON.stringify(calendarSlots)};
+
+    let activeTab = 'catalog'; // 'catalog' | 'timeline'
 
     let state = {
       searchQuery: '',
@@ -1385,6 +1982,41 @@ const indexHtmlContent = `<!DOCTYPE html>
       storyFilter: 'all',
       viewMode: 'card'
     };
+
+    let timelineState = {
+      searchQuery: '',
+      statusFilter: 'all',
+      langFilter: 'all',
+      viewMode: 'flow' // 'flow' | 'table'
+    };
+
+    // Tab Navigation
+    function switchMainTab(tab) {
+      activeTab = tab;
+      document.getElementById('tabCatalogBtn').classList.toggle('active', tab === 'catalog');
+      document.getElementById('tabTimelineBtn').classList.toggle('active', tab === 'timeline');
+
+      document.getElementById('catalogViewSection').style.display = tab === 'catalog' ? 'block' : 'none';
+      document.getElementById('timelineViewSection').style.display = tab === 'timeline' ? 'block' : 'none';
+
+      localStorage.setItem('zayn_main_tab', tab);
+
+      if (tab === 'timeline') {
+        renderTimeline();
+      }
+    }
+
+    // Switch to catalog and filter by a specific story
+    function filterCatalogByStory(slug) {
+      switchMainTab('catalog');
+      const select = document.getElementById('storySelect');
+      if (select) {
+        select.value = slug;
+        state.storyFilter = slug;
+        render();
+        select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
 
     // Calculate and render all KPIs dynamically
     function renderKPIs() {
@@ -1415,6 +2047,9 @@ const indexHtmlContent = `<!DOCTYPE html>
 
       const elTotalCount = document.getElementById('totalCount');
       if (elTotalCount) elTotalCount.textContent = total;
+
+      const tabCatCount = document.getElementById('tabCatalogCount');
+      if (tabCatCount) tabCatCount.textContent = total;
 
       // Update counts inside platform filter chips
       const chipAll = document.querySelector('[data-filter="platform"][data-value="all"]');
@@ -1469,9 +2104,6 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     // 3-Tier Robust Hydration System:
-    // Tier 1: /api/catalog (Cloudflare D1 live database)
-    // Tier 2: ./audit-data.json (GitHub Pages / static preview fallback)
-    // Tier 3: embedded RAW_AUDIT_DATA (Guaranteed bundle snapshot)
     async function hydrateLiveCatalog(manual = false) {
       const pill = document.getElementById('d1-status-pill');
       const text = document.getElementById('d1StatusText');
@@ -1488,9 +2120,13 @@ const indexHtmlContent = `<!DOCTYPE html>
           if (data && data.success && Array.isArray(data.auditRecords) && data.auditRecords.length > 0) {
             console.log('⚡ Live D1 hydration successful:', data.auditRecords.length, 'records');
             RAW_AUDIT_DATA = data.auditRecords;
+            if (Array.isArray(data.calendarSlots) && data.calendarSlots.length > 0) {
+              RAW_CALENDAR_DATA = data.calendarSlots;
+            }
             populateStoryDropdown();
             renderKPIs();
             render();
+            renderTimeline();
             if (pill) {
               pill.className = 'status-badge status-live';
               pill.title = 'Live from Cloudflare D1 SQLite database (Click to refresh)';
@@ -1502,10 +2138,10 @@ const indexHtmlContent = `<!DOCTYPE html>
           }
         }
       } catch (err) {
-        console.warn('/api/catalog not reachable, checking static audit-data.json fallback...', err);
+        console.warn('/api/catalog not reachable, checking static fallback...', err);
       }
 
-      // 2. Try static audit-data.json (GitHub Pages / local preview fallback)
+      // 2. Try static audit-data.json and calendar-data.json
       try {
         const res = await fetch('./audit-data.json');
         if (res.ok) {
@@ -1513,9 +2149,23 @@ const indexHtmlContent = `<!DOCTYPE html>
           if (Array.isArray(data) && data.length > 0) {
             console.log('📁 Static audit-data.json loaded:', data.length, 'records');
             RAW_AUDIT_DATA = data;
+
+            try {
+              const calRes = await fetch('./calendar-data.json');
+              if (calRes.ok) {
+                const calData = await calRes.json();
+                if (Array.isArray(calData) && calData.length > 0) {
+                  RAW_CALENDAR_DATA = calData;
+                }
+              }
+            } catch {
+              // Ignore
+            }
+
             populateStoryDropdown();
             renderKPIs();
             render();
+            renderTimeline();
             if (pill) {
               pill.className = 'status-badge status-snapshot';
               pill.title = 'Snapshot from audit-data.json (Click to refresh)';
@@ -1534,6 +2184,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       populateStoryDropdown();
       renderKPIs();
       render();
+      renderTimeline();
       if (pill) {
         pill.className = 'status-badge status-embedded';
         pill.title = 'Pre-rendered in HTML bundle (Click to refresh)';
@@ -1557,9 +2208,13 @@ const indexHtmlContent = `<!DOCTYPE html>
       localStorage.setItem('zayn_theme', target);
     }
 
-    // Initialize Theme
     const savedTheme = localStorage.getItem('zayn_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
+
+    const savedTab = localStorage.getItem('zayn_main_tab');
+    if (savedTab === 'timeline') {
+      switchMainTab('timeline');
+    }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -1611,17 +2266,12 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function getFilteredData() {
       return RAW_AUDIT_DATA.filter(item => {
-        // Platform filter
         if (state.platformFilter !== 'all' && item.platform !== state.platformFilter) {
           return false;
         }
-
-        // Language filter
         if (state.langFilter !== 'all' && item.language !== state.langFilter) {
           return false;
         }
-
-        // Story filter
         if (state.storyFilter !== 'all') {
           if (state.storyFilter === 'compilation') {
             if (item.category !== 'Compilation Marathon') return false;
@@ -1629,8 +2279,6 @@ const indexHtmlContent = `<!DOCTYPE html>
             return false;
           }
         }
-
-        // Search query
         if (state.searchQuery) {
           const q = state.searchQuery;
           const searchStr = [
@@ -1748,7 +2396,6 @@ const indexHtmlContent = `<!DOCTYPE html>
       const visibleEl = document.getElementById('visibleCount');
       if (visibleEl) visibleEl.textContent = data.length;
 
-      // Notice when filters active
       const noticeEl = document.getElementById('filterNotice');
       if (noticeEl) {
         const isFiltered = state.platformFilter !== 'all' || state.langFilter !== 'all' || state.storyFilter !== 'all' || state.searchQuery;
@@ -1764,6 +2411,221 @@ const indexHtmlContent = `<!DOCTYPE html>
       document.getElementById('tableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 1.5rem; color: var(--text-dim); font-size: 0.85rem;">No published videos match your filter.</td></tr>';
     }
 
+    // =========================================================================
+    // TIMELINE RENDERING & INTERACTIONS
+    // =========================================================================
+    function setTimelineViewMode(mode) {
+      timelineState.viewMode = mode;
+      document.getElementById('viewCalFlowBtn').classList.toggle('active', mode === 'flow');
+      document.getElementById('viewCalTableBtn').classList.toggle('active', mode === 'table');
+      document.getElementById('timelineFlowContainer').style.display = mode === 'flow' ? 'block' : 'none';
+      document.getElementById('timelineTableContainer').style.display = mode === 'table' ? 'block' : 'none';
+    }
+
+    function setTimelineStatusFilter(val, btn) {
+      timelineState.statusFilter = val;
+      document.querySelectorAll('[data-cal-filter="status"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTimeline();
+    }
+
+    function setTimelineLangFilter(val, btn) {
+      timelineState.langFilter = val;
+      document.querySelectorAll('[data-cal-filter="lang"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTimeline();
+    }
+
+    function handleTimelineSearch() {
+      timelineState.searchQuery = document.getElementById('timelineSearchInput').value.trim().toLowerCase();
+      renderTimeline();
+    }
+
+    function getFilteredTimelineData() {
+      return RAW_CALENDAR_DATA.filter(item => {
+        if (timelineState.statusFilter !== 'all') {
+          if (timelineState.statusFilter === 'completed' && !item.isCompleted && item.status !== 'completed') return false;
+          if (timelineState.statusFilter === 'today' && item.status !== 'today') return false;
+          if (timelineState.statusFilter === 'upcoming' && item.status !== 'upcoming') return false;
+        }
+
+        if (timelineState.langFilter !== 'all' && item.lang !== timelineState.langFilter) {
+          return false;
+        }
+
+        if (timelineState.searchQuery) {
+          const q = timelineState.searchQuery;
+          const searchStr = [
+            item.id,
+            item.date,
+            item.dayName,
+            item.timeSlot,
+            item.slotType,
+            item.bookSlug,
+            item.storyTitleId,
+            item.storyTitleEn,
+            item.theme
+          ].join(' ').toLowerCase();
+
+          if (!searchStr.includes(q)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    function renderTimeline() {
+      const data = getFilteredTimelineData();
+
+      // Update counters
+      const total = RAW_CALENDAR_DATA.length;
+      const completed = RAW_CALENDAR_DATA.filter(s => s.status === 'completed' || s.isCompleted).length;
+      const todayCount = RAW_CALENDAR_DATA.filter(s => s.status === 'today').length;
+      const upcoming = RAW_CALENDAR_DATA.filter(s => s.status === 'upcoming').length;
+      const progress = ((completed / total) * 100).toFixed(1);
+
+      const elTotal = document.getElementById('kpiCalTotal');
+      if (elTotal) elTotal.textContent = total;
+
+      const elCompleted = document.getElementById('kpiCalCompleted');
+      if (elCompleted) elCompleted.textContent = completed;
+
+      const elToday = document.getElementById('kpiCalToday');
+      if (elToday) elToday.textContent = todayCount;
+
+      const elUpcoming = document.getElementById('kpiCalUpcoming');
+      if (elUpcoming) elUpcoming.textContent = upcoming;
+
+      const elProgress = document.getElementById('kpiCalProgress');
+      if (elProgress) elProgress.textContent = progress + '%';
+
+      const elDesc = document.getElementById('kpiCalProgressDesc');
+      if (elDesc) elDesc.textContent = completed + ' of ' + total + ' Slots Broadcasted';
+
+      const elProgressBar = document.getElementById('timelineProgressBar');
+      if (elProgressBar) elProgressBar.style.width = progress + '%';
+
+      const elBarLabel = document.getElementById('progressBarLabel');
+      if (elBarLabel) elBarLabel.innerHTML = '<strong>' + completed + ' of ' + total + ' Slots</strong> (' + progress + '%)';
+
+      const elTabBadge = document.getElementById('tabTimelineBadge');
+      if (elTabBadge) elTabBadge.textContent = completed + '/' + total + ' (' + progress + '%)';
+
+      const visibleEl = document.getElementById('timelineVisibleCount');
+      if (visibleEl) visibleEl.textContent = data.length;
+
+      const totalEl = document.getElementById('timelineTotalCount');
+      if (totalEl) totalEl.textContent = total;
+
+      const noticeEl = document.getElementById('timelineFilterNotice');
+      if (noticeEl) {
+        const isFiltered = timelineState.statusFilter !== 'all' || timelineState.langFilter !== 'all' || timelineState.searchQuery;
+        noticeEl.textContent = isFiltered ? '(Filters Active)' : '';
+      }
+
+      // Group slots by date for Flow View
+      const groups = new Map();
+      data.forEach(slot => {
+        const key = slot.date;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(slot);
+      });
+
+      let flowHtml = '';
+      if (groups.size === 0) {
+        flowHtml = '<div style="text-align: center; padding: 2.5rem; color: var(--text-dim); font-size: 0.85rem;">No scheduled broadcasts match your filter.</div>';
+      } else {
+        for (const [dateStr, slots] of groups) {
+          const isToday = slots.some(s => s.status === 'today');
+          const dayName = slots[0]?.dayName || '';
+
+          flowHtml += \`
+            <div class="timeline-day-group">
+              <div class="timeline-day-header \${isToday ? 'today' : ''}">
+                <span>📅 \${dayName}, \${formatDate(dateStr)}</span>
+                \${isToday ? '<span class="day-today-tag">🔥 Hari Ini / Today</span>' : ''}
+                <span style="font-size: 0.7rem; color: var(--text-dim); margin-left: auto;">\${slots.length} Broadcast\${slots.length > 1 ? 's' : ''}</span>
+              </div>
+              <div class="timeline-slots-grid">
+                \${slots.map(renderSlotCard).join('')}
+              </div>
+            </div>
+          \`;
+        }
+      }
+      document.getElementById('timelineFlowContainer').innerHTML = flowHtml;
+
+      // Render Schedule Table View
+      const rowsHtml = data.map(renderSlotTableRow).join('');
+      document.getElementById('timelineTableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 1.5rem; color: var(--text-dim); font-size: 0.85rem;">No scheduled broadcasts match your filter.</td></tr>';
+    }
+
+    function renderSlotCard(slot) {
+      const isToday = slot.status === 'today';
+      const isCompleted = slot.status === 'completed' || slot.isCompleted;
+
+      const statusClass = isToday ? 'today' : isCompleted ? 'completed' : 'upcoming';
+      const statusText = isToday ? '🔥 Today' : isCompleted ? '✅ Completed' : '⏳ Scheduled';
+
+      return \`
+        <div class="slot-card \${isToday ? 'today-card' : ''}">
+          <div class="slot-top">
+            <span class="slot-time-badge">⏰ \${slot.timeSlot}</span>
+            <span class="slot-status-pill \${statusClass}">\${statusText}</span>
+          </div>
+
+          <div class="slot-title">\${slot.storyTitleId}</div>
+          <div class="slot-type-label">\${slot.slotType}</div>
+
+          <div class="slot-badges">
+            <span class="lang-badge" style="background: var(--bg-tertiary); font-size: 0.65rem;">\${slot.lang.toUpperCase()}</span>
+            <span class="format-badge" style="font-size: 0.65rem;">\${slot.format}</span>
+          </div>
+
+          <div class="slot-theme-box">
+            "\${slot.theme}"
+          </div>
+
+          \${slot.hasPublishedAsset ? \`
+            <button class="slot-action-btn active-btn" onclick="filterCatalogByStory('\${slot.bookSlug}')">
+              📚 View Published Assets ↗
+            </button>
+          \` : isToday ? \`
+            <div style="font-size: 0.72rem; color: #f59e0b; font-weight: 700; text-align: center; padding: 0.2rem;">
+              ⚡ Scheduled for Prime Bedtime Broadcast Today
+            </div>
+          \` : \`
+            <div style="font-size: 0.72rem; color: var(--text-dim); text-align: center; padding: 0.2rem;">
+              ⏳ In Production Queue
+            </div>
+          \`}
+        </div>
+      \`;
+    }
+
+    function renderSlotTableRow(slot) {
+      const isToday = slot.status === 'today';
+      const isCompleted = slot.status === 'completed' || slot.isCompleted;
+      const statusClass = isToday ? 'today' : isCompleted ? 'completed' : 'upcoming';
+      const statusText = isToday ? 'Today' : isCompleted ? 'Done' : 'Upcoming';
+
+      return \`
+        <tr>
+          <td style="white-space: nowrap; font-weight: 700;">\${formatDate(slot.date)}</td>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">\${slot.timeSlot}</td>
+          <td>\${slot.dayName}</td>
+          <td><span class="slot-status-pill \${statusClass}">\${statusText}</span></td>
+          <td><strong>\${slot.storyTitleId}</strong></td>
+          <td><span class="lang-badge">\${slot.lang.toUpperCase()}</span></td>
+          <td><span class="format-badge">\${slot.format.split(' ')[0]}</span></td>
+          <td style="font-size: 0.74rem;">\${slot.slotType}</td>
+          <td style="font-size: 0.72rem; color: var(--text-dim);">\${(slot.targetPlatforms || []).join(', ')}</td>
+          <td style="font-size: 0.72rem; max-width: 260px; font-style: italic;">\${slot.theme}</td>
+        </tr>
+      \`;
+    }
+
+    // Modal Video Player
     function openYoutubeModal(videoId, title) {
       const modal = document.getElementById('videoModal');
       const frame = document.getElementById('modalPlayerFrame');
@@ -1783,8 +2645,24 @@ const indexHtmlContent = `<!DOCTYPE html>
       if (e.key === 'Escape') closeModal();
     });
 
-    // CSV Export for Compliance Audit
-    function exportToCsv() {
+    // Dynamic CSV Export
+    function exportActiveCsv() {
+      if (activeTab === 'timeline') {
+        exportTimelineCsv();
+      } else {
+        exportCatalogCsv();
+      }
+    }
+
+    function exportActiveJson() {
+      if (activeTab === 'timeline') {
+        exportTimelineJson();
+      } else {
+        exportCatalogJson();
+      }
+    }
+
+    function exportCatalogCsv() {
       const headers = ['Audit ID', 'Category', 'Platform', 'Language', 'Format', 'Story Title (ID)', 'Story Title (EN)', 'Published Video Title', 'Platform Video ID', 'Published Date UTC', 'Direct Video URL', 'Status', 'License', 'Author', 'Illustrator', 'Source URL'];
       
       const rows = RAW_AUDIT_DATA.map(item => [
@@ -1810,14 +2688,14 @@ const indexHtmlContent = `<!DOCTYPE html>
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement('a');
       link.setAttribute('href', encodedUri);
-      link.setAttribute('download', 'zayn-storybook-multi-platform-audit-catalog.csv');
+      link.setAttribute('download', 'zayn-storybook-catalog-audit.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('Exported CSV audit file!');
+      showToast('Exported Catalog CSV!');
     }
 
-    function exportToJson() {
+    function exportCatalogJson() {
       const jsonContent = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(RAW_AUDIT_DATA, null, 2));
       const link = document.createElement('a');
       link.setAttribute('href', jsonContent);
@@ -1825,17 +2703,59 @@ const indexHtmlContent = `<!DOCTYPE html>
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('Exported JSON audit records!');
+      showToast('Exported Catalog JSON!');
+    }
+
+    function exportTimelineCsv() {
+      const headers = ['Slot ID', 'Date', 'Day', 'Time Slot', 'Status', 'Story Slug', 'Story Title (ID)', 'Story Title (EN)', 'Lang', 'Format', 'Slot Type', 'Theme / Synopsis', 'Target Platforms'];
+      
+      const rows = RAW_CALENDAR_DATA.map(item => [
+        item.id,
+        item.date,
+        item.dayName,
+        \`"\${item.timeSlot}"\`,
+        item.status,
+        item.bookSlug,
+        \`"\${(item.storyTitleId || '').replace(/"/g, '""')}"\`,
+        \`"\${(item.storyTitleEn || '').replace(/"/g, '""')}"\`,
+        item.lang.toUpperCase(),
+        \`"\${item.format}"\`,
+        \`"\${item.slotType}"\`,
+        \`"\${(item.theme || '').replace(/"/g, '""')}"\`,
+        \`"\${(item.targetPlatforms || []).join('; ')}"\`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'zayn-storybook-30-day-timeline.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported Timeline CSV!');
+    }
+
+    function exportTimelineJson() {
+      const jsonContent = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(RAW_CALENDAR_DATA, null, 2));
+      const link = document.createElement('a');
+      link.setAttribute('href', jsonContent);
+      link.setAttribute('download', 'zayn-storybook-release-timeline.json');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Exported Timeline JSON!');
     }
 
     // Initial render
     populateStoryDropdown();
     renderKPIs();
     render();
+    renderTimeline();
   </script>
 </body>
 </html>
 `;
 
 fs.writeFileSync(path.join(docsDir, "index.html"), indexHtmlContent);
-console.log(`Successfully generated docs/index.html with ${auditRecords.length} records!`);
+console.log(`Successfully generated docs/index.html with ${auditRecords.length} records and ${calendarSlots.length} timeline slots!`);

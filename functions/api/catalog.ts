@@ -102,6 +102,19 @@ export async function onRequest(context: { env: Env; request: Request }) {
       });
     }
 
+    // 3. Optional: Fetch schedule calendar slots from D1
+    let calendarSlots: any[] = [];
+    try {
+      const { results: cal } = await db
+        .prepare("SELECT * FROM content_calendar ORDER BY scheduled_date ASC, time_slot ASC")
+        .all();
+      if (Array.isArray(cal)) {
+        calendarSlots = cal;
+      }
+    } catch {
+      // Graceful fallback if table does not exist or empty
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -109,6 +122,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
         totalRecords: auditRecords.length,
         totalBooks: books.length,
         auditRecords,
+        calendarSlots,
         timestamp: new Date().toISOString(),
       }),
       {
