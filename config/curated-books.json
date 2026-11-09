@@ -733,5 +733,132 @@
         "en": "Now I will sleep. And dream about real tigers in a jungle!"
       }
     ]
+  },
+  {
+    "slug": "ayo-berayun-momo",
+    "title": "Ayo, Berayun, Momo!",
+    "originalTitle": "Swing High, Momo!",
+    "author": "Iwok Abqary",
+    "illustrator": "Citra Nidya",
+    "publisher": "Badan Pengembangan dan Pembinaan Bahasa, Kemendikdasmen RI",
+    "license": "Lisensi Terbuka / Hak Cipta Kemendikdasmen RI",
+    "readingLevel": 2,
+    "sourceUrl": "https://budi.kemendikdasmen.go.id/baca/digital/ayo-berayun-momo",
+    "pdfUrl": "https://budi.kemendikdasmen.go.id/unduh-file/ayo-berayun-momo/digital",
+    "coverPage": 1,
+    "avatarPage": 7,
+    "theme": "Keberanian & Kepedulian Hutan Tropis: Kisah Momo si Siamang",
+    "characterBible": {
+      "protagonists": [
+        {
+          "id": "momo",
+          "name": "Momo / The Brave Siamang",
+          "role": "Gentle Siamang Overcoming Fear",
+          "voice": {
+            "id": "id-ID-ArdiNeural",
+            "en": "en-US-GuyNeural",
+            "color": "#10B981",
+            "badge": "🐒 Momo"
+          }
+        }
+      ]
+    },
+    "worldBible": {
+      "village": "Lush Tropical Rainforest Canopy of Sumatra",
+      "palette": {
+        "jungleGreen": "#059669",
+        "warmCanopy": "#10B981",
+        "sunlitLeaf": "#84CC16",
+        "earthBrown": "#78350F"
+      }
+    },
+    "moral": {
+      "headlineId": "Keberanian Tumbuh Saat Kita Peduli dan Menolong Sesama!",
+      "spokenId": "Jangan biarkan rasa takut menghentikanmu berbuat baik. Saat kita berani menolong orang lain, rasa takut akan hilang dan kita menjadi lebih kuat!",
+      "headlineEn": "True Courage Blooms When We Care and Help Others!",
+      "spokenEn": "Never let fear hold you back from doing good. When we step forward to help someone in need, courage replaces fear and makes us stronger!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_06.png",
+      "backdropImage": "assets/scene_01.png",
+      "id": {
+        "headlineTop": "AYO, BERAYUN, MOMO!",
+        "headlineBottom": "SIAMANG PEMBERANI 🐒🌳",
+        "hook": "TAKUT TINGGI TAPI NEKAT TERBANG DEMI TOLONG BURUNG KECIL!",
+        "hookEmoji": "🐒🦅🐍",
+        "badge": "DONGENG HEWAN INDONESIA",
+        "sticker": "Siamang Super Berani! 🌳",
+        "bedtimeTitle": "Ayo, Berayun, Momo!",
+        "bedtimeHook": "Kisah Siamang Penakut yang Berani Berayun Demi Sahabat"
+      },
+      "en": {
+        "headlineTop": "SWING HIGH, MOMO!",
+        "headlineBottom": "THE BRAVE SIAMANG 🐒🌳",
+        "hook": "TERRIFIED OF HEIGHTS, YET LEAPED TO SAVE A BABY BIRD!",
+        "hookEmoji": "🐒🦅🐍",
+        "badge": "INSPIRING INDONESIAN FABLE",
+        "sticker": "Brave Little Hero! 🌳",
+        "bedtimeTitle": "Swing High, Momo!",
+        "bedtimeHook": "A Touching Tale of Overcoming Fear Through Friendship"
+      }
+    },
+    "scenes": [
+      {
+        "index": 1,
+        "type": "story",
+        "pageNumber": 7,
+        "id": "Momo adalah seekor siamang Sumatra berbulu hitam. Lengannya panjang dan kuat, namun ia tidak pernah mau berayun di pepohonan.",
+        "en": "Momo is a Sumatran siamang with shiny black fur. His arms are long and strong, but he never ever dares to swing through the trees."
+      },
+      {
+        "index": 2,
+        "type": "story",
+        "pageNumber": 11,
+        "id": "Momo sangat takut berayun karena pernah hampir terjatuh. Saat teman-temannya asyik memetik buah ara di seberang hutan, Momo hanya diam sendirian memetik dedaunan.",
+        "en": "Momo was terrified because he had once slipped and almost tumbled down. When his friends leaped across the forest to pick sweet figs, Momo stayed behind eating leaves all alone."
+      },
+      {
+        "index": 3,
+        "type": "story",
+        "pageNumber": 18,
+        "id": "Tiba-tiba terdengar suara rintihan, cuit! cuit! Seekor anak burung malang terjatuh dari sarangnya yang tinggi dan tergeletak tak berdaya di tanah.",
+        "en": "Suddenly, a soft cry echoed, chirp! chirp! A helpless little baby bird had tumbled from its high nest, lying vulnerable on the forest floor."
+      },
+      {
+        "index": 4,
+        "type": "story",
+        "pageNumber": 19,
+        "id": "Gawat! Seekor ular melata mendekat hendak memangsa anak burung itu. Momo panik berteriak melengking minta tolong, namun seluruh keluarganya sedang pergi jauh.",
+        "en": "Danger! A sneaky snake slithered closer, ready to strike the baby bird. Momo shrieked in alarm calling for help, but the deep forest was completely empty."
+      },
+      {
+        "index": 5,
+        "type": "story",
+        "pageNumber": 23,
+        "id": "Ular itu semakin dekat! Momo mondar-mandir bingung dan cemas. Haruskah ia berayun dan melompat dari dahan tinggi demi menolong sahabat kecilnya?",
+        "en": "The snake was getting closer and closer! Momo paced anxiously. Should he dare to swing and leap across the dizzying canopy to rescue his tiny friend?"
+      },
+      {
+        "index": 6,
+        "type": "story",
+        "pageNumber": 26,
+        "id": "Demi menyelamatkan anak burung, Momo melupakan rasa takutnya! Ia melompat dan berayun kencang melayang di udara, wing! wing! Hap! Ia mendarat dengan selamat di seberang!",
+        "en": "To save the helpless chick, Momo forgot all his fears! He leaped and swung bravely through the open air, whoosh! whoosh! Snap! He landed safely on the far tree!"
+      },
+      {
+        "index": 7,
+        "type": "story",
+        "pageNumber": 28,
+        "id": "Momo langsung menyambar anak burung itu lalu memanjat gesit kembali ke puncak pohon, jauh dari jangkauan ular yang kelaparan!",
+        "en": "Momo gently scooped up the little chick and climbed swiftly back up to the treetops, safely out of the hungry snake's reach!"
+      },
+      {
+        "index": 8,
+        "type": "story",
+        "pageNumber": 29,
+        "id": "Cuit, cuit! Anak burung bersiul gembira kembali ke pelukan induknya. Momo tersenyum bangga—ia berhasil mengalahkan rasa takutnya dan kini berani berayun lagi!",
+        "en": "Chirp, chirp! The baby bird was safe and happy in its warm nest. Momo beamed with joy—he had conquered his fear and found his courage to swing once more!"
+      }
+    ]
   }
 ]
