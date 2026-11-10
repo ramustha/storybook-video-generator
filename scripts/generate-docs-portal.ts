@@ -108,28 +108,25 @@ function padId(n: number): string {
 }
 
 /**
- * Resolves verified thumbnail URL with fallbacks across languages, formats, and brand emblem.
- * Guarantees zero missing or broken thumbnail assets.
+ * Resolves verified thumbnail URL strictly matching aspect ratio.
+ * Guarantees zero aspect-ratio mismatch between landscape (16:9) and vertical (9:16).
  */
 function resolveStoryThumbnail(data: any, lang: "id" | "en", fmt: "landscape" | "vertical"): string {
   const yt = data.publications?.youtube || {};
-  const altFmt = fmt === "landscape" ? "vertical" : "landscape";
   const altLang = lang === "id" ? "en" : "id";
 
   const candidateId =
     yt[lang]?.[fmt]?.id ||
-    yt[lang]?.[altFmt]?.id ||
     yt[altLang]?.[fmt]?.id ||
-    yt[altLang]?.[altFmt]?.id ||
     data.exports?.[lang]?.[fmt]?.youtubeId ||
-    data.exports?.[lang]?.[altFmt]?.youtubeId ||
-    data.exports?.[altLang]?.[fmt]?.youtubeId ||
-    data.exports?.[altLang]?.[altFmt]?.youtubeId;
+    data.exports?.[altLang]?.[fmt]?.youtubeId;
 
   if (candidateId) {
     return `https://img.youtube.com/vi/${candidateId}/hqdefault.jpg`;
   }
-  return "branding/cover-facebook-1640x924.png";
+  return fmt === "vertical"
+    ? "branding/story-highlight-instagram-1080x1920.png"
+    : "branding/cover-facebook-1640x924.png";
 }
 
 for (const s of stories) {

@@ -99,14 +99,37 @@ export async function onRequest(context: { env: Env; request: Request }) {
       }
 
       let thumbUrl = p.thumbnail_url;
+      const isTargetVertical = p.format === "vertical";
+
       if (!thumbUrl) {
-        const ytPub = (publications as any[]).find(
-          (other) => other.book_slug === p.book_slug && other.platform === "youtube" && other.external_id
+        // Priority 1: YouTube in same story with identical format AND identical language
+        let ytPub = (publications as any[]).find(
+          (other) =>
+            other.book_slug === p.book_slug &&
+            other.platform === "youtube" &&
+            other.external_id &&
+            other.lang === p.lang &&
+            (isTargetVertical ? other.format === "vertical" : other.format !== "vertical")
         );
+
+        // Priority 2: YouTube in same story with identical format (cross-language)
+        if (!ytPub) {
+          ytPub = (publications as any[]).find(
+            (other) =>
+              other.book_slug === p.book_slug &&
+              other.platform === "youtube" &&
+              other.external_id &&
+              (isTargetVertical ? other.format === "vertical" : other.format !== "vertical")
+          );
+        }
+
         if (ytPub && ytPub.external_id) {
           thumbUrl = `https://img.youtube.com/vi/${ytPub.external_id}/hqdefault.jpg`;
         } else {
-          thumbUrl = "branding/cover-facebook-1640x924.png";
+          // Priority 3: Fallback strictly to aspect-ratio matching brand emblem
+          thumbUrl = isTargetVertical
+            ? "branding/story-highlight-instagram-1080x1920.png"
+            : "branding/cover-facebook-1640x924.png";
         }
       }
 
