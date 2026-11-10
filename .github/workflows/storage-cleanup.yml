@@ -1,0 +1,74 @@
+name: Cloudflare R2 Remote Storage Cleanup
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry Run Mode (Preview without deleting)'
+        required: false
+        type: boolean
+        default: false
+      keep_latest:
+        description: 'Number of latest published stories to protect'
+        required: false
+        default: '1'
+      min_age_hours:
+        description: 'Minimum publication age (hours) before buffer deletion'
+        required: false
+        default: '48'
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup_r2:
+    name: Prune Published Video Buffers from Cloudflare R2
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      - name: 🔑 Configure Cloudflare R2 Credentials
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.PERSONAL_R2_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.PERSONAL_R2_ACCESS_KEY_ID }}
+          R2_SECRET_KEY: ${{ secrets.PERSONAL_R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
+        run: |
+          mkdir -p config
+          cat <<EOF > config/r2-config.json
+          {
+            "accountId": "${R2_ACCOUNT_ID}",
+            "endpoint": "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+            "accessKeyId": "${R2_ACCESS_KEY_ID}",
+            "secretAccessKey": "${R2_SECRET_KEY}",
+            "bucketName": "zayn-storybook",
+            "publicDomain": "${R2_PUBLIC_DOMAIN:-https://pub-f2786231e5e34f19a6860d7fe9ddd569.r2.dev}"
+          }
+          EOF
+
+      - name: 🧹 Execute Cloudflare R2 Cleanup
+        env:
+          INPUT_DRY_RUN: ${{ inputs.dry_run || false }}
+          INPUT_KEEP_LATEST: ${{ inputs.keep_latest || '1' }}
+          INPUT_MIN_AGE_HOURS: ${{ inputs.min_age_hours || '48' }}
+        run: |
+          ARGS="--r2 --keep-latest ${INPUT_KEEP_LATEST} --min-age-hours ${INPUT_MIN_AGE_HOURS}"
+          if [ "${INPUT_DRY_RUN}" != "true" ]; then
+            ARGS="${ARGS} --execute"
+          fi
+          echo "Running: npx tsx scripts/cleanup-storage.ts ${ARGS}"
+          npx tsx scripts/cleanup-storage.ts ${ARGS}
