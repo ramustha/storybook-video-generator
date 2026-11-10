@@ -1,0 +1,39 @@
+scripts/upload-tiktok-browser.ts
+  698ac31901cd73e0 12-22,24-34,37-41
+scripts/upload-youtube.ts
+  698ac31901cd73e0 10-14,35-41,43,83-84,1067,1078-1079,1093-1094
+scripts/upload-tiktok.ts
+  698ac31901cd73e0 397-407,409-419,422-426
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 4-13,243-245
+scripts/content-calendar.ts
+  698ac31901cd73e0 1011-1029
+scripts/lib/seo-formatter.ts
+  698ac31901cd73e0 38-85,112-113,115,240-253,255-304,306
+scripts/notify-telegram.ts
+  698ac31901cd73e0 218,220-230,232-234,238-239,245
+scripts/upload-meta.ts
+  698ac31901cd73e0 186-209,214,220,225,231
+scripts/refresh-youtube-seo.ts
+  698ac31901cd73e0 5-9,72-106,144-145,147-148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "3cf630b309b5c6bb98be3727e6880e70b6c316ab",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 317,
+      "total_deletions": 74,
+      "accepted_lines": 314,
+      "overriden_lines": 0
+    }
+  }
+}
