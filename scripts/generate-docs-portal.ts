@@ -1954,7 +1954,7 @@ const indexHtmlContent = `<!DOCTYPE html>
             <div class="progress-fill" id="timelineProgressBar" style="width: ${initialCalProgress}%;"></div>
           </div>
           <div class="progress-labels">
-            <span>🚀 Launch: <strong>07 Nov 2026</strong></span>
+            <span>🚀 Launch: <strong id="roadmapLaunchDate">07 Nov 2026</strong></span>
             <span id="progressBarLabel"><strong>${initialCalCompleted} of ${initialCalTotal} Slots</strong> (${initialCalProgress}%)</span>
             <span>🏁 Finale: <strong id="roadmapFinaleDate">06 Dec 2026</strong></span>
           </div>
@@ -2780,6 +2780,11 @@ const indexHtmlContent = `<!DOCTYPE html>
       const elBarLabel = document.getElementById('progressBarLabel');
       if (elBarLabel) elBarLabel.innerHTML = '<strong>' + completed + ' of ' + total + ' Slots</strong> (' + progress + '%)';
 
+      const elLaunch = document.getElementById('roadmapLaunchDate');
+      if (elLaunch && scopeSlots.length > 0) {
+        elLaunch.textContent = formatDate(scopeSlots[0].date);
+      }
+
       const elFinale = document.getElementById('roadmapFinaleDate');
       if (elFinale && scopeSlots.length > 0) {
         elFinale.textContent = formatDate(scopeSlots[scopeSlots.length - 1].date);
@@ -2787,6 +2792,20 @@ const indexHtmlContent = `<!DOCTYPE html>
 
       const elTabBadge = document.getElementById('tabTimelineBadge');
       if (elTabBadge) elTabBadge.textContent = completed + '/' + total + ' (' + progress + '%)';
+
+      // Dynamically update scope buttons from loaded dataset
+      const active30Count = RAW_CALENDAR_DATA.filter(function(s) { return s.date <= '2026-12-06'; }).length;
+      const budiCount = RAW_CALENDAR_DATA.filter(function(s) { return s.date >= '2026-12-07'; }).length;
+      const totalAll = RAW_CALENDAR_DATA.length;
+
+      const btnActive30 = document.querySelector('[data-cal-filter="scope"][data-value="active30"]');
+      if (btnActive30) btnActive30.textContent = '🌟 Active 30 Days (' + active30Count + ')';
+
+      const btnAll = document.querySelector('[data-cal-filter="scope"][data-value="all"]');
+      if (btnAll) btnAll.textContent = '🚀 2-Year Master Plan (' + totalAll + ')';
+
+      const btnBudi = document.querySelector('[data-cal-filter="scope"][data-value="budi"]');
+      if (btnBudi) btnBudi.textContent = '📚 BUDI 2026–2028 (' + budiCount + ')';
 
       // Update filter chip text counts
       const chipAll = document.querySelector('[data-cal-filter="status"][data-value="all"]');

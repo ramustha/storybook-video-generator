@@ -84,6 +84,18 @@ export async function onRequest(context: { env: Env; request: Request }) {
         formatLabel = "Watch Video (16:9)";
       }
 
+      let thumbUrl = p.thumbnail_url;
+      if (!thumbUrl) {
+        const ytPub = (publications as any[]).find(
+          (other) => other.book_slug === p.book_slug && other.platform === "youtube" && other.external_id
+        );
+        if (ytPub && ytPub.external_id) {
+          thumbUrl = `https://img.youtube.com/vi/${ytPub.external_id}/hqdefault.jpg`;
+        } else {
+          thumbUrl = "branding/cover-facebook-1640x924.png";
+        }
+      }
+
       auditRecords.push({
         id: `AUD-${String(counter++).padStart(3, "0")}`,
         storySlug: p.book_slug,
@@ -101,7 +113,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
         publishedAt: p.published_at || "",
         status: p.status || "published",
         privacy: "public",
-        thumbnailUrl: p.thumbnail_url || (p.external_id ? `https://img.youtube.com/vi/${p.external_id}/hqdefault.jpg` : undefined),
+        thumbnailUrl: thumbUrl,
         author: b.author || "Pratham Books Authors",
         illustrator: b.illustrator || "Pratham Books Illustrators",
         license: b.license || "CC BY 4.0",
