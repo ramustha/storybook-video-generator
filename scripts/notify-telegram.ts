@@ -215,23 +215,34 @@ export async function notifyTelegramPublish(options: TelegramNotifyOptions): Pro
       : (story.moral?.headlineId || "Belajar hal baru dan berbuat baik setiap hari!");
 
   // Build message HTML
+  const isEn = lang === "en";
   const wibTime = formatWibTimestamp(new Date(), lang);
-  const timeLabel = lang === "en" ? "Broadcast Time" : "Waktu Tayang";
+  const header = isEn
+    ? `🚀 <b>Zayn Storybook: New Story Now Streaming!</b> 🌟\n`
+    : `🚀 <b>Zayn Storybook: Cerita Baru Mengudara!</b> 🌟\n`;
+  const titleLabel = isEn ? "Title" : "Judul";
+  const moralLabel = isEn ? "Moral Lesson" : "Pesan Moral";
+  const timeLabel = isEn ? "Broadcast Time" : "Waktu Tayang";
+  const watchLabel = isEn ? "Watch & Enjoy Together" : "Tonton & Nikmati Bersama";
+  const footer = isEn
+    ? `\n✨ <i>Happy watching and storytelling with your little one!</i> 🌙`
+    : `\n✨ <i>Selamat menonton dan mendongeng bersama si kecil!</i> 🌙`;
+
   const lines: string[] = [
-    `🚀 <b>Zayn Storybook: Cerita Baru Mengudara!</b> 🌟\n`,
-    `📖 <b>Judul:</b> <i>${title}</i> [${lang.toUpperCase()}]`,
-    `💡 <b>Pesan Moral:</b> ${moralText}`,
+    header,
+    `📖 <b>${titleLabel}:</b> <i>${title}</i> [${lang.toUpperCase()}]`,
+    `💡 <b>${moralLabel}:</b> ${moralText}`,
     `⏰ <b>${timeLabel}:</b> ${wibTime}${options.slot ? ` • ${options.slot}` : ""}`,
   ];
 
-  lines.push(`\n🔗 <b>Tonton & Nikmati Bersama:</b>`);
-  if (ytLandscape) lines.push(`▶️ <a href="${ytLandscape}">YouTube (Video 16:9 Full HD)</a>`);
+  lines.push(`\n🔗 <b>${watchLabel}:</b>`);
+  if (ytLandscape) lines.push(isEn ? `▶️ <a href="${ytLandscape}">YouTube (16:9 Full HD Video)</a>` : `▶️ <a href="${ytLandscape}">YouTube (Video 16:9 Full HD)</a>`);
   if (ytVertical) lines.push(`📱 <a href="${ytVertical}">YouTube Shorts (9:16)</a>`);
   if (igUrl) lines.push(`📸 <a href="${igUrl}">Instagram Reels</a>`);
   if (fbUrl) lines.push(`📘 <a href="${fbUrl}">Facebook Video</a>`);
   if (threadsUrl) lines.push(`🧵 <a href="${threadsUrl}">Meta Threads</a>`);
 
-  lines.push(`\n✨ <i>Selamat menonton dan mendongeng bersama si kecil!</i> 🌙`);
+  lines.push(footer);
   const captionHtml = lines.join("\n");
 
   // Determine public cover / thumbnail URL if R2 config exists

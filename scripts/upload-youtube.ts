@@ -7,7 +7,12 @@ import readline from "readline";
 import { google } from "googleapis";
 import { uploadVideoViaBrowser, launchInteractiveLogin } from "./playwright-youtube-uploader";
 import { QuotaRotator } from "./quota-rotator";
-import { generateSeoMetadata } from "./lib/seo-formatter";
+import {
+  generateSeoMetadata,
+  generateStoryChapters,
+  extractStoryMoral,
+  extractStoryMoralDescription,
+} from "./lib/seo-formatter";
 import { db } from "./lib/db";
 
 const SCOPES = [
@@ -27,7 +32,15 @@ interface StoryScene {
   durationSeconds: number;
   audio: {
     text: string;
+    durationSeconds?: number;
+    en?: {
+      text?: string;
+      durationSeconds?: number;
+      [key: string]: any;
+    };
+    [key: string]: any;
   };
+  [key: string]: any;
 }
 
 interface StoryManifest {
@@ -67,22 +80,8 @@ function formatTimestamp(totalSeconds: number): string {
 /**
  * Builds chapter list from story scene durations.
  */
-function generateChapters(scenes: StoryScene[]): string {
-  let elapsed = 0;
-  const lines: string[] = [];
-
-  for (const scene of scenes) {
-    const timestamp = formatTimestamp(elapsed);
-    if (scene.type === "cover") {
-      lines.push(`${timestamp} Pembuka: ${scene.audio.text.slice(0, 30)}...`);
-    } else {
-      const summary = scene.audio.text.slice(0, 35).replace(/[\r\n]+/g, " ");
-      lines.push(`${timestamp} Bagian ${scene.index}: ${summary}...`);
-    }
-    elapsed += scene.durationSeconds;
-  }
-
-  return lines.join("\n");
+function generateChapters(scenes: StoryScene[], lang: "id" | "en" = "id"): string {
+  return generateStoryChapters(scenes, lang);
 }
 
 /**
@@ -1065,7 +1064,7 @@ async function main() {
     }
 
     const displayTitle = isEn ? (manifest.originalTitle || manifest.title) : manifest.title;
-    const chapters: string = generateChapters(manifest.scenes);
+    const chapters: string = generateChapters(manifest.scenes, lang);
 
     // High-CTR, High-Intent SEO Metadata
     const seoLandscape = generateSeoMetadata({
@@ -1076,8 +1075,8 @@ async function main() {
       format: "landscape",
       author: manifest.source.originalAuthor,
       illustrator: manifest.source.originalIllustrator,
-      moralHeadline: isEn ? manifest.moral?.headlineEn : manifest.moral?.headlineId,
-      moralDescription: isEn ? manifest.moral?.summaryEn : manifest.moral?.summaryId,
+      moralHeadline: extractStoryMoral(manifest, lang),
+      moralDescription: extractStoryMoralDescription(manifest, lang),
       chapters,
       license: manifest.source.license,
       publisher: manifest.source.repository,
@@ -1091,8 +1090,8 @@ async function main() {
       format: "vertical",
       author: manifest.source.originalAuthor,
       illustrator: manifest.source.originalIllustrator,
-      moralHeadline: isEn ? manifest.moral?.headlineEn : manifest.moral?.headlineId,
-      moralDescription: isEn ? manifest.moral?.summaryEn : manifest.moral?.summaryId,
+      moralHeadline: extractStoryMoral(manifest, lang),
+      moralDescription: extractStoryMoralDescription(manifest, lang),
       license: manifest.source.license,
       publisher: manifest.source.repository,
     });

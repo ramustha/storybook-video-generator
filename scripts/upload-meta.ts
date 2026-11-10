@@ -183,27 +183,52 @@ async function loadR2Config(): Promise<R2Config> {
  */
 function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "landscape"): string {
   const isLandscape = format === "landscape";
+  const isEn = lang === "en";
+
+  // Dynamic moral lesson extraction with comprehensive fallback
+  let moral = "";
+  if (isEn) {
+    moral = story.moral?.summaryEn || story.moral?.headlineEn;
+    if (!moral) {
+      const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+      if (moralScene?.audio?.en?.text) {
+        moral = moralScene.audio.en.text.replace(/^The moral of the story:\s*/i, "").split(".")[0].trim();
+      }
+    }
+    if (!moral) moral = "Always be kind, honest, and thoughtful!";
+  } else {
+    moral = story.moral?.summaryId || story.moral?.headlineId;
+    if (!moral) {
+      const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+      if (moralScene?.audio?.text) {
+        moral = moralScene.audio.text.replace(/^Pesan moral cerita ini:\s*/i, "").split(".")[0].trim();
+      }
+    }
+    if (!moral) moral = "Selalu belajar hal baik, berbuat jujur, dan saling menyayangi setiap hari!";
+  }
+
   if (lang === "id") {
     const rawTitle = (story.title || "Cerita Anak Bergambar").replace(/\(.*\)/, "").trim();
     const hook = story.thumbnailConfig?.id?.hook || story.thumbnailConfig?.id?.headlineTop || "Kisah seru dan penuh tawa!";
     const badge = story.thumbnailConfig?.id?.badge || "Dongeng Animasi Anak";
-    const sticker = story.thumbnailConfig?.id?.sticker || "";
+    const sticker = story.thumbnailConfig?.id?.sticker ? ` ${story.thumbnailConfig.id.sticker}` : "";
     const bedtimeHook = story.thumbnailConfig?.id?.bedtimeHook || "Cerita edukatif untuk menemani si kecil belajar nilai kebaikan.";
     const hashtags = isLandscape
       ? "#CeritaAnak #DongengAnak #Storybook #BukuAnak #AnimasiAnak #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook #FacebookWatch #VideoAnak"
       : "#CeritaAnak #DongengAnak #Storybook #KidsStory #AnimasiAnak #Reels #FacebookReels #InstagramReels #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook";
 
-    return `${rawTitle} 🐱📚\n\n${hook} ${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Seri Cerita & Dongeng Anak Bergambar Zayn Storybook\n✨ Nilai Moral: Selalu jujur, berbuat baik, dan bertanggung jawab atas tugas kita!\n\n${hashtags}`;
+    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Seri Cerita & Dongeng Anak Bergambar Zayn Storybook\n✨ Nilai Moral: ${moral}\n\n${hashtags}`;
   } else {
     const rawTitle = story.originalTitle || story.title || "Kids Storybook";
     const hook = story.thumbnailConfig?.en?.hook || story.thumbnailConfig?.en?.headlineTop || "A wonderful story for kids!";
     const badge = story.thumbnailConfig?.en?.badge || "Animated Children's Book";
+    const sticker = story.thumbnailConfig?.en?.sticker ? ` ${story.thumbnailConfig.en.sticker}` : "";
     const bedtimeHook = story.thumbnailConfig?.en?.bedtimeHook || "A delightful bedtime tale for children.";
     const hashtags = isLandscape
       ? "#KidsBooks #Storytime #BedtimeStory #Animation #ChildrensBook #KidsAnimation #ZaynStorybook #FacebookWatch #ReadAloud"
       : "#KidsBooks #Storytime #BedtimeStory #Animation #Reels #InstagramReels #FacebookReels #ChildrensBook #KidsAnimation #ZaynStorybook";
 
-    return `${rawTitle} 🐱📚\n\n${hook}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Zayn Storybook Children's Animated Picture Book Series\n✨ Moral: Honesty, kindness, and taking responsibility bring true happiness!\n\n${hashtags}`;
+    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Zayn Storybook Children's Animated Picture Book Series\n✨ Moral Lesson: ${moral}\n\n${hashtags}`;
   }
 }
 

@@ -35,6 +35,54 @@ export function sanitizeTitle(rawTitle: string, maxLen = 95): string {
   return sanitized.slice(0, maxLen - 1).trim() + "…";
 }
 
+export function extractStoryMoral(story: any, lang: "id" | "en"): string {
+  const isEn = lang === "en";
+  if (isEn) {
+    if (story?.moral?.headlineEn) return story.moral.headlineEn;
+    const moralScene = story?.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+    if (moralScene?.audio?.en?.text) {
+      const cleaned = moralScene.audio.en.text.replace(/^The moral of the story:\s*/i, "").split(".")[0].trim();
+      return cleaned.endsWith("!") || cleaned.endsWith(".") ? cleaned : `${cleaned}!`;
+    }
+    return "Always be kind, honest, and thoughtful!";
+  } else {
+    if (story?.moral?.headlineId) return story.moral.headlineId;
+    const moralScene = story?.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+    if (moralScene?.audio?.text) {
+      const cleaned = moralScene.audio.text.replace(/^Pesan moral cerita ini:\s*/i, "").split(".")[0].trim();
+      return cleaned.endsWith("!") || cleaned.endsWith(".") ? cleaned : `${cleaned}!`;
+    }
+    return "Belajar hal baik, berbuat jujur, dan saling menyayangi setiap hari!";
+  }
+}
+
+export function extractStoryMoralDescription(story: any, lang: "id" | "en"): string | undefined {
+  const isEn = lang === "en";
+  if (isEn) {
+    if (story?.moral?.summaryEn) return story.moral.summaryEn;
+    const moralScene = story?.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+    if (moralScene?.audio?.en?.text) {
+      const parts = moralScene.audio.en.text.replace(/^The moral of the story:\s*/i, "").split(".");
+      if (parts.length > 1) {
+        const desc = parts.slice(1).join(".").trim();
+        if (desc) return desc;
+      }
+    }
+    return undefined;
+  } else {
+    if (story?.moral?.summaryId) return story.moral.summaryId;
+    const moralScene = story?.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+    if (moralScene?.audio?.text) {
+      const parts = moralScene.audio.text.replace(/^Pesan moral cerita ini:\s*/i, "").split(".");
+      if (parts.length > 1) {
+        const desc = parts.slice(1).join(".").trim();
+        if (desc) return desc;
+      }
+    }
+    return undefined;
+  }
+}
+
 /**
  * Builds high-intent, search-optimized title, description, and tags for YouTube & Meta.
  */
@@ -61,10 +109,10 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
   }
 
   // 2. High-Density SEO Description (200-300+ words)
-  const author = options.author || "Penulis Buku Cerita Anak";
-  const illustrator = options.illustrator || "Ilustrator Cerita";
+  const author = options.author || (isEn ? "Children's Book Author" : "Penulis Buku Cerita Anak");
+  const illustrator = options.illustrator || (isEn ? "Book Illustrator" : "Ilustrator Cerita");
   const license = options.license || "Creative Commons Attribution 4.0 (CC BY 4.0)";
-  const publisher = options.publisher || "StoryWeaver / Pratham Books";
+  const publisher = options.publisher || (isEn ? "StoryWeaver / Open License Catalog" : "StoryWeaver / Pratham Books");
   const moral = options.moralHeadline || (isEn ? "Always be kind, honest, and thoughtful!" : "Belajar hal baik, berbuat jujur, dan saling menyayangi setiap hari!");
 
   const descLines: string[] = [];
@@ -189,3 +237,70 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
     hashtags,
   };
 }
+
+export interface ChapterSceneLike {
+  index: number;
+  type?: string;
+  durationSeconds?: number;
+  audio?: {
+    text?: string;
+    durationSeconds?: number;
+    en?: {
+      text?: string;
+      durationSeconds?: number;
+      [key: string]: any;
+    };
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+export function formatChapterTimestamp(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = Math.floor(totalSeconds % 60);
+  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Builds YouTube chapters adhering strictly to target language and timing.
+ */
+export function generateStoryChapters(
+  scenes: ChapterSceneLike[],
+  lang: "id" | "en" = "id"
+): string {
+  if (!scenes || !Array.isArray(scenes) || scenes.length === 0) return "";
+  let elapsed = 0;
+  const lines: string[] = [];
+  const isEn = lang === "en";
+
+  for (const scene of scenes) {
+    const timestamp = formatChapterTimestamp(elapsed);
+    const sceneText = (isEn && scene.audio?.en?.text)
+      ? scene.audio.en.text
+      : scene.audio?.text || "";
+    const cleanText = sceneText.replace(/[\r\n]+/g, " ").trim();
+
+    if (scene.type === "cover") {
+      const label = isEn ? "Intro" : "Pembuka";
+      lines.push(`${timestamp} ${cleanText ? `${label}: ${cleanText.slice(0, 30)}...` : label}`);
+    } else if (scene.type === "moral") {
+      const label = isEn ? "Moral of the Story" : "Pesan Moral Cerita";
+      const stripped = cleanText.replace(/^(The moral of the story:\s*|Pesan moral cerita ini:\s*)/i, "").trim();
+      lines.push(`${timestamp} ${stripped ? `${label}: ${stripped.slice(0, 35)}...` : label}`);
+    } else if (scene.type === "outro") {
+      const label = isEn ? "Outro & Next Story" : "Penutup & Rekomendasi";
+      lines.push(`${timestamp} ${label}`);
+    } else {
+      const label = isEn ? `Chapter ${scene.index}` : `Bagian ${scene.index}`;
+      lines.push(`${timestamp} ${cleanText ? `${label}: ${cleanText.slice(0, 35)}...` : label}`);
+    }
+
+    const duration = (isEn && scene.audio?.en?.durationSeconds)
+      ? scene.audio.en.durationSeconds
+      : scene.durationSeconds || scene.audio?.durationSeconds || 5;
+    elapsed += duration;
+  }
+
+  return lines.join("\n");
+}
+
