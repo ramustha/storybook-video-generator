@@ -1,0 +1,35 @@
+src/motion/render-motion-stage.ts
+  698ac31901cd73e0 1-183
+scripts/manage-story-storage.ts
+  698ac31901cd73e0 130-131
+scripts/pack-edu-motion-story.ts
+  698ac31901cd73e0 1-1148
+.gitignore
+  698ac31901cd73e0 8
+src/motion/types.ts
+  698ac31901cd73e0 1-226
+scripts/render-book.ts
+  698ac31901cd73e0 8,38,41-88
+scripts/publish-threads.ts
+  698ac31901cd73e0 51,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "cce8f3c1803938b2fdf0b79f5643f0776da014d5",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 1613,
+      "total_deletions": 6,
+      "accepted_lines": 1613,
+      "overriden_lines": 0
+    }
+  }
+}
