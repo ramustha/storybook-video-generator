@@ -1,0 +1,29 @@
+scripts/cleanup-storage.ts
+  698ac31901cd73e0 2,4-5,8-9,16-24,35-71,73-102,104-105,108-116,119-128,131,133-137,139-142,145-186,188-216,219-220,227-230,246-263,270-389,391,395-399,404,406,408,429-430,432-447,449-461,471-477,480-498,501-523,526-531,534-536,538-540,544-547,550,552-557,559,563-566,568-575,578-586
+package.json
+  698ac31901cd73e0 21-23
+cloudflare/daily-broadcast-cron/src/index.js
+  698ac31901cd73e0 111,114-120
+.github/workflows/storage-cleanup.yml
+  698ac31901cd73e0 1-74
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "6c4f9291140d62bd256326cc14249c8443bffdd9",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 552,
+      "total_deletions": 186,
+      "accepted_lines": 551,
+      "overriden_lines": 0
+    }
+  }
+}
