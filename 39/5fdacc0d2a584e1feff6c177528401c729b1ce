@@ -1,0 +1,27 @@
+scripts/lib/db.ts
+  698ac31901cd73e0 97-117,843-898
+scripts/publish-announcement.ts
+  698ac31901cd73e0 12,97,106,135,141,234-237,239-240,242,244-245,248-251,253-254,256,258-259,262-263,270,313-314,341-357,359-377,384,386-387,417-418,423,428,430,444,449,453,475,481,502,508,529,532-533
+scripts/generate-all-announcements.ts
+  698ac31901cd73e0 1-629
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "395fdacc0d2a584e1feff6c177528401c729b1ce",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 789,
+      "total_deletions": 102,
+      "accepted_lines": 789,
+      "overriden_lines": 0
+    }
+  }
+}
