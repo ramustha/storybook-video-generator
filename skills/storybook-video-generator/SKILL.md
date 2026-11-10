@@ -1,17 +1,18 @@
 ---
 name: storybook-video-generator
-description: Create structured bilingual children's storybook videos (Bahasa Indonesia & English by default), AI video storyboard sheets, and short-form animations from open-license literature with consistent character illustrations, neural child voiceover, synchronized ASMR/Foley audio, kinetic subtitles, and multi-format MP4 export (16:9 Landscape & 9:16 Shorts/Reels).
+description: Create structured bilingual children's storybook videos (Bahasa Indonesia & English by default), AI video storyboard sheets, and short-form animations across dual tracks — Track 1: Deterministic Book Archival (Remotion with 100% authentic BUDI/StoryWeaver illustrator plates) & Track 2: Probabilistic/Dynamic Edu-Motion (Playwright + GSAP + Layered SVG for fables & science explainers) — with neural child voiceover, synchronized ASMR/Foley audio, kinetic subtitles, and multi-format MP4 export (16:9 Landscape & 9:16 Shorts/Reels).
 ---
 
 # Storybook & AI Video Storyboard Generator
 
-Transforms open-license children's storybooks and creative folklore concepts into cinematic animated videos with **bilingual editions by default (Bahasa Indonesia & English)** for YouTube (16:9) and TikTok/Shorts/Reels (9:16) using 100% shared visual consistency bibles, neural voiceover, tactile Foley/ASMR sound design, and Remotion video rendering.
+Transforms open-license children's storybooks and creative folklore concepts into cinematic animated videos with **bilingual editions by default (Bahasa Indonesia & English)** for YouTube (16:9) and TikTok/Shorts/Reels (9:16) using **Dual-Track Production** (Deterministic Remotion book archival or Dynamic Playwright + GSAP educational motion), 100% shared visual consistency bibles, neural voiceover, tactile Foley/ASMR sound design, and automated multi-platform distribution.
 
 ## Quick Reference & Prerequisites
 
 | Requirement | Specification | Reference Document |
 | :--- | :--- | :--- |
-| **Tooling & AI Model Matrix** | Node.js `>=18`, tsx, Remotion, `msedge-tts`, Model Recommendations | [prerequisites.md](./references/prerequisites.md) |
+| **Dual-Track Architecture** | Track 1: Deterministic Book Archival (Remotion) vs. Track 2: Dynamic Edu-Motion (GSAP + HTML5 + Playwright) | [edu-motion-track.md](./references/edu-motion-track.md) |
+| **Tooling & AI Model Matrix** | Node.js `>=18`, tsx, Remotion, Playwright, GSAP 3, `msedge-tts`, Model Recommendations | [prerequisites.md](./references/prerequisites.md) |
 | **Directory Template** | Self-contained story folder, raw files, bibles, exports, `story.json` | [directory-template.md](./references/directory-template.md) |
 | **Story Repositories** | SIBI Kemendikbud, Badan Bahasa, StoryWeaver (CC BY 4.0), GDL | [story-sources.md](./references/story-sources.md) |
 | **Visual Consistency & Masterboard** | Character Bible, World Bible, 9:16 Poster Sheet, Chained Prompts | [consistency-bible.md](./references/consistency-bible.md) |
@@ -21,7 +22,8 @@ Transforms open-license children's storybooks and creative folklore concepts int
 | **Moral of the Story Outro** | Dedicated kid-friendly moral takeaway card, playful pill badge, hero vignette & kinetic read-along | [cinematography.md#moral-scene-direction](./references/cinematography.md#moral-scene-direction) |
 | **Duration & Platform Strategy** | <20s Short-only, 20-60s Short-primary, 60-180s Dual, >180s Long-primary (YouTube, TikTok, Reels) | [video-duration-strategy.md](./references/video-duration-strategy.md) |
 | **Compilation & Marathon Engine** | Auto-recommendation, thematic curation, ChapterBumper interstitials, >8 min Mid-Roll, YouTube Chapters | [compilation-marathon.md](./references/compilation-marathon.md) |
-| **Publishing & Distribution** | YouTube Data API v3, Instagram Reels (via Cloudflare R2), Facebook (Reels & Page Video) | [distribution-upload.md](./references/distribution-upload.md) |
+| **Publishing & Distribution** | YouTube Data API v3, Instagram Reels (via Cloudflare R2), Facebook (Reels & Page Video), Meta Threads | [distribution-upload.md](./references/distribution-upload.md) |
+| **Cloud Automation & Scheduling** | GitHub Actions, Cloudflare Worker Cron Trigger (08:30 & 19:00 WIB), Meta Threads publishing | [cloud-automation-and-scheduling.md](./references/cloud-automation-and-scheduling.md) |
 | **Bilingual Social Promotion & Growth** | Single post dual-language hook, carousel blueprint, engagement questions, YouTube Community polls | [social-promotion-playbook.md](./references/social-promotion-playbook.md) |
 | **Audit & Publication Catalog** | Standalone GitHub Pages catalog (`docs/index.html`), 53+ multi-platform records, CSV/JSON export | [distribution-upload.md#7-multi-platform-publication-catalog--audit-portal-github-pages](./references/distribution-upload.md#7-multi-platform-publication-catalog--audit-portal-github-pages) |
 | **Analytics & Performance Tracking** | Live views, likes, comments, and catalog metrics via YouTube Data & Analytics API | [distribution-upload.md#5-live-performance--view-analytics-npm-run-stats](./references/distribution-upload.md#5-live-performance--view-analytics-npm-run-stats) |
@@ -35,9 +37,23 @@ Transforms open-license children's storybooks and creative folklore concepts int
 
 * Producing automated children's storybook videos in **both Bahasa Indonesia and English** from public or open-source literature.
 * Creating structured scene-by-scene video storyboards and 9:16 infographic visual masterboards.
-* Generating short-form animated educational content for TikTok, IG Reels, or YouTube Shorts.
+* Generating short-form animated educational content for TikTok, IG Reels, or YouTube Shorts across dual tracks (deterministic book archival or dynamic educational motion).
 * Requiring strict visual character and environment consistency across multi-scene narrative videos.
 * Synthesizing child-friendly dual-language voiceovers paired with tactile Foley/ASMR sound effects and kinetic subtitles.
+
+### Choosing Between Production Tracks
+
+* **Choose Track 1: Deterministic Book Archival (`pipelineTrack: "original-illustration"` or default)**:
+  * Sourcing from authentic published open-license picture books (BUDI Kemendikdasmen RI, StoryWeaver / Pratham Books, SIBI Kemendikbud).
+  * Original illustrator art must be preserved with 100% fidelity using Apple Vision OCR inpainting (`npm run plates`).
+  * Rendering declarative video compositions via Remotion with Bang Motion camera dynamics (`npm run render:book`).
+  * Ideal for bedtime stories, character-building picture books, and official literary catalogs.
+
+* **Choose Track 2: Probabilistic & Dynamic Edu-Motion (`pipelineTrack: "edu-motion"`)**:
+  * Sourcing from text-only folklore, fables (*Fabel Kancil dan Buaya*, *Timun Mas*), STEM science explainers, or concepts without fixed illustration books.
+  * Requiring procedural character vector rigs (SVG), physical simulations (water ripples, waving foliage), x-ray anatomical reveals, or kinetic diagramming.
+  * Using 6 dynamic stage archetypes (`diorama-cross-section`, `vertical-tower`, `exploded-layers`, `horizontal-track`, `magnifying-lens`, `acoustic-emotion`).
+  * Rendering via headless Playwright + GSAP 3 + FFmpeg audio/video muxing (`npx tsx scripts/pack-edu-motion-story.ts` & `render-book.ts`).
 
 ### When NOT to Use
 * Generating live-action videos, photorealistic talking heads, or 3D character avatars.
@@ -172,7 +188,9 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
     * Scene action examples: scissors snipping, cooking pots bubbling, wood saw slicing, tiger roaring with shockwave rumble, comic *boing-pop* when hair falls off, cartoon galloping footsteps, crystal head shine *ping*, and celebratory chimes.
   * Details in [voiceover-subtitles.md](./references/voiceover-subtitles.md).
 
-### 7. Configure Remotion Scene Direction
+### 7. Configure Scene Direction & Animation Engine (Dual-Track Selection)
+
+#### Track 1: Remotion Scene Direction (`pipelineTrack: "original-illustration"`)
 * Enforce Bang Motion camera laws: scale `≥ 1.08x`, continuous camera breathing, and alternating motions (`slow_zoom_in`, `pan_right`, `tilt_up`).
 * **Preserve Narrative Scene Continuity (No Artificial Chopping)**: Do not artificially split a single coherent book page or unified illustration into fragmented micro-scenes with abrupt camera cuts. Keep the scene context unified and let the narrative and audio flow smoothly.
 * **Zero-Crop Vertical Canvas (9:16 Shorts/Reels)**: Use Ambient Pillarbox Canvas (full-bleed blurred background + floating 16:9 centerpiece plate + subtitles below artwork). Never use raw `objectFit: cover` which cuts off >60% of horizontal action.
@@ -188,20 +206,23 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
     * **Floating Sparkles & Stars**: Gentle floating particles (`⭐`, `✨`, `🌟`, `💖`, `🌈`) drifting with smooth sine-wave animation.
     * **Encouraging Outro Note**: Sweet parting message (`💖 Terima kasih sudah menonton! Sampai jumpa di dongeng seru berikutnya! ✨` / `💖 Thank you for watching! See you in the next adventure! ✨`).
 * **Next Video Recommendation & Subscribe Outro Scene (`OutroScene.tsx`)**:
-  * An 8–10 second dynamic ending scene (`type: "outro"`) engineered for cross-story discovery and channel growth:
-    * **Dynamic & Universal Standard**: Never hardcode specific story titles into outro voiceovers or default labels so that the outro template is 100% reusable across any current or future storybook:
-      * **Universal Voiceover Narration**:
-        * ID: *"Wah, seru sekali ya ceritanya! Jangan lupa klik video di sebelah sini untuk menonton dongeng seru lainnya, dan klik tombol Subscribe agar kita bisa terus berpetualang bersama! Sampai jumpa di cerita berikutnya! Dadah!"*
-        * EN: *"Did you enjoy the story? Click the video on your screen to watch another fun adventure, and don't forget to hit Subscribe so we can keep reading together! See you in the next story! Bye-bye!"*
-      * **Dynamic Preview Box**: 16:9 frame displaying dynamic recommendation title (`"Dongeng Seru Berikutnya!"` / `"Next Exciting Adventure!"`), subtitle (`"Klik untuk Menonton Cerita Lengkap"`), and "Play ▶" button. **Coordinates are pixel-matched to YouTube's End Screen 16:9 interactive element**, ensuring YouTube Studio's "Best for Viewer" interactive card snaps seamlessly over the frame while remaining visually compelling on Shorts, TikTok, and Reels!
-      * **Dynamic Channel Subscribe Card**: Pulsing avatar paired with dynamic channel handle (`@ZaynAdyanRamadhan`), tagline (`"Dongeng Cerita Baru Tiap Minggu!"`), and bold red `SUBSCRIBE 🔔` call-to-action button, aligning with YouTube's Subscribe End Screen element.
-      * **Full-Context Kinetic Subtitles**: Syncs spoken outro voiceover with real-time word bouncing and phonetic color highlights.
+  * An 8–10 second dynamic ending scene (`type: "outro"`) engineered for cross-story discovery and channel growth with coordinates pixel-matched to YouTube's End Screen 16:9 interactive elements.
+
+#### Track 2: Edu-Motion Stage & Kinetic Timelines (`pipelineTrack: "edu-motion"`)
+* **Dynamic Stage Rigs**: Employs one of the 6 stage archetypes (`diorama-cross-section`, `vertical-tower`, `exploded-layers`, `horizontal-track`, `magnifying-lens`, `acoustic-emotion`).
+* **HTML5 + GSAP 3 Architecture**: Composed into a single responsive `motion/{id,en}/index.html` stage with fluid CSS Grid adapting to **16:9 2-Column** and **9:16 3-Zone Vertical**.
+* **Zero AI Video Hallucination**: Character limb, mouth, and eye movements are driven by deterministic GSAP timelines synced to `timeline.json` audio cue points.
+* **Procedural SFX & Soundscapes**: Procedurally mixes cartoon Foley events (`boing`, `splash`, `chime`) triggered at exact timestamp offsets. Details in [edu-motion-track.md](./references/edu-motion-track.md).
+
 * **Responsive Subtitle Positioning & Safe Zones**:
   * **Landscape 16:9**: Positioned at `bottom: "64px"`, max-width `84%`, rounded glassmorphic card (`borderRadius: "20px"`), font size `32px`.
   * **Vertical 9:16**: Positioned at `bottom: "260px"` (well above YouTube Shorts / TikTok bottom UI overlays of 0–220px, and comfortably below the centerpiece illustration card), font size `27px`. See [cinematography.md](./references/cinematography.md).
 
-### 8. Export Multi-Format MP4 Videos (4 Deliverables by Default)
-* Execute Remotion headless rendering CLI commands to export all 4 deliverables (ID 16:9, ID 9:16, EN 16:9, EN 9:16):
+### 8. Export Multi-Format MP4 Videos (Universal Dual-Track CLI)
+* The rendering CLI (`scripts/render-book.ts`) inspects `story.json.pipelineTrack` and routes automatically:
+  * `pipelineTrack === "edu-motion"` $\to$ Dispatches to headless Playwright + FFmpeg (`renderEduMotionVideo()`).
+  * Otherwise $\to$ Dispatches to Remotion CLI compiler.
+* Both tracks export identical 1080p Full HD MP4 deliverables (ID 16:9, ID 9:16, EN 16:9, EN 9:16):
   ```bash
   # Render all 4 bilingual video deliverables by default (1080p Full HD)
   npx tsx scripts/render-book.ts --book <book-slug> --lang all --format all
@@ -210,13 +231,13 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   npx tsx scripts/render-book.ts --book <book-slug> --lang id --format all
   npx tsx scripts/render-book.ts --book <book-slug> --lang en --format all
 
-  # Optional 4K UHD Master (Forces YouTube high-bitrate VP9/AV1 codec allocation)
+  # Optional 4K UHD Master (Track 1 Remotion only)
   npx tsx scripts/render-book.ts --book <book-slug> --format all --resolution 4k
   ```
 * Deliverables:
   * `stories/<book-slug>/exports/id/<book-slug>-16x9.mp4` & `-9x16.mp4`
   * `stories/<book-slug>/exports/en/<book-slug>-16x9.mp4` & `-9x16.mp4`
-* Details in [remotion-renderer.md](./references/remotion-renderer.md).
+* Details in [remotion-renderer.md](./references/remotion-renderer.md) and [edu-motion-track.md](./references/edu-motion-track.md).
 
 ### 9. Generate High-CTR Bilingual Thumbnails (Edge-to-Edge & Zero Dead Space)
 * Generate high-CTR 1920x1080 thumbnails for both languages before publishing. YouTube thumbnail CTR determines algorithmic reach.
@@ -347,8 +368,31 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
   # Upload to BOTH Instagram Reels and Facebook Page:
   npm run upload:meta -- --book <book-slug> --platform both
 
-  # Monitor real-time Meta performance (Facebook & Instagram views, likes, comments):
+  # --- META THREADS PUBLISHING ---
+  # Verify Threads API connection and token validity:
+  npm run auth:threads
+
+  # Publish single story video (9:16 Vertical) or cover (4:5 Portrait) to Threads:
+  npm run upload:threads -- --book <book-slug> --mode video
+  npm run upload:threads -- --book <book-slug> --mode image
+
+  # Batch publish entire catalog to Threads:
+  npm run upload:threads -- --all-books --mode video
+
+  # Publish channel introduction post:
+  npm run upload:threads -- --intro
+
+  # --- MULTI-PLATFORM ANALYTICS ---
+  # Monitor real-time performance across Facebook, Instagram & Threads (views, likes, comments, shares):
   npm run stats:meta
+
+  # --- CLOUD AUTOMATION & ON-TIME DISPATCH ---
+  # Deploy Cloudflare Worker Cron Trigger (Precision scheduling at 08:30 & 19:00 WIB):
+  npm run deploy:worker
+
+  # Instant trigger daily broadcast workflow on GitHub Actions runner (<15s execution):
+  npm run broadcast:trigger -- --slot morning
+  npm run broadcast:trigger -- --slot evening
   ```
 * Saves returned live video IDs, URLs, and timestamps into `story.json.publications[platform]`. Details in [distribution-upload.md](./references/distribution-upload.md).
 * **Cloudflare R2 Temporary Edge Buffer Lifecycle**:
@@ -577,6 +621,8 @@ Before delivering or publishing:
 - [ ] **Bilingual High-CTR Thumbnails Rendered**: Generated 1920x1080 thumbnails in both Popular Comic and Niche Bedtime formats for ID and EN editions with title typography and curiosity hooks.
 - [ ] **Multi-Platform Thumbnail Matrix Complete**: All 4 types (`thumbnail-popular.png`, `thumbnail-bedtime.png`, `thumbnail.png`, `thumbnail-vertical.png`) exist with correct dimensions (1920×1080 landscape, 1080×1920 vertical) for both `id` and `en`. Verified with `npm run thumbnail:verify`.
 - [ ] **Cross-Platform Duplicate Prevention Verified**: Confirmed publication idempotency via local manifest and live platform API checks before video insertion.
+- [ ] **Meta Threads Publication Verified**: Manifest checked for zero duplicates, 9:16 vertical video and/or 4:5 portrait cover posted, and publication IDs recorded in `story.json`.
+- [ ] **Cloud Storage & R2 Sync Complete**: Clean story assets and manifests synchronized to Cloudflare R2 (`zayn-storybook`) with 0MB permanent video bloat.
 - [ ] **Automated YouTube Publishing Complete**: Live video URLs for both language editions synced back into `story.json`.
 - [ ] **Copyright & License Compliance Verified**: Full CC BY 4.0 attribution (Author, Illustrator, Publisher, Source URL, License URL) embedded in descriptions; royalty-free audio verified; YouTube Copyright Match Tool guidelines (`support.google.com/youtube/answer/7648743`) respected with Restrictions set to None.
 - [ ] **Post-Publication Storage Cleanup Executed**: Large local MP4 video files and raw PDF extraction scrap purged from published projects, reclaiming disk space while maintaining 100% Remotion reproducibility.
