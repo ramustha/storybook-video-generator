@@ -242,6 +242,10 @@ export async function onRequest(context: { env: Env; request: Request }) {
               ? ["YouTube (16:9)", "Facebook Watch (16:9)"]
               : ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"];
 
+          const hasAsset = publishedSlugs.has(bookSlug);
+          const hasAssets = hasAsset || bookMap.has(bookSlug);
+          const isBuffered = Boolean(c.is_buffered);
+
           return {
             id: `SLOT-${String(c.cal_id || idx + 1).padStart(4, "0")}`,
             date: dateStr,
@@ -258,6 +262,8 @@ export async function onRequest(context: { env: Env; request: Request }) {
             status,
             isCompleted,
             hasPublishedAsset: hasAsset,
+            isBuffered,
+            hasAssets,
           };
         });
       }
