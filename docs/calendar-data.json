@@ -143,8 +143,8 @@
     ],
     "theme": "English Read-Aloud: Not Now, Not Now! Learning Patience & Family Warmth",
     "status": "today",
-    "isCompleted": false,
-    "hasPublishedAsset": false
+    "isCompleted": true,
+    "hasPublishedAsset": true
   },
   {
     "id": "SLOT-008",
@@ -165,7 +165,7 @@
     "theme": "Prime Bedtime Story: Jangan Sekarang, Tunggu Dulu! Belajar Sabar Menanti Kejutan Indah",
     "status": "today",
     "isCompleted": false,
-    "hasPublishedAsset": false
+    "hasPublishedAsset": true
   },
   {
     "id": "SLOT-009",

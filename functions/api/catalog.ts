@@ -163,14 +163,16 @@ export async function onRequest(context: { env: Env; request: Request }) {
           const bookSlug = c.book_slug || "story";
           const hasAsset = publishedSlugs.has(bookSlug);
 
-          let status: "completed" | "today" | "upcoming" = "upcoming";
           let isCompleted = Boolean(c.is_completed);
+          let status: "completed" | "today" | "upcoming" = "upcoming";
           if (dateStr < todayIso) {
             status = "completed";
             isCompleted = true;
           } else if (dateStr === todayIso) {
             status = "today";
-            isCompleted = false;
+            // Retain isCompleted from D1 (e.g. morning slot already broadcasted today)
+          } else {
+            status = "upcoming";
           }
 
           const fallbackTitle = formatSlugToTitle(bookSlug);
