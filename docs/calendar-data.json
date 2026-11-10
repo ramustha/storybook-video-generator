@@ -100,8 +100,8 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Grandma's Glasses & The Great Spectacles Hunt",
-    "status": "today",
-    "isCompleted": false,
+    "status": "completed",
+    "isCompleted": true,
     "hasPublishedAsset": false
   },
   {
@@ -121,8 +121,8 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Misteri Kacamata Nenek yang Hilang & Kasih Sayang Cucu",
-    "status": "today",
-    "isCompleted": false,
+    "status": "completed",
+    "isCompleted": true,
     "hasPublishedAsset": false
   },
   {
@@ -142,7 +142,7 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Not Now, Not Now! Learning Patience & Family Warmth",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false
   },
@@ -163,7 +163,7 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Jangan Sekarang, Tunggu Dulu! Belajar Sabar Menanti Kejutan Indah",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false
   },
