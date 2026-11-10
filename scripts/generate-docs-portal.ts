@@ -337,6 +337,7 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
     en: formatSlugToTitle(slot.bookSlug),
   };
 
+  const hasPublishedAsset = publishedStorySlugs.has(slot.bookSlug);
   let status: "completed" | "today" | "upcoming" = "upcoming";
   let isCompleted = false;
 
@@ -345,13 +346,16 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
     isCompleted = true;
   } else if (dateStr === todayIso) {
     status = "today";
-    isCompleted = false;
+    const isMorningSlot = slot.timeSlot.includes("08:") || slot.slotType.toLowerCase().includes("morning");
+    if (hasPublishedAsset && currentHour >= 9 && isMorningSlot) {
+      isCompleted = true;
+    } else {
+      isCompleted = false;
+    }
   } else {
     status = "upcoming";
     isCompleted = false;
   }
-
-  const hasPublishedAsset = publishedStorySlugs.has(slot.bookSlug);
 
   return {
     id: `SLOT-${String(idx + 1).padStart(3, "0")}`,
@@ -2703,19 +2707,20 @@ const indexHtmlContent = `<!DOCTYPE html>
             slot.isCompleted = true;
           } else if (slot.date === clientTodayIso) {
             slot.status = 'today';
-            slot.isCompleted = false;
+            // Retain isCompleted if already marked true by D1 or asset check
+            if (slot.isCompleted === undefined) slot.isCompleted = false;
           } else {
             slot.status = 'upcoming';
-            slot.isCompleted = false;
+            if (slot.isCompleted === undefined) slot.isCompleted = false;
           }
         });
 
         // Update Next Up Spotlight dynamically in the header banner
         const liveTodaySlots = RAW_CALENDAR_DATA.filter(s => s.status === 'today');
-        const liveNextUp = liveTodaySlots.find(s => {
-          const isMorning = s.timeSlot.includes('08:') || s.slotType.toLowerCase().includes('morning');
-          return clientHour < 12 ? isMorning : !isMorning;
-        }) || liveTodaySlots[0] || RAW_CALENDAR_DATA.find(s => s.status === 'upcoming');
+        const liveNextUp = liveTodaySlots.find(s => !s.isCompleted && (clientHour < 12 ? (s.timeSlot.includes('08:') || s.slotType.toLowerCase().includes('morning')) : true))
+          || liveTodaySlots.find(s => !s.isCompleted)
+          || liveTodaySlots[0]
+          || RAW_CALENDAR_DATA.find(s => s.status === 'upcoming');
 
         const bannerEl = document.getElementById('nextUpBanner');
         if (bannerEl && liveNextUp) {
@@ -2883,11 +2888,11 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     function renderSlotCard(slot) {
+      const isCompleted = Boolean(slot.isCompleted || slot.status === 'completed');
       const isToday = slot.status === 'today';
-      const isCompleted = slot.status === 'completed' || slot.isCompleted;
 
-      const statusClass = isToday ? 'today' : isCompleted ? 'completed' : 'upcoming';
-      const statusText = isToday ? '🔥 Today' : isCompleted ? '✅ Completed' : '⏳ Scheduled';
+      const statusClass = isCompleted ? 'completed' : isToday ? 'today' : 'upcoming';
+      const statusText = isCompleted ? '✅ Completed' : isToday ? '🔥 Today' : '⏳ Scheduled';
 
       const dayName = slot.dayName || 'Hari';
       const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
@@ -2897,7 +2902,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       const theme = slot.theme || 'Pendidikan Karakter Anak';
 
       return \`
-        <div class="slot-card \${isToday ? 'today-card' : ''}">
+        <div class="slot-card \${isToday && !isCompleted ? 'today-card' : ''}">
           <!-- Header with Date, Time, and Status -->
           <div class="slot-top">
             <div class="slot-datetime-badge">
@@ -2940,7 +2945,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
           <!-- Card Actions / Status -->
           <div class="slot-footer-actions">
-            \${slot.hasPublishedAsset ? \`
+            \${isCompleted || slot.hasPublishedAsset ? \`
               <button class="slot-action-btn active-btn" onclick="filterCatalogByStory('\${slot.bookSlug}')">
                 📚 View Published Assets ↗
               </button>
@@ -2959,10 +2964,10 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     function renderSlotTableRow(slot) {
+      const isCompleted = Boolean(slot.isCompleted || slot.status === 'completed');
       const isToday = slot.status === 'today';
-      const isCompleted = slot.status === 'completed' || slot.isCompleted;
-      const statusClass = isToday ? 'today' : isCompleted ? 'completed' : 'upcoming';
-      const statusText = isToday ? 'Today' : isCompleted ? 'Done' : 'Upcoming';
+      const statusClass = isCompleted ? 'completed' : isToday ? 'today' : 'upcoming';
+      const statusText = isCompleted ? 'Done' : isToday ? 'Today' : 'Upcoming';
 
       const dayName = slot.dayName || 'Hari';
       const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
