@@ -5,6 +5,7 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { db } from "./lib/db";
+import { renderEduMotionVideo } from "../src/motion/render-motion-stage";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -29,18 +30,62 @@ async function main() {
 
   const languages: Array<"id" | "en"> = langArg === "all" ? ["id", "en"] : [langArg];
 
-  console.log(`\n📦 Bundling Remotion video composition for "${rawManifest.title}"...`);
-  const serveUrl = await bundle({
-    entryPoint: path.resolve("./src/remotion/index.ts"),
-    publicDir: storyDir,
-  });
-
   const formats: Array<"landscape" | "vertical"> =
     requestedFormat === "both" || requestedFormat === "all"
       ? ["landscape", "vertical"]
       : [requestedFormat as "landscape" | "vertical"];
 
+  let serveUrl: string | null = null;
+
   for (const lang of languages) {
+    const motionStageHtml = path.join(storyDir, "motion", lang, "index.html");
+    const isEduMotionTrack = rawManifest.pipelineTrack === "edu-motion" || existsSync(motionStageHtml);
+
+    if (isEduMotionTrack && existsSync(motionStageHtml)) {
+      console.log(`\n⚡ [Edu-Motion Track] Detected self-contained Motion Stage for "${rawManifest.title}" [${lang.toUpperCase()}]`);
+      const exportLangDir = lang === "en" ? path.join(storyDir, "exports/en") : path.join(storyDir, "exports/id");
+      await fs.mkdir(exportLangDir, { recursive: true });
+
+      const enSlug = rawManifest.exports?.en?.landscape?.path
+        ? path.basename(rawManifest.exports.en.landscape.path, "-16x9.mp4")
+        : (rawManifest.originalTitle
+            ? rawManifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+            : `${bookSlug}-en`);
+      const baseName = lang === "en" ? enSlug : bookSlug;
+
+      for (const format of formats) {
+        const is4K = resolution === "4k";
+        const outputFileName = `${baseName}-${format === "vertical" ? "9x16" : "16x9"}${is4K ? "-4k" : ""}.mp4`;
+        const outputLocation = path.join(exportLangDir, outputFileName);
+
+        const res = await renderEduMotionVideo({
+          storyDir,
+          bookSlug,
+          lang,
+          format,
+          outputLocation,
+          fps: 30,
+        });
+
+        if (!rawManifest.exports) rawManifest.exports = {};
+        if (!rawManifest.exports[lang]) rawManifest.exports[lang] = {};
+        rawManifest.exports[lang][format] = {
+          status: "rendered",
+          resolution: `${res.width}x${res.height}`,
+          renderedAt: new Date().toISOString(),
+          path: path.relative(storyDir, outputLocation),
+        };
+      }
+      continue;
+    }
+
+    if (!serveUrl) {
+      console.log(`\n📦 [Original-Illustration Track] Bundling Remotion video composition for "${rawManifest.title}"...`);
+      serveUrl = await bundle({
+        entryPoint: path.resolve("./src/remotion/index.ts"),
+        publicDir: storyDir,
+      });
+    }
     // Deep clone story data for active language
     const storyData = JSON.parse(JSON.stringify(rawManifest));
     if (lang === "en") {

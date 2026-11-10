@@ -5,6 +5,7 @@ dist/
 tmp/
 
 # Credentials, Keys & Secrets (Strictly Ignored)
+.wrangler/
 config/youtube-credentials.json
 config/youtube-token.json
 config/youtube-browser-session/
