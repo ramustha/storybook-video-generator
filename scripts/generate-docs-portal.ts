@@ -378,6 +378,33 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
   };
 });
 
+// Merge stats-data.json if present
+const statsJsonPath = path.join(docsDir, "stats-data.json");
+if (fs.existsSync(statsJsonPath)) {
+  try {
+    const statsData = JSON.parse(fs.readFileSync(statsJsonPath, "utf-8"));
+    const statsMap = new Map<string, any>();
+    for (const item of statsData.items || []) {
+      if (item.id) statsMap.set(item.id, item);
+    }
+    for (const rec of auditRecords as any[]) {
+      const s = statsMap.get(rec.videoId) || statsMap.get(rec.id);
+      if (s) {
+        rec.views = s.views || 0;
+        rec.likes = s.likes || 0;
+        rec.comments = s.comments || 0;
+      } else {
+        rec.views = rec.views || 0;
+        rec.likes = rec.likes || 0;
+        rec.comments = rec.comments || 0;
+      }
+    }
+    console.log(`Merged weekly stats for ${statsMap.size} assets from ${statsJsonPath}`);
+  } catch (err: any) {
+    console.warn("⚠️ Failed to read stats-data.json:", err.message);
+  }
+}
+
 // Write audit-data.json and calendar-data.json
 const auditJsonPath = path.join(docsDir, "audit-data.json");
 fs.writeFileSync(auditJsonPath, JSON.stringify(auditRecords, null, 2));
@@ -392,6 +419,8 @@ const initialTotal = auditRecords.length;
 const initialYt = auditRecords.filter((r) => r.platform === "YouTube").length;
 const initialFb = auditRecords.filter((r) => r.platform === "Facebook").length;
 const initialIg = auditRecords.filter((r) => r.platform === "Instagram").length;
+const initialTotalViews = (auditRecords as any[]).reduce((sum, r) => sum + (r.views || 0), 0);
+const initialTotalLikes = (auditRecords as any[]).reduce((sum, r) => sum + (r.likes || 0), 0);
 const initialStorySlugs = new Set(
   auditRecords.filter((r) => r.category !== "Compilation Marathon").map((r) => r.storySlug)
 );
@@ -1280,6 +1309,19 @@ const indexHtmlContent = `<!DOCTYPE html>
       max-width: 135px;
     }
 
+    .hub-metric-pill {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 3px;
+      padding: 0.05rem 0.25rem;
+      white-space: nowrap;
+      margin-left: 0.15rem;
+      flex-shrink: 0;
+    }
+
     .platform-hub-actions {
       display: flex;
       align-items: center;
@@ -1998,10 +2040,20 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="stat-value" id="kpiTotal">${initialTotal}</div>
           <div class="stat-desc">Published & verified assets</div>
         </div>
+        <div class="stat-card" style="border-color: rgba(56, 189, 248, 0.3);">
+          <div class="stat-title">Total Live Views</div>
+          <div class="stat-value" id="kpiTotalViews" style="color: #38bdf8;">${initialTotalViews.toLocaleString()}</div>
+          <div class="stat-desc">Cross-Platform Weekly Harvest</div>
+        </div>
+        <div class="stat-card" style="border-color: rgba(236, 72, 153, 0.3);">
+          <div class="stat-title">Total Reactions</div>
+          <div class="stat-value" id="kpiTotalLikes" style="color: #f472b6;">${initialTotalLikes.toLocaleString()}</div>
+          <div class="stat-desc">Likes & Audience Reactions</div>
+        </div>
         <div class="stat-card yt">
           <div class="stat-title">YouTube Videos</div>
           <div class="stat-value" id="kpiYt">${initialYt}</div>
-          <div class="stat-desc">Landscape, Shorts & Marathons</div>
+          <div class="stat-desc">Full HD, Shorts & Marathons</div>
         </div>
         <div class="stat-card fb">
           <div class="stat-title">Facebook Videos</div>
@@ -2012,16 +2064,6 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="stat-title">Instagram Reels</div>
           <div class="stat-value" id="kpiIg">${initialIg}</div>
           <div class="stat-desc">Bilingual Reels (9:16)</div>
-        </div>
-        <div class="stat-card stories">
-          <div class="stat-title">Story Books</div>
-          <div class="stat-value" id="kpiStories">${initialStoriesCount}</div>
-          <div class="stat-desc">Active Children's Titles</div>
-        </div>
-        <div class="stat-card cc">
-          <div class="stat-title">License & Rights</div>
-          <div class="stat-value" style="font-size: 1.15rem; color: var(--success-green);">CC BY 4.0</div>
-          <div class="stat-desc">StoryWeaver / Pratham Books</div>
         </div>
       </section>
 
@@ -2420,6 +2462,15 @@ const indexHtmlContent = `<!DOCTYPE html>
       const elStories = document.getElementById('kpiStories');
       if (elStories) elStories.textContent = storiesCount;
 
+      const totalViews = RAW_AUDIT_DATA.reduce((sum, d) => sum + (d.views || 0), 0);
+      const totalLikes = RAW_AUDIT_DATA.reduce((sum, d) => sum + (d.likes || 0), 0);
+
+      const elViews = document.getElementById('kpiTotalViews');
+      if (elViews) elViews.textContent = totalViews.toLocaleString();
+
+      const elLikes = document.getElementById('kpiTotalLikes');
+      if (elLikes) elLikes.textContent = totalLikes.toLocaleString();
+
       const elTotalCount = document.getElementById('totalCount');
       if (elTotalCount) elTotalCount.textContent = total;
 
@@ -2721,11 +2772,15 @@ const indexHtmlContent = `<!DOCTYPE html>
             languages: new Set(),
             publications: [],
             latestPublishedAt: item.publishedAt,
-            primaryVideoId: item.id
+            primaryVideoId: item.id,
+            totalViews: 0,
+            totalLikes: 0
           });
         }
         const g = groups.get(key);
         g.languages.add(item.language.toUpperCase());
+        g.totalViews = (g.totalViews || 0) + (item.views || 0);
+        g.totalLikes = (g.totalLikes || 0) + (item.likes || 0);
         if (item.publishedAt && item.publishedAt > g.latestPublishedAt) {
           g.latestPublishedAt = item.publishedAt;
         }
@@ -2781,6 +2836,7 @@ const indexHtmlContent = `<!DOCTYPE html>
         const langBadge = pub.language.toUpperCase() === 'ID' ? 'ID' : 'EN';
         const ratioBadge = pub.aspectRatio === '9:16' ? 'P' : 'L';
         const ratioClass = pub.aspectRatio === '9:16' ? 'p-tag' : 'l-tag';
+        const metricPill = pub.views ? \`<span class="hub-metric-pill" title="\${pub.views.toLocaleString()} views · \${pub.likes || 0} likes">👀 \${pub.views >= 1000 ? (pub.views/1000).toFixed(1) + 'K' : pub.views}</span>\` : '';
 
         return \`
           <div class="platform-hub-row">
@@ -2789,6 +2845,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="hub-lang-tag">\${langBadge}</span>
               <span class="hub-ratio-tag \${ratioClass}" title="\${pub.aspectRatio === '9:16' ? 'Portrait (9:16)' : 'Landscape (16:9)'}">\${ratioBadge}</span>
               <span class="hub-id-text" title="\${pub.videoTitle}">\${pub.videoId}</span>
+              \${metricPill}
             </div>
             <div class="platform-hub-actions">
               <button class="hub-btn-play" onclick="openPreviewModal('\${pub.id}')" title="Play Preview">
@@ -2810,7 +2867,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="format-badge \${badgeClass}" title="\${isVertical ? 'Portrait (9:16)' : 'Landscape (16:9)'}" style="font-weight: 800; padding: 0.12rem 0.45rem;">\${isVertical ? 'P' : 'L'}</span>
               \${langBadges}
             </div>
-            <span class="thumb-count-badge">\${group.publications.length} Releases</span>
+            <span class="thumb-count-badge">\${group.publications.length} Releases\${group.totalViews > 0 ? \` · 👀 \${group.totalViews.toLocaleString()}\` : ''}</span>
           </div>
 
           <div class="card-content">
@@ -2827,6 +2884,12 @@ const indexHtmlContent = `<!DOCTYPE html>
                 <span>Credits:</span>
                 <span>\${group.author} · \${group.illustrator}</span>
               </div>
+              \${group.totalViews > 0 ? \`
+              <div class="card-meta-row">
+                <span>Audience Reach:</span>
+                <span style="color: #38bdf8; font-weight: 700;">👀 \${group.totalViews.toLocaleString()} views · ❤️ \${group.totalLikes.toLocaleString()} likes</span>
+              </div>
+              \` : ''}
               <div class="card-meta-row">
                 <span>Updated:</span>
                 <span>\${formatDate(group.latestPublishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>

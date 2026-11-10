@@ -127,6 +127,15 @@ jobs:
           fi
           npx tsx scripts/performance-analytics.ts $FLAGS | tee /tmp/stats-output.txt
 
+      - name: 🌐 Rebuild Catalog Portal & Deploy to Cloudflare Pages
+        if: success() && inputs.dry_run != true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.PERSONAL_R2_ACCOUNT_ID }}
+        run: |
+          npm run docs:portal
+          npx wrangler pages deploy docs --project-name storybook-catalog --branch main --commit-dirty=true
+
       - name: 🚨 Notify Telegram on Workflow Failure
         if: failure()
         run: |

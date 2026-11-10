@@ -120,3 +120,18 @@ CREATE TABLE IF NOT EXISTS gcp_quota_pool (
   is_active BOOLEAN DEFAULT 1,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 7. Snapshot Metrik Kinerja Multi-Platform (Weekly Performance Analytics)
+CREATE TABLE IF NOT EXISTS publication_stats (
+  external_id TEXT PRIMARY KEY,
+  platform TEXT NOT NULL,
+  views INTEGER DEFAULT 0,
+  likes INTEGER DEFAULT 0,
+  comments INTEGER DEFAULT 0,
+  shares INTEGER DEFAULT 0,
+  watch_time_minutes REAL DEFAULT 0,
+  recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_pub_stats_platform ON publication_stats(platform);
+

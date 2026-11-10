@@ -38,7 +38,12 @@ export async function onRequest(context: { env: Env; request: Request }) {
       .all();
 
     const { results: publications } = await db
-      .prepare("SELECT * FROM publications ORDER BY published_at DESC")
+      .prepare(`
+        SELECT p.*, s.views, s.likes, s.comments, s.shares, s.watch_time_minutes, s.recorded_at as stats_recorded_at
+        FROM publications p
+        LEFT JOIN publication_stats s ON p.external_id = s.external_id
+        ORDER BY p.published_at DESC
+      `)
       .all();
 
     const bookMap = new Map<string, any>();
@@ -157,6 +162,11 @@ export async function onRequest(context: { env: Env; request: Request }) {
         illustrator: b.illustrator || "Ruchi Shah / StoryWeaver",
         license: b.license || "CC BY 4.0",
         sourceUrl: b.source_url || "https://storyweaver.org.in",
+        views: p.views || 0,
+        likes: p.likes || 0,
+        comments: p.comments || 0,
+        shares: p.shares || 0,
+        statsRecordedAt: p.stats_recorded_at || null,
       });
     }
 
@@ -255,12 +265,20 @@ export async function onRequest(context: { env: Env; request: Request }) {
       // Graceful fallback if table does not exist or empty
     }
 
+    // Calculate aggregate metrics across all published assets
+    const totalViews = auditRecords.reduce((sum, r) => sum + (r.views || 0), 0);
+    const totalLikes = auditRecords.reduce((sum, r) => sum + (r.likes || 0), 0);
+    const totalComments = auditRecords.reduce((sum, r) => sum + (r.comments || 0), 0);
+
     return new Response(
       JSON.stringify({
         success: true,
         source: "cloudflare-d1",
         totalRecords: auditRecords.length,
         totalBooks: books.length,
+        totalViews,
+        totalLikes,
+        totalComments,
         auditRecords,
         calendarSlots,
         timestamp: new Date().toISOString(),

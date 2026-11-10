@@ -388,7 +388,61 @@ async function main() {
   }
   console.log("=======================================================\n");
 
-  // 6. Send Telegram Notification
+  // 6. Persist Weekly Metrics to Cloudflare D1 & Static docs/stats-data.json
+  const statsJsonPath = path.resolve("./docs/stats-data.json");
+  const statsArtifact = {
+    recordedAt: new Date().toISOString(),
+    summary: {
+      totalAssets: allItems.length,
+      totalViews: totalAggViews,
+      totalLikes: totalAggLikes,
+      totalComments: totalAggComments,
+      youtube: ytStats,
+      facebook: fbStats,
+      instagram: igStats,
+      threads: thStats,
+      topContent,
+    },
+    items: allItems.map((item) => ({
+      id: item.id,
+      bookSlug: item.bookSlug,
+      platform: item.platform,
+      format: item.format,
+      lang: item.lang,
+      views: item.views,
+      likes: item.likes,
+      comments: item.comments,
+      url: item.url,
+    })),
+  };
+
+  try {
+    await fs.writeFile(statsJsonPath, JSON.stringify(statsArtifact, null, 2));
+    console.log(`✔ Saved static analytics snapshot to ${statsJsonPath}`);
+  } catch (err: any) {
+    console.warn("⚠️ Failed to write docs/stats-data.json:", err.message);
+  }
+
+  if (!dryRun && allItems.length > 0) {
+    console.log("💾 Persisting metrics to Cloudflare D1 `publication_stats` table...");
+    const d1Records = allItems.map((i) => ({
+      external_id: i.id,
+      platform: i.platform.toLowerCase(),
+      views: i.views || 0,
+      likes: i.likes || 0,
+      comments: i.comments || 0,
+      shares: 0,
+      watch_time_minutes: 0,
+    }));
+    try {
+      await db.savePublicationStats(d1Records);
+      console.log(`✔ Successfully persisted ${d1Records.length} metrics to Cloudflare D1.`);
+    } catch (err: any) {
+      console.warn("⚠️ Failed to persist metrics to Cloudflare D1:", err.message);
+    }
+  }
+
+  // 7. Send Telegram Notification
   if (sendTelegram) {
     console.log("✈️ Sending Weekly Performance Analytics Report to Telegram...");
     const ok = await notifyTelegramAnalytics({
