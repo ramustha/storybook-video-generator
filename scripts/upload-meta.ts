@@ -578,7 +578,7 @@ async function findLiveFacebookVideoByTitle(
 ): Promise<{ id: string; permalink: string } | null> {
   try {
     const res = await fetch(
-      `https://graph.facebook.com/v21.0/${facebookPageId}/videos?fields=id,title,description,permalink_url&limit=50&access_token=${accessToken}`
+      `https://graph.facebook.com/v21.0/${facebookPageId}/videos?fields=id,title,description,permalink_url,format&limit=50&access_token=${accessToken}`
     );
     const data = await res.json();
     if (!data.data || !Array.isArray(data.data)) return null;
@@ -588,7 +588,24 @@ async function findLiveFacebookVideoByTitle(
       const itemTitle = (item.title || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
       const itemDesc = (item.description || "").toLowerCase().replace(/[^a-z0-9]+/g, " ");
       if (itemTitle.includes(target) || itemDesc.includes(target)) {
-        return { id: item.id, permalink: item.permalink_url || `https://www.facebook.com/${item.id}` };
+        // Dimension check to distinguish between 9:16 vertical Reels and 16:9 landscape Watch videos
+        if (Array.isArray(item.format) && item.format.length > 0) {
+          const nativeFmt = item.format.find((f: any) => f.filter === "native") || item.format[item.format.length - 1];
+          if (nativeFmt && nativeFmt.width && nativeFmt.height) {
+            const isItemVertical = nativeFmt.height > nativeFmt.width;
+            if (format === "vertical" && !isItemVertical) continue;
+            if (format === "landscape" && isItemVertical) continue;
+          }
+        } else if (item.permalink_url) {
+          const isReel = item.permalink_url.includes("/reel/");
+          if (format === "vertical" && !isReel) continue;
+          if (format === "landscape" && isReel) continue;
+        }
+
+        const permalink = item.permalink_url
+          ? (item.permalink_url.startsWith("http") ? item.permalink_url : `https://www.facebook.com${item.permalink_url}`)
+          : `https://www.facebook.com/${item.id}`;
+        return { id: item.id, permalink };
       }
     }
     return null;
