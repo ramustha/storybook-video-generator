@@ -101,6 +101,8 @@ function formatSlugToTitle(slug: string): string {
     .join(" ");
 }
 
+const allAssetSlugs: string[] = Array.from(new Set([...stories, ...Array.from(storyTitlesMap.keys())]));
+
 // 2. Build Audit Records
 const auditRecords: AuditRecord[] = [];
 let counter = 1;
@@ -339,10 +341,10 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
   const hasPublishedAsset = publishedStorySlugs.has(slot.bookSlug);
   const storyDir = path.join(storiesDir, slot.bookSlug);
   let isBuffered = false;
-  let hasAssets = false;
+  let hasAssets = allAssetSlugs.includes(slot.bookSlug);
 
   if (fs.existsSync(storyDir)) {
-    hasAssets = fs.existsSync(path.join(storyDir, "story.json"));
+    hasAssets = fs.existsSync(path.join(storyDir, "story.json")) || hasAssets;
     try {
       const manifest = JSON.parse(fs.readFileSync(path.join(storyDir, "story.json"), "utf-8"));
       const hasVert = !!(manifest.exports?.[slot.lang]?.vertical?.path && fs.existsSync(path.join(storyDir, manifest.exports[slot.lang].vertical.path)));
@@ -2397,6 +2399,8 @@ const indexHtmlContent = `<!DOCTYPE html>
       const publishedSlugs = new Set((RAW_AUDIT_DATA || []).map(function(r) { return r.storySlug; }));
       const hasPublishedAsset = Boolean(s.hasPublishedAsset || publishedSlugs.has(bookSlug));
       const isCompleted = Boolean(s.isCompleted || s.is_completed);
+      const isBuffered = Boolean(s.isBuffered || s.is_buffered);
+      const hasAssets = Boolean(s.hasAssets || s.has_assets || hasPublishedAsset || KNOWN_STORY_ASSETS.includes(bookSlug));
 
       return {
         id: s.id ? (typeof s.id === 'string' && s.id.startsWith('SLOT-') ? s.id : 'SLOT-' + String(s.id).padStart(4, '0')) : 'SLOT-' + String((idx || 0) + 1).padStart(4, '0'),
@@ -2413,10 +2417,13 @@ const indexHtmlContent = `<!DOCTYPE html>
         theme: theme,
         status: s.status || 'upcoming',
         isCompleted: isCompleted,
-        hasPublishedAsset: hasPublishedAsset
+        hasPublishedAsset: hasPublishedAsset,
+        isBuffered: isBuffered,
+        hasAssets: hasAssets
       };
     }
 
+    const KNOWN_STORY_ASSETS = ${JSON.stringify(allAssetSlugs)};
     let RAW_CALENDAR_DATA = ${JSON.stringify(calendarSlots)}.map(normalizeCalendarSlot);
 
     let activeTab = 'catalog'; // 'catalog' | 'timeline'
@@ -3450,8 +3457,25 @@ const indexHtmlContent = `<!DOCTYPE html>
     function renderSlotTableRow(slot) {
       const isCompleted = Boolean(slot.isCompleted || slot.status === 'completed');
       const isToday = slot.status === 'today';
-      const statusClass = isCompleted ? 'completed' : isToday ? 'today' : 'upcoming';
-      const statusText = isCompleted ? 'Done' : isToday ? 'Today' : 'Upcoming';
+      const isBuffered = Boolean(slot.isBuffered);
+      const hasAssets = Boolean(slot.hasAssets);
+
+      let statusClass = 'upcoming';
+      let statusText = 'Upcoming';
+
+      if (isCompleted) {
+        statusClass = 'completed';
+        statusText = 'Done';
+      } else if (isBuffered) {
+        statusClass = 'buffered';
+        statusText = '🟢 Buffered';
+      } else if (hasAssets) {
+        statusClass = 'assets-ready';
+        statusText = '🟡 Assets Ready';
+      } else if (isToday) {
+        statusClass = 'today';
+        statusText = 'Today';
+      }
 
       const dayName = slot.dayName || 'Hari';
       const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';

@@ -204,7 +204,7 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-010",
@@ -227,7 +227,7 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-011",
@@ -250,7 +250,7 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-012",
@@ -273,7 +273,7 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-013",
