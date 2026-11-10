@@ -3,6 +3,7 @@ import { existsSync, createReadStream, readdirSync } from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { db } from "./lib/db";
 
 interface MetaConfig {
   appId: string;
@@ -1049,7 +1050,7 @@ async function main() {
             id: fbResult.videoId,
             url: fbResult.permalink,
             publishedAt: new Date().toISOString(),
-            title: story.title,
+            title: title,
             status: "published",
           };
         } catch (err: any) {
@@ -1079,7 +1080,7 @@ async function main() {
             id: igResult.mediaId,
             url: igResult.permalink,
             publishedAt: new Date().toISOString(),
-            title: story.title,
+            title: title,
             status: "published",
           };
         } catch (err: any) {
@@ -1121,7 +1122,7 @@ async function main() {
       id: fbResult.videoId,
       url: fbResult.permalink,
       publishedAt: new Date().toISOString(),
-      title: story.title,
+      title: title,
       status: "published",
     };
   } else if (options.platform === "instagram") {
@@ -1141,7 +1142,7 @@ async function main() {
       id: igResult.mediaId,
       url: igResult.permalink,
       publishedAt: new Date().toISOString(),
-      title: story.title,
+      title: title,
       status: "published",
     };
   }
@@ -1149,6 +1150,14 @@ async function main() {
   // Save publications update to story.json
   await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2) + "\n", "utf-8");
   console.log(`\n💾 Saved publication metadata to ${storyJsonPath}`);
+
+  // Sync to Cloudflare D1 database (Single Source of Truth)
+  try {
+    await db.saveStory(story);
+    console.log(`☁️ Synchronized publication metadata to Cloudflare D1 database.`);
+  } catch (d1Err: any) {
+    console.warn(`⚠️ Cloudflare D1 sync warning: ${d1Err.message}`);
+  }
 
   console.log("\n✨ ALL COMPLETED SUCCESSFULLY! ✨\n");
 }

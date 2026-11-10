@@ -51,6 +51,11 @@ export async function onRequest(context: { env: Env; request: Request }) {
     let counter = 1;
 
     for (const p of publications as any[]) {
+      // Defensive filter: Skip invalid/unsupported platforms or entries without ID/URL
+      if (p.platform === "announcements" || (!p.external_id && !p.video_url)) {
+        continue;
+      }
+
       const b = bookMap.get(p.book_slug) || {};
       const isMarathon = p.book_slug.includes("bedtime") || p.book_slug.includes("kompilasi");
 
@@ -68,6 +73,9 @@ export async function onRequest(context: { env: Env; request: Request }) {
       } else if (p.platform === "tiktok") {
         platformName = "TikTok";
         platformIcon = "tiktok";
+      } else if (p.platform === "telegram") {
+        platformName = "Telegram";
+        platformIcon = "telegram";
       }
 
       let formatLabel = "Landscape (16:9)";
@@ -78,6 +86,12 @@ export async function onRequest(context: { env: Env; request: Request }) {
         else if (p.platform === "facebook") formatLabel = "Facebook Reel (9:16)";
         else if (p.platform === "instagram") formatLabel = "Instagram Reel (9:16)";
         else formatLabel = "Vertical (9:16)";
+      } else if (p.format === "post") {
+        aspectRatio = "4:5";
+        formatLabel = p.platform === "threads" ? "Threads Post" : "Social Post";
+      } else if (p.format === "notification") {
+        aspectRatio = "16:9";
+        formatLabel = "Telegram Notification";
       } else if (isMarathon) {
         formatLabel = "Marathon Video (16:9)";
       } else if (p.platform === "facebook") {
@@ -96,6 +110,8 @@ export async function onRequest(context: { env: Env; request: Request }) {
         }
       }
 
+      const defaultStoryTitle = p.lang === "en" ? (b.title_en || b.title_id) : (b.title_id || b.title_en);
+
       auditRecords.push({
         id: `AUD-${String(counter++).padStart(3, "0")}`,
         storySlug: p.book_slug,
@@ -107,7 +123,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
         language: p.lang || "id",
         format: formatLabel,
         aspectRatio,
-        videoTitle: p.external_title || `${b.title_id || p.book_slug} - ${platformName}`,
+        videoTitle: p.external_title || `${defaultStoryTitle || p.book_slug} - ${platformName}`,
         videoId: p.external_id || "",
         videoUrl: p.video_url || "",
         publishedAt: p.published_at || "",
@@ -115,7 +131,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
         privacy: "public",
         thumbnailUrl: thumbUrl,
         author: b.author || "Pratham Books Authors",
-        illustrator: b.illustrator || "Pratham Books Illustrators",
+        illustrator: b.illustrator || "Ruchi Shah / StoryWeaver",
         license: b.license || "CC BY 4.0",
         sourceUrl: b.source_url || "https://storyweaver.org.in",
       });
