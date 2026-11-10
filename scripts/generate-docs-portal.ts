@@ -1216,6 +1216,20 @@ const indexHtmlContent = `<!DOCTYPE html>
       overflow: hidden;
     }
 
+    .hub-platform-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+    }
+
+    .hub-platform-icon svg {
+      width: 15px;
+      height: 15px;
+    }
+
     .hub-name {
       font-weight: 600;
       color: var(--text-main);
@@ -1232,6 +1246,38 @@ const indexHtmlContent = `<!DOCTYPE html>
       border-radius: 3px;
       background: rgba(255, 255, 255, 0.08);
       color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .hub-ratio-tag {
+      font-size: 0.58rem;
+      font-weight: 800;
+      padding: 0.04rem 0.22rem;
+      border-radius: 3px;
+      line-height: 1.1;
+      flex-shrink: 0;
+    }
+
+    .hub-ratio-tag.l-tag {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+
+    .hub-ratio-tag.p-tag {
+      background: rgba(236, 72, 153, 0.15);
+      color: #f472b6;
+      border: 1px solid rgba(236, 72, 153, 0.35);
+    }
+
+    .hub-id-text {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 135px;
     }
 
     .platform-hub-actions {
@@ -1246,33 +1292,41 @@ const indexHtmlContent = `<!DOCTYPE html>
       border: 1px solid rgba(56, 189, 248, 0.3);
       color: #38bdf8;
       border-radius: 3px;
-      padding: 0.1rem 0.35rem;
-      font-size: 0.65rem;
+      padding: 0.12rem 0.4rem;
+      font-size: 0.68rem;
       cursor: pointer;
-      line-height: 1.2;
+      line-height: 1.1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.15s ease;
     }
 
     .hub-btn-play:hover {
       background: #38bdf8;
       color: #0b0f19;
+      transform: scale(1.05);
     }
 
     .hub-btn-link {
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text-muted);
       border-radius: 3px;
-      padding: 0.1rem 0.35rem;
-      font-size: 0.65rem;
+      padding: 0.12rem 0.4rem;
+      font-size: 0.68rem;
       text-decoration: none;
-      line-height: 1.2;
+      line-height: 1.1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.15s ease;
     }
 
     .hub-btn-link:hover {
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.2);
       color: #ffffff;
+      transform: scale(1.05);
     }
 
     .card-actions {
@@ -1994,14 +2048,14 @@ const indexHtmlContent = `<!DOCTYPE html>
         <div class="filter-chips-row">
           <span class="filter-label">Ratio:</span>
           <button class="filter-chip active" data-filter="ratio" data-value="all" onclick="setRatioFilter('all', this)">All</button>
-          <button class="filter-chip" data-filter="ratio" data-value="16:9" onclick="setRatioFilter('16:9', this)">📺 Landscape (16:9)</button>
-          <button class="filter-chip" data-filter="ratio" data-value="9:16" onclick="setRatioFilter('9:16', this)">📱 Vertical (9:16)</button>
+          <button class="filter-chip" data-filter="ratio" data-value="16:9" onclick="setRatioFilter('16:9', this)" title="Landscape (16:9)">📺 L</button>
+          <button class="filter-chip" data-filter="ratio" data-value="9:16" onclick="setRatioFilter('9:16', this)" title="Portrait (9:16)">📱 P</button>
 
           <span class="filter-label" style="margin-left: 0.5rem;">Platform:</span>
           <button class="filter-chip active" data-filter="platform" data-value="all" onclick="setPlatformFilter('all', this)">All</button>
-          <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">YouTube</button>
-          <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">Facebook</button>
-          <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">Instagram</button>
+          <button class="filter-chip" data-filter="platform" data-value="YouTube" onclick="setPlatformFilter('YouTube', this)">📺 YouTube</button>
+          <button class="filter-chip" data-filter="platform" data-value="Facebook" onclick="setPlatformFilter('Facebook', this)">📘 Facebook</button>
+          <button class="filter-chip" data-filter="platform" data-value="Instagram" onclick="setPlatformFilter('Instagram', this)">📸 Instagram</button>
 
           <span class="filter-label" style="margin-left: 0.5rem;">Lang:</span>
           <button class="filter-chip active" data-filter="lang" data-value="all" onclick="setLangFilter('all', this)">All</button>
@@ -2696,34 +2750,52 @@ const indexHtmlContent = `<!DOCTYPE html>
       return result;
     }
 
+    function getPlatformIconSvg(platform) {
+      if (platform === 'YouTube') {
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="#ff0000" style="vertical-align: middle;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>';
+      }
+      if (platform === 'Facebook') {
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="#1877f2" style="vertical-align: middle;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>';
+      }
+      if (platform === 'Instagram') {
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="#e4405f" style="vertical-align: middle;"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>';
+      }
+      if (platform === 'Telegram') {
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="#229ed9" style="vertical-align: middle;"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.196 1.006.128.832.941z"/></svg>';
+      }
+      if (platform === 'Threads') {
+        return '<svg width="15" height="15" viewBox="0 0 24 24" fill="#ffffff" style="vertical-align: middle;"><path d="M12.186 24h-.007C5.463 24 0 18.537 0 11.814 0 5.091 5.463 0 12.186 0c6.702 0 12.158 5.437 12.186 12.138v.076c0 3.323-1.196 6.33-3.367 8.468-2.095 2.062-4.912 3.208-7.933 3.228h-.699zm0-21.84c-5.426 0-9.84 4.414-9.84 9.84 0 5.427 4.414 9.84 9.84 9.84h.565c2.464-.016 4.757-.95 6.455-2.628 1.76-1.733 2.73-4.17 2.73-6.862 0-5.426-4.414-9.84-9.84-9.84z"/></svg>';
+      }
+      return '<span style="font-size: 0.95rem;">🌐</span>';
+    }
+
     function renderGroupedCard(group) {
       const isVertical = group.aspectRatio === '9:16';
       const badgeClass = isVertical ? 'badge-vertical' : 'badge-landscape';
       const defaultThumb = isVertical ? 'branding/cover-instagram-1080x1080.png' : 'branding/cover-facebook-1640x924.png';
       const thumbSrc = group.thumbnailUrl || defaultThumb;
-      const langBadges = Array.from(group.languages).map(l => '<span class="lang-badge">' + (l === 'ID' ? '🇮🇩 ID' : '🇬🇧 EN') + '</span>').join(' ');
+      const langBadges = Array.from(group.languages).map(l => '<span class="lang-badge">' + (l === 'ID' ? 'ID' : 'EN') + '</span>').join(' ');
 
       const pubRowsHtml = group.publications.map(pub => {
-        const isYt = pub.platform === 'YouTube';
-        const isFb = pub.platform === 'Facebook';
-        const isIg = pub.platform === 'Instagram';
-        const platIcon = isYt ? '📺' : isFb ? '📘' : isIg ? '📸' : '🌐';
-        const langBadge = pub.language.toUpperCase() === 'ID' ? '🇮🇩 ID' : '🇬🇧 EN';
+        const iconSvg = getPlatformIconSvg(pub.platform);
+        const langBadge = pub.language.toUpperCase() === 'ID' ? 'ID' : 'EN';
+        const ratioBadge = pub.aspectRatio === '9:16' ? 'P' : 'L';
+        const ratioClass = pub.aspectRatio === '9:16' ? 'p-tag' : 'l-tag';
 
         return \`
           <div class="platform-hub-row">
             <div class="platform-hub-left">
-              <span>\${platIcon}</span>
-              <span class="hub-name">\${pub.platform}</span>
+              <span class="hub-platform-icon" title="\${pub.platform}">\${iconSvg}</span>
               <span class="hub-lang-tag">\${langBadge}</span>
-              <span style="font-size: 0.65rem; color: var(--text-dim); margin-left: 0.2rem;">\${pub.format}</span>
+              <span class="hub-ratio-tag \${ratioClass}" title="\${pub.aspectRatio === '9:16' ? 'Portrait (9:16)' : 'Landscape (16:9)'}">\${ratioBadge}</span>
+              <span class="hub-id-text" title="\${pub.videoTitle}">\${pub.videoId}</span>
             </div>
             <div class="platform-hub-actions">
               <button class="hub-btn-play" onclick="openPreviewModal('\${pub.id}')" title="Play Preview">
-                ▶ Play
+                ▶
               </button>
-              <a href="\${pub.videoUrl}" target="_blank" rel="noopener noreferrer" class="hub-btn-link" title="Open \${pub.platform}">
-                ↗ Open
+              <a href="\${pub.videoUrl}" target="_blank" rel="noopener noreferrer" class="hub-btn-link" title="Open on \${pub.platform}">
+                ↗
               </a>
             </div>
           </div>
@@ -2735,7 +2807,7 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="card-thumb-wrapper \${isVertical ? 'ratio-vertical' : ''}">
             <img src="\${thumbSrc}" alt="\${group.storyTitleId}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='\${defaultThumb}'}">
             <div class="thumb-overlay-badge">
-              <span class="format-badge \${badgeClass}">\${group.formatLabel}</span>
+              <span class="format-badge \${badgeClass}" title="\${isVertical ? 'Portrait (9:16)' : 'Landscape (16:9)'}" style="font-weight: 800; padding: 0.12rem 0.45rem;">\${isVertical ? 'P' : 'L'}</span>
               \${langBadges}
             </div>
             <span class="thumb-count-badge">\${group.publications.length} Releases</span>
@@ -2756,17 +2828,17 @@ const indexHtmlContent = `<!DOCTYPE html>
                 <span>\${group.author} · \${group.illustrator}</span>
               </div>
               <div class="card-meta-row">
-                <span>Latest Update:</span>
+                <span>Updated:</span>
                 <span>\${formatDate(group.latestPublishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>
               </div>
             </div>
 
             <div class="card-actions">
-              <button class="btn-card" onclick="openPreviewModal('\${group.primaryVideoId}')">
-                ▶ Play Main
+              <button class="btn-card" onclick="openPreviewModal('\${group.primaryVideoId}')" title="Play Preview">
+                ▶
               </button>
-              <button class="btn-card primary" onclick="filterCatalogByStory('\${group.storySlug}')">
-                🔍 Filter Story (\${group.publications.length})
+              <button class="btn-card primary" onclick="filterCatalogByStory('\${group.storySlug}')" title="Filter Story Releases">
+                🔍 Filter (\${group.publications.length})
               </button>
             </div>
           </div>
@@ -2790,9 +2862,9 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="card-thumb-wrapper \${isVertical ? 'ratio-vertical' : ''}">
             <img src="\${thumbSrc}" alt="\${item.videoTitle}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='branding/cover-facebook-1640x924.png'}">
             <div class="thumb-overlay-badge">
-              <span class="platform-badge \${platClass}">\${platIcon} \${item.platform}</span>
+              <span class="platform-badge \${platClass}" title="\${item.platform}">\${platIcon}</span>
               <span class="lang-badge">\${item.language.toUpperCase()}</span>
-              <span class="format-badge">\${item.format}</span>
+              <span class="format-badge \${isVertical ? 'badge-vertical' : 'badge-landscape'}" style="font-weight: 800;">\${isVertical ? 'P' : 'L'}</span>
             </div>
             \${item.duration ? \`<span class="thumb-duration-badge">\${item.duration.split(' ')[0]}</span>\` : ''}
           </div>
@@ -2816,11 +2888,11 @@ const indexHtmlContent = `<!DOCTYPE html>
             </div>
 
             <div class="card-actions">
-              <button class="btn-card" onclick="openPreviewModal('\${item.id}')">
-                ▶ Preview
+              <button class="btn-card" onclick="openPreviewModal('\${item.id}')" title="Play Preview">
+                ▶
               </button>
-              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary">
-                Open \${item.platform} ↗
+              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary" title="Open on \${item.platform}">
+                ↗
               </a>
             </div>
           </div>
@@ -2830,12 +2902,13 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function renderTableRow(item) {
       const platClass = item.platform === 'YouTube' ? 'yt' : item.platform === 'Facebook' ? 'fb' : 'ig';
+      const isVertical = item.aspectRatio === '9:16';
       return \`
         <tr>
           <td><span class="meta-id-tag" onclick="copyToClipboard('\${item.id}', 'Audit ID')">\${item.id}</span></td>
           <td><span class="platform-badge \${platClass}">\${item.platform}</span></td>
           <td><span class="lang-badge">\${item.language.toUpperCase()}</span></td>
-          <td><span class="format-badge">\${item.format}</span></td>
+          <td><span class="format-badge \${isVertical ? 'badge-vertical' : 'badge-landscape'}" style="font-weight: 800;">\${isVertical ? 'P' : 'L'}</span></td>
           <td><strong>\${item.storyTitleId}</strong></td>
           <td class="table-cell-title">
             \${item.videoTitle}
@@ -2846,11 +2919,11 @@ const indexHtmlContent = `<!DOCTYPE html>
           <td><span style="color: var(--success-green); font-weight: 600; font-size: 0.72rem;">\${item.status.toUpperCase()}</span></td>
           <td>
             <div style="display: flex; gap: 0.35rem; align-items: center;">
-              <button class="btn-card" style="padding: 0.2rem 0.45rem; font-size: 0.7rem; height: 24px;" onclick="openPreviewModal('\${item.id}')">
-                ▶ Play
+              <button class="btn-card" style="padding: 0.2rem 0.45rem; font-size: 0.7rem; height: 24px;" onclick="openPreviewModal('\${item.id}')" title="Play Preview">
+                ▶
               </button>
-              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="table-link">
-                View ↗
+              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="table-link" title="Open on \${item.platform}">
+                ↗
               </a>
             </div>
           </td>
