@@ -6,12 +6,10 @@ import { publishFacebookPhotoPost } from "./publish-launch-posts";
 import { publishInstagramFeedPhoto } from "./publish-instagram-post";
 import { publishThreadsPhotoPost } from "./publish-threads";
 import {
-  getTelegramConfig,
-  sendTelegramMessage,
   notifyTelegramFailure,
-  formatWibTimestamp,
 } from "./notify-telegram";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
+import { db } from "./lib/db";
 
 export interface AnnouncementOptions {
   bookSlug?: string;
@@ -36,7 +34,6 @@ export interface AnnouncementRecord {
   facebook?: PlatformPublishResult;
   instagram?: PlatformPublishResult;
   threads?: PlatformPublishResult;
-  telegram?: PlatformPublishResult;
 }
 
 /**
@@ -97,7 +94,7 @@ export interface TailoredTeaserCopies {
   captionInstagram: string;
   captionFacebook: string;
   captionThreads: string;
-  captionTelegramHtml: string;
+  captionYoutubeCommunity: string;
 }
 
 /**
@@ -106,7 +103,7 @@ export interface TailoredTeaserCopies {
  * - Instagram: Emotive parenting hook, save prompt, engagement question, focused hashtags.
  * - Facebook: Warm community tone, benefits of mindful bedtime screen-time, family discussion.
  * - Threads: Conversational micro-storytelling, bite-sized curiosity hook, zero hashtag spam.
- * - Telegram: Clean HTML formatting, bullet highlights, actionable reminder prompt.
+ * - YouTube Community: Scheduled premiere reminder with clear CTA and live-chat invitation.
  * Guarantees 100% single-language consistency matching the target language.
  */
 export function generateTeaserCopy(
@@ -135,13 +132,13 @@ ${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${h
 Halo Ayah Bunda dan adik-adik tersayang! 🥰👋
 Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @zayn.storybook!
 
-🎨 Sorotan Cerita Malam Ini:
+🎨 Sorotan Cerita:
 👉 ${hook}
 ${sticker ? `✨ Catatan Seru: ${sticker}\n` : ""}
 💡 Nilai Kebaikan untuk Si Kecil:
 ${moral}
 
-📌 TIPS BEDTIME ROUTINE:
+📌 TIPS RUTINITAS SEBELUM TIDUR:
 Jadikan dongeng 15 menit ini sebagai momen transisi tenang sebelum si kecil terlelap. Redupkan lampu, siapkan selimut hangat, dan nikmati petualangan bersama.
 
 🔔 Nyalakan lonceng pengingat di YouTube @zayn.storybook sekarang agar tidak terlewat saat tayang perdana!
@@ -234,41 +231,43 @@ In just 1 hour (at ${slotTime}), our new animated read-aloud storybook "${cleanT
 
 Set your premiere reminder on YouTube @zayn.storybook and snuggle up for bedtime storytime tonight! 🌙💤`;
 
-  // 4. TELEGRAM HTML CAPTION (Clean, Actionable Formatting with Direct Prompts)
-  const captionTelegramHtml = isId
-    ? `⏰ <b>PENGUMUMAN: 1 JAM LAGI TAYANG PERDANA!</b> 🌟✨
-${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 🌙💤
+  // 4. YOUTUBE COMMUNITY TAB CAPTION (Optimized for YouTube Premiere Reminder)
+  const captionYoutubeCommunity = isId
+    ? `⏰ TAYANG PERDANA 1 JAM LAGI! (Pukul ${slotTime}) 🌟✨
+📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 🌙💤
 
-Halo Ayah, Bunda, & adik-adik tersayang! 🥰
-Tepat pukul <b>${slotTime}</b>, video dongeng animasi terbaru "<b>${cleanTitle}</b>" akan tayang perdana di YouTube!
+Halo teman-teman dan keluarga tersayang! 🥰👋
+Cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana tepat pukul ${slotTime} nanti!
 
-🎨 <b>Sorotan Cerita Malam Ini:</b>
+🎨 Sorotan Cerita:
 👉 ${hook}
-${sticker ? `✨ <i>${sticker}</i>\n` : ""}
-💡 <b>Pesan Kebaikan untuk Si Kecil:</b>
+
+💡 Nilai Kebaikan:
 ${moral}
 
-🔔 <i>Nyalakan pengingat di kanal YouTube @Zayn.Storybook dan siapkan waktu santai bersama si kecil! Tautan tontonan resmi akan langsung kami bagikan di sini tepat pukul ${slotTime}.</i>`
-    : `⏰ <b>ANNOUNCEMENT: PREMIERING IN 1 HOUR!</b> 🌟✨
-${badge ? `🏷️ <i>${badge}</i>\n` : ""}📖 <b>${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}</b> 📖🎈
+🔔 Klik tombol "Set Reminder" / "Ingatkan Saya" pada video premiere agar adik-adik tidak terlewatkan momen seru ini!
+Sampai jumpa di kolom live chat nanti ya! ❤️👇`
+    : `⏰ PREMIERING IN 1 HOUR! (At ${slotTime}) 🌟✨
+📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 📖🎈
 
-Hello parents and curious little ones! 🥰
-In just 1 hour (at <b>${slotTime}</b>), our new animated storybook "<b>${cleanTitle}</b>" is premiering on YouTube!
+Hello wonderful families and little readers! 🥰👋
+Our brand-new animated read-aloud storybook "${cleanTitle}" premieres at ${slotTime}!
 
-🎨 <b>Tonight's Story Highlight:</b>
+🎨 Tonight's Story Highlight:
 👉 ${hook}
-${sticker ? `✨ <i>${sticker}</i>\n` : ""}
-💡 <b>Life Lesson:</b>
+
+💡 Life Lesson:
 ${moral}
 
-🔔 <i>Turn on your reminder on YouTube @Zayn.Storybook! The official watch link will be shared here right at ${slotTime}.</i>`;
+🔔 Hit "Set Reminder" on the premiere video so you don't miss the adventure!
+See you in the live chat! ❤️👇`;
 
   return {
     captionSocial: captionInstagram,
     captionInstagram,
     captionFacebook,
     captionThreads,
-    captionTelegramHtml,
+    captionYoutubeCommunity,
   };
 }
 
@@ -311,7 +310,8 @@ function resolveBestPhoto(storyDir: string, lang: "id" | "en"): string {
 }
 
 /**
- * Main routine: Publishes deduplicated announcement feeds across Facebook, Instagram, Threads, and Telegram.
+ * Main routine: Publishes deduplicated announcement feeds across Facebook, Instagram, and Threads.
+ * Note: Telegram is strictly an internal creator notification tool and skipped from public feeds.
  */
 export async function publishAnnouncement(options: AnnouncementOptions = {}): Promise<{
   success: boolean;
@@ -338,33 +338,53 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
 
   if (!targetBook) {
     const isEvening = options.slot === "evening" || (options.slot !== "morning" && currentHour >= 12);
-    const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
-    const nowJakarta = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-    const dayName = dayNames[nowJakarta.getDay()];
+    let matchingSlot: any = null;
 
-    const todaySlots = DAILY_CALENDAR_MONTH_1.filter((s) => {
-      if (s.date && s.date === todayDate) return true;
-      if (!s.date && s.dayName === dayName) return true;
-      return false;
-    });
+    // Check Cloudflare D1 content_calendar first
+    try {
+      const d1Slots = await db.getCalendar(todayDate);
+      if (d1Slots && d1Slots.length > 0) {
+        matchingSlot = d1Slots.find((s) => {
+          const isMorningSlot =
+            s.time_slot.includes("07:") ||
+            s.time_slot.includes("08:") ||
+            s.slot_type.toLowerCase().includes("morning");
+          return isEvening ? !isMorningSlot : isMorningSlot;
+        }) || d1Slots[0];
+      }
+    } catch (e: any) {
+      console.warn("ℹ️ Could not query D1 calendar, falling back to local calendar:", e.message);
+    }
 
-    const matchingSlot = todaySlots.find((s) => {
-      const isMorningSlot =
-        s.timeSlot.includes("07:") ||
-        s.timeSlot.includes("08:") ||
-        s.slotType.toLowerCase().includes("morning");
-      return isEvening ? !isMorningSlot : isMorningSlot;
-    }) || todaySlots[0];
+    if (!matchingSlot) {
+      const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
+      const nowJakarta = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+      const dayName = dayNames[nowJakarta.getDay()];
+
+      const todaySlots = DAILY_CALENDAR_MONTH_1.filter((s) => {
+        if (s.date && s.date === todayDate) return true;
+        if (!s.date && s.dayName === dayName) return true;
+        return false;
+      });
+
+      matchingSlot = todaySlots.find((s) => {
+        const isMorningSlot =
+          s.timeSlot.includes("07:") ||
+          s.timeSlot.includes("08:") ||
+          s.slotType.toLowerCase().includes("morning");
+        return isEvening ? !isMorningSlot : isMorningSlot;
+      }) || todaySlots[0];
+    }
 
     if (!matchingSlot) {
       console.log(`🌴 Hari ini (${todayDate}) tidak ada jadwal tayang aktif. Lewati pengumuman.`);
       return { success: true, skipped: true };
     }
 
-    targetBook = matchingSlot.bookSlug;
+    targetBook = matchingSlot.book_slug || matchingSlot.bookSlug;
     targetLang = targetLang || matchingSlot.lang;
-    slotTime = matchingSlot.timeSlot;
-    slotLabel = matchingSlot.slotType;
+    slotTime = matchingSlot.time_slot || matchingSlot.timeSlot;
+    slotLabel = matchingSlot.slot_type || matchingSlot.slotType;
   }
 
   const lang = targetLang || "id";
@@ -394,21 +414,20 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     announcedAt: new Date().toISOString(),
   };
 
-  // 3. Strict Deduplication Gate
+  // 3. Strict Deduplication Gate (Public Platforms: Facebook, Instagram, Threads)
+  // Note: Telegram is strictly reserved for internal creator notifications/alerts and skipped from public feeds.
   const hasFb = Boolean(existingAnn.facebook?.id);
   const hasIg = Boolean(existingAnn.instagram?.id);
   const hasThreads = Boolean(existingAnn.threads?.id);
-  const hasTelegram = Boolean(existingAnn.telegram?.status === "sent");
 
-  console.log("🔍 ANNOUNCEMENT DEDUPLICATION STATUS:");
+  console.log("🔍 ANNOUNCEMENT DEDUPLICATION STATUS (PUBLIC SOCIAL FEEDS):");
   console.log(`   - Facebook Page Feed : ${hasFb ? `✔ LIVE (${existingAnn.facebook?.id})` : "⏳ PENDING"}`);
   console.log(`   - Instagram Feed     : ${hasIg ? `✔ LIVE (${existingAnn.instagram?.id})` : "⏳ PENDING"}`);
   console.log(`   - Meta Threads       : ${hasThreads ? `✔ LIVE (${existingAnn.threads?.id})` : "⏳ PENDING"}`);
-  console.log(`   - Telegram Teaser    : ${hasTelegram ? `✔ SENT (${existingAnn.telegram?.sentAt})` : "⏳ PENDING"}`);
 
-  const isAllPublished = hasFb && hasIg && hasThreads && hasTelegram;
+  const isAllPublished = hasFb && hasIg && hasThreads;
   if (isAllPublished && !options.force) {
-    console.log(`\n🛡️ [ZERO DUPLICATE GATE] Announcement for "${story.title}" [${lang.toUpperCase()}] on ${todayDate} has ALREADY been published across ALL platforms!`);
+    console.log(`\n🛡️ [ZERO DUPLICATE GATE] Announcement for "${story.title}" [${lang.toUpperCase()}] on ${todayDate} has ALREADY been published across ALL public social platforms!`);
     console.log(`   ⏩ Skipping announcement feed to guarantee ZERO duplicate posts.`);
     console.log(`   💡 Tip: Pass --force to replace or re-post anyway.\n`);
     return { success: true, skipped: true, targetBook, lang };
@@ -422,16 +441,16 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     captionInstagram,
     captionFacebook,
     captionThreads,
-    captionTelegramHtml,
+    captionYoutubeCommunity,
   } = generateTeaserCopy(story, lang, slotTime);
 
   const errors: string[] = [];
 
-  // 5. Granular Publishing to Pending Platforms
+  // 5. Granular Publishing to Pending Public Platforms
   // 5A. Facebook Page Feed Photo (Tailored for Parenting Community)
   if (!hasFb || options.force) {
     try {
-      console.log(`\n📘 [1/4] Publishing Announcement to Facebook Page...`);
+      console.log(`\n📘 [1/3] Publishing Announcement to Facebook Page...`);
       const fbRes = await publishFacebookPhotoPost({
         photoPath,
         caption: captionFacebook,
@@ -453,13 +472,13 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
       errors.push(`[Facebook] ${fbErr.message}`);
     }
   } else {
-    console.log(`\n⏩ [1/4] Skipping Facebook Page: Already published today (${existingAnn.facebook?.id}).`);
+    console.log(`\n⏩ [1/3] Skipping Facebook Page: Already published today (${existingAnn.facebook?.id}).`);
   }
 
   // 5B. Instagram Feed Photo (Tailored for Saves & Engagement)
   if (!hasIg || options.force) {
     try {
-      console.log(`\n📸 [2/4] Publishing Announcement to Instagram Feed...`);
+      console.log(`\n📸 [2/3] Publishing Announcement to Instagram Feed...`);
       const igRes = await publishInstagramFeedPhoto({
         imagePath: photoPath,
         caption: captionInstagram,
@@ -480,13 +499,13 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
       errors.push(`[Instagram] ${igErr.message}`);
     }
   } else {
-    console.log(`\n⏩ [2/4] Skipping Instagram Feed: Already published today (${existingAnn.instagram?.id}).`);
+    console.log(`\n⏩ [2/3] Skipping Instagram Feed: Already published today (${existingAnn.instagram?.id}).`);
   }
 
   // 5C. Meta Threads Image Post (Tailored for Conversational Micro-Storytelling)
   if (!hasThreads || options.force) {
     try {
-      console.log(`\n🧵 [3/4] Publishing Announcement to Meta Threads...`);
+      console.log(`\n🧵 [3/3] Publishing Announcement to Meta Threads...`);
       const thRes = await publishThreadsPhotoPost({
         imagePath: photoPath,
         text: captionThreads,
@@ -507,50 +526,11 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
       errors.push(`[Threads] ${thErr.message}`);
     }
   } else {
-    console.log(`\n⏩ [3/4] Skipping Meta Threads: Already published today (${existingAnn.threads?.id}).`);
+    console.log(`\n⏩ [3/3] Skipping Meta Threads: Already published today (${existingAnn.threads?.id}).`);
   }
 
-  // 5D. Telegram Teaser Broadcast
-  if (!hasTelegram || options.force) {
-    try {
-      console.log(`\n✈️ [4/4] Dispatching Teaser Announcement to Telegram...`);
-      const tgConfig = getTelegramConfig();
-      if (tgConfig) {
-        let photoUrl: string | undefined = undefined;
-        const r2ConfigPath = path.resolve("./config/r2-config.json");
-        if (existsSync(r2ConfigPath)) {
-          try {
-            const r2 = JSON.parse(readFileSync(r2ConfigPath, "utf-8"));
-            if (r2.publicDomain) {
-              photoUrl = `${r2.publicDomain.replace(/\/$/, "")}/stories/${targetBook}/assets/cover.png`;
-            }
-          } catch {}
-        }
-
-        if (options.dryRun) {
-          console.log("\n[DRY RUN] Telegram Announcement HTML:\n", captionTelegramHtml);
-          console.log(`Photo CDN URL: ${photoUrl || "(No photo URL)"}`);
-        } else {
-          const sent = await sendTelegramMessage(tgConfig, captionTelegramHtml, photoUrl);
-          if (sent) {
-            existingAnn.telegram = {
-              status: "sent",
-              sentAt: new Date().toISOString(),
-            };
-            console.log(`✔ Telegram teaser broadcast sent!`);
-          } else {
-            errors.push(`[Telegram] Delivery failed`);
-          }
-        }
-      } else {
-        console.log(`ℹ️ Telegram skipped: Credentials not configured.`);
-      }
-    } catch (tgErr: any) {
-      console.error(`⚠️ Telegram announcement warning:`, tgErr.message);
-      errors.push(`[Telegram] ${tgErr.message}`);
-    }
-  } else {
-    console.log(`\n⏩ [4/4] Skipping Telegram: Already sent teaser today (${existingAnn.telegram?.sentAt}).`);
+  if (options.dryRun) {
+    console.log("\n[DRY RUN] YouTube Community Announcement Preview:\n", captionYoutubeCommunity);
   }
 
   // 6. Save Manifest & Push Back to Cloudflare R2

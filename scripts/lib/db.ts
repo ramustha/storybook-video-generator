@@ -94,6 +94,27 @@ export interface CuratedBookRecord {
   created_at?: string;
 }
 
+export interface AnnouncementRecordD1 {
+  id?: number;
+  scheduled_date: string;
+  time_slot: string;
+  lang: string;
+  book_slug: string;
+  slot_type: string;
+  title: string;
+  theme?: string;
+  hook?: string;
+  moral?: string;
+  photo_url?: string;
+  caption_instagram: string;
+  caption_facebook: string;
+  caption_threads: string;
+  caption_youtube_community?: string;
+  status?: string;
+  announced_at?: string;
+  created_at?: string;
+}
+
 export interface D1Config {
   accountId: string;
   databaseId: string;
@@ -818,6 +839,63 @@ class StorybookDB {
         platforms,
       };
     });
+  }
+
+  // ============================================================================
+  // PRE-BROADCAST ANNOUNCEMENT OPERATIONS
+  // ============================================================================
+
+  async saveAnnouncement(ann: AnnouncementRecordD1): Promise<void> {
+    const sql = `
+      INSERT INTO announcements (
+        scheduled_date, time_slot, lang, book_slug, slot_type, title,
+        theme, hook, moral, photo_url,
+        caption_instagram, caption_facebook, caption_threads, caption_youtube_community,
+        status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(scheduled_date, time_slot, lang) DO UPDATE SET
+        book_slug = excluded.book_slug,
+        slot_type = excluded.slot_type,
+        title = excluded.title,
+        theme = excluded.theme,
+        hook = excluded.hook,
+        moral = excluded.moral,
+        photo_url = excluded.photo_url,
+        caption_instagram = excluded.caption_instagram,
+        caption_facebook = excluded.caption_facebook,
+        caption_threads = excluded.caption_threads,
+        caption_youtube_community = excluded.caption_youtube_community,
+        status = excluded.status;
+    `;
+    await this.execute(sql, [
+      ann.scheduled_date,
+      ann.time_slot,
+      ann.lang,
+      ann.book_slug,
+      ann.slot_type,
+      ann.title,
+      ann.theme || null,
+      ann.hook || null,
+      ann.moral || null,
+      ann.photo_url || null,
+      ann.caption_instagram,
+      ann.caption_facebook,
+      ann.caption_threads,
+      ann.caption_youtube_community || null,
+      ann.status || "scheduled",
+    ]);
+  }
+
+  async getAnnouncement(date: string, timeSlot: string, lang: string): Promise<AnnouncementRecordD1 | null> {
+    const rows = await this.query<AnnouncementRecordD1>(
+      "SELECT * FROM announcements WHERE scheduled_date = ? AND time_slot = ? AND lang = ? LIMIT 1",
+      [date, timeSlot, lang]
+    );
+    return rows[0] || null;
+  }
+
+  async getAllAnnouncements(): Promise<AnnouncementRecordD1[]> {
+    return this.query<AnnouncementRecordD1>("SELECT * FROM announcements ORDER BY scheduled_date ASC, time_slot ASC");
   }
 }
 
