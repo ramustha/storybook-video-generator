@@ -210,16 +210,20 @@ export async function onRequest(context: { env: Env; request: Request }) {
           const timeSlot = c.time_slot || "08:30 WIB";
           const slotType = c.slot_type || "Daily Broadcast";
           const bookSlug = c.book_slug || "story";
+          const slotLang = c.lang || "id";
           const hasAsset = publishedSlugs.has(bookSlug);
 
-          let isCompleted = Boolean(c.is_completed);
+          const isSlotPublished = auditRecords.some(
+            (r) => r.storySlug === bookSlug && (r.language === slotLang || (!r.language && slotLang === "id"))
+          );
+
+          let isCompleted = Boolean(c.is_completed) || isSlotPublished;
           let status: "completed" | "today" | "upcoming" = "upcoming";
           if (dateStr < todayIso) {
             status = "completed";
             isCompleted = true;
           } else if (dateStr === todayIso) {
-            status = "today";
-            // Retain isCompleted from D1 (e.g. morning slot already broadcasted today)
+            status = isCompleted ? "completed" : "today";
           } else {
             status = "upcoming";
           }
@@ -242,7 +246,6 @@ export async function onRequest(context: { env: Env; request: Request }) {
               ? ["YouTube (16:9)", "Facebook Watch (16:9)"]
               : ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"];
 
-          const hasAsset = publishedSlugs.has(bookSlug);
           const hasAssets = hasAsset || bookMap.has(bookSlug);
           const isBuffered = Boolean(c.is_buffered);
 
@@ -255,7 +258,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
             bookSlug,
             storyTitleId,
             storyTitleEn,
-            lang: c.lang || "id",
+            lang: slotLang,
             format: formatLabel,
             targetPlatforms,
             theme: c.theme || c.book_theme || "Cerita Anak",
