@@ -129,6 +129,8 @@ function getContentType(filePath: string): string {
       return "image/svg+xml";
     case ".html":
       return "text/html; charset=utf-8";
+    case ".mp4":
+      return "video/mp4";
     case ".mp3":
       return "audio/mpeg";
     case ".m4a":
@@ -179,7 +181,8 @@ async function asyncPool<T, R>(
  */
 async function collectLocalStoryFiles(
   bookSlug: string,
-  manifestOnly: boolean = false
+  manifestOnly: boolean = false,
+  includeVideos: boolean = false
 ): Promise<FileToSync[]> {
   const storyDir = path.resolve(`./stories/${bookSlug}`);
   const results: FileToSync[] = [];
@@ -214,7 +217,7 @@ async function collectLocalStoryFiles(
       if (entry.name.startsWith(".")) continue;
       if (entry.name === "raw" && entry.isDirectory()) continue;
       if (entry.name === "cache" && entry.isDirectory()) continue;
-      if (entry.name.endsWith(".mp4")) continue;
+      if (entry.name.endsWith(".mp4") && !includeVideos) continue;
 
       if (entry.isDirectory()) {
         await walk(fullPath);
@@ -241,7 +244,7 @@ async function collectLocalStoryFiles(
  */
 export async function pushStory(
   bookSlug: string,
-  options: { force?: boolean; manifestOnly?: boolean; dryRun?: boolean } = {}
+  options: { force?: boolean; manifestOnly?: boolean; includeVideos?: boolean; dryRun?: boolean } = {}
 ) {
   const r2 = await loadR2Config();
   const s3 = getS3Client(r2);
@@ -250,11 +253,19 @@ export async function pushStory(
   console.log(`☁️ Cloudflare R2 Push: [stories/${bookSlug}]`);
   console.log(`   Bucket : ${r2.bucketName}`);
   console.log(`   Target : stories/${bookSlug}/`);
-  console.log(`   Mode   : ${options.manifestOnly ? "Manifest Only" : "Full Story Assets (No MP4)"}`);
+  console.log(
+    `   Mode   : ${
+      options.manifestOnly
+        ? "Manifest Only"
+        : options.includeVideos
+        ? "Full Story Assets + Rendered MP4 Videos"
+        : "Full Story Assets (No MP4)"
+    }`
+  );
   if (options.dryRun) console.log(`   \x1b[33m[DRY RUN - No network mutations]\x1b[0m`);
   console.log(`======================================================`);
 
-  const files = await collectLocalStoryFiles(bookSlug, options.manifestOnly);
+  const files = await collectLocalStoryFiles(bookSlug, options.manifestOnly, options.includeVideos);
   if (files.length === 0) {
     console.log(`⚠️ No files found to upload for [${bookSlug}].`);
     return;
@@ -349,7 +360,7 @@ export async function pushStory(
  */
 export async function pullStory(
   bookSlug: string,
-  options: { force?: boolean; manifestOnly?: boolean; dryRun?: boolean } = {}
+  options: { force?: boolean; manifestOnly?: boolean; includeVideos?: boolean; dryRun?: boolean } = {}
 ) {
   const r2 = await loadR2Config();
   const s3 = getS3Client(r2);
@@ -376,6 +387,9 @@ export async function pullStory(
     for (const item of res.Contents || []) {
       if (item.Key && !item.Key.endsWith("/")) {
         if (options.manifestOnly && item.Key !== `${prefix}story.json`) {
+          continue;
+        }
+        if (!options.includeVideos && item.Key.endsWith(".mp4")) {
           continue;
         }
         remoteObjects.push(item);
@@ -462,6 +476,60 @@ export async function pullStory(
 
 /**
  * Lists all stories stored in Cloudflare R2 with statistics.
+ */
+/**
+ * Checks whether rendered MP4 videos exist in Cloudflare R2 for a given story.
+ */
+export async function checkStoryBufferedVideos(bookSlug: string): Promise<{
+  idLandscape: boolean;
+  idVertical: boolean;
+  enLandscape: boolean;
+  enVertical: boolean;
+  allBuffered: boolean;
+  anyBuffered: boolean;
+}> {
+  try {
+    const r2 = await loadR2Config();
+    const s3 = getS3Client(r2);
+    const prefix = `stories/${bookSlug}/exports/`;
+
+    const listCmd = new ListObjectsV2Command({
+      Bucket: r2.bucketName,
+      Prefix: prefix,
+    });
+    const res = await s3.send(listCmd);
+
+    const keys = (res.Contents || []).map((c) => c.Key || "");
+    const idLandscape = keys.some((k) => k.includes("/id/") && k.endsWith("16x9.mp4"));
+    const idVertical = keys.some((k) => k.includes("/id/") && k.endsWith("9x16.mp4"));
+    const enLandscape = keys.some((k) => k.includes("/en/") && k.endsWith("16x9.mp4"));
+    const enVertical = keys.some((k) => k.includes("/en/") && k.endsWith("9x16.mp4"));
+
+    const allBuffered = idLandscape && idVertical && enLandscape && enVertical;
+    const anyBuffered = idLandscape || idVertical || enLandscape || enVertical;
+
+    return {
+      idLandscape,
+      idVertical,
+      enLandscape,
+      enVertical,
+      allBuffered,
+      anyBuffered,
+    };
+  } catch {
+    return {
+      idLandscape: false,
+      idVertical: false,
+      enLandscape: false,
+      enVertical: false,
+      allBuffered: false,
+      anyBuffered: false,
+    };
+  }
+}
+
+/**
+ * Lists all stories in R2.
  */
 export async function listStories() {
   const r2 = await loadR2Config();
@@ -628,18 +696,20 @@ async function main() {
 
   const force = args.includes("--force");
   const manifestOnly = args.includes("--manifest-only");
+  const includeVideos = args.includes("--include-videos") || args.includes("--with-videos");
   const dryRun = args.includes("--dry-run");
 
   switch (command) {
     case "push": {
       const bookSlug = args[1]?.startsWith("--") ? undefined : args[1] || getArg("--book");
       if (!bookSlug) {
-        console.error("Usage: npm run story:push <book-slug> [--manifest-only] [--force] [--dry-run]");
+        console.error("Usage: npm run story:push <book-slug> [--manifest-only] [--include-videos] [--force] [--dry-run]");
         process.exit(1);
       }
       await pushStory(bookSlug.replace(/^stories\//, "").replace(/\/$/, ""), {
         force,
         manifestOnly,
+        includeVideos,
         dryRun,
       });
       break;
@@ -647,12 +717,13 @@ async function main() {
     case "pull": {
       const bookSlug = args[1]?.startsWith("--") ? undefined : args[1] || getArg("--book");
       if (!bookSlug) {
-        console.error("Usage: npm run story:pull <book-slug> [--manifest-only] [--force] [--dry-run]");
+        console.error("Usage: npm run story:pull <book-slug> [--manifest-only] [--include-videos] [--force] [--dry-run]");
         process.exit(1);
       }
       await pullStory(bookSlug.replace(/^stories\//, "").replace(/\/$/, ""), {
         force,
         manifestOnly,
+        includeVideos,
         dryRun,
       });
       break;

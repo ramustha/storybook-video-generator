@@ -1036,7 +1036,7 @@ async function publishToday(
       const storyPath = path.join(storyDir, "story.json");
       if (!existsSync(storyPath)) {
         console.log(`📥 Story assets not found locally for [${slot.bookSlug}]. Pulling from Cloudflare R2...`);
-        await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug]);
+        await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug, "--include-videos"]);
       }
 
       const status = checkPublicationStatus(slot.bookSlug, slot.lang);
@@ -1046,15 +1046,32 @@ async function publishToday(
         continue;
       }
 
-      // Step 1: Cek apakah file video sudah ada; jika belum, render otomatis!
-      const storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
-      const vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
-      const landPath = storyJson.exports?.[slot.lang]?.landscape?.path ? path.join(storyDir, storyJson.exports[slot.lang].landscape.path) : null;
+      // Step 1: Cek apakah file video sudah ada di disk. Jika belum, coba pull video pre-rendered dari R2!
+      let storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
+      let vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
+      let landPath = storyJson.exports?.[slot.lang]?.landscape?.path ? path.join(storyDir, storyJson.exports[slot.lang].landscape.path) : null;
 
-      const needRender = !vertPath || !existsSync(vertPath) || !landPath || !existsSync(landPath);
+      let needRender = !vertPath || !existsSync(vertPath) || !landPath || !existsSync(landPath);
 
       if (needRender) {
-        console.log(`⚙️ Video belum ada di disk. Menjalankan render Remotion otomatis...`);
+        console.log(`🔎 Video belum ada di disk lokal. Mencari buffer video pre-rendered di Cloudflare R2...`);
+        try {
+          await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug, "--include-videos"]);
+          // Re-check after pulling videos
+          storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
+          vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
+          landPath = storyJson.exports?.[slot.lang]?.landscape?.path ? path.join(storyDir, storyJson.exports[slot.lang].landscape.path) : null;
+          needRender = !vertPath || !existsSync(vertPath) || !landPath || !existsSync(landPath);
+          if (!needRender) {
+            console.log(`⚡ [BUFFER HIT] Ditemukan video pre-rendered di R2! Melewati proses render (~20 menit dihemat!).`);
+          }
+        } catch {
+          // If pull fails or no videos in R2, proceed to render
+        }
+      }
+
+      if (needRender) {
+        console.log(`⚙️ Video belum ada di buffer R2. Menjalankan render Remotion otomatis...`);
         const renderArgs = ["scripts/render-book.ts", "--book", slot.bookSlug, "--lang", slot.lang, "--format", slot.format];
         await runChildCommand("npx", ["tsx", ...renderArgs]);
       }

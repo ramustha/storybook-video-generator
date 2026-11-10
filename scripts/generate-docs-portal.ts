@@ -43,6 +43,8 @@ export interface EnrichedCalendarSlot {
   status: "completed" | "today" | "upcoming";
   isCompleted: boolean;
   hasPublishedAsset: boolean;
+  isBuffered?: boolean;
+  hasAssets?: boolean;
 }
 
 const workspaceRoot = path.resolve(__dirname, "..");
@@ -335,6 +337,22 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
   };
 
   const hasPublishedAsset = publishedStorySlugs.has(slot.bookSlug);
+  const storyDir = path.join(storiesDir, slot.bookSlug);
+  let isBuffered = false;
+  let hasAssets = false;
+
+  if (fs.existsSync(storyDir)) {
+    hasAssets = fs.existsSync(path.join(storyDir, "story.json"));
+    try {
+      const manifest = JSON.parse(fs.readFileSync(path.join(storyDir, "story.json"), "utf-8"));
+      const hasVert = !!(manifest.exports?.[slot.lang]?.vertical?.path && fs.existsSync(path.join(storyDir, manifest.exports[slot.lang].vertical.path)));
+      const hasLand = !!(manifest.exports?.[slot.lang]?.landscape?.path && fs.existsSync(path.join(storyDir, manifest.exports[slot.lang].landscape.path)));
+      isBuffered = hasVert && hasLand;
+    } catch {
+      isBuffered = false;
+    }
+  }
+
   let status: "completed" | "today" | "upcoming" = "upcoming";
   let isCompleted = false;
 
@@ -375,6 +393,8 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
     status,
     isCompleted,
     hasPublishedAsset,
+    isBuffered,
+    hasAssets,
   };
 });
 
@@ -1708,6 +1728,18 @@ const indexHtmlContent = `<!DOCTYPE html>
       background: rgba(16, 185, 129, 0.15);
       color: #34d399;
       border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .slot-status-pill.buffered {
+      background: rgba(14, 165, 233, 0.2);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.4);
+    }
+
+    .slot-status-pill.assets-ready {
+      background: rgba(234, 179, 8, 0.2);
+      color: #eab308;
+      border: 1px solid rgba(234, 179, 8, 0.4);
     }
 
     .slot-status-pill.today {
@@ -3318,9 +3350,25 @@ const indexHtmlContent = `<!DOCTYPE html>
     function renderSlotCard(slot) {
       const isCompleted = Boolean(slot.isCompleted || slot.status === 'completed');
       const isToday = slot.status === 'today';
+      const isBuffered = Boolean(slot.isBuffered);
+      const hasAssets = Boolean(slot.hasAssets);
 
-      const statusClass = isCompleted ? 'completed' : isToday ? 'today' : 'upcoming';
-      const statusText = isCompleted ? '✅ Completed' : isToday ? '🔥 Today' : '⏳ Scheduled';
+      let statusClass = 'upcoming';
+      let statusText = '⏳ Scheduled';
+
+      if (isCompleted) {
+        statusClass = 'completed';
+        statusText = '✅ Completed';
+      } else if (isBuffered) {
+        statusClass = 'buffered';
+        statusText = '🟢 Buffered & Ready';
+      } else if (hasAssets) {
+        statusClass = 'assets-ready';
+        statusText = '🟡 Assets Ready';
+      } else if (isToday) {
+        statusClass = 'today';
+        statusText = '🔥 Today';
+      }
 
       const dayName = slot.dayName || 'Hari';
       const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
@@ -3377,6 +3425,14 @@ const indexHtmlContent = `<!DOCTYPE html>
               <button class="slot-action-btn active-btn" onclick="filterCatalogByStory('\${slot.bookSlug}')">
                 📚 View Published Assets ↗
               </button>
+            \` : isBuffered ? \`
+              <div class="slot-today-banner" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8;">
+                🟢 Pre-Rendered (Waiting for Air Time: \${timeText})
+              </div>
+            \` : hasAssets ? \`
+              <div class="slot-queue-banner" style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.35); color: #facc15;">
+                🟡 Story Assets Ready (In Render Queue)
+              </div>
             \` : isToday ? \`
               <div class="slot-today-banner">
                 ⚡ Active Broadcast Today (\${timeText})
