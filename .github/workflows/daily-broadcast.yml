@@ -1,17 +1,15 @@
 name: Zayn Storybook Daily Broadcast Scheduler
 
 on:
-  # Automated triggers migrated to Cloudflare Worker to avoid GitHub queue delays:
-  # https://zayn-storybook-cron-trigger.atkcollection110.workers.dev
-  # schedule:
-  #   # 00:30 UTC = 07:30 WIB (Morning Teaser Announcement)
-  #   - cron: '30 0 * * *'
-  #   # 01:30 UTC = 08:30 WIB (Daily Morning Slot - English Feature)
-  #   - cron: '30 1 * * *'
-  #   # 11:00 UTC = 18:00 WIB (Evening Teaser Announcement)
-  #   - cron: '0 11 * * *'
-  #   # 12:00 UTC = 19:00 WIB (Daily Prime Bedtime Slot - Indonesian Bedtime Story)
-  #   - cron: '0 12 * * *'
+  schedule:
+    # 00:30 UTC = 07:30 WIB (Morning Teaser Announcement)
+    - cron: '30 0 * * *'
+    # 01:30 UTC = 08:30 WIB (Daily Morning Slot - English Feature)
+    - cron: '30 1 * * *'
+    # 10:30 UTC = 17:30 WIB (Evening Teaser Announcement)
+    - cron: '30 10 * * *'
+    # 11:30 UTC = 18:30 WIB (Daily Prime Bedtime Slot - Indonesian Bedtime Story)
+    - cron: '30 11 * * *'
   workflow_dispatch:
     inputs:
       action:
