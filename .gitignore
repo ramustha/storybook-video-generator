@@ -16,6 +16,7 @@ config/*.json
 !config/curated-books.json
 !config/budi-catalog.json
 !config/d1-config.json
+!config/buffered-stories.json
 .cache/
 .env
 .env.local

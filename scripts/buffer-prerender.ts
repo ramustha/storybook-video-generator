@@ -4,6 +4,7 @@ import path from "path";
 import { execSync } from "child_process";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { checkStoryBufferedVideos, pushStory } from "./manage-story-storage";
+import { db } from "./lib/db";
 
 interface BufferOptions {
   daysAhead?: number;
@@ -14,6 +15,20 @@ interface BufferOptions {
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
+}
+
+async function recordBufferedStory(slug: string) {
+  try {
+    const configPath = path.resolve(process.cwd(), "config/buffered-stories.json");
+    let list: string[] = [];
+    if (existsSync(configPath)) {
+      list = JSON.parse(await fs.readFile(configPath, "utf-8"));
+    }
+    if (!list.includes(slug)) {
+      list.push(slug);
+      await fs.writeFile(configPath, JSON.stringify(list, null, 2));
+    }
+  } catch {}
 }
 
 async function main() {
@@ -73,6 +88,13 @@ async function main() {
     if (hasRequiredVideos && !force) {
       console.log(`   🟢 [BUFFER HIT] Both Landscape (16:9) & Vertical (9:16) already exist in Cloudflare R2!`);
       console.log(`   ⏩ Skipping render. This story is ready for instant broadcast on ${slot.date}.`);
+      try {
+        await db.markCalendarSlotBuffered(slot.bookSlug, slot.lang);
+        await recordBufferedStory(slot.bookSlug);
+        console.log(`   ✔ Confirmed buffer status in Cloudflare D1 for [${slot.bookSlug}] [${slot.lang}]`);
+      } catch (d1Err: any) {
+        console.warn(`   ⚠️ D1 buffer flag update warning: ${d1Err.message}`);
+      }
       continue;
     }
 
@@ -101,6 +123,14 @@ async function main() {
       // Step 3: Push rendered MP4s back to Cloudflare R2
       console.log(`   ☁️ Uploading rendered MP4 video buffer to Cloudflare R2...`);
       execSync(`npx tsx scripts/manage-story-storage.ts push ${slot.bookSlug} --include-videos`, { stdio: "inherit" });
+
+      try {
+        await db.markCalendarSlotBuffered(slot.bookSlug, slot.lang);
+        await recordBufferedStory(slot.bookSlug);
+        console.log(`   ✔ Marked calendar slot as buffered in Cloudflare D1 for [${slot.bookSlug}] [${slot.lang}]`);
+      } catch (d1Err: any) {
+        console.warn(`   ⚠️ D1 buffer flag update warning: ${d1Err.message}`);
+      }
 
       console.log(`   🎉 SUCCESS! Pre-render buffer complete for [${slot.bookSlug}] on ${slot.date}!`);
     } catch (err: any) {
