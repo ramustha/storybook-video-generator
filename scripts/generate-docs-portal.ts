@@ -1796,7 +1796,7 @@ const indexHtmlContent = `<!DOCTYPE html>
         <span class="tab-badge" id="tabCatalogCount">${initialTotal}</span>
       </button>
       <button class="nav-tab-btn" id="tabTimelineBtn" onclick="switchMainTab('timeline')">
-        <span>📅</span> 30-Day Release Timeline
+        <span>📅</span> Release Roadmap
         <span class="tab-badge" id="tabTimelineBadge">${initialCalCompleted}/${initialCalTotal} (${initialCalProgress}%)</span>
       </button>
     </nav>
@@ -1924,7 +1924,7 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="stat-card">
             <div class="stat-title">Planned Slots</div>
             <div class="stat-value" id="kpiCalTotal">${initialCalTotal}</div>
-            <div class="stat-desc">30 Days Editorial Roadmap</div>
+            <div class="stat-desc" id="kpiCalPlanDesc">Active 30 Days Launch Roadmap</div>
           </div>
           <div class="stat-card cc">
             <div class="stat-title">Completed</div>
@@ -1954,9 +1954,9 @@ const indexHtmlContent = `<!DOCTYPE html>
             <div class="progress-fill" id="timelineProgressBar" style="width: ${initialCalProgress}%;"></div>
           </div>
           <div class="progress-labels">
-            <span>🚀 Launch: 07 Nov 2026</span>
+            <span>🚀 Launch: <strong id="roadmapLaunchDate">07 Nov 2026</strong></span>
             <span id="progressBarLabel"><strong>${initialCalCompleted} of ${initialCalTotal} Slots</strong> (${initialCalProgress}%)</span>
-            <span>🏁 Finale: 06 Dec 2026</span>
+            <span>🏁 Finale: <strong id="roadmapFinaleDate">06 Dec 2026</strong></span>
           </div>
         </div>
       </div>
@@ -2001,7 +2001,12 @@ const indexHtmlContent = `<!DOCTYPE html>
         </div>
 
         <div class="filter-chips-row">
-          <span class="filter-label">Status:</span>
+          <span class="filter-label">Roadmap:</span>
+          <button class="filter-chip active" data-cal-filter="scope" data-value="active30" onclick="setTimelineScopeFilter('active30', this)">🌟 Active 30 Days (60)</button>
+          <button class="filter-chip" data-cal-filter="scope" data-value="all" onclick="setTimelineScopeFilter('all', this)">🚀 2-Year Master Plan (1,530)</button>
+          <button class="filter-chip" data-cal-filter="scope" data-value="budi" onclick="setTimelineScopeFilter('budi', this)">📚 BUDI 2026–2028 (1,470)</button>
+
+          <span class="filter-label" style="margin-left: 0.5rem;">Status:</span>
           <button class="filter-chip active" data-cal-filter="status" data-value="all" onclick="setTimelineStatusFilter('all', this)">All (${initialCalTotal})</button>
           <button class="filter-chip" data-cal-filter="status" data-value="today" onclick="setTimelineStatusFilter('today', this)">🔥 Today (${initialCalToday})</button>
           <button class="filter-chip" data-cal-filter="status" data-value="upcoming" onclick="setTimelineStatusFilter('upcoming', this)">⏳ Upcoming (${initialCalUpcoming})</button>
@@ -2087,7 +2092,64 @@ const indexHtmlContent = `<!DOCTYPE html>
   <script>
     // Embedded Datasets
     let RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
-    let RAW_CALENDAR_DATA = ${JSON.stringify(calendarSlots)};
+    // Defensive normalizer guaranteeing zero missing or undefined slot properties
+    function normalizeCalendarSlot(s, idx) {
+      if (!s) return null;
+      const dateStr = s.date || s.scheduled_date || '2026-11-07';
+      const dayName = s.dayName || s.day_name || 'Hari';
+      const timeSlot = s.timeSlot || s.time_slot || '08:30 WIB';
+      const slotType = s.slotType || s.slot_type || 'Daily Broadcast';
+      const bookSlug = s.bookSlug || s.book_slug || 'story';
+
+      let storyTitleId = s.storyTitleId || s.title_id || s.titleId;
+      let storyTitleEn = s.storyTitleEn || s.title_en || s.titleEn;
+      if (!storyTitleId) {
+        storyTitleId = bookSlug.replace(/-/g, ' ').replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
+      }
+      if (!storyTitleEn) {
+        storyTitleEn = storyTitleId;
+      }
+
+      const lang = s.lang || s.language || 'id';
+      const theme = s.theme || s.book_theme || 'Cerita Anak';
+      const format = s.format === 'both'
+        ? 'Landscape (16:9) & Shorts (9:16)'
+        : s.format === 'vertical'
+        ? 'Shorts / Reels (9:16)'
+        : (s.format || 'Landscape (16:9)');
+
+      const targetPlatforms = Array.isArray(s.targetPlatforms) && s.targetPlatforms.length > 0
+        ? s.targetPlatforms
+        : format.includes('Shorts') && format.includes('Landscape')
+        ? ['YouTube (16:9 & Shorts)', 'Facebook (Watch & Reels)', 'Instagram Reels']
+        : format.includes('Shorts')
+        ? ['YouTube Shorts', 'Facebook Reels', 'Instagram Reels']
+        : ['YouTube (16:9)', 'Facebook Watch (16:9)'];
+
+      const publishedSlugs = new Set((RAW_AUDIT_DATA || []).map(function(r) { return r.storySlug; }));
+      const hasPublishedAsset = Boolean(s.hasPublishedAsset || publishedSlugs.has(bookSlug));
+      const isCompleted = Boolean(s.isCompleted || s.is_completed);
+
+      return {
+        id: s.id ? (typeof s.id === 'string' && s.id.startsWith('SLOT-') ? s.id : 'SLOT-' + String(s.id).padStart(4, '0')) : 'SLOT-' + String((idx || 0) + 1).padStart(4, '0'),
+        date: dateStr,
+        dayName: dayName,
+        timeSlot: timeSlot,
+        slotType: slotType,
+        bookSlug: bookSlug,
+        storyTitleId: storyTitleId,
+        storyTitleEn: storyTitleEn,
+        lang: lang,
+        format: format,
+        targetPlatforms: targetPlatforms,
+        theme: theme,
+        status: s.status || 'upcoming',
+        isCompleted: isCompleted,
+        hasPublishedAsset: hasPublishedAsset
+      };
+    }
+
+    let RAW_CALENDAR_DATA = ${JSON.stringify(calendarSlots)}.map(normalizeCalendarSlot);
 
     let activeTab = 'catalog'; // 'catalog' | 'timeline'
 
@@ -2101,9 +2163,11 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     let timelineState = {
       searchQuery: '',
+      scopeFilter: 'active30', // 'active30' | 'all' | 'budi'
       statusFilter: 'all',
       langFilter: 'all',
-      viewMode: 'flow' // 'flow' | 'table'
+      viewMode: 'flow', // 'flow' | 'table'
+      maxDisplayCount: 60
     };
 
     // Tab Navigation
@@ -2237,7 +2301,7 @@ const indexHtmlContent = `<!DOCTYPE html>
             console.log('⚡ Live D1 hydration successful:', data.auditRecords.length, 'records');
             RAW_AUDIT_DATA = data.auditRecords;
             if (Array.isArray(data.calendarSlots) && data.calendarSlots.length > 0) {
-              RAW_CALENDAR_DATA = data.calendarSlots;
+              RAW_CALENDAR_DATA = data.calendarSlots.map(normalizeCalendarSlot).filter(Boolean);
             }
             populateStoryDropdown();
             renderKPIs();
@@ -2271,7 +2335,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               if (calRes.ok) {
                 const calData = await calRes.json();
                 if (Array.isArray(calData) && calData.length > 0) {
-                  RAW_CALENDAR_DATA = calData;
+                  RAW_CALENDAR_DATA = calData.map(normalizeCalendarSlot).filter(Boolean);
                 }
               }
             } catch {
@@ -2417,9 +2481,10 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     function formatDate(isoStr) {
-      if (!isoStr || isoStr === 'N/A') return 'Published';
+      if (!isoStr || isoStr === 'N/A' || isoStr === 'undefined') return 'Scheduled';
       try {
         const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
         return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
       } catch (e) {
         return isoStr;
@@ -2533,6 +2598,19 @@ const indexHtmlContent = `<!DOCTYPE html>
     // =========================================================================
     // TIMELINE RENDERING & INTERACTIONS
     // =========================================================================
+    function setTimelineScopeFilter(val, btn) {
+      timelineState.scopeFilter = val;
+      timelineState.maxDisplayCount = val === 'active30' ? 60 : 120;
+      document.querySelectorAll('[data-cal-filter="scope"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTimeline();
+    }
+
+    function loadMoreTimelineSlots() {
+      timelineState.maxDisplayCount += 60;
+      renderTimeline();
+    }
+
     function setTimelineViewMode(mode) {
       timelineState.viewMode = mode;
       document.getElementById('viewCalFlowBtn').classList.toggle('active', mode === 'flow');
@@ -2562,6 +2640,13 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function getFilteredTimelineData() {
       return RAW_CALENDAR_DATA.filter(item => {
+        // 1. Scope filter
+        if (timelineState.scopeFilter === 'active30') {
+          if (item.date > '2026-12-06') return false;
+        } else if (timelineState.scopeFilter === 'budi') {
+          if (item.date < '2026-12-07') return false;
+        }
+
         if (timelineState.statusFilter !== 'all') {
           if (timelineState.statusFilter === 'completed' && !item.isCompleted && item.status !== 'completed') return false;
           if (timelineState.statusFilter === 'today' && item.status !== 'today') return false;
@@ -2648,17 +2733,31 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function renderTimeline() {
       updateLiveTodayStatus();
-      const data = getFilteredTimelineData();
 
-      // Update counters
-      const total = RAW_CALENDAR_DATA.length;
-      const completed = RAW_CALENDAR_DATA.filter(s => s.status === 'completed' || s.isCompleted).length;
-      const todayCount = RAW_CALENDAR_DATA.filter(s => s.status === 'today').length;
-      const upcoming = RAW_CALENDAR_DATA.filter(s => s.status === 'upcoming').length;
-      const progress = ((completed / total) * 100).toFixed(1);
+      // Compute stats based on the active roadmap scope
+      const scopeSlots = RAW_CALENDAR_DATA.filter(item => {
+        if (timelineState.scopeFilter === 'active30') return item.date <= '2026-12-06';
+        if (timelineState.scopeFilter === 'budi') return item.date >= '2026-12-07';
+        return true;
+      });
+
+      const total = scopeSlots.length;
+      const completed = scopeSlots.filter(s => s.status === 'completed' || s.isCompleted).length;
+      const todayCount = scopeSlots.filter(s => s.status === 'today').length;
+      const upcoming = scopeSlots.filter(s => s.status === 'upcoming').length;
+      const progress = total > 0 ? ((completed / total) * 100).toFixed(1) : '0.0';
 
       const elTotal = document.getElementById('kpiCalTotal');
       if (elTotal) elTotal.textContent = total;
+
+      const elPlanDesc = document.getElementById('kpiCalPlanDesc');
+      if (elPlanDesc) {
+        elPlanDesc.textContent = timelineState.scopeFilter === 'active30'
+          ? 'Active 30 Days Launch Roadmap (Month 1)'
+          : timelineState.scopeFilter === 'budi'
+          ? 'BUDI Kemendikdasmen (2026–2028 · 626 Books)'
+          : 'Full 2-Year Editorial Masterplan (2026–2028)';
+      }
 
       const elCompleted = document.getElementById('kpiCalCompleted');
       if (elCompleted) elCompleted.textContent = completed;
@@ -2681,8 +2780,32 @@ const indexHtmlContent = `<!DOCTYPE html>
       const elBarLabel = document.getElementById('progressBarLabel');
       if (elBarLabel) elBarLabel.innerHTML = '<strong>' + completed + ' of ' + total + ' Slots</strong> (' + progress + '%)';
 
+      const elLaunch = document.getElementById('roadmapLaunchDate');
+      if (elLaunch && scopeSlots.length > 0) {
+        elLaunch.textContent = formatDate(scopeSlots[0].date);
+      }
+
+      const elFinale = document.getElementById('roadmapFinaleDate');
+      if (elFinale && scopeSlots.length > 0) {
+        elFinale.textContent = formatDate(scopeSlots[scopeSlots.length - 1].date);
+      }
+
       const elTabBadge = document.getElementById('tabTimelineBadge');
       if (elTabBadge) elTabBadge.textContent = completed + '/' + total + ' (' + progress + '%)';
+
+      // Dynamically update scope buttons from loaded dataset
+      const active30Count = RAW_CALENDAR_DATA.filter(function(s) { return s.date <= '2026-12-06'; }).length;
+      const budiCount = RAW_CALENDAR_DATA.filter(function(s) { return s.date >= '2026-12-07'; }).length;
+      const totalAll = RAW_CALENDAR_DATA.length;
+
+      const btnActive30 = document.querySelector('[data-cal-filter="scope"][data-value="active30"]');
+      if (btnActive30) btnActive30.textContent = '🌟 Active 30 Days (' + active30Count + ')';
+
+      const btnAll = document.querySelector('[data-cal-filter="scope"][data-value="all"]');
+      if (btnAll) btnAll.textContent = '🚀 2-Year Master Plan (' + totalAll + ')';
+
+      const btnBudi = document.querySelector('[data-cal-filter="scope"][data-value="budi"]');
+      if (btnBudi) btnBudi.textContent = '📚 BUDI 2026–2028 (' + budiCount + ')';
 
       // Update filter chip text counts
       const chipAll = document.querySelector('[data-cal-filter="status"][data-value="all"]');
@@ -2694,21 +2817,24 @@ const indexHtmlContent = `<!DOCTYPE html>
       const chipCompleted = document.querySelector('[data-cal-filter="status"][data-value="completed"]');
       if (chipCompleted) chipCompleted.textContent = '✅ Completed (' + completed + ')';
 
+      const data = getFilteredTimelineData();
+      const displayData = data.slice(0, timelineState.maxDisplayCount);
+
       const visibleEl = document.getElementById('timelineVisibleCount');
-      if (visibleEl) visibleEl.textContent = data.length;
+      if (visibleEl) visibleEl.textContent = displayData.length;
 
       const totalEl = document.getElementById('timelineTotalCount');
-      if (totalEl) totalEl.textContent = total;
+      if (totalEl) totalEl.textContent = data.length;
 
       const noticeEl = document.getElementById('timelineFilterNotice');
       if (noticeEl) {
-        const isFiltered = timelineState.statusFilter !== 'all' || timelineState.langFilter !== 'all' || timelineState.searchQuery;
+        const isFiltered = timelineState.statusFilter !== 'all' || timelineState.langFilter !== 'all' || timelineState.searchQuery || timelineState.scopeFilter !== 'active30';
         noticeEl.textContent = isFiltered ? '(Filters Active)' : '';
       }
 
       // Group slots by date for Flow View
       const groups = new Map();
-      data.forEach(slot => {
+      displayData.forEach(slot => {
         const key = slot.date;
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(slot);
@@ -2735,11 +2861,24 @@ const indexHtmlContent = `<!DOCTYPE html>
             </div>
           \`;
         }
+
+        if (data.length > timelineState.maxDisplayCount) {
+          flowHtml += \`
+            <div style="text-align: center; padding: 2.5rem 1rem;">
+              <button class="btn-card primary" onclick="loadMoreTimelineSlots()" style="padding: 0.75rem 2rem; font-size: 0.88rem; font-weight: 600;">
+                ⬇️ Load More Broadcasts (Showing \${displayData.length} of \${data.length})
+              </button>
+              <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem;">
+                Displaying \${displayData.length} of \${data.length} scheduled slots in active filter
+              </div>
+            </div>
+          \`;
+        }
       }
       document.getElementById('timelineFlowContainer').innerHTML = flowHtml;
 
       // Render Schedule Table View
-      const rowsHtml = data.map(renderSlotTableRow).join('');
+      const rowsHtml = displayData.map(renderSlotTableRow).join('');
       document.getElementById('timelineTableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 1.5rem; color: var(--text-dim); font-size: 0.85rem;">No scheduled broadcasts match your filter.</td></tr>';
     }
 
@@ -2750,13 +2889,20 @@ const indexHtmlContent = `<!DOCTYPE html>
       const statusClass = isToday ? 'today' : isCompleted ? 'completed' : 'upcoming';
       const statusText = isToday ? '🔥 Today' : isCompleted ? '✅ Completed' : '⏳ Scheduled';
 
+      const dayName = slot.dayName || 'Hari';
+      const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
+      const timeText = slot.timeSlot || '08:30 WIB';
+      const titleId = slot.storyTitleId || 'Dongeng Anak';
+      const slotType = slot.slotType || 'Daily Broadcast';
+      const theme = slot.theme || 'Pendidikan Karakter Anak';
+
       return \`
         <div class="slot-card \${isToday ? 'today-card' : ''}">
           <!-- Header with Date, Time, and Status -->
           <div class="slot-top">
             <div class="slot-datetime-badge">
-              <span class="slot-date-text">📅 \${slot.dayName}, \${formatDate(slot.date)}</span>
-              <span class="slot-time-text">⏰ \${slot.timeSlot}</span>
+              <span class="slot-date-text">📅 \${dayName}, \${dateFormatted}</span>
+              <span class="slot-time-text">⏰ \${timeText}</span>
             </div>
             <div style="display: flex; gap: 0.35rem; align-items: center;">
               <span class="meta-id-tag" style="font-size: 0.65rem;">\${slot.id}</span>
@@ -2766,9 +2912,9 @@ const indexHtmlContent = `<!DOCTYPE html>
 
           <!-- Story Title & Subtitle -->
           <div class="slot-main-info">
-            <div class="slot-title">\${slot.storyTitleId}</div>
-            \${slot.storyTitleEn && slot.storyTitleEn !== slot.storyTitleId ? \`<div class="slot-subtitle">\${slot.storyTitleEn}</div>\` : ''}
-            <div class="slot-type-label">\${slot.slotType}</div>
+            <div class="slot-title">\${titleId}</div>
+            \${slot.storyTitleEn && slot.storyTitleEn !== titleId ? \`<div class="slot-subtitle">\${slot.storyTitleEn}</div>\` : ''}
+            <div class="slot-type-label">\${slotType}</div>
           </div>
 
           <!-- Badges: Language, Format, Platforms -->
@@ -2789,7 +2935,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
           <!-- Theme Box -->
           <div class="slot-theme-box">
-            "\${slot.theme}"
+            "\${theme}"
           </div>
 
           <!-- Card Actions / Status -->
@@ -2800,7 +2946,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               </button>
             \` : isToday ? \`
               <div class="slot-today-banner">
-                ⚡ Active Broadcast Today (\${slot.timeSlot})
+                ⚡ Active Broadcast Today (\${timeText})
               </div>
             \` : \`
               <div class="slot-queue-banner">
@@ -2818,21 +2964,28 @@ const indexHtmlContent = `<!DOCTYPE html>
       const statusClass = isToday ? 'today' : isCompleted ? 'completed' : 'upcoming';
       const statusText = isToday ? 'Today' : isCompleted ? 'Done' : 'Upcoming';
 
+      const dayName = slot.dayName || 'Hari';
+      const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
+      const timeText = slot.timeSlot || '08:30 WIB';
+      const titleId = slot.storyTitleId || 'Dongeng Anak';
+      const slotType = slot.slotType || 'Daily Broadcast';
+      const theme = slot.theme || 'Pendidikan Karakter Anak';
+
       return \`
         <tr>
-          <td style="white-space: nowrap; font-weight: 700;">\${formatDate(slot.date)}</td>
-          <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">\${slot.timeSlot}</td>
-          <td>\${slot.dayName}</td>
+          <td style="white-space: nowrap; font-weight: 700;">\${dateFormatted}</td>
+          <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">\${timeText}</td>
+          <td>\${dayName}</td>
           <td><span class="slot-status-pill \${statusClass}">\${statusText}</span></td>
           <td>
-            <strong>\${slot.storyTitleId}</strong>
-            \${slot.storyTitleEn && slot.storyTitleEn !== slot.storyTitleId ? \`<div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic;">\${slot.storyTitleEn}</div>\` : ''}
+            <strong>\${titleId}</strong>
+            \${slot.storyTitleEn && slot.storyTitleEn !== titleId ? \`<div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic;">\${slot.storyTitleEn}</div>\` : ''}
           </td>
-          <td><span class="lang-badge">\${slot.lang.toUpperCase()}</span></td>
-          <td><span class="format-badge">\${slot.format.split(' ')[0]}</span></td>
-          <td style="font-size: 0.74rem;">\${slot.slotType}</td>
+          <td><span class="lang-badge">\${(slot.lang || 'id').toUpperCase()}</span></td>
+          <td><span class="format-badge">\${(slot.format || 'Landscape').split(' ')[0]}</span></td>
+          <td style="font-size: 0.74rem;">\${slotType}</td>
           <td style="font-size: 0.72rem; color: var(--text-dim);">\${(slot.targetPlatforms || []).join(', ')}</td>
-          <td style="font-size: 0.72rem; max-width: 260px; font-style: italic;">\${slot.theme}</td>
+          <td style="font-size: 0.72rem; max-width: 260px; font-style: italic;">\${theme}</td>
         </tr>
       \`;
     }
