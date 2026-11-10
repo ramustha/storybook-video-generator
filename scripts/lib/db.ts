@@ -586,23 +586,52 @@ class StorybookDB {
       }
     }
 
-    // 3. Upsert legacy publications if present
+    // 3. Upsert multi-platform publications (YouTube, Facebook, Instagram, Threads, Telegram)
     if (manifest.publications && typeof manifest.publications === "object") {
-      for (const [platform, langs] of Object.entries(manifest.publications)) {
-        if (!langs || typeof langs !== "object") continue;
-        for (const [lang, formats] of Object.entries(langs as Record<string, any>)) {
-          if (!formats || typeof formats !== "object") continue;
-          for (const [format, p] of Object.entries(formats as Record<string, any>)) {
-            if (!p || typeof p !== "object") continue;
+      for (const [platform, platformData] of Object.entries(manifest.publications)) {
+        if (!platformData || typeof platformData !== "object") continue;
+        if (platform === "announcements" || platform === "socialPromotion") continue;
+
+        for (const [langKey, langData] of Object.entries(platformData as Record<string, any>)) {
+          if (!langData || typeof langData !== "object") continue;
+          const lang = langKey === "en" ? "en" : "id";
+          const fallbackTitle = lang === "en" ? (manifest.originalTitle || manifest.title) : manifest.title;
+
+          // Case A: 2-level structure (e.g. instagram[lang] = { id, url }, threads[lang] = { id, url }, telegram[lang] = { id, url })
+          if (langData.id || langData.url) {
+            const format = platform === "instagram" ? "vertical" : platform === "telegram" ? "notification" : "post";
+            const thumb = langData.thumbnailUrl || (platform === "youtube" && langData.id ? `https://img.youtube.com/vi/${langData.id}/hqdefault.jpg` : null);
+
             await this.recordPublication({
               bookSlug: slug,
               platform,
               lang,
               format,
-              externalId: p.id,
+              externalId: langData.id ? String(langData.id) : undefined,
+              videoUrl: langData.url,
+              externalTitle: langData.title || fallbackTitle,
+              thumbnailUrl: thumb || undefined,
+              publishedAt: langData.publishedAt,
+              status: langData.status || "published",
+              errorMessage: langData.error,
+            });
+            continue;
+          }
+
+          // Case B: 3-level structure (e.g. youtube[lang][format] = { id, url }, facebook[lang][format] = { id, url })
+          for (const [format, p] of Object.entries(langData as Record<string, any>)) {
+            if (!p || typeof p !== "object" || (!p.id && !p.url)) continue;
+            const thumb = p.thumbnailUrl || (platform === "youtube" && p.id ? `https://img.youtube.com/vi/${p.id}/hqdefault.jpg` : null);
+
+            await this.recordPublication({
+              bookSlug: slug,
+              platform,
+              lang,
+              format,
+              externalId: p.id ? String(p.id) : undefined,
               videoUrl: p.url,
-              externalTitle: p.title,
-              thumbnailUrl: p.thumbnailUrl,
+              externalTitle: p.title || fallbackTitle,
+              thumbnailUrl: thumb || undefined,
               publishedAt: p.publishedAt,
               status: p.status || "published",
               errorMessage: p.error,

@@ -8,6 +8,7 @@ import { google } from "googleapis";
 import { uploadVideoViaBrowser, launchInteractiveLogin } from "./playwright-youtube-uploader";
 import { QuotaRotator } from "./quota-rotator";
 import { generateSeoMetadata } from "./lib/seo-formatter";
+import { db } from "./lib/db";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
@@ -1272,6 +1273,22 @@ async function main() {
 
           await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
+        // Sync to Cloudflare D1 (Single Source of Truth)
+        try {
+          await db.saveStory(manifest);
+          console.log(`   ☁️ Synchronized YouTube Shorts publication to Cloudflare D1.`);
+        } catch (d1Err: any) {
+          console.warn(`   ⚠️ Cloudflare D1 sync warning: ${d1Err.message}`);
+        }
+
+          // Sync to Cloudflare D1 (Single Source of Truth)
+          try {
+            await db.saveStory(manifest);
+            console.log(`   ☁️ Synchronized YouTube landscape publication to Cloudflare D1.`);
+          } catch (d1Err: any) {
+            console.warn(`   ⚠️ Cloudflare D1 sync warning: ${d1Err.message}`);
+          }
+
           if (autoCleanup && existsSync(landscapeVideo)) {
             await fs.unlink(landscapeVideo);
             console.log(`   🧹 Auto-cleanup: Removed local 16:9 MP4 (${path.basename(landscapeVideo)}) after verified upload.`);
@@ -1469,6 +1486,14 @@ async function main() {
         };
 
         await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+        // Sync to Cloudflare D1 (Single Source of Truth)
+        try {
+          await db.saveStory(manifest);
+          console.log(`   ☁️ Synchronized YouTube Shorts publication to Cloudflare D1.`);
+        } catch (d1Err: any) {
+          console.warn(`   ⚠️ Cloudflare D1 sync warning: ${d1Err.message}`);
+        }
 
         if (autoCleanup && existsSync(verticalVideo)) {
           await fs.unlink(verticalVideo);

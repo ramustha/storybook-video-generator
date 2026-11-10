@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { createReadStream, existsSync, readdirSync } from "fs";
 import path from "path";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { db } from "./lib/db";
 
 const META_CONFIG_PATH = path.resolve("./config/meta-config.json");
 const R2_CONFIG_PATH = path.resolve("./config/r2-config.json");
@@ -690,16 +691,26 @@ export async function publishStoryToThreads(options: {
     // Update manifest publications
     if (!manifest.publications) manifest.publications = {};
     if (!manifest.publications.threads) manifest.publications.threads = {};
+    const storyTitle = lang === "en" ? (manifest.originalTitle || manifest.title) : manifest.title;
     manifest.publications.threads[lang] = {
       id: postId,
       url: postDetails.permalink,
       publishedAt: new Date().toISOString(),
+      title: storyTitle,
       type: mode,
       status: "published",
     };
 
     await fs.writeFile(storyJsonPath, JSON.stringify(manifest, null, 2), "utf-8");
     console.log(`💾 Saved Threads publication record to story.json`);
+
+    // Sync to Cloudflare D1 database (Single Source of Truth)
+    try {
+      await db.saveStory(manifest);
+      console.log(`☁️ Synchronized Threads publication to Cloudflare D1 database.`);
+    } catch (d1Err: any) {
+      console.warn(`⚠️ Cloudflare D1 sync warning: ${d1Err.message}`);
+    }
 
     // Sync updated manifest back to Cloudflare R2
     if (!options.dryRun) {

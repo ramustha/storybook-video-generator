@@ -259,7 +259,36 @@ export async function notifyTelegramPublish(options: TelegramNotifyOptions): Pro
     return true;
   }
 
-  return await sendTelegramMessage(config, captionHtml, photoUrl);
+  const success = await sendTelegramMessage(config, captionHtml, photoUrl);
+  if (success && !options.dryRun) {
+    try {
+      const storyJsonPath = path.resolve(`./stories/${options.bookSlug}/story.json`);
+      if (existsSync(storyJsonPath)) {
+        const raw = await fs.readFile(storyJsonPath, "utf-8");
+        const manifest = JSON.parse(raw);
+        if (!manifest.publications) manifest.publications = {};
+        if (!manifest.publications.telegram) manifest.publications.telegram = {};
+        const lang = options.lang || "id";
+        const title = lang === "en" ? (manifest.originalTitle || manifest.title) : manifest.title;
+        manifest.publications.telegram[lang] = {
+          id: `${config.chatId}-${options.bookSlug}-${lang}`,
+          url: `https://t.me/c/${config.chatId.replace(/^-100/, "")}`,
+          publishedAt: new Date().toISOString(),
+          title: `Telegram Broadcast: ${title} [${lang.toUpperCase()}]`,
+          status: "published",
+        };
+        await fs.writeFile(storyJsonPath, JSON.stringify(manifest, null, 2) + "\n", "utf-8");
+
+        // Persist directly to Cloudflare D1 (Single Source of Truth)
+        const { db } = await import("./lib/db");
+        await db.saveStory(manifest);
+      }
+    } catch (tgSyncErr: any) {
+      console.warn(`⚠️ Telegram publication DB sync warning: ${tgSyncErr.message}`);
+    }
+  }
+
+  return success;
 }
 
 /**
