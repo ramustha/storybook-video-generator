@@ -1008,7 +1008,25 @@ async function publishToday(
       }).format(new Date()),
       10
     );
-    const isMorning = slotFilter === "morning" || (slotFilter === "auto" && jakartaHour < 14);
+
+    let isMorning = false;
+    if (slotFilter === "morning") {
+      isMorning = true;
+    } else if (slotFilter === "evening") {
+      isMorning = false;
+    } else if (slotFilter === "auto") {
+      if (jakartaHour >= 6 && jakartaHour < 14) {
+        isMorning = true;
+      } else if (jakartaHour >= 16 && jakartaHour <= 23) {
+        isMorning = false;
+      } else {
+        console.warn(`\n⚠️ [SLOT AUTO] Current time is ${jakartaHour}:00 WIB, outside scheduled broadcast windows:`);
+        console.warn(`   • Morning Slot Window : 06:00 - 13:59 WIB (Scheduled 08:30 WIB)`);
+        console.warn(`   • Evening Slot Window : 16:00 - 23:59 WIB (Scheduled 18:30/19:30 WIB)`);
+        console.warn(`🛑 Skipping automated broadcast to prevent unscheduled middle-of-the-night releases.\n`);
+        return;
+      }
+    }
 
     const filtered = slots.filter((s) => {
       const isMorningSlot =

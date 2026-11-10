@@ -2,7 +2,12 @@ import fs from "fs/promises";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { google } from "googleapis";
-import { generateSeoMetadata } from "./lib/seo-formatter";
+import {
+  generateSeoMetadata,
+  generateStoryChapters,
+  extractStoryMoral,
+  extractStoryMoralDescription,
+} from "./lib/seo-formatter";
 import { db } from "./lib/db";
 
 const CONFIG_DIR = path.resolve("./config");
@@ -64,6 +69,41 @@ async function main() {
     (item) => item.platform?.toLowerCase() === "youtube" && item.videoId
   );
 
+  // If targetSlug specified and not in auditData, extract from story.json publications
+  if (targetSlug && !ytPubs.some((p) => p.storySlug === targetSlug)) {
+    const targetStoryPath = path.resolve(`./stories/${targetSlug}/story.json`);
+    if (existsSync(targetStoryPath)) {
+      try {
+        const s = JSON.parse(readFileSync(targetStoryPath, "utf-8"));
+        const pubs = s.publications?.youtube || {};
+        for (const l of ["en", "id"] as const) {
+          if (pubs[l]?.landscape?.id) {
+            ytPubs.push({
+              platform: "youtube",
+              videoId: pubs[l].landscape.id,
+              storySlug: targetSlug,
+              language: l,
+              format: "landscape",
+              aspectRatio: "16:9",
+              videoTitle: pubs[l].landscape.title,
+            });
+          }
+          if (pubs[l]?.vertical?.id) {
+            ytPubs.push({
+              platform: "youtube",
+              videoId: pubs[l].vertical.id,
+              storySlug: targetSlug,
+              language: l,
+              format: "vertical",
+              aspectRatio: "9:16",
+              videoTitle: pubs[l].vertical.title,
+            });
+          }
+        }
+      } catch {}
+    }
+  }
+
   console.log(`✔ Found ${ytPubs.length} published YouTube videos in catalog.`);
 
   let updatedCount = 0;
@@ -101,24 +141,11 @@ async function main() {
     const illustrator = storyJson?.source?.originalIllustrator || pub.illustrator;
     const license = storyJson?.source?.license || pub.license;
     const publisher = storyJson?.source?.repository || "StoryWeaver / Pratham Books";
-    const moralHeadline = lang === "en" ? storyJson?.moral?.headlineEn : storyJson?.moral?.headlineId;
-    const moralDesc = lang === "en" ? storyJson?.moral?.summaryEn : storyJson?.moral?.summaryId;
+    const moralHeadline = extractStoryMoral(storyJson, lang);
+    const moralDesc = extractStoryMoralDescription(storyJson, lang);
 
-    // Generate Chapters if scenes present
-    let chapters = "";
-    if (storyJson?.scenes && Array.isArray(storyJson.scenes)) {
-      let elapsed = 0;
-      const chapterLines: string[] = [];
-      for (const scene of storyJson.scenes) {
-        const m = Math.floor(elapsed / 60);
-        const s = Math.floor(elapsed % 60);
-        const ts = `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-        const summary = scene.audio?.text ? scene.audio.text.slice(0, 30).replace(/[\r\n]+/g, " ") : `Bagian ${scene.index}`;
-        chapterLines.push(`${ts} ${summary}...`);
-        elapsed += scene.durationSeconds || 5;
-      }
-      chapters = chapterLines.join("\n");
-    }
+    // Generate Chapters adhering to target language and timing
+    const chapters = generateStoryChapters(storyJson?.scenes || [], lang);
 
     // Special handling for marathon compilations to keep high-retention title
     const isCompilation = slug.startsWith("bedtime-") || pub.category?.toLowerCase().includes("compilation") || pub.category?.toLowerCase().includes("marathon");

@@ -9,14 +9,36 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 
 function buildTikTokCaption(story: any, lang: "id" | "en"): string {
-  if (lang === "id") {
-    const rawTitle = (story.title || "Cerita Anak Bergambar").replace(/\(.*\)/, "").trim();
-    const hook = story.thumbnailConfig?.id?.hook || story.thumbnailConfig?.id?.headlineTop || "Kisah seru dan edukatif!";
-    return `${rawTitle} 🐱📚\n\n${hook}\n\n📖 Seri Animasi Dongeng Zayn Storybook\n✨ Nilai Moral: Selalu tolong menolong dan berbuat baik!\n\n#ceritaanak #dongeng #edukasianak #kartunanak #zaynstorybook #animasianak #reels`;
+  const isEn = lang === "en";
+  let moral = "";
+  if (isEn) {
+    moral = story.moral?.summaryEn || story.moral?.headlineEn;
+    if (!moral) {
+      const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+      if (moralScene?.audio?.en?.text) {
+        moral = moralScene.audio.en.text.replace(/^The moral of the story:\s*/i, "").split(".")[0].trim();
+      }
+    }
+    if (!moral) moral = "Kindness and honesty always win!";
   } else {
+    moral = story.moral?.summaryId || story.moral?.headlineId;
+    if (!moral) {
+      const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+      if (moralScene?.audio?.text) {
+        moral = moralScene.audio.text.replace(/^Pesan moral cerita ini:\s*/i, "").split(".")[0].trim();
+      }
+    }
+    if (!moral) moral = "Selalu tolong menolong dan berbuat baik!";
+  }
+
+  if (isEn) {
     const rawTitle = story.originalTitle || story.title || "Children Storybook";
     const hook = story.thumbnailConfig?.en?.hook || story.thumbnailConfig?.en?.headlineTop || "A wonderful bedtime story!";
-    return `${rawTitle} 🐱📚\n\n${hook}\n\n📖 Zayn Storybook - Animated Children's Stories\n✨ Moral: Kindness and honesty always win!\n\n#kidsbooks #storytime #bedtimestory #animation #childrensbook #zaynstorybook`;
+    return `${rawTitle} 📖✨\n\n${hook}\n\n📖 Zayn Storybook - Animated Children's Stories\n✨ Moral: ${moral}\n\n#kidsbooks #storytime #bedtimestory #animation #childrensbook #zaynstorybook`;
+  } else {
+    const rawTitle = (story.title || "Cerita Anak Bergambar").replace(/\(.*\)/, "").trim();
+    const hook = story.thumbnailConfig?.id?.hook || story.thumbnailConfig?.id?.headlineTop || "Kisah seru dan edukatif!";
+    return `${rawTitle} 📖✨\n\n${hook}\n\n📖 Seri Animasi Dongeng Zayn Storybook\n✨ Nilai Moral: ${moral}\n\n#ceritaanak #dongeng #edukasianak #kartunanak #zaynstorybook #animasianak #reels`;
   }
 }
 

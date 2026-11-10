@@ -1,15 +1,16 @@
 name: Zayn Storybook Daily Broadcast Scheduler
 
 on:
-  schedule:
-    # 00:30 UTC = 07:30 WIB (Morning Teaser Announcement)
-    - cron: '30 0 * * *'
-    # 01:30 UTC = 08:30 WIB (Daily Morning Slot - English Feature)
-    - cron: '30 1 * * *'
-    # 10:30 UTC = 17:30 WIB (Evening Teaser Announcement)
-    - cron: '30 10 * * *'
-    # 11:30 UTC = 18:30 WIB (Daily Prime Bedtime Slot - Indonesian Bedtime Story)
-    - cron: '30 11 * * *'
+  # Note: Native GitHub Actions schedule crons are disabled because GitHub's runner queue
+  # frequently suffers multi-hour delays (e.g. 6.5h delay firing evening crons in the middle of the night).
+  # All scheduled broadcast and teaser runs are triggered reliably with zero lag by Cloudflare Worker:
+  # "zayn-storybook-cron-trigger" (cloudflare/daily-broadcast-cron) via GitHub workflow_dispatch API.
+  #
+  # schedule:
+  #   - cron: '30 0 * * *'
+  #   - cron: '30 1 * * *'
+  #   - cron: '30 10 * * *'
+  #   - cron: '30 11 * * *'
   workflow_dispatch:
     inputs:
       action:
@@ -239,6 +240,9 @@ jobs:
           R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.PERSONAL_R2_ACCOUNT_ID || 'e5c0394bca4b8239f091b55cb3e9d3e6' }}
         run: |
           UTC_HOUR=$(date -u +%H)
           UTC_MIN=$(date -u +%M)
