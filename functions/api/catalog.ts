@@ -5,6 +5,13 @@ interface Env {
   DB?: D1Database;
 }
 
+function formatSlugToTitle(slug: string): string {
+  if (!slug) return "Story";
+  return slug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+}
+
 export async function onRequest(context: { env: Env; request: Request }) {
   const db = context.env.DB;
 
@@ -106,10 +113,90 @@ export async function onRequest(context: { env: Env; request: Request }) {
     let calendarSlots: any[] = [];
     try {
       const { results: cal } = await db
-        .prepare("SELECT * FROM content_calendar ORDER BY scheduled_date ASC, time_slot ASC")
+        .prepare(
+          `SELECT 
+            c.id as cal_id,
+            c.scheduled_date,
+            c.day_name,
+            c.time_slot,
+            c.slot_type,
+            c.book_slug,
+            c.lang,
+            c.format,
+            c.theme,
+            c.is_completed,
+            b.title_id,
+            b.title_en,
+            b.theme as book_theme
+          FROM content_calendar c
+          LEFT JOIN books b ON c.book_slug = b.slug
+          ORDER BY c.scheduled_date ASC, c.time_slot ASC`
+        )
         .all();
-      if (Array.isArray(cal)) {
-        calendarSlots = cal;
+
+      if (Array.isArray(cal) && cal.length > 0) {
+        const publishedSlugs = new Set(auditRecords.map((r) => r.storySlug));
+        const todayIso = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date());
+
+        calendarSlots = (cal as any[]).map((c, idx) => {
+          const dateStr = c.scheduled_date || "2026-11-07";
+          const dayName = c.day_name || "Hari";
+          const timeSlot = c.time_slot || "08:30 WIB";
+          const slotType = c.slot_type || "Daily Broadcast";
+          const bookSlug = c.book_slug || "story";
+          const hasAsset = publishedSlugs.has(bookSlug);
+
+          let status: "completed" | "today" | "upcoming" = "upcoming";
+          let isCompleted = Boolean(c.is_completed);
+          if (dateStr < todayIso) {
+            status = "completed";
+            isCompleted = true;
+          } else if (dateStr === todayIso) {
+            status = "today";
+            isCompleted = false;
+          }
+
+          const fallbackTitle = formatSlugToTitle(bookSlug);
+          const storyTitleId = c.title_id || fallbackTitle;
+          const storyTitleEn = c.title_en || storyTitleId;
+
+          const formatLabel =
+            c.format === "both"
+              ? "Landscape (16:9) & Shorts (9:16)"
+              : c.format === "vertical"
+              ? "Shorts / Reels (9:16)"
+              : "Landscape (16:9)";
+
+          const targetPlatforms =
+            c.format === "vertical"
+              ? ["YouTube Shorts", "Facebook Reels", "Instagram Reels"]
+              : c.format === "landscape"
+              ? ["YouTube (16:9)", "Facebook Watch (16:9)"]
+              : ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"];
+
+          return {
+            id: `SLOT-${String(c.cal_id || idx + 1).padStart(4, "0")}`,
+            date: dateStr,
+            dayName,
+            timeSlot,
+            slotType,
+            bookSlug,
+            storyTitleId,
+            storyTitleEn,
+            lang: c.lang || "id",
+            format: formatLabel,
+            targetPlatforms,
+            theme: c.theme || c.book_theme || "Cerita Anak",
+            status,
+            isCompleted,
+            hasPublishedAsset: hasAsset,
+          };
+        });
       }
     } catch {
       // Graceful fallback if table does not exist or empty
