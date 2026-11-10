@@ -940,6 +940,48 @@ class StorybookDB {
   async getAllAnnouncements(): Promise<AnnouncementRecordD1[]> {
     return this.query<AnnouncementRecordD1>("SELECT * FROM announcements ORDER BY scheduled_date ASC, time_slot ASC");
   }
+
+  async savePublicationStats(stats: PublicationStatsRecord[]): Promise<void> {
+    if (!stats || stats.length === 0) return;
+    for (const s of stats) {
+      const sql = `
+        INSERT INTO publication_stats (
+          external_id, platform, views, likes, comments, shares, watch_time_minutes, recorded_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(external_id) DO UPDATE SET
+          views = excluded.views,
+          likes = excluded.likes,
+          comments = excluded.comments,
+          shares = excluded.shares,
+          watch_time_minutes = excluded.watch_time_minutes,
+          recorded_at = CURRENT_TIMESTAMP;
+      `;
+      await this.execute(sql, [
+        s.external_id,
+        s.platform.toLowerCase(),
+        s.views || 0,
+        s.likes || 0,
+        s.comments || 0,
+        s.shares || 0,
+        s.watch_time_minutes || 0,
+      ]);
+    }
+  }
+
+  async getAllPublicationStats(): Promise<PublicationStatsRecord[]> {
+    return this.query<PublicationStatsRecord>("SELECT * FROM publication_stats ORDER BY views DESC");
+  }
+}
+
+export interface PublicationStatsRecord {
+  external_id: string;
+  platform: string;
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  watch_time_minutes?: number;
+  recorded_at?: string;
 }
 
 export const db = new StorybookDB();
