@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import { existsSync, createReadStream, createWriteStream } from "fs";
+import { execSync } from "child_process";
 import path from "path";
 import os from "os";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
@@ -134,8 +135,19 @@ async function synthesizeLine(
         }
       }
 
-      // Add 0.25s natural pause tail
-      durationSec = parseFloat((durationSec + 0.25).toFixed(2));
+      // Measure true audio file duration and add natural breathing room tail (+0.8s)
+      let actualAudioSec = durationSec;
+      try {
+        const afOut = execSync(`afinfo "${audioFilePath}" 2>/dev/null`).toString();
+        const m = afOut.match(/estimated duration:\s*([\d.]+)\s*sec/);
+        if (m) {
+          actualAudioSec = parseFloat(m[1]);
+        }
+      } catch {
+        actualAudioSec = durationSec + 0.5;
+      }
+
+      durationSec = parseFloat((actualAudioSec + 0.8).toFixed(2));
 
       return {
         audioPath: audioFilePath,
