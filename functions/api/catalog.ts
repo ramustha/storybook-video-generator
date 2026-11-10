@@ -186,6 +186,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
             c.format,
             c.theme,
             c.is_completed,
+            c.is_buffered,
             b.title_id,
             b.title_en,
             b.theme as book_theme

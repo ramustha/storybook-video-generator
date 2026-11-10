@@ -54,12 +54,13 @@ jobs:
       - name: 🌐 Ensure Remotion Headless Browser
         run: npx --yes @remotion/cli browser ensure 2>/dev/null || true
 
-      - name: 🔑 Configure R2 Secrets & Credentials
+      - name: 🔑 Configure R2 & D1 Secrets & Credentials
         env:
           R2_ACCOUNT_ID: ${{ secrets.PERSONAL_R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.PERSONAL_R2_ACCESS_KEY_ID }}
           R2_SECRET_KEY: ${{ secrets.PERSONAL_R2_SECRET_ACCESS_KEY }}
           R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           mkdir -p config
           cat <<EOF > config/r2-config.json
@@ -73,7 +74,18 @@ jobs:
           }
           EOF
 
+          cat <<EOF > config/d1-config.json
+          {
+            "accountId": "e5c0394bca4b8239f091b55cb3e9d3e6",
+            "databaseId": "a979ff27-bed2-4428-a4af-eae976a24253",
+            "databaseName": "zayn-storybook-db",
+            "region": "APAC"
+          }
+          EOF
+
       - name: 🛡️ Execute Automated Pre-Render Buffer Engine
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           ARGS="--days ${{ inputs.days || '3' }}"
           if [ "${{ inputs.force }}" = "true" ]; then ARGS="${ARGS} --force"; fi

@@ -768,6 +768,24 @@ class StorybookDB {
     await this.execute(sql, [date, timeSlot, lang]);
   }
 
+  async markCalendarSlotBuffered(bookSlug: string, lang?: string): Promise<void> {
+    if (lang) {
+      const sql = `
+        UPDATE content_calendar
+        SET is_buffered = 1
+        WHERE book_slug = ? AND lang = ?;
+      `;
+      await this.execute(sql, [bookSlug, lang]);
+    } else {
+      const sql = `
+        UPDATE content_calendar
+        SET is_buffered = 1
+        WHERE book_slug = ?;
+      `;
+      await this.execute(sql, [bookSlug]);
+    }
+  }
+
   // ============================================================================
   // CURATED POOL (INGESTION BACKLOG)
   // ============================================================================

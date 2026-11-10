@@ -51,6 +51,14 @@ const workspaceRoot = path.resolve(__dirname, "..");
 const storiesDir = path.join(workspaceRoot, "stories");
 const docsDir = path.join(workspaceRoot, "docs");
 const curatedPath = path.join(workspaceRoot, "config", "curated-books.json");
+const bufferedPath = path.join(workspaceRoot, "config", "buffered-stories.json");
+
+let bufferedStories: string[] = [];
+if (fs.existsSync(bufferedPath)) {
+  try {
+    bufferedStories = JSON.parse(fs.readFileSync(bufferedPath, "utf-8"));
+  } catch {}
+}
 
 if (!fs.existsSync(docsDir)) {
   fs.mkdirSync(docsDir, { recursive: true });
@@ -353,6 +361,10 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
     } catch {
       isBuffered = false;
     }
+  }
+
+  if (bufferedStories.includes(slot.bookSlug)) {
+    isBuffered = true;
   }
 
   const slotLang = slot.lang || "id";
