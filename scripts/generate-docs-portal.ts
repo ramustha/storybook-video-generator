@@ -355,23 +355,21 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
     }
   }
 
+  const slotLang = slot.lang || "id";
+  const isSlotPublished = auditRecords.some(
+    (r) => r.storySlug === slot.bookSlug && (r.language === slotLang || (!r.language && slotLang === "id"))
+  );
+
+  let isCompleted = isSlotPublished;
   let status: "completed" | "today" | "upcoming" = "upcoming";
-  let isCompleted = false;
 
   if (dateStr < todayIso) {
     status = "completed";
     isCompleted = true;
   } else if (dateStr === todayIso) {
-    status = "today";
-    const isMorningSlot = slot.timeSlot.includes("08:") || slot.slotType.toLowerCase().includes("morning");
-    if (hasPublishedAsset && currentHour >= 9 && isMorningSlot) {
-      isCompleted = true;
-    } else {
-      isCompleted = false;
-    }
+    status = isCompleted ? "completed" : "today";
   } else {
     status = "upcoming";
-    isCompleted = false;
   }
 
   return {
@@ -3169,13 +3167,18 @@ const indexHtmlContent = `<!DOCTYPE html>
         }).format(new Date()), 10);
 
         RAW_CALENDAR_DATA.forEach(slot => {
+          const isSlotPublished = (RAW_AUDIT_DATA || []).some(
+            r => r.storySlug === slot.bookSlug && (r.language === slot.lang || (!r.language && slot.lang === 'id'))
+          );
+          if (isSlotPublished) {
+            slot.isCompleted = true;
+          }
+
           if (slot.date < clientTodayIso) {
             slot.status = 'completed';
             slot.isCompleted = true;
           } else if (slot.date === clientTodayIso) {
-            slot.status = 'today';
-            // Retain isCompleted if already marked true by D1 or asset check
-            if (slot.isCompleted === undefined) slot.isCompleted = false;
+            slot.status = slot.isCompleted ? 'completed' : 'today';
           } else {
             slot.status = 'upcoming';
             if (slot.isCompleted === undefined) slot.isCompleted = false;
@@ -3183,11 +3186,11 @@ const indexHtmlContent = `<!DOCTYPE html>
         });
 
         // Update Next Up Spotlight dynamically in the header banner
-        const liveTodaySlots = RAW_CALENDAR_DATA.filter(s => s.status === 'today');
+        const liveTodaySlots = RAW_CALENDAR_DATA.filter(s => s.date === clientTodayIso);
         const liveNextUp = liveTodaySlots.find(s => !s.isCompleted && (clientHour < 12 ? (s.timeSlot.includes('08:') || s.slotType.toLowerCase().includes('morning')) : true))
           || liveTodaySlots.find(s => !s.isCompleted)
-          || liveTodaySlots[0]
-          || RAW_CALENDAR_DATA.find(s => s.status === 'upcoming');
+          || RAW_CALENDAR_DATA.find(s => s.date > clientTodayIso && !s.isCompleted)
+          || liveTodaySlots[0];
 
         const bannerEl = document.getElementById('nextUpBanner');
         if (bannerEl && liveNextUp) {
