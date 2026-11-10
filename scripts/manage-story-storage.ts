@@ -127,6 +127,8 @@ function getContentType(filePath: string): string {
       return "image/webp";
     case ".svg":
       return "image/svg+xml";
+    case ".html":
+      return "text/html; charset=utf-8";
     case ".mp3":
       return "audio/mpeg";
     case ".m4a":

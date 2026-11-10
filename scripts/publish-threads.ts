@@ -48,6 +48,7 @@ export interface StoryManifest {
         id: string;
         url: string;
         publishedAt: string;
+        title?: string;
         type: string;
         status: string;
       };
@@ -55,6 +56,7 @@ export interface StoryManifest {
         id: string;
         url: string;
         publishedAt: string;
+        title?: string;
         type: string;
         status: string;
       };
