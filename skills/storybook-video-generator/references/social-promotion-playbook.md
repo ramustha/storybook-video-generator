@@ -77,7 +77,7 @@ Every social promotion post must follow this 7-step architecture:
   * **Slide 2**: Climactic or Funny Scene Still (e.g. Scene 4/5).
   * **Slide 3**: Resolution / Emotional Scene Still (e.g. Scene 7/8).
   * **Slide 4**: Dedicated Moral Card (`type: "moral"` frame from `MoralScene.tsx`).
-  * **Slide 5**: CTA Slide: *"Tonton Dongeng Lengkapnya di YouTube @Zayn.Storybook! 🔔 Link di Bio!"*.
+  * **Slide 5**: CTA Slide: *"Tonton Dongeng Lengkapnya di YouTube @ZaynStorybook! 🔔 Link di Bio!"*.
 * **Reel Caption**: Use the bilingual teaser copy with a prompt to visit the full 16:9 widescreen master on YouTube.
 * **Story Strategy**: Share the Reel / Carousel to Stories with an interactive Poll sticker: *"Sudah baca dongeng ini belum? (Sudah! 🌟 / Mau nonton bareng si kecil! 💖)"* and a Link Sticker pointing to YouTube.
 

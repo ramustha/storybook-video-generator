@@ -12,6 +12,7 @@ This document defines the automated publishing pipeline for YouTube, multi-platf
 | **YouTube Shorts** | Quick Story Snack | 9:16 (1080×1920 or 4K 2160×3840) | Up to 3 mins | Ambient Pillarbox Canvas, `#Shorts` tagging, "Related Video" link to 16:9 full video |
 | **TikTok** | Short-Form Video | 9:16 (1080×1920) | Up to 10 mins | Punchy hook captions (<150 chars), safe-zone adherence (bottom 18%), viral sound cues |
 | **Instagram Reels** | Short-Form Video | 9:16 (1080×1920) | Up to 90s | High-aesthetic visual cover, carousel caption storytelling, parenting/children hashtags |
+| **Meta Threads** | Short Video / 4:5 Image | 9:16 (1080×1920) or 4:5 (1080×1350) | Up to 5 mins | Dedicated channel voice, max 500 chars, R2 temporary buffer, zero duplicate gate |
 
 ---
 
