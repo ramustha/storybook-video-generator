@@ -597,10 +597,24 @@ class StorybookDB {
           const lang = langKey === "en" ? "en" : "id";
           const fallbackTitle = lang === "en" ? (manifest.originalTitle || manifest.title) : manifest.title;
 
+          // Helper to resolve YouTube thumbnail matching aspect ratio
+          const resolveFallbackThumb = (targetFormat: string): string | null => {
+            const yt = manifest.publications?.youtube;
+            if (!yt) return null;
+            const isVert = targetFormat === "vertical";
+            const fmtKey = isVert ? "vertical" : "landscape";
+            const otherLang = lang === "en" ? "id" : "en";
+            const ytId = yt[lang]?.[fmtKey]?.id || yt[otherLang]?.[fmtKey]?.id;
+            if (ytId) return `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+            return isVert
+              ? "branding/story-highlight-instagram-1080x1920.png"
+              : "branding/cover-facebook-1640x924.png";
+          };
+
           // Case A: 2-level structure (e.g. instagram[lang] = { id, url }, threads[lang] = { id, url }, telegram[lang] = { id, url })
           if (langData.id || langData.url) {
             const format = platform === "instagram" ? "vertical" : platform === "telegram" ? "notification" : "post";
-            const thumb = langData.thumbnailUrl || (platform === "youtube" && langData.id ? `https://img.youtube.com/vi/${langData.id}/hqdefault.jpg` : null);
+            const thumb = langData.thumbnailUrl || (platform === "youtube" && langData.id ? `https://img.youtube.com/vi/${langData.id}/hqdefault.jpg` : resolveFallbackThumb(format));
 
             await this.recordPublication({
               bookSlug: slug,
@@ -621,7 +635,7 @@ class StorybookDB {
           // Case B: 3-level structure (e.g. youtube[lang][format] = { id, url }, facebook[lang][format] = { id, url })
           for (const [format, p] of Object.entries(langData as Record<string, any>)) {
             if (!p || typeof p !== "object" || (!p.id && !p.url)) continue;
-            const thumb = p.thumbnailUrl || (platform === "youtube" && p.id ? `https://img.youtube.com/vi/${p.id}/hqdefault.jpg` : null);
+            const thumb = p.thumbnailUrl || (platform === "youtube" && p.id ? `https://img.youtube.com/vi/${p.id}/hqdefault.jpg` : resolveFallbackThumb(format));
 
             await this.recordPublication({
               bookSlug: slug,
