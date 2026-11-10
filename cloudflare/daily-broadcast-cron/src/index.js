@@ -47,8 +47,32 @@ export default {
     const now = new Date();
     console.log(`⏰ Triggered by Cloudflare Cron: "${cron}" at ${now.toISOString()}`);
 
-    // 1. Daily Teaser Announcement (10:30 UTC = 17:30 WIB) - Prioritize Indonesian Audience
-    if (cron === "30 10 * * *" || cron === "0 11 * * *") {
+    // 1. Morning Teaser Announcement (00:30 UTC = 07:30 WIB)
+    if (cron === "30 0 * * *") {
+      ctx.waitUntil(
+        dispatchWorkflow(env, "daily-broadcast.yml", {
+          action: "announcement",
+          slot: "morning",
+          book: "auto",
+          lang: "en",
+          dry_run: false,
+        })
+      );
+    }
+    // 2. Daily Morning Broadcast (01:30 UTC = 08:30 WIB) - English Feature
+    else if (cron === "30 1 * * *") {
+      ctx.waitUntil(
+        dispatchWorkflow(env, "daily-broadcast.yml", {
+          action: "broadcast",
+          slot: "morning",
+          book: "auto",
+          lang: "en",
+          dry_run: false,
+        })
+      );
+    }
+    // 3. Daily Evening Teaser Announcement (10:30 UTC = 17:30 WIB)
+    else if (cron === "30 10 * * *" || cron === "0 11 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {
           action: "announcement",
@@ -59,7 +83,7 @@ export default {
         })
       );
     }
-    // 2. Daily Prime Bedtime Story Broadcast (11:30 UTC = 18:30 WIB) - 1x High-Quality Upload / Day
+    // 4. Daily Prime Bedtime Story Broadcast (11:30 UTC = 18:30 WIB)
     else if (cron === "30 11 * * *" || cron === "0 12 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {
