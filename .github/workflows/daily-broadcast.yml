@@ -252,15 +252,14 @@ jobs:
             IS_ANNOUNCEMENT="true"
           elif [ "${INPUT_ACTION}" = "broadcast" ]; then
             IS_ANNOUNCEMENT="false"
-          elif [ "${UTC_HOUR}" = "11" ] || ([ "${UTC_HOUR}" = "00" ] && [ "${UTC_MIN}" -ge "20" ]); then
-            # 11:00 UTC = 18:00 WIB (1h before 19:00 WIB bedtime story)
-            # 00:30 UTC = 07:30 WIB (1h before 08:30 WIB morning story)
+          elif [ "${UTC_HOUR}" = "00" ] && [ "${UTC_MIN}" -ge "10" ] && [ "${UTC_MIN}" -le "45" ]; then
+            # 00:15 UTC = 07:15 WIB (Single Daily Unified Announcement - Morning & Evening Schedule)
             IS_ANNOUNCEMENT="true"
           fi
 
           if [ "${IS_ANNOUNCEMENT}" = "true" ]; then
-            echo "📢 Running Pre-Broadcast Teaser Announcement Feed (1 Hour Prior)..."
-            ARGS=""
+            echo "📢 Running Single Daily Unified Bilingual Announcement Feed (Menu Dongeng Hari Ini)..."
+            ARGS="--daily-lineup"
             if [ "${INPUT_DRY_RUN}" = "true" ]; then ARGS="${ARGS} --dry-run"; fi
             if [ "${INPUT_BOOK}" != "auto" ]; then ARGS="${ARGS} --book ${INPUT_BOOK}"; fi
             if [ "${INPUT_LANG}" != "auto" ]; then ARGS="${ARGS} --lang ${INPUT_LANG}"; fi

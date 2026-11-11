@@ -2,9 +2,9 @@ import fs from "fs/promises";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { spawn } from "child_process";
-import { publishFacebookPhotoPost } from "./publish-launch-posts";
-import { publishInstagramFeedPhoto } from "./publish-instagram-post";
-import { publishThreadsPhotoPost } from "./publish-threads";
+import { publishFacebookPhotoPost, publishFacebookMultiPhotoPost } from "./publish-launch-posts";
+import { publishInstagramFeedPhoto, publishInstagramCarousel } from "./publish-instagram-post";
+import { publishThreadsPhotoPost, publishThreadsCarousel } from "./publish-threads";
 import {
   notifyTelegramFailure,
 } from "./notify-telegram";
@@ -14,7 +14,9 @@ import { db } from "./lib/db";
 export interface AnnouncementOptions {
   bookSlug?: string;
   lang?: "id" | "en";
-  slot?: "morning" | "evening" | "auto" | "all";
+  slot?: "morning" | "evening" | "auto" | "all" | "daily";
+  dailyLineup?: boolean;
+  date?: string;
   dryRun?: boolean;
   force?: boolean;
 }
@@ -310,6 +312,341 @@ function resolveBestPhoto(storyDir: string, lang: "id" | "en"): string {
 }
 
 /**
+ * Generates unified bilingual teaser copy for the single daily announcement ("Menu Dongeng Hari Ini").
+ * Covers both Morning English Read-Aloud (08:30 WIB) and Evening Prime Bedtime Story (19:00 WIB).
+ */
+export function generateDailyLineupCopy(
+  morningStory: any,
+  morningSlot: any,
+  eveningStory: any,
+  eveningSlot: any,
+  dateStr: string
+): TailoredTeaserCopies {
+  const morningRawTitle = morningStory.originalTitle || morningStory.title || "Morning English Story";
+  const morningCleanTitle = morningRawTitle.replace(/[!]+$/, "").trim();
+  const morningThumb = morningStory.thumbnailConfig?.en;
+  const morningHook = morningThumb?.hook || "A joyful, cheerful English read-aloud journey for young learners!";
+
+  const eveningRawTitle = eveningStory.title || eveningStory.originalTitle || "Dongeng Pengantar Tidur";
+  const eveningCleanTitle = eveningRawTitle.replace(/[!]+$/, "").trim();
+  const eveningThumb = eveningStory.thumbnailConfig?.id;
+  const eveningHook = eveningThumb?.hook || "Petualangan seru dan penuh tawa untuk si kecil!";
+  const eveningMoral = extractMoral(eveningStory, "id");
+
+  const morningTime = morningSlot.time_slot || morningSlot.timeSlot || "08:30 WIB";
+  const eveningTime = eveningSlot.time_slot || eveningSlot.timeSlot || "19:00 WIB";
+
+  // 1. INSTAGRAM FEED CAROUSEL CAPTION
+  const captionInstagram = `🌟 JADWAL DONGENG ZAYN HARI INI 🌟
+Selamat pagi Ayah, Bunda & Adik-adik tersayang! 🥰👋
+Hari ini ada 2 cerita bergambar istimewa siap menemani hari ceria si kecil di @zayn.storybook:
+
+🌅 [PAGI · ${morningTime}] English Read-Aloud:
+📖 "${morningCleanTitle}" (English Edition)
+✨ ${morningHook}
+🎈 Melatih kepekaan mendengar & kosakata bahasa Inggris si kecil lewat cerita riang saat sarapan pagi!
+
+🌙 [MALAM · ${eveningTime}] Prime Bedtime Story:
+📖 "${eveningCleanTitle}" (Edisi Bahasa Indonesia)
+✨ ${eveningHook}
+💖 Pesan Budi Pekerti:
+${eveningMoral}
+
+👉 Geser ke kiri (swipe ⬅️) untuk melihat preview cerita malam!
+🔔 Nyalakan lonceng notifikasi di YouTube @zayn.storybook agar tidak terlewat saat masing-masing cerita tayang perdana ya!
+
+💬 Cerita mana yang paling ditunggu si kecil hari ini? Sapa kami di kolom komentar ya! 👇❤️
+
+#ZaynStorybook #JadwalDongeng #DongengAnak #CeritaAnakBergambar #BilingualStorybook #EnglishReadAloud #BedtimeStories #ParentingIndonesia #BukuAnakBergambar`;
+
+  // 2. FACEBOOK PAGE MULTI-PHOTO CAPTION
+  const captionFacebook = `🌟 JADWAL DONGENG ZAYN HARI INI (${dateStr}) 🌟
+Selamat pagi Ayah & Bunda! Awali hari si kecil dengan keceriaan dan tutup malamnya dengan mimpi indah bersama 2 dongeng animasi bergambar pilihan hari ini di kanal YouTube Zayn Storybook:
+
+🌅 [PAGI · Pukul ${morningTime}] English Read-Aloud:
+📖 "${morningCleanTitle}" (English Edition)
+👉 ${morningHook}
+Momen pas saat sarapan atau bersiap sekolah untuk melatih kecakapan mendengar bahasa Inggris dengan intonasi ceria dan ramah anak.
+
+🌙 [MALAM · Pukul ${eveningTime}] Prime Bedtime Story:
+📖 "${eveningCleanTitle}" (Edisi Bahasa Indonesia)
+👉 ${eveningHook}
+💖 Nilai Kebaikan Budi Pekerti:
+${eveningMoral}
+Dongeng penenang sebelum tidur untuk transisi tidur lelap tanpa layar berisik.
+
+🔔 Pasang alarm atau aktifkan lonceng pengingat di YouTube Zayn Storybook sekarang! Tautan tontonan lengkap akan langsung aktif di beranda saat tayang perdana.
+
+💬 OBROLAN KELUARGA:
+Dari kedua cerita hari ini, mana nih yang paling membuat si kecil penasaran? Yuk ceritakan di kolom komentar! 👇❤️
+
+#ZaynStorybook #JadwalDongeng #DongengSebelumTidur #ParentingCeria #BukuAnakBergambar #KeluargaBahagia #DongengEdukasi`;
+
+  // 3. THREADS CAPTION (Guaranteed < 500 chars)
+  const captionThreads = `Selamat pagi Ayah & Bunda! 🌟
+Berikut Menu Dongeng Zayn Storybook hari ini:
+
+🌅 ${morningTime} [EN]: "${morningCleanTitle}" 📖🎈
+👉 English Read-Aloud ceria saat sarapan!
+
+🌙 ${eveningTime} [ID]: "${eveningCleanTitle}" 🌙✨
+👉 Dongeng pengantar tidur nyenyak & pesan budi pekerti.
+
+Geser ke kiri untuk lihat preview kedua bukunya ya! Cerita mana yang paling ditunggu si kecil hari ini? 👇🥰
+
+#ZaynStorybook #DongengAnak #BilingualKids`;
+
+  return {
+    captionSocial: captionInstagram,
+    captionInstagram,
+    captionFacebook,
+    captionThreads,
+    captionYoutubeCommunity: captionFacebook,
+  };
+}
+
+/**
+ * Publishes a single unified daily bilingual announcement ("Menu Dongeng Hari Ini")
+ * featuring both the morning English story and the evening Indonesian story.
+ */
+export async function publishDailyLineupAnnouncement(options: AnnouncementOptions = {}): Promise<{
+  success: boolean;
+  skipped?: boolean;
+  morningBook?: string;
+  eveningBook?: string;
+}> {
+  const targetDate = options.date || getJakartaDateString();
+  const currentHour = getJakartaHour();
+
+  console.log("\n==================================================================");
+  console.log("🌟 SINGLE DAILY UNIFIED BILINGUAL ANNOUNCEMENT DISPATCHER");
+  console.log("==================================================================");
+  console.log(`📅 Target Date (WIB) : ${targetDate}`);
+  console.log(`⏰ Current Hour      : ${currentHour}:00 WIB`);
+  console.log(`🧪 Dry Run Mode      : ${options.dryRun ? "YES (Preview Only)" : "NO (Live Post)"}`);
+  console.log(`⚡ Force Re-post     : ${options.force ? "YES" : "NO (Strict Deduplication Active)"}`);
+
+  // 1. Resolve today's morning and evening slots
+  let slots: any[] = [];
+  try {
+    slots = await db.getCalendar(targetDate);
+  } catch (e: any) {
+    console.warn("ℹ️ Could not query D1 calendar, falling back to local calendar:", e.message);
+  }
+
+  if (!slots || slots.length === 0) {
+    const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
+    const nowJakarta = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+    const dayName = dayNames[nowJakarta.getDay()];
+
+    slots = DAILY_CALENDAR_MONTH_1.filter((s) => {
+      if (s.date && s.date === targetDate) return true;
+      if (!s.date && s.dayName === dayName) return true;
+      return false;
+    });
+  }
+
+  if (!slots || slots.length === 0) {
+    console.log(`🌴 Tidak ada jadwal tayang aktif untuk tanggal (${targetDate}). Lewati pengumuman.`);
+    return { success: true, skipped: true };
+  }
+
+  const morningSlot = slots.find((s) => {
+    const time = (s.time_slot || s.timeSlot || "").toLowerCase();
+    const type = (s.slot_type || s.slotType || "").toLowerCase();
+    const lang = s.lang || "";
+    return time.includes("08:") || time.includes("07:") || type.includes("morning") || lang === "en";
+  }) || slots[0];
+
+  const eveningSlot = slots.find((s) => {
+    const time = (s.time_slot || s.timeSlot || "").toLowerCase();
+    const type = (s.slot_type || s.slotType || "").toLowerCase();
+    const lang = s.lang || "";
+    return time.includes("19:") || time.includes("18:") || type.includes("prime") || type.includes("bedtime") || (lang === "id" && s !== morningSlot);
+  }) || (slots.length > 1 ? slots[1] : slots[0]);
+
+  const morningBook = morningSlot.book_slug || morningSlot.bookSlug;
+  const eveningBook = eveningSlot.book_slug || eveningSlot.bookSlug;
+
+  console.log(`🌅 Morning Slot  : [${morningBook}] [${morningSlot.lang || "en"}] @ ${morningSlot.time_slot || morningSlot.timeSlot || "08:30 WIB"}`);
+  console.log(`🌙 Evening Slot  : [${eveningBook}] [${eveningSlot.lang || "id"}] @ ${eveningSlot.time_slot || eveningSlot.timeSlot || "19:00 WIB"}`);
+  console.log("==================================================================\n");
+
+  // 2. Ensure stories exist locally
+  const storiesToEnsure = Array.from(new Set([morningBook, eveningBook]));
+  for (const slug of storiesToEnsure) {
+    const sDir = path.resolve("./stories", slug);
+    const sJson = path.join(sDir, "story.json");
+    if (!existsSync(sJson)) {
+      console.log(`📥 Story assets not found locally for [${slug}]. Pulling from Cloudflare R2...`);
+      await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slug]);
+    }
+    if (!existsSync(sJson)) {
+      throw new Error(`story.json not found for book '${slug}' at ${sJson}`);
+    }
+  }
+
+  const morningStoryPath = path.resolve("./stories", morningBook, "story.json");
+  const eveningStoryPath = path.resolve("./stories", eveningBook, "story.json");
+  const morningStory = JSON.parse(await fs.readFile(morningStoryPath, "utf-8"));
+  const eveningStory = JSON.parse(await fs.readFile(eveningStoryPath, "utf-8"));
+
+  // 3. Deduplication Check across platforms
+  if (!morningStory.publications) morningStory.publications = {};
+  if (!morningStory.publications.announcements) morningStory.publications.announcements = {};
+  if (!morningStory.publications.announcements[targetDate]) morningStory.publications.announcements[targetDate] = {};
+
+  const existingLineup = morningStory.publications.announcements[targetDate].dailyLineup || {};
+  const hasFb = Boolean(existingLineup.facebook?.id || existingLineup.facebook?.postId);
+  const hasIg = Boolean(existingLineup.instagram?.id);
+  const hasThreads = Boolean(existingLineup.threads?.id || existingLineup.threads?.postId);
+
+  console.log("🔍 DAILY LINEUP DEDUPLICATION STATUS:");
+  console.log(`   - Facebook Page : ${hasFb ? `✔ LIVE (${existingLineup.facebook?.id || existingLineup.facebook?.postId})` : "⏳ PENDING"}`);
+  console.log(`   - Instagram Feed : ${hasIg ? `✔ LIVE (${existingLineup.instagram?.id})` : "⏳ PENDING"}`);
+  console.log(`   - Meta Threads   : ${hasThreads ? `✔ LIVE (${existingLineup.threads?.id || existingLineup.threads?.postId})` : "⏳ PENDING"}`);
+
+  if (hasFb && hasIg && hasThreads && !options.force) {
+    console.log(`\n🛡️ [ZERO DUPLICATE GATE] Daily lineup announcement for ${targetDate} has ALREADY been published across ALL public social platforms!`);
+    console.log(`   ⏩ Skipping to guarantee ZERO duplicate posts. Pass --force to re-post.\n`);
+    return { success: true, skipped: true, morningBook, eveningBook };
+  }
+
+  // 4. Resolve Visual Assets for both books
+  const morningStoryDir = path.resolve("./stories", morningBook);
+  const eveningStoryDir = path.resolve("./stories", eveningBook);
+  const morningPhoto = resolveBestPhoto(morningStoryDir, "en");
+  const eveningPhoto = resolveBestPhoto(eveningStoryDir, "id");
+  const imagePaths = [morningPhoto, eveningPhoto];
+
+  console.log(`\n🖼️ Visual Slides Selected:`);
+  console.log(`   - Slide 1 [Morning EN]: ${path.basename(morningPhoto)}`);
+  console.log(`   - Slide 2 [Evening ID]: ${path.basename(eveningPhoto)}`);
+
+  // 5. Generate Tailored Captions
+  const captions = generateDailyLineupCopy(morningStory, morningSlot, eveningStory, eveningSlot, targetDate);
+
+  const errors: string[] = [];
+  let fbResult = existingLineup.facebook;
+  let igResult = existingLineup.instagram;
+  let thResult = existingLineup.threads;
+
+  // 6A. Facebook Multi-Photo Post
+  if (!hasFb || options.force) {
+    try {
+      console.log(`\n📘 [1/3] Publishing Daily Lineup Multi-Photo Post to Facebook Page...`);
+      const fbRes = await publishFacebookMultiPhotoPost({
+        photoPaths: imagePaths,
+        caption: captions.captionFacebook,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && fbRes.success) {
+        fbResult = {
+          postId: fbRes.postId,
+          url: fbRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+        console.log(`✔ Facebook multi-photo post live: ${fbRes.permalink}`);
+      }
+    } catch (fbErr: any) {
+      console.error(`⚠️ Facebook announcement warning:`, fbErr.message);
+      errors.push(`Facebook: ${fbErr.message}`);
+    }
+  }
+
+  // 6B. Instagram Carousel Post
+  if (!hasIg || options.force) {
+    try {
+      console.log(`\n📸 [2/3] Publishing Daily Lineup Carousel to Instagram Feed...`);
+      const igRes = await publishInstagramCarousel({
+        imagePaths,
+        caption: captions.captionInstagram,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && igRes.success) {
+        igResult = {
+          id: igRes.id,
+          url: igRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+        console.log(`✔ Instagram carousel live: ${igRes.permalink}`);
+      }
+    } catch (igErr: any) {
+      console.error(`⚠️ Instagram announcement warning:`, igErr.message);
+      errors.push(`Instagram: ${igErr.message}`);
+    }
+  }
+
+  // 6C. Threads Multi-Image Carousel Post
+  if (!hasThreads || options.force) {
+    try {
+      console.log(`\n🧵 [3/3] Publishing Daily Lineup Carousel to Meta Threads...`);
+      const thRes = await publishThreadsCarousel({
+        imagePaths,
+        text: captions.captionThreads,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && thRes.success) {
+        thResult = {
+          id: thRes.postId,
+          postId: thRes.postId,
+          url: thRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+        console.log(`✔ Threads carousel live: ${thRes.permalink}`);
+      }
+    } catch (thErr: any) {
+      console.error(`⚠️ Threads announcement warning:`, thErr.message);
+      errors.push(`Threads: ${thErr.message}`);
+    }
+  }
+
+  // 7. Save publication metadata to story.json and Cloudflare R2
+  if (!options.dryRun) {
+    const updatedLineup = {
+      announcedAt: new Date().toISOString(),
+      morningBook,
+      eveningBook,
+      facebook: fbResult,
+      instagram: igResult,
+      threads: thResult,
+    };
+
+    morningStory.publications.announcements[targetDate].dailyLineup = updatedLineup;
+    await fs.writeFile(morningStoryPath, JSON.stringify(morningStory, null, 2), "utf-8");
+    await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "push", morningBook, "--manifest-only"]);
+
+    if (eveningBook !== morningBook) {
+      if (!eveningStory.publications) eveningStory.publications = {};
+      if (!eveningStory.publications.announcements) eveningStory.publications.announcements = {};
+      if (!eveningStory.publications.announcements[targetDate]) eveningStory.publications.announcements[targetDate] = {};
+      eveningStory.publications.announcements[targetDate].dailyLineup = updatedLineup;
+      await fs.writeFile(eveningStoryPath, JSON.stringify(eveningStory, null, 2), "utf-8");
+      await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "push", eveningBook, "--manifest-only"]);
+    }
+    console.log(`✔ story.json manifests updated with daily lineup publication record in R2.`);
+  }
+
+  if (errors.length > 0 && !options.dryRun) {
+    try {
+      await notifyTelegramFailure({
+        bookSlug: `${morningBook}+${eveningBook}`,
+        lang: "bilingual",
+        slot: `Daily Lineup (${targetDate})`,
+        platform: "Single Daily Announcement Dispatcher",
+        error: errors.join("\n"),
+      });
+    } catch {}
+  }
+
+  console.log("\n🎉 SINGLE DAILY BILINGUAL ANNOUNCEMENT DISPATCH COMPLETE!\n");
+  return { success: errors.length === 0, morningBook, eveningBook };
+}
+
+/**
  * Main routine: Publishes deduplicated announcement feeds across Facebook, Instagram, and Threads.
  * Note: Telegram is strictly an internal creator notification tool and skipped from public feeds.
  */
@@ -319,7 +656,24 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
   targetBook?: string;
   lang?: string;
 }> {
-  const todayDate = getJakartaDateString();
+  // If daily lineup mode is requested, or if slot is "daily" or "all", or default in morning without explicit book:
+  const isDailyLineup =
+    options.dailyLineup ||
+    options.slot === "daily" ||
+    options.slot === "all" ||
+    (!options.bookSlug && options.slot !== "morning" && options.slot !== "evening");
+
+  if (isDailyLineup) {
+    const res = await publishDailyLineupAnnouncement(options);
+    return {
+      success: res.success,
+      skipped: res.skipped,
+      targetBook: `${res.morningBook}+${res.eveningBook}`,
+      lang: "bilingual",
+    };
+  }
+
+  const todayDate = options.date || getJakartaDateString();
   const currentHour = getJakartaHour();
 
   console.log("\n==================================================================");
@@ -575,14 +929,18 @@ async function main() {
 
   const dryRun = args.includes("--dry-run");
   const force = args.includes("--force");
+  const dailyLineup = args.includes("--daily-lineup");
+  const dateArg = getArg("--date");
   const bookSlug = getArg("--book");
   const langArg = getArg("--lang") as "id" | "en" | undefined;
-  const slotArg = getArg("--slot") as "morning" | "evening" | "auto" | undefined;
+  const slotArg = getArg("--slot") as "morning" | "evening" | "auto" | "daily" | "all" | undefined;
 
   await publishAnnouncement({
     bookSlug,
     lang: langArg,
     slot: slotArg,
+    dailyLineup,
+    date: dateArg,
     dryRun,
     force,
   });

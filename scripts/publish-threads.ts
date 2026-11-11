@@ -208,12 +208,14 @@ export async function createThreadsContainer(
   userId: string,
   accessToken: string,
   payload: {
-    mediaType: "TEXT" | "IMAGE" | "VIDEO";
+    mediaType: "TEXT" | "IMAGE" | "VIDEO" | "CAROUSEL";
     text?: string;
     imageUrl?: string;
     videoUrl?: string;
     linkAttachment?: string;
     isMadeWithAi?: boolean;
+    isCarouselItem?: boolean;
+    children?: string[];
   }
 ): Promise<string> {
   const url = `https://graph.threads.net/v1.0/${userId}/threads`;
@@ -236,6 +238,12 @@ export async function createThreadsContainer(
   }
   if (payload.isMadeWithAi) {
     params.append("is_made_with_ai", "true");
+  }
+  if (payload.isCarouselItem) {
+    params.append("is_carousel_item", "true");
+  }
+  if (payload.children && payload.children.length > 0) {
+    params.append("children", payload.children.join(","));
   }
 
   const res = await fetch(url, {
@@ -545,6 +553,86 @@ export async function publishThreadsPhotoPost(options: {
     return { success: true, postId, permalink: postDetails.permalink };
   } finally {
     await cleanup();
+  }
+}
+
+/**
+ * Publishes a multi-image carousel post to Meta Threads (e.g. for bilingual daily lineup announcements).
+ */
+export async function publishThreadsCarousel(options: {
+  imagePaths: string[];
+  text: string;
+  dryRun?: boolean;
+}): Promise<{
+  success: boolean;
+  postId?: string;
+  permalink?: string;
+  dryRun?: boolean;
+}> {
+  const config = await loadThreadsConfig();
+  if (!config.threadsAccessToken || !config.threadsUserId) {
+    throw new Error("Threads credentials not configured (missing threadsUserId or threadsAccessToken).");
+  }
+
+  if (options.dryRun) {
+    console.log("\n[DRY RUN] Threads Carousel Caption:\n", options.text);
+    console.log(`[DRY RUN] Attached Images (${options.imagePaths.length}):`, options.imagePaths);
+    return { success: true, dryRun: true };
+  }
+
+  if (!options.imagePaths || options.imagePaths.length <= 1) {
+    return publishThreadsPhotoPost({
+      imagePath: options.imagePaths?.[0] || "",
+      text: options.text,
+      dryRun: options.dryRun,
+    });
+  }
+
+  const cleanups: Array<() => Promise<void>> = [];
+  const itemIds: string[] = [];
+
+  try {
+    for (let i = 0; i < options.imagePaths.length; i++) {
+      const imgPath = options.imagePaths[i];
+      console.log(`📸 Uploading Threads slide ${i + 1}/${options.imagePaths.length}: ${path.basename(imgPath)}...`);
+      const { publicUrl, cleanup } = await uploadImageToR2(imgPath, "threads-carousel");
+      cleanups.push(cleanup);
+
+      const itemId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
+        mediaType: "IMAGE",
+        imageUrl: publicUrl,
+        isCarouselItem: true,
+        isMadeWithAi: true,
+      });
+      console.log(`   ✔ Threads Carousel Item ${i + 1} ID: ${itemId}`);
+      itemIds.push(itemId);
+    }
+
+    // Wait for all item containers to process
+    for (const itemId of itemIds) {
+      await waitForThreadsContainer(itemId, config.threadsAccessToken);
+    }
+
+    // Create CAROUSEL container
+    console.log(`📦 Creating Threads CAROUSEL parent container with ${itemIds.length} items...`);
+    const containerId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
+      mediaType: "CAROUSEL",
+      text: options.text,
+      children: itemIds,
+    });
+
+    await waitForThreadsContainer(containerId, config.threadsAccessToken);
+
+    const postId = await publishThreadsContainer(config.threadsUserId, containerId, config.threadsAccessToken);
+    const postDetails = await getThreadsPostDetails(postId, config.threadsAccessToken);
+    console.log(`🎉 SUCCESS! THREADS CAROUSEL IS LIVE: ${postDetails.permalink}`);
+    return { success: true, postId, permalink: postDetails.permalink };
+  } finally {
+    for (const c of cleanups) {
+      try {
+        await c();
+      } catch {}
+    }
   }
 }
 
