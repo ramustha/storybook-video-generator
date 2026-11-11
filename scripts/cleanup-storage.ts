@@ -1,23 +1,27 @@
 import fs from "fs/promises";
-import { existsSync, statSync } from "fs";
+import { existsSync, statSync, readFileSync } from "fs";
 import path from "path";
-
-interface CleanupOptions {
-  bookSlug?: string;
-  allBooks: boolean;
-  execute: boolean;
-  cleanVideos: boolean;
-  cleanIntermediate: boolean;
-}
+import { S3Client, ListObjectsV2Command, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { loadR2Config } from "./manage-story-storage";
 
 interface CleanupItem {
-  type: "published_video" | "intermediate_page" | "temp_file";
+  target: "local" | "r2";
+  type: "published_video" | "compilation_video";
   bookSlug: string;
   lang?: string;
   format?: string;
   filePath: string;
   sizeBytes: number;
   publishedUrl?: string;
+  publishedAt?: string;
+  ageHours?: number;
+}
+
+interface StoryPublicationSummary {
+  slug: string;
+  isPublished: boolean;
+  latestPublishedAt: number;
+  latestPublishedAtIso: string;
 }
 
 function formatBytes(bytes: number): string {
@@ -28,119 +32,202 @@ function formatBytes(bytes: number): string {
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }
 
-async function getDirectorySize(dirPath: string): Promise<number> {
-  let total = 0;
-  try {
-    const entries = await fs.readdir(dirPath, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(dirPath, entry.name);
-      if (entry.isDirectory()) {
-        total += await getDirectorySize(fullPath);
-      } else if (entry.isFile()) {
-        const stat = await fs.stat(fullPath);
-        total += stat.size;
-      }
-    }
-  } catch {
-    // Ignore errors
-  }
-  return total;
-}
+/**
+ * Discovers and ranks all published stories in descending order by publication timestamp.
+ * Returns the ranked list of slugs and summary metadata.
+ */
+async function getPublishedStoriesRanked(): Promise<{
+  rankedSlugs: string[];
+  storySummaries: Map<string, StoryPublicationSummary>;
+}> {
+  const storiesDir = path.resolve("./stories");
+  const entries = await fs.readdir(storiesDir, { withFileTypes: true });
+  const storySlugs = entries
+    .filter((e) => e.isDirectory() && e.name !== "branding")
+    .map((e) => e.name);
 
-async function scanBook(bookSlug: string, options: CleanupOptions): Promise<{ items: CleanupItem[]; totalBytes: number }> {
-  const storyDir = path.resolve(`./stories/${bookSlug}`);
-  const manifestPath = path.join(storyDir, "story.json");
-  const items: CleanupItem[] = [];
-  let totalBytes = 0;
+  const summaries: StoryPublicationSummary[] = [];
 
-  if (!existsSync(manifestPath)) {
-    return { items, totalBytes };
-  }
+  for (const slug of storySlugs) {
+    const manifestPath = path.join(storiesDir, slug, "story.json");
+    if (!existsSync(manifestPath)) continue;
 
-  const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
-  const publications = manifest.publications?.youtube || {};
+    try {
+      const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
+      const pubs = manifest.publications?.youtube || {};
+      let isPub = false;
+      let maxTimestamp = 0;
 
-  // 1. Scan for published video files
-  if (options.cleanVideos) {
-    const langs: Array<"id" | "en"> = ["id", "en"];
-    for (const lang of langs) {
-      const exportDir = path.join(storyDir, "exports", lang);
-      if (!existsSync(exportDir)) continue;
-
-      // Check landscape
-      const landscapePub = publications[lang]?.landscape;
-      const isLandscapePublished = landscapePub?.status === "published" && !!landscapePub?.id;
-      const landscapeVideoPath = manifest.exports?.[lang]?.landscape?.path
-        ? path.join(storyDir, manifest.exports[lang].landscape.path)
-        : (lang === "en"
-            ? path.join(exportDir, `${manifest.originalTitle ? manifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") : `${bookSlug}-en`}-16x9.mp4`)
-            : path.join(exportDir, `${bookSlug}-16x9.mp4`));
-
-      if (isLandscapePublished && existsSync(landscapeVideoPath)) {
-        const stat = statSync(landscapeVideoPath);
-        items.push({
-          type: "published_video",
-          bookSlug,
-          lang,
-          format: "landscape (16:9)",
-          filePath: landscapeVideoPath,
-          sizeBytes: stat.size,
-          publishedUrl: landscapePub?.url || `https://youtu.be/${landscapePub.id}`,
-        });
-        totalBytes += stat.size;
-      }
-
-      // Check vertical / shorts
-      const verticalPub = publications[lang]?.vertical;
-      const isVerticalPublished = verticalPub?.status === "published" && !!verticalPub?.id;
-      const verticalVideoPath = manifest.exports?.[lang]?.vertical?.path
-        ? path.join(storyDir, manifest.exports[lang].vertical.path)
-        : (lang === "en"
-            ? path.join(exportDir, `${manifest.originalTitle ? manifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") : `${bookSlug}-en`}-9x16.mp4`)
-            : path.join(exportDir, `${bookSlug}-9x16.mp4`));
-
-      if (isVerticalPublished && existsSync(verticalVideoPath)) {
-        const stat = statSync(verticalVideoPath);
-        items.push({
-          type: "published_video",
-          bookSlug,
-          lang,
-          format: "vertical (9:16 Shorts)",
-          filePath: verticalVideoPath,
-          sizeBytes: stat.size,
-          publishedUrl: verticalPub?.url || `https://youtube.com/shorts/${verticalPub.id}`,
-        });
-        totalBytes += stat.size;
-      }
-    }
-  }
-
-  // 2. Scan for intermediate raw page extractions (raw/pages/)
-  if (options.cleanIntermediate) {
-    const rawPagesDir = path.join(storyDir, "raw/pages");
-    if (existsSync(rawPagesDir)) {
-      // Ensure that final artwork in assets/ already exists before proposing deletion
-      const assetsDir = path.join(storyDir, "assets");
-      const hasAssets = existsSync(assetsDir);
-      if (hasAssets) {
-        const dirSize = await getDirectorySize(rawPagesDir);
-        if (dirSize > 0) {
-          items.push({
-            type: "intermediate_page",
-            bookSlug,
-            filePath: rawPagesDir,
-            sizeBytes: dirSize,
-          });
-          totalBytes += dirSize;
+      for (const lang of ["id", "en"] as const) {
+        for (const fmt of ["landscape", "vertical"] as const) {
+          const entry = pubs[lang]?.[fmt];
+          if (entry?.status === "published" && entry?.id) {
+            isPub = true;
+            if (entry.publishedAt) {
+              const t = new Date(entry.publishedAt).getTime();
+              if (t > maxTimestamp) maxTimestamp = t;
+            }
+          }
         }
       }
+
+      // Check other platforms if YouTube status wasn't set
+      if (!isPub && manifest.publications) {
+        for (const p of ["facebook", "instagram", "threads"] as const) {
+          const platObj = manifest.publications[p];
+          if (platObj) {
+            for (const lang of ["id", "en"] as const) {
+              const entry = platObj[lang];
+              if (entry?.status === "published" || entry?.id) {
+                isPub = true;
+                if (entry.publishedAt) {
+                  const t = new Date(entry.publishedAt).getTime();
+                  if (t > maxTimestamp) maxTimestamp = t;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (isPub) {
+        if (maxTimestamp === 0) {
+          maxTimestamp = statSync(manifestPath).mtimeMs;
+        }
+        summaries.push({
+          slug,
+          isPublished: true,
+          latestPublishedAt: maxTimestamp,
+          latestPublishedAtIso: new Date(maxTimestamp).toISOString(),
+        });
+      }
+    } catch {
+      // Ignore corrupted or unreadable story.json
+    }
+  }
+
+  // Sort descending: newest published story is index 0
+  summaries.sort((a, b) => b.latestPublishedAt - a.latestPublishedAt);
+
+  const rankedSlugs = summaries.map((s) => s.slug);
+  const storySummaries = new Map<string, StoryPublicationSummary>();
+  summaries.forEach((s) => storySummaries.set(s.slug, s));
+
+  return { rankedSlugs, storySummaries };
+}
+
+/**
+ * Scans local story directories for published videos eligible for cleanup.
+ * Strictly respects protected latest releases, minimum age, and skips unreleased drafts.
+ */
+async function scanLocalStories(
+  targetSlugs: string[],
+  protectedSlugs: Set<string>,
+  storySummaries: Map<string, StoryPublicationSummary>,
+  minAgeHours: number
+): Promise<{ items: CleanupItem[]; totalBytes: number }> {
+  const items: CleanupItem[] = [];
+  let totalBytes = 0;
+  const storiesDir = path.resolve("./stories");
+
+  for (const slug of targetSlugs) {
+    // 🛡️ Guard 1: Never delete protected latest published releases
+    if (protectedSlugs.has(slug)) {
+      continue;
+    }
+
+    // 🛡️ Guard 2: Never delete unreleased / future stories
+    const summary = storySummaries.get(slug);
+    if (!summary || !summary.isPublished) {
+      continue;
+    }
+
+    const storyDir = path.join(storiesDir, slug);
+    const manifestPath = path.join(storyDir, "story.json");
+    if (!existsSync(manifestPath)) continue;
+
+    try {
+      const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
+      const publications = manifest.publications?.youtube || {};
+
+      for (const lang of ["id", "en"] as const) {
+        const exportDir = path.join(storyDir, "exports", lang);
+        if (!existsSync(exportDir)) continue;
+
+        // Check landscape
+        const landscapePub = publications[lang]?.landscape;
+        const isLandscapePub = landscapePub?.status === "published" && !!landscapePub?.id;
+        const landscapePath = manifest.exports?.[lang]?.landscape?.path
+          ? path.join(storyDir, manifest.exports[lang].landscape.path)
+          : (lang === "en"
+              ? path.join(exportDir, `${manifest.originalTitle ? manifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") : `${slug}-en`}-16x9.mp4`)
+              : path.join(exportDir, `${slug}-16x9.mp4`));
+
+        if (isLandscapePub && existsSync(landscapePath)) {
+          const pubTime = landscapePub.publishedAt ? new Date(landscapePub.publishedAt).getTime() : summary.latestPublishedAt;
+          const ageHours = (Date.now() - pubTime) / (1000 * 3600);
+
+          if (ageHours >= minAgeHours) {
+            const stat = statSync(landscapePath);
+            items.push({
+              target: "local",
+              type: "published_video",
+              bookSlug: slug,
+              lang,
+              format: "landscape (16:9)",
+              filePath: landscapePath,
+              sizeBytes: stat.size,
+              publishedUrl: landscapePub?.url || `https://youtu.be/${landscapePub.id}`,
+              publishedAt: new Date(pubTime).toISOString(),
+              ageHours: Math.round(ageHours),
+            });
+            totalBytes += stat.size;
+          }
+        }
+
+        // Check vertical
+        const verticalPub = publications[lang]?.vertical;
+        const isVerticalPub = verticalPub?.status === "published" && !!verticalPub?.id;
+        const verticalPath = manifest.exports?.[lang]?.vertical?.path
+          ? path.join(storyDir, manifest.exports[lang].vertical.path)
+          : (lang === "en"
+              ? path.join(exportDir, `${manifest.originalTitle ? manifest.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") : `${slug}-en`}-9x16.mp4`)
+              : path.join(exportDir, `${slug}-9x16.mp4`));
+
+        if (isVerticalPub && existsSync(verticalPath)) {
+          const pubTime = verticalPub.publishedAt ? new Date(verticalPub.publishedAt).getTime() : summary.latestPublishedAt;
+          const ageHours = (Date.now() - pubTime) / (1000 * 3600);
+
+          if (ageHours >= minAgeHours) {
+            const stat = statSync(verticalPath);
+            items.push({
+              target: "local",
+              type: "published_video",
+              bookSlug: slug,
+              lang,
+              format: "vertical (9:16)",
+              filePath: verticalPath,
+              sizeBytes: stat.size,
+              publishedUrl: verticalPub?.url || `https://youtube.com/shorts/${verticalPub.id}`,
+              publishedAt: new Date(pubTime).toISOString(),
+              ageHours: Math.round(ageHours),
+            });
+            totalBytes += stat.size;
+          }
+        }
+      }
+    } catch {
+      // Ignore read errors
     }
   }
 
   return { items, totalBytes };
 }
 
-async function scanCompilations(): Promise<{ items: CleanupItem[]; totalBytes: number }> {
+/**
+ * Scans local compilation exports for published compilation MP4s.
+ */
+async function scanLocalCompilations(minAgeHours: number): Promise<{ items: CleanupItem[]; totalBytes: number }> {
   const items: CleanupItem[] = [];
   let totalBytes = 0;
   const compDir = path.resolve("./exports/compilations");
@@ -156,36 +243,169 @@ async function scanCompilations(): Promise<{ items: CleanupItem[]; totalBytes: n
         const mp4Path = path.join(compDir, `kompilasi-${key}-16x9.mp4`);
         if (existsSync(mp4Path)) {
           const stat = statSync(mp4Path);
-          items.push({
-            type: "published_video",
-            bookSlug: `compilation-${key}`,
-            lang: key.includes("-en") ? "en" : "id",
-            format: "landscape (16:9)",
-            filePath: mp4Path,
-            sizeBytes: stat.size,
-            publishedUrl: data.youtube?.url || data.permalink,
-          });
-          totalBytes += stat.size;
+          const pubTime = data.youtube?.publishedAt ? new Date(data.youtube.publishedAt).getTime() : stat.mtimeMs;
+          const ageHours = (Date.now() - pubTime) / (1000 * 3600);
+
+          if (ageHours >= minAgeHours) {
+            items.push({
+              target: "local",
+              type: "compilation_video",
+              bookSlug: `compilation-${key}`,
+              lang: key.includes("-en") ? "en" : "id",
+              format: "landscape (16:9)",
+              filePath: mp4Path,
+              sizeBytes: stat.size,
+              publishedUrl: data.youtube?.url || data.permalink || `https://youtu.be/${data.youtube?.videoId}`,
+              publishedAt: new Date(pubTime).toISOString(),
+              ageHours: Math.round(ageHours),
+            });
+            totalBytes += stat.size;
+          }
         }
       }
     }
   } catch {
     // Ignore error
   }
+
   return { items, totalBytes };
 }
 
-async function executeCleanup(items: CleanupItem[]) {
-  console.log(`\n🧹 Executing Safe Storage Cleanup...`);
+/**
+ * Scans Cloudflare R2 bucket for published MP4 video buffers eligible for deletion.
+ * Strictly respects protected latest releases, minimum age, and skips unreleased buffers.
+ */
+async function scanR2(
+  protectedSlugs: Set<string>,
+  storySummaries: Map<string, StoryPublicationSummary>,
+  minAgeHours: number
+): Promise<{ items: CleanupItem[]; totalBytes: number }> {
+  const items: CleanupItem[] = [];
+  let totalBytes = 0;
+
+  let r2Config;
+  try {
+    r2Config = await loadR2Config();
+  } catch (err: any) {
+    console.warn(`⚠️ Cloudflare R2 not configured: ${err.message}. Skipping R2 scan.`);
+    return { items, totalBytes };
+  }
+
+  const s3 = new S3Client({
+    region: "auto",
+    endpoint: r2Config.endpoint,
+    credentials: {
+      accessKeyId: r2Config.accessKeyId,
+      secretAccessKey: r2Config.secretAccessKey,
+    },
+  });
+
+  const storiesDir = path.resolve("./stories");
+  let continuationToken: string | undefined = undefined;
+
+  try {
+    do {
+      const res = await s3.send(
+        new ListObjectsV2Command({
+          Bucket: r2Config.bucketName,
+          ContinuationToken: continuationToken,
+        })
+      );
+
+      const contents = res.Contents || [];
+      for (const obj of contents) {
+        if (!obj.Key || !obj.Key.endsWith(".mp4")) continue;
+
+        // Key format: stories/<slug>/exports/<lang>/<filename>.mp4
+        const parts = obj.Key.split("/");
+        if (parts.length < 5 || parts[0] !== "stories" || parts[2] !== "exports") continue;
+
+        const slug = parts[1];
+        const lang = parts[3];
+
+        // 🛡️ Guard 1: Never delete protected latest published releases
+        if (protectedSlugs.has(slug)) {
+          continue;
+        }
+
+        // 🛡️ Guard 2: Never delete unreleased / future buffer stories
+        const summary = storySummaries.get(slug);
+        if (!summary || !summary.isPublished) {
+          continue;
+        }
+
+        // Check if the specific language is published
+        const manifestPath = path.join(storiesDir, slug, "story.json");
+        let isLangPublished = false;
+        let langPubTimestamp = 0;
+        let pubUrl: string | undefined = undefined;
+
+        if (existsSync(manifestPath)) {
+          try {
+            const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+            const pubLandscape = manifest.publications?.youtube?.[lang]?.landscape;
+            const pubVertical = manifest.publications?.youtube?.[lang]?.vertical;
+
+            if (pubLandscape?.status === "published" || pubVertical?.status === "published") {
+              isLangPublished = true;
+              pubUrl = pubLandscape?.url || pubVertical?.url;
+              const t = Math.max(
+                pubLandscape?.publishedAt ? new Date(pubLandscape.publishedAt).getTime() : 0,
+                pubVertical?.publishedAt ? new Date(pubVertical.publishedAt).getTime() : 0
+              );
+              langPubTimestamp = t || summary.latestPublishedAt;
+            }
+          } catch {}
+        }
+
+        if (!isLangPublished) {
+          continue; // Lang not yet published (e.g. upcoming slot)!
+        }
+
+        // 🛡️ Guard 3: Minimum age requirement
+        const ageHours = (Date.now() - langPubTimestamp) / (1000 * 3600);
+        if (ageHours < minAgeHours) {
+          continue; // Published too recently (< minAgeHours)!
+        }
+
+        const size = obj.Size || 0;
+        items.push({
+          target: "r2",
+          type: "published_video",
+          bookSlug: slug,
+          lang,
+          filePath: obj.Key,
+          sizeBytes: size,
+          publishedUrl: pubUrl,
+          publishedAt: new Date(langPubTimestamp).toISOString(),
+          ageHours: Math.round(ageHours),
+        });
+        totalBytes += size;
+      }
+
+      continuationToken = res.NextContinuationToken;
+    } while (continuationToken);
+  } catch (err: any) {
+    console.warn(`⚠️ R2 scan error: ${err.message}`);
+  }
+
+  return { items, totalBytes };
+}
+
+/**
+ * Executes local deletion and marks manifest localStatus.
+ */
+async function executeLocalCleanup(items: CleanupItem[]) {
+  console.log(`\n🧹 Executing Local Storage Cleanup...`);
   const touchedManifests = new Set<string>();
 
   for (const item of items) {
     try {
-      if (item.type === "published_video") {
+      if (existsSync(item.filePath)) {
         await fs.unlink(item.filePath);
-        console.log(`   ✔ Deleted published video: ${path.basename(item.filePath)} (${formatBytes(item.sizeBytes)})`);
+        console.log(`   ✔ [LOCAL] Deleted published video: ${path.basename(item.filePath)} (${formatBytes(item.sizeBytes)})`);
 
-        // Update story.json manifest to document clean-up while preserving YouTube links
+        // If story manifest exists, document localStatus
         const manifestPath = path.resolve(`./stories/${item.bookSlug}/story.json`);
         if (existsSync(manifestPath)) {
           const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
@@ -200,17 +420,45 @@ async function executeCleanup(items: CleanupItem[]) {
           await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
           touchedManifests.add(manifestPath);
         }
-      } else if (item.type === "intermediate_page") {
-        await fs.rm(item.filePath, { recursive: true, force: true });
-        console.log(`   ✔ Removed intermediate extraction folder: ${path.basename(item.filePath)} (${formatBytes(item.sizeBytes)})`);
       }
     } catch (err: any) {
       console.warn(`   ⚠️ Could not delete ${item.filePath}: ${err.message}`);
     }
   }
 
-  console.log(`\n🎉 Storage cleanup completed! ${touchedManifests.size} story manifests updated.`);
-  console.log(`💡 Note: Cleaned-up videos remain 100% live on YouTube and can be re-rendered on demand via Remotion anytime.`);
+  if (touchedManifests.size > 0) {
+    console.log(`   ✔ Updated ${touchedManifests.size} story manifests with reproducible localStatus.`);
+  }
+}
+
+/**
+ * Executes Cloudflare R2 remote deletion.
+ */
+async function executeR2Cleanup(items: CleanupItem[]) {
+  console.log(`\n☁️ Executing Cloudflare R2 Remote Storage Cleanup...`);
+  const r2Config = await loadR2Config();
+  const s3 = new S3Client({
+    region: "auto",
+    endpoint: r2Config.endpoint,
+    credentials: {
+      accessKeyId: r2Config.accessKeyId,
+      secretAccessKey: r2Config.secretAccessKey,
+    },
+  });
+
+  for (const item of items) {
+    try {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: r2Config.bucketName,
+          Key: item.filePath,
+        })
+      );
+      console.log(`   ✔ [R2] Deleted remote published buffer: ${item.filePath} (${formatBytes(item.sizeBytes)})`);
+    } catch (err: any) {
+      console.warn(`   ⚠️ Could not delete R2 object ${item.filePath}: ${err.message}`);
+    }
+  }
 }
 
 async function main() {
@@ -220,87 +468,122 @@ async function main() {
     return idx !== -1 ? args[idx + 1] : undefined;
   };
 
+  const isLocal = args.includes("--local") || (!args.includes("--r2") && !args.includes("--all-targets"));
+  const isR2 = args.includes("--r2") || args.includes("--all-targets");
+  const isExecute = args.includes("--execute") || args.includes("--force") || args.includes("--yes");
+  const keepLatest = parseInt(getArg("--keep-latest") || "1", 10);
+  const minAgeHours = getArg("--min-age-hours") !== undefined
+    ? parseInt(getArg("--min-age-hours")!, 10)
+    : (isR2 && !isLocal ? 48 : 0);
   const bookSlug = getArg("--book");
-  const allBooks = args.includes("--all") || !bookSlug;
-  const execute = args.includes("--execute") || args.includes("--force") || args.includes("--yes");
-  const cleanVideos = !args.includes("--intermediate-only");
-  const cleanIntermediate = !args.includes("--videos-only");
 
-  console.log(`\n======================================================`);
-  console.log(`💾 Storybook Storage Optimizer & Post-Publish Cleanup`);
-  console.log(`   Mode: ${execute ? "\x1b[32mEXECUTE (DELETING UNUSED ARTIFACTS)\x1b[0m" : "\x1b[33mDRY RUN (PREVIEW ONLY)\x1b[0m"}`);
-  console.log(`======================================================`);
+  console.log(`\n==================================================================`);
+  console.log(`💾 ZAYN STORYBOOK: HYBRID STORAGE OPTIMIZER & CLEANUP`);
+  console.log(`   Targets Active       : ${[isLocal ? "LOCAL DISK" : null, isR2 ? "CLOUDFLARE R2" : null].filter(Boolean).join(" & ")}`);
+  console.log(`   Execution Mode       : ${isExecute ? "\x1b[32mEXECUTE (DELETING UNUSED ARTIFACTS)\x1b[0m" : "\x1b[33mDRY RUN (PREVIEW ONLY)\x1b[0m"}`);
+  console.log(`   Keep Latest Releases : Top ${keepLatest} published story`);
+  console.log(`   Minimum Age Gate     : ${minAgeHours} hours after publication`);
+  if (bookSlug) console.log(`   Single Book Filter   : ${bookSlug}`);
+  console.log(`==================================================================`);
 
-  const storiesDir = path.resolve("./stories");
-  let targetSlugs: string[] = [];
+  // 1. Analyze published stories and rank them
+  const { rankedSlugs, storySummaries } = await getPublishedStoriesRanked();
+  const protectedSlugs = new Set<string>(rankedSlugs.slice(0, keepLatest));
 
-  if (bookSlug) {
-    targetSlugs = [bookSlug];
-  } else {
-    const entries = await fs.readdir(storiesDir, { withFileTypes: true });
-    targetSlugs = entries
-      .filter((e) => e.isDirectory() && e.name !== "branding")
-      .map((e) => e.name);
+  if (protectedSlugs.size > 0) {
+    console.log(`\n🛡️  Protected Latest Releases (${protectedSlugs.size} story):`);
+    for (const slug of protectedSlugs) {
+      const summary = storySummaries.get(slug);
+      console.log(`   • ${slug} (Published: ${summary?.latestPublishedAtIso}) -> 🔒 LOCKED`);
+    }
   }
 
-  let allItems: CleanupItem[] = [];
-  let grandTotalBytes = 0;
+  let localItems: CleanupItem[] = [];
+  let localBytes = 0;
+  let r2Items: CleanupItem[] = [];
+  let r2Bytes = 0;
 
-  for (const slug of targetSlugs) {
-    const { items, totalBytes } = await scanBook(slug, {
-      bookSlug: slug,
-      allBooks,
-      execute,
-      cleanVideos,
-      cleanIntermediate,
-    });
-    allItems.push(...items);
-    grandTotalBytes += totalBytes;
+  // 2. Scan Local Storage if requested
+  if (isLocal) {
+    console.log(`\n🔍 Scanning Local Storage for historic published videos...`);
+    const targetSlugs = bookSlug
+      ? [bookSlug]
+      : (await fs.readdir(path.resolve("./stories"), { withFileTypes: true }))
+          .filter((e) => e.isDirectory() && e.name !== "branding")
+          .map((e) => e.name);
+
+    const localStories = await scanLocalStories(targetSlugs, protectedSlugs, storySummaries, minAgeHours);
+    localItems.push(...localStories.items);
+    localBytes += localStories.totalBytes;
+
+    if (!bookSlug) {
+      const localComp = await scanLocalCompilations(minAgeHours);
+      localItems.push(...localComp.items);
+      localBytes += localComp.totalBytes;
+    }
   }
+
+  // 3. Scan Cloudflare R2 if requested
+  if (isR2) {
+    console.log(`\n🔍 Scanning Cloudflare R2 Remote Storage for published video buffers...`);
+    const r2Scan = await scanR2(protectedSlugs, storySummaries, minAgeHours);
+    r2Items.push(...r2Scan.items);
+    r2Bytes += r2Scan.totalBytes;
+  }
+
+  const allItems = [...localItems, ...r2Items];
+  const grandTotalBytes = localBytes + r2Bytes;
 
   if (allItems.length === 0) {
-    // Also scan compilations
-    const compScan = await scanCompilations();
-    allItems.push(...compScan.items);
-    grandTotalBytes += compScan.totalBytes;
-  } else {
-    const compScan = await scanCompilations();
-    allItems.push(...compScan.items);
-    grandTotalBytes += compScan.totalBytes;
-  }
-
-  if (allItems.length === 0) {
-    console.log(`\n✨ Everything is clean! No published videos or temporary extraction scrap found.`);
+    console.log(`\n✨ Everything is clean!`);
+    console.log(`   • No historic published videos found exceeding retention rules.`);
+    console.log(`   • All upcoming buffers and latest release assets are safely intact.`);
     return;
   }
 
-  console.log(`\n📦 Cleanup Candidates Found:`);
-  console.log(`---------------------------------------------------------------------------------------------------------`);
-  console.log(`Project / Category         | Type                  | Size       | Target File & Published Status`);
-  console.log(`---------------------------------------------------------------------------------------------------------`);
+  console.log(`\n📦 Cleanup Candidates Found (${allItems.length} items):`);
+  console.log(`-----------------------------------------------------------------------------------------------------------------`);
+  console.log(`Target  | Project / Category        | Type                    | Size       | Age   | Published Status`);
+  console.log(`-----------------------------------------------------------------------------------------------------------------`);
 
   for (const item of allItems) {
+    const targetBadge = item.target === "local" ? "LOCAL" : "R2   ";
     const typeLabel =
-      item.type === "published_video"
-        ? `Published MP4 [${item.lang?.toUpperCase()}]`
-        : "Raw Intermediate Pages";
-    const statusNote = item.publishedUrl ? `Live on YouTube (${item.publishedUrl})` : "Final assets preserved";
+      item.type === "compilation_video"
+        ? "Compilation MP4"
+        : `Published MP4 [${item.lang?.toUpperCase()}]`;
+    const ageLabel = item.ageHours !== undefined ? `${item.ageHours}h ago` : "N/A";
+    const statusNote = item.publishedUrl ? `Live on YouTube (${item.publishedUrl})` : "Verified Live";
+
     console.log(
-      `${item.bookSlug.padEnd(26)} | ${typeLabel.padEnd(21)} | ${formatBytes(item.sizeBytes).padStart(10)} | ${path.basename(item.filePath)} (${statusNote})`
+      `${targetBadge}   | ${item.bookSlug.padEnd(25)} | ${typeLabel.padEnd(23)} | ${formatBytes(item.sizeBytes).padStart(10)} | ${ageLabel.padEnd(5)} | ${path.basename(item.filePath)}`
     );
   }
 
-  console.log(`---------------------------------------------------------------------------------------------------------`);
-  console.log(`\n📊 Total Reclaimable Disk Space: \x1b[32m${formatBytes(grandTotalBytes)}\x1b[0m`);
+  console.log(`-----------------------------------------------------------------------------------------------------------------`);
+  if (isLocal) console.log(`📊 Local Reclaimable Disk Space : \x1b[32m${formatBytes(localBytes)}\x1b[0m`);
+  if (isR2) console.log(`☁️ Cloudflare R2 Reclaimable Space: \x1b[32m${formatBytes(r2Bytes)}\x1b[0m`);
+  console.log(`📊 Total Reclaimable Space      : \x1b[32m${formatBytes(grandTotalBytes)}\x1b[0m\n`);
 
-  if (!execute) {
-    console.log(`\n💡 To execute cleanup and reclaim ${formatBytes(grandTotalBytes)} of disk space:`);
-    console.log(`   npm run cleanup -- --execute`);
-    if (bookSlug) {
-      console.log(`   npm run cleanup -- --book ${bookSlug} --execute`);
+  if (!isExecute) {
+    console.log(`💡 DRY RUN COMPLETE. To execute cleanup:`);
+    if (isLocal && !isR2) {
+      console.log(`   npm run cleanup:local -- --execute`);
+    } else if (isR2 && !isLocal) {
+      console.log(`   npm run cleanup:r2 -- --execute`);
+    } else {
+      console.log(`   npx tsx scripts/cleanup-storage.ts --all-targets --execute`);
     }
   } else {
-    await executeCleanup(allItems);
+    if (localItems.length > 0) {
+      await executeLocalCleanup(localItems);
+    }
+    if (r2Items.length > 0) {
+      await executeR2Cleanup(r2Items);
+    }
+    console.log(`\n🎉 Storage cleanup completed successfully!`);
+    console.log(`💡 Note: Source illustrations (assets/*.png) and voiceovers (assets/*.mp3) remain 100% intact.`);
+    console.log(`   Any video can be re-rendered via Remotion anytime on demand.`);
   }
 }
 

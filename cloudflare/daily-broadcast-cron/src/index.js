@@ -108,9 +108,16 @@ export default {
         })
       );
 
-      // Weekly analytics on Monday only (UTC Day 1)
+      // Weekly analytics & R2 remote storage cleanup on Monday only (UTC Day 1)
       if (now.getUTCDay() === 1) {
         ctx.waitUntil(dispatchWorkflow(env, "weekly-analytics.yml"));
+        ctx.waitUntil(
+          dispatchWorkflow(env, "storage-cleanup.yml", {
+            dry_run: false,
+            keep_latest: "1",
+            min_age_hours: "48",
+          })
+        );
       }
     }
     else {
