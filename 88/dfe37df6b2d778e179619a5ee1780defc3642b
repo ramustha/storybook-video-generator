@@ -1,0 +1,37 @@
+src/motion/types.ts
+  685042d435a49612 15-16,165-183
+src/motion/hybrid-compiler.ts
+  685042d435a49612 1-876
+src/motion/source-guard.ts
+  685042d435a49612 1-155
+scripts/pack-edu-curiosity-cloud.ts
+  685042d435a49612 1-856
+scripts/render-book.ts
+  685042d435a49612 9-60,64-68,70-75,86,93-101,105-106,109-117,128,257-265,302
+scripts/test-edu-motion-guard.ts
+  685042d435a49612 1-455
+scripts/compile-hybrid-edu-motion.ts
+  685042d435a49612 1-98
+src/motion/stage-shared.ts
+  685042d435a49612 1-644
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "88dfe37df6b2d778e179619a5ee1780defc3642b",
+  "prompts": {
+    "685042d435a49612": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "c9007616-4bcd-4182-8dfe-9033e403155d",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 3203,
+      "total_deletions": 55,
+      "accepted_lines": 3203,
+      "overriden_lines": 0
+    }
+  }
+}
