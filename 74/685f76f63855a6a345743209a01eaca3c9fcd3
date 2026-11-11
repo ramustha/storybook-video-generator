@@ -1,0 +1,35 @@
+cloudflare/daily-broadcast-cron/src/index.js
+  698ac31901cd73e0 50-51,55,57,74-75
+scripts/publish-launch-posts.ts
+  698ac31901cd73e0 147-252
+scripts/publish-threads.ts
+  698ac31901cd73e0 211,217-218,242-247,559-635
+cloudflare/daily-broadcast-cron/wrangler.toml
+  698ac31901cd73e0 7,9-10,12
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 255-256,261-262
+docs/index.html
+  698ac31901cd73e0 1947
+scripts/publish-announcement.ts
+  698ac31901cd73e0 5-7,17-19,315-648,659-676,932-933,936,942-943
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "74685f76f63855a6a345743209a01eaca3c9fcd3",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 574,
+      "total_deletions": 36,
+      "accepted_lines": 574,
+      "overriden_lines": 0
+    }
+  }
+}
