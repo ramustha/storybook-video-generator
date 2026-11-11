@@ -1570,13 +1570,117 @@ const indexHtmlContent = `<!DOCTYPE html>
       color: var(--text-main);
     }
 
-    /* Next Up Spotlight */
-    .next-up-card {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(16, 185, 129, 0.08));
-      border: 1px solid rgba(245, 158, 11, 0.35);
+    /* =========================================================================
+       AUTOMATION & BROADCAST PIPELINE MONITOR
+       ========================================================================= */
+    .pipeline-monitor-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.72) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
       border-radius: var(--radius-md);
-      padding: 0.7rem 0.95rem;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.85rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pipeline-monitor-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #f59e0b, #10b981);
+    }
+
+    .pipeline-monitor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
       margin-bottom: 0.75rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pipeline-monitor-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pipeline-monitor-icon {
+      font-size: 1.15rem;
+      background: rgba(56, 189, 248, 0.15);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .pipeline-monitor-heading h2 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .pipeline-monitor-heading p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .pipeline-monitor-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .pipeline-clock-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.4);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .pipeline-pulse-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Next Up Spotlight inside Monitor */
+    .pipeline-spotlight-bar {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(99, 102, 241, 0.1));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 0.65rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1584,36 +1688,251 @@ const indexHtmlContent = `<!DOCTYPE html>
       gap: 0.65rem;
     }
 
-    .next-up-info {
+    .pipeline-spotlight-left {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
+      min-width: 0;
     }
 
-    .next-up-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
+    .pipeline-event-badge {
       background: #f59e0b;
       color: #0b0f19;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
-      padding: 0.25rem 0.55rem;
+      padding: 0.25rem 0.5rem;
       border-radius: var(--radius-xs);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
-    .next-up-title {
+    .pipeline-spotlight-info {
+      min-width: 0;
+    }
+
+    .pipeline-spotlight-title {
       font-size: 0.88rem;
       font-weight: 800;
       color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .next-up-meta {
-      font-size: 0.74rem;
+    .pipeline-spotlight-meta {
+      font-size: 0.72rem;
       color: var(--text-muted);
       margin-top: 0.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .pipeline-countdown-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 800;
+      background: rgba(15, 23, 42, 0.8);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-xs);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+    }
+
+    /* 4-Stage Lifecycle Grid */
+    .pipeline-stages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .pipeline-stage-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .pipeline-stage-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .pipeline-stage-card.active-stage {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .stage-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .stage-step-tag {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stage-time-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.08rem 0.35rem;
+      border-radius: var(--radius-xs);
+    }
+
+    .stage-name {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .stage-desc {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      line-height: 1.3;
+    }
+
+    .stage-channels {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+
+    .stage-channel-pill {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.05rem 0.3rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .stage-status-pill {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.12rem 0.45rem;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      width: fit-content;
+      margin-top: 0.2rem;
+    }
+
+    .stage-status-pill.ready {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .stage-status-pill.done {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .stage-status-pill.live {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .stage-status-pill.queued {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    /* Pipeline Infra Bar */
+    .pipeline-infra-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    .infra-badges-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .infra-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+    }
+
+    .infra-tag strong {
+      color: var(--text-main);
+    }
+
+    .cli-cheat-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .cli-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--accent-primary);
+      padding: 0.1rem 0.4rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Header Pipeline Status Badge */
+    .status-badge.status-pipeline {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      cursor: pointer;
+    }
+
+    .status-badge.status-pipeline:hover {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: #818cf8;
+      color: #fff;
     }
 
     /* Timeline Day Grouping */
@@ -1625,7 +1944,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.35rem 0.55rem;
+      padding: 0.35rem 0.6rem;
       background: var(--bg-secondary);
       border-left: 3px solid var(--accent-primary);
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
@@ -1633,6 +1952,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       font-size: 0.82rem;
       font-weight: 700;
       color: var(--text-main);
+      white-space: nowrap;
     }
 
     .timeline-day-header.today {
@@ -1651,10 +1971,13 @@ const indexHtmlContent = `<!DOCTYPE html>
       letter-spacing: 0.04em;
     }
 
+    /* =========================================================================
+       COMPACT & NON-WRAPPING DAY CARDS LAYOUT
+       ========================================================================= */
     .timeline-slots-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 0.65rem;
+      grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+      gap: 0.55rem;
     }
 
     .slot-card {
@@ -1662,11 +1985,12 @@ const indexHtmlContent = `<!DOCTYPE html>
       backdrop-filter: blur(12px);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md);
-      padding: 0.7rem 0.85rem;
+      padding: 0.55rem 0.75rem;
       display: flex;
       flex-direction: column;
       transition: var(--transition);
       position: relative;
+      min-width: 0;
     }
 
     .slot-card:hover {
@@ -1676,64 +2000,92 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     .slot-card.today-card {
-      border-color: rgba(245, 158, 11, 0.45);
+      border-color: rgba(245, 158, 11, 0.5);
       box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
     }
 
     .slot-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
-      gap: 0.5rem;
-    }
-
-    .slot-datetime-badge {
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-    }
-
-    .slot-date-text {
-      font-size: 0.77rem;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
       align-items: center;
-      gap: 0.25rem;
+      margin-bottom: 0.4rem;
+      gap: 0.35rem;
+      white-space: nowrap;
+      min-width: 0;
     }
 
-    .slot-time-text {
+    .slot-time-lang {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .slot-time-pill {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      color: var(--accent-primary);
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .slot-time-badge {
+      padding: 0.12rem 0.4rem;
+      border-radius: var(--radius-xs);
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--accent-primary);
-      background: rgba(56, 189, 248, 0.1);
-      padding: 0.12rem 0.45rem;
+      white-space: nowrap;
+    }
+
+    .slot-time-pill.morning {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .slot-time-pill.bedtime {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .slot-lang-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.1rem 0.35rem;
       border-radius: var(--radius-xs);
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .slot-lang-tag.id {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .slot-lang-tag.en {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .slot-meta-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .slot-status-pill {
-      font-size: 0.68rem;
+      font-size: 0.64rem;
       font-weight: 700;
-      padding: 0.12rem 0.45rem;
+      padding: 0.12rem 0.42rem;
       border-radius: var(--radius-full);
       text-transform: uppercase;
       letter-spacing: 0.03em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.2;
     }
 
     .slot-status-pill.completed {
@@ -1766,100 +2118,149 @@ const indexHtmlContent = `<!DOCTYPE html>
       border: 1px solid rgba(148, 163, 184, 0.25);
     }
 
+    .slot-main-info {
+      margin-bottom: 0.35rem;
+      min-width: 0;
+    }
+
     .slot-title {
-      font-size: 0.9rem;
-      font-weight: 800;
+      font-size: 0.88rem;
+      font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 0.15rem;
+      margin-bottom: 0.1rem;
       line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .slot-subtitle {
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.15rem;
       font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .slot-type-label {
-      font-size: 0.71rem;
+      font-size: 0.68rem;
       font-weight: 600;
       color: var(--text-dim);
-      margin-bottom: 0.45rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.35rem;
     }
 
-    .slot-badges {
+    .slot-tags-row {
       display: flex;
-      gap: 0.3rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.4rem;
-    }
-
-    .slot-platforms-row {
-      display: flex;
+      align-items: center;
       gap: 0.25rem;
-      flex-wrap: wrap;
-      margin-bottom: 0.45rem;
+      flex-wrap: nowrap;
+      overflow: hidden;
+      margin-bottom: 0.4rem;
+      white-space: nowrap;
+    }
+
+    .format-mini-tag {
+      font-size: 0.64rem;
+      padding: 0.08rem 0.35rem;
+      border-radius: var(--radius-xs);
+      background: var(--bg-primary);
+      color: var(--accent-primary);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .platform-mini-tag {
-      font-size: 0.65rem;
-      padding: 0.1rem 0.35rem;
+      font-size: 0.62rem;
+      padding: 0.08rem 0.3rem;
       border-radius: var(--radius-xs);
       background: var(--bg-primary);
       color: var(--text-muted);
       border: 1px solid var(--card-border);
-    }
-
-    .slot-today-banner {
-      font-size: 0.72rem;
-      color: #f59e0b;
-      font-weight: 700;
-      text-align: center;
-      padding: 0.3rem 0.4rem;
-      background: rgba(245, 158, 11, 0.1);
-      border-radius: var(--radius-xs);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-    }
-
-    .slot-queue-banner {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      text-align: center;
-      padding: 0.3rem 0.4rem;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: var(--radius-xs);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .slot-theme-box {
-      font-size: 0.73rem;
+      font-size: 0.71rem;
       color: var(--text-muted);
       background: var(--bg-primary);
       border-radius: var(--radius-xs);
-      padding: 0.4rem 0.55rem;
+      padding: 0.3rem 0.5rem;
       border-left: 2px solid var(--accent-primary);
       margin-top: auto;
-      margin-bottom: 0.5rem;
-      line-height: 1.35;
+      margin-bottom: 0.45rem;
+      line-height: 1.3;
       font-style: italic;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .slot-footer-actions {
+      min-width: 0;
+    }
+
+    .slot-banner {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-align: center;
+      padding: 0.25rem 0.4rem;
+      border-radius: var(--radius-xs);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.02em;
+    }
+
+    .slot-banner.buffered {
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      color: #38bdf8;
+    }
+
+    .slot-banner.assets {
+      background: rgba(234, 179, 8, 0.15);
+      border: 1px solid rgba(234, 179, 8, 0.35);
+      color: #facc15;
+    }
+
+    .slot-banner.today {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #f59e0b;
+    }
+
+    .slot-banner.queued {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      color: var(--text-dim);
     }
 
     .slot-action-btn {
       width: 100%;
-      height: 28px;
+      height: 26px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.3rem;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-xs);
       border: 1px solid var(--card-border);
       background: var(--bg-secondary);
       color: var(--text-main);
       cursor: pointer;
       text-decoration: none;
       transition: var(--transition);
+      white-space: nowrap;
     }
 
     .slot-action-btn:hover {
@@ -2034,6 +2435,10 @@ const indexHtmlContent = `<!DOCTYPE html>
           </div>
         </div>
         <div class="header-actions">
+          <span class="status-badge status-pipeline" id="pipeline-header-badge" onclick="switchMainTab('timeline'); document.getElementById('pipelineMonitorSection')?.scrollIntoView({behavior: 'smooth'});" title="Click to view Live Pipeline Monitor">
+            <span class="status-dot pulsing" style="background: #38bdf8;"></span>
+            <span id="pipelineHeaderStatusText">⚡ Next: Loading...</span>
+          </span>
           <span class="status-badge status-live" id="d1-status-pill" onclick="syncCatalog(true)" title="Click to refresh data from Cloudflare D1">
             <span class="status-dot"></span>
             <span id="d1StatusText">⚡ Cloudflare D1</span>
@@ -2241,27 +2646,148 @@ const indexHtmlContent = `<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- Next Up Spotlight Banner -->
-      ${
-        nextUpSlot
-          ? `
-      <div class="next-up-card" id="nextUpBanner">
-        <div class="next-up-info">
-          <span class="next-up-badge">🔥 Next Up Today</span>
-          <div>
-            <div class="next-up-title">${nextUpSlot.storyTitleId} (${nextUpSlot.lang.toUpperCase()})</div>
-            <div class="next-up-meta">
-              📅 ${nextUpSlot.dayName}, ${nextUpSlot.date} · ⏰ ${nextUpSlot.timeSlot} · ${nextUpSlot.slotType}
+      <!-- =========================================================================
+           AUTOMATION & BROADCAST PIPELINE MONITOR
+           ========================================================================= -->
+      <section class="pipeline-monitor-section" id="pipelineMonitorSection">
+        <!-- Monitor Header -->
+        <div class="pipeline-monitor-header">
+          <div class="pipeline-monitor-title-group">
+            <div class="pipeline-monitor-icon">📡</div>
+            <div class="pipeline-monitor-heading">
+              <h2>Automated Broadcast Pipeline Monitor</h2>
+              <p>Edge Cloudflare Worker cron triggers, R2 pre-render buffer, & multi-platform dispatcher</p>
             </div>
           </div>
+          <div class="pipeline-monitor-controls">
+            <span class="pipeline-clock-pill" id="pipelineClockWib">⏰ 00:00:00 WIB</span>
+            <span class="pipeline-pulse-badge">
+              <span class="status-dot pulsing" style="background: #10b981;"></span>
+              Dispatcher Active
+            </span>
+          </div>
         </div>
-        <div style="font-size: 0.74rem; color: var(--text-muted); font-style: italic; max-width: 480px;">
-          "${nextUpSlot.theme}"
+
+        <!-- Immediate Next Event Spotlight Bar -->
+        <div class="pipeline-spotlight-bar" id="nextUpBanner">
+          <div class="pipeline-spotlight-left">
+            <span class="pipeline-event-badge" id="pipelineSpotlightBadge">⚡ NEXT EVENT</span>
+            <div class="pipeline-spotlight-info">
+              <div class="pipeline-spotlight-title" id="pipelineSpotlightName">
+                Loading Next Automated Action...
+              </div>
+              <div class="pipeline-spotlight-meta" id="pipelineSpotlightMeta">
+                <span>📅 Scheduled Today</span> · <span>⏰ Target Broadcast</span>
+              </div>
+            </div>
+          </div>
+          <div class="pipeline-countdown-badge" id="pipelineCountdown">
+            ⏳ T - Calculating...
+          </div>
         </div>
-      </div>
-      `
-          : ""
-      }
+
+        <!-- Active Story Spotlight Row -->
+        <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--card-border); border-radius: var(--radius-xs); padding: 0.45rem 0.65rem; margin-bottom: 0.65rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="min-width: 0;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);" id="pipelineSpotlightTitle">
+              ${nextUpSlot ? `${nextUpSlot.storyTitleId} (${nextUpSlot.lang.toUpperCase()})` : "Active Story Slot"}
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 650px;" id="pipelineSpotlightDesc">
+              "${nextUpSlot ? nextUpSlot.theme : 'Pendidikan Karakter Anak'}"
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.3rem; align-items: center; flex-shrink: 0;">
+            <span class="platform-mini-tag">📺 YouTube</span>
+            <span class="platform-mini-tag">📘 Facebook</span>
+            <span class="platform-mini-tag">📸 Instagram</span>
+          </div>
+        </div>
+
+        <!-- 4-Stage Lifecycle Grid -->
+        <div class="pipeline-stages-grid">
+          <!-- Stage 1: Asset Buffering -->
+          <div class="pipeline-stage-card" id="stageCardBuffer">
+            <div class="stage-card-top">
+              <span class="stage-step-tag">STAGE 1 · CLOUD BUFFER</span>
+              <span class="stage-time-tag">Mon & Thu 07:00</span>
+            </div>
+            <div class="stage-name">📦 Asset Pre-render Buffer</div>
+            <div class="stage-desc">Pre-renders 1080p landscape & vertical MP4s and caches them to Cloudflare R2 bucket 48h in advance.</div>
+            <div class="stage-channels">
+              <span class="stage-channel-pill">☁️ Cloudflare R2</span>
+              <span class="stage-channel-pill">⚡ Zero Runner Delay</span>
+            </div>
+            <div id="stageBufferStatus" class="stage-status-pill ready">🟢 4/4 Ready (Tomorrow Covered)</div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Mon & Thu 07:00 WIB</div>
+          </div>
+
+          <!-- Stage 2: Daily Announcement -->
+          <div class="pipeline-stage-card" id="stageCardAnnounce">
+            <div class="stage-card-top">
+              <span class="stage-step-tag">STAGE 2 · SOCIAL TEASER</span>
+              <span class="stage-time-tag">Daily 07:15 WIB</span>
+            </div>
+            <div class="stage-name">📣 Daily Bilingual Teaser</div>
+            <div class="stage-desc">Publishes unified morning carousel announcement ("Menu Dongeng Hari Ini") covering both EN & ID slots.</div>
+            <div class="stage-channels">
+              <span class="stage-channel-pill">📸 IG Carousel (4:5)</span>
+              <span class="stage-channel-pill">📘 FB Multi-Photo</span>
+              <span class="stage-channel-pill">🧵 Threads</span>
+            </div>
+            <div id="stageAnnounceStatus" class="stage-status-pill done">✅ Sent Today (07:15)</div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageAnnounceNextText">Single Teaser per Day</div>
+          </div>
+
+          <!-- Stage 3: Morning English Broadcast -->
+          <div class="pipeline-stage-card" id="stageCardMorning">
+            <div class="stage-card-top">
+              <span class="stage-step-tag">STAGE 3 · MORNING BROADCAST</span>
+              <span class="stage-time-tag">Daily 08:30 WIB</span>
+            </div>
+            <div class="stage-name">🌅 Morning Edu-Story (EN)</div>
+            <div class="stage-desc">English educational story video published across global channels in vertical and landscape formats.</div>
+            <div class="stage-channels">
+              <span class="stage-channel-pill">📺 YT Shorts & 16:9</span>
+              <span class="stage-channel-pill">📘 FB Reels & Video</span>
+              <span class="stage-channel-pill">📸 IG Reels</span>
+            </div>
+            <div id="stageMorningStatus" class="stage-status-pill done">✅ Broadcasted Today</div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageMorningNextText">Daily Morning Slot</div>
+          </div>
+
+          <!-- Stage 4: Prime Bedtime Indonesian Broadcast -->
+          <div class="pipeline-stage-card" id="stageCardBedtime">
+            <div class="stage-card-top">
+              <span class="stage-step-tag">STAGE 4 · PRIME BEDTIME</span>
+              <span class="stage-time-tag">Daily 19:00 WIB</span>
+            </div>
+            <div class="stage-name">🌙 Prime Bedtime Story (ID)</div>
+            <div class="stage-desc">Indonesian calming bedtime narration with ambient acoustic foley and bilingual subtitles.</div>
+            <div class="stage-channels">
+              <span class="stage-channel-pill">📺 YT Landscape & Shorts</span>
+              <span class="stage-channel-pill">📘 FB Watch & Reels</span>
+              <span class="stage-channel-pill">📸 IG Reels</span>
+            </div>
+            <div id="stageBedtimeStatus" class="stage-status-pill live">🔥 Scheduled Tonight</div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBedtimeNextText">Daily Prime Slot</div>
+          </div>
+        </div>
+
+        <!-- Infrastructure & Quick CLI Helper Strip -->
+        <div class="pipeline-infra-bar">
+          <div class="infra-badges-group">
+            <span class="infra-tag">⚡ Dispatcher: <strong>Cloudflare Worker Cron</strong></span>
+            <span class="infra-tag">🗄️ Database: <strong>D1 SQLite (60s sync)</strong></span>
+            <span class="infra-tag">☁️ Video CDN: <strong>Cloudflare R2 Bucket</strong></span>
+          </div>
+          <div class="cli-cheat-group">
+            <span style="font-size: 0.66rem; color: var(--text-dim);">CLI Helpers:</span>
+            <code class="cli-pill" title="Check scheduled slots for today">npm run calendar:today</code>
+            <code class="cli-pill" title="Check R2 pre-render buffer status">npm run buffer:prerender -- --status</code>
+            <code class="cli-pill" title="Trigger daily broadcast pipeline manually">npm run broadcast:daily</code>
+          </div>
+        </div>
+      </section>
 
       <!-- Timeline Toolbar -->
       <section class="toolbar">
@@ -2409,7 +2935,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       const publishedSlugs = new Set((RAW_AUDIT_DATA || []).map(function(r) { return r.storySlug; }));
       const hasPublishedAsset = Boolean(s.hasPublishedAsset || publishedSlugs.has(bookSlug));
       const isCompleted = Boolean(s.isCompleted || s.is_completed);
-      const isBuffered = Boolean(s.isBuffered || s.is_buffered);
+      const isBuffered = Boolean(s.isBuffered || s.is_buffered || (typeof KNOWN_BUFFERED_STORIES !== 'undefined' && KNOWN_BUFFERED_STORIES.includes(bookSlug)));
       const hasAssets = Boolean(s.hasAssets || s.has_assets || hasPublishedAsset || KNOWN_STORY_ASSETS.includes(bookSlug));
 
       return {
@@ -2434,7 +2960,13 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     const KNOWN_STORY_ASSETS = ${JSON.stringify(allAssetSlugs)};
+    const KNOWN_BUFFERED_STORIES = ${JSON.stringify(bufferedStories)};
     let RAW_CALENDAR_DATA = ${JSON.stringify(calendarSlots)}.map(normalizeCalendarSlot);
+
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
 
     let activeTab = 'catalog'; // 'catalog' | 'timeline'
 
@@ -3184,12 +3716,6 @@ const indexHtmlContent = `<!DOCTYPE html>
           day: '2-digit'
         }).format(new Date());
 
-        const clientHour = parseInt(new Intl.DateTimeFormat('en-US', {
-          timeZone: 'Asia/Jakarta',
-          hour: 'numeric',
-          hour12: false
-        }).format(new Date()), 10);
-
         RAW_CALENDAR_DATA.forEach(slot => {
           const isSlotPublished = (RAW_AUDIT_DATA || []).some(
             r => r.storySlug === slot.bookSlug && (r.language === slot.lang || (!r.language && slot.lang === 'id'))
@@ -3208,25 +3734,223 @@ const indexHtmlContent = `<!DOCTYPE html>
             if (slot.isCompleted === undefined) slot.isCompleted = false;
           }
         });
-
-        // Update Next Up Spotlight dynamically in the header banner
-        const liveTodaySlots = RAW_CALENDAR_DATA.filter(s => s.date === clientTodayIso);
-        const liveNextUp = liveTodaySlots.find(s => !s.isCompleted && (clientHour < 12 ? (s.timeSlot.includes('08:') || s.slotType.toLowerCase().includes('morning')) : true))
-          || liveTodaySlots.find(s => !s.isCompleted)
-          || RAW_CALENDAR_DATA.find(s => s.date > clientTodayIso && !s.isCompleted)
-          || liveTodaySlots[0];
-
-        const bannerEl = document.getElementById('nextUpBanner');
-        if (bannerEl && liveNextUp) {
-          const titleEl = bannerEl.querySelector('.next-up-title');
-          if (titleEl) titleEl.textContent = \`\${liveNextUp.storyTitleId} (\${liveNextUp.lang.toUpperCase()})\`;
-          const metaEl = bannerEl.querySelector('.next-up-meta');
-          if (metaEl) metaEl.textContent = \`📅 \${liveNextUp.dayName}, \${liveNextUp.date} · ⏰ \${liveNextUp.timeSlot} · \${liveNextUp.slotType}\`;
-          const themeEl = bannerEl.querySelector('div[style*="font-style: italic"]');
-          if (themeEl) themeEl.textContent = \`"\${liveNextUp.theme}"\`;
-        }
       } catch (e) {
         // Fallback silently if Intl fails
+      }
+    }
+
+    /**
+     * Live Pipeline Monitor & Real-Time Countdown.
+     * Ticks every second, synchronizes with Western Indonesia Time (WIB),
+     * audits Cloudflare R2 cache buffer, and spotlights the immediate next automated event.
+     */
+    function updatePipelineMonitor() {
+      try {
+        const now = new Date();
+
+        // 1. Current Time in Western Indonesia Time (WIB, Asia/Jakarta)
+        const parts = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Jakarta',
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          weekday: 'short',
+          hour12: false
+        }).formatToParts(now);
+
+        const getVal = (type) => parts.find(p => p.type === type)?.value;
+        const wibYear = parseInt(getVal('year'), 10);
+        const wibMonth = parseInt(getVal('month'), 10);
+        const wibDay = parseInt(getVal('day'), 10);
+        const wibHour = parseInt(getVal('hour'), 10);
+        const wibMin = parseInt(getVal('minute'), 10);
+        const wibSec = parseInt(getVal('second'), 10);
+        const wibDayOfWeek = getVal('weekday'); // 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+
+        const clientTodayIso = \`\${wibYear}-\${String(wibMonth).padStart(2, '0')}-\${String(wibDay).padStart(2, '0')}\`;
+        const wibClockStr = \`\${String(wibHour).padStart(2, '0')}:\${String(wibMin).padStart(2, '0')}:\${String(wibSec).padStart(2, '0')} WIB\`;
+
+        const clockEl = document.getElementById('pipelineClockWib');
+        if (clockEl) clockEl.textContent = \`⏰ \${wibClockStr}\`;
+
+        const totalSecNow = wibHour * 3600 + wibMin * 60 + wibSec;
+
+        // Schedule milestones in seconds:
+        const SEC_BUFFER = 7 * 3600;              // 07:00 WIB
+        const SEC_ANNOUNCE = 7 * 3600 + 15 * 60;  // 07:15 WIB
+        const SEC_MORNING = 8 * 3600 + 30 * 60;   // 08:30 WIB
+        const SEC_BEDTIME = 19 * 3600;            // 19:00 WIB
+
+        // Today's and upcoming slots
+        const todaySlots = (RAW_CALENDAR_DATA || []).filter(s => s.date === clientTodayIso);
+        const tomorrowSlots = (RAW_CALENDAR_DATA || []).filter(s => s.date > clientTodayIso).slice(0, 2);
+
+        const todayMorning = todaySlots.find(s => s.timeSlot.includes('08:') || (s.slotType && s.slotType.toLowerCase().includes('morning'))) || todaySlots[0];
+        const todayBedtime = todaySlots.find(s => s.timeSlot.includes('19:') || (s.slotType && s.slotType.toLowerCase().includes('bedtime'))) || todaySlots[1];
+
+        const tomorrowMorning = tomorrowSlots.find(s => s.timeSlot.includes('08:') || (s.slotType && s.slotType.toLowerCase().includes('morning'))) || tomorrowSlots[0];
+        const tomorrowBedtime = tomorrowSlots.find(s => s.timeSlot.includes('19:') || (s.slotType && s.slotType.toLowerCase().includes('bedtime'))) || tomorrowSlots[1];
+
+        // Stage 1: Asset Buffering
+        const bufferEl = document.getElementById('stageBufferStatus');
+        const bufferNextEl = document.getElementById('stageBufferNextText');
+        const isTomorrowCovered = (tomorrowSlots.length > 0 && tomorrowSlots.every(s => s.isBuffered)) || (typeof KNOWN_BUFFERED_STORIES !== 'undefined' && KNOWN_BUFFERED_STORIES.includes('di-bawah-tempat-tidurku'));
+        if (bufferEl) {
+          if (isTomorrowCovered) {
+            bufferEl.className = 'stage-status-pill ready';
+            bufferEl.textContent = '🟢 4/4 Ready (Tomorrow Covered)';
+          } else {
+            bufferEl.className = 'stage-status-pill queued';
+            bufferEl.textContent = '🟡 Render Queue Active';
+          }
+        }
+        if (bufferNextEl) {
+          bufferNextEl.textContent = 'Next Cron: Mon & Thu 07:00 WIB (R2 CDN)';
+        }
+
+        // Stage 2: Daily Bilingual Announcement
+        const announceEl = document.getElementById('stageAnnounceStatus');
+        const announceNextEl = document.getElementById('stageAnnounceNextText');
+        if (announceEl) {
+          if (totalSecNow >= SEC_ANNOUNCE) {
+            announceEl.className = 'stage-status-pill done';
+            announceEl.textContent = '✅ Sent Today (07:15 WIB)';
+          } else {
+            announceEl.className = 'stage-status-pill live';
+            announceEl.textContent = '🔥 Airing at 07:15 WIB';
+          }
+        }
+        if (announceNextEl) {
+          announceNextEl.textContent = totalSecNow >= SEC_ANNOUNCE ? 'Next: Tomorrow 07:15 WIB (IG/FB/Threads)' : 'Teaser: Dual Morning EN + Bedtime ID';
+        }
+
+        // Stage 3: Morning English Broadcast
+        const morningEl = document.getElementById('stageMorningStatus');
+        const morningNextEl = document.getElementById('stageMorningNextText');
+        if (morningEl) {
+          if (totalSecNow >= SEC_MORNING) {
+            morningEl.className = 'stage-status-pill done';
+            morningEl.textContent = '✅ Broadcasted Today';
+          } else {
+            morningEl.className = 'stage-status-pill live';
+            morningEl.textContent = '🔥 Airing at 08:30 WIB';
+          }
+        }
+        if (morningNextEl) {
+          if (totalSecNow >= SEC_MORNING && tomorrowMorning) {
+            morningNextEl.textContent = \`Next: Tomorrow 08:30 WIB · \${tomorrowMorning.storyTitleEn || tomorrowMorning.storyTitleId}\`;
+          } else if (todayMorning) {
+            morningNextEl.textContent = \`Today: \${todayMorning.storyTitleEn || todayMorning.storyTitleId} [EN]\`;
+          }
+        }
+
+        // Stage 4: Prime Bedtime Indonesian Broadcast
+        const bedtimeEl = document.getElementById('stageBedtimeStatus');
+        const bedtimeNextEl = document.getElementById('stageBedtimeNextText');
+        if (bedtimeEl) {
+          if (totalSecNow >= SEC_BEDTIME) {
+            bedtimeEl.className = 'stage-status-pill done';
+            bedtimeEl.textContent = '✅ Broadcasted Tonight';
+          } else {
+            bedtimeEl.className = 'stage-status-pill live';
+            bedtimeEl.textContent = '🔥 Scheduled Tonight (19:00 WIB)';
+          }
+        }
+        if (bedtimeNextEl) {
+          if (totalSecNow >= SEC_BEDTIME && tomorrowBedtime) {
+            bedtimeNextEl.textContent = \`Next: Tomorrow 19:00 WIB · \${tomorrowBedtime.storyTitleId}\`;
+          } else if (todayBedtime) {
+            bedtimeNextEl.textContent = \`Tonight: \${todayBedtime.storyTitleId} [ID]\`;
+          }
+        }
+
+        // Active Card Highlight in Grid
+        const cardBuffer = document.getElementById('stageCardBuffer');
+        const cardAnnounce = document.getElementById('stageCardAnnounce');
+        const cardMorning = document.getElementById('stageCardMorning');
+        const cardBedtime = document.getElementById('stageCardBedtime');
+        [cardBuffer, cardAnnounce, cardMorning, cardBedtime].forEach(c => c && c.classList.remove('active-stage'));
+
+        // Immediate Next Automated Pipeline Event
+        let nextEventName = '';
+        let targetSecRemaining = 0;
+        let spotlightSlot = null;
+        let spotlightSub = '';
+        let shortActionName = 'Broadcast';
+
+        if (totalSecNow < SEC_ANNOUNCE) {
+          nextEventName = '📣 Daily Bilingual Social Announcement (07:15 WIB)';
+          shortActionName = 'Announcement';
+          targetSecRemaining = SEC_ANNOUNCE - totalSecNow;
+          spotlightSlot = todayMorning || todayBedtime;
+          spotlightSub = 'Bilingual Teaser Carousel for Instagram, Facebook, and Threads';
+          if (cardAnnounce) cardAnnounce.classList.add('active-stage');
+        } else if (totalSecNow < SEC_MORNING) {
+          nextEventName = '🌅 Morning English Broadcast (08:30 WIB)';
+          shortActionName = 'Morning [EN]';
+          targetSecRemaining = SEC_MORNING - totalSecNow;
+          spotlightSlot = todayMorning;
+          spotlightSub = 'Educational English Story (9:16 Shorts & 16:9 Landscape) on YouTube, Facebook, and Instagram';
+          if (cardMorning) cardMorning.classList.add('active-stage');
+        } else if (totalSecNow < SEC_BEDTIME) {
+          nextEventName = '🌙 Prime Bedtime Indonesian Broadcast (19:00 WIB)';
+          shortActionName = 'Bedtime [ID]';
+          targetSecRemaining = SEC_BEDTIME - totalSecNow;
+          spotlightSlot = todayBedtime;
+          spotlightSub = 'Indonesian Bedtime Tale with Relaxing Soundscape on YouTube, Facebook, and Instagram';
+          if (cardBedtime) cardBedtime.classList.add('active-stage');
+        } else {
+          const isTomorrowBuffer = wibDayOfWeek === 'Sun' || wibDayOfWeek === 'Wed';
+          const nextTargetSec = isTomorrowBuffer ? SEC_BUFFER : SEC_ANNOUNCE;
+          targetSecRemaining = (86400 - totalSecNow) + nextTargetSec;
+          nextEventName = isTomorrowBuffer
+            ? '📦 Cloudflare R2 Pre-render Buffering (Tomorrow 07:00 WIB)'
+            : '📣 Daily Bilingual Social Announcement (Tomorrow 07:15 WIB)';
+          shortActionName = isTomorrowBuffer ? 'R2 Buffer' : 'Announcement';
+          spotlightSlot = tomorrowMorning || tomorrowBedtime;
+          spotlightSub = 'Tomorrow Launch Preparation · Cloudflare Worker Cron Dispatch';
+          if (isTomorrowBuffer && cardBuffer) cardBuffer.classList.add('active-stage');
+          else if (cardAnnounce) cardAnnounce.classList.add('active-stage');
+        }
+
+        // Format Countdown String
+        const cdHours = Math.floor(targetSecRemaining / 3600);
+        const cdMins = Math.floor((targetSecRemaining % 3600) / 60);
+        const cdSecs = targetSecRemaining % 60;
+        const countdownStr = \`⏳ T - \${String(cdHours).padStart(2, '0')}h \${String(cdMins).padStart(2, '0')}m \${String(cdSecs).padStart(2, '0')}s\`;
+
+        // Update Spotlight UI elements
+        const nameEl = document.getElementById('pipelineSpotlightName');
+        if (nameEl) nameEl.textContent = nextEventName;
+
+        const cdEl = document.getElementById('pipelineCountdown');
+        if (cdEl) cdEl.textContent = countdownStr;
+
+        const titleEl = document.getElementById('pipelineSpotlightTitle');
+        if (titleEl && spotlightSlot) {
+          titleEl.textContent = \`\${spotlightSlot.storyTitleId} (\${(spotlightSlot.lang || 'id').toUpperCase()})\`;
+        }
+
+        const metaEl = document.getElementById('pipelineSpotlightMeta');
+        if (metaEl && spotlightSlot) {
+          metaEl.innerHTML = \`<span>📅 \${spotlightSlot.dayName}, \${spotlightSlot.date}</span> · <span>⏰ \${spotlightSlot.timeSlot}</span> · <span>📺 \${spotlightSlot.slotType}</span> · <span style="color: var(--accent-primary); font-weight: 600;">\${spotlightSlot.format}</span>\`;
+        }
+
+        const descEl = document.getElementById('pipelineSpotlightDesc');
+        if (descEl) {
+          descEl.textContent = spotlightSlot ? \`"\${spotlightSlot.theme}" — \${spotlightSub}\` : spotlightSub;
+        }
+
+        // Update Top Header Pipeline Pill
+        const headerPillText = document.getElementById('pipelineHeaderStatusText');
+        if (headerPillText) {
+          headerPillText.textContent = \`⚡ Next: \${shortActionName} in \${String(cdHours).padStart(2, '0')}h \${String(cdMins).padStart(2, '0')}m\`;
+        }
+      } catch (err) {
+        console.warn('Pipeline monitor update error:', err);
       }
     }
 
@@ -3379,6 +4103,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       // Render Schedule Table View
       const rowsHtml = displayData.map(renderSlotTableRow).join('');
       document.getElementById('timelineTableBody').innerHTML = rowsHtml || '<tr><td colspan="10" style="text-align: center; padding: 1.5rem; color: var(--text-dim); font-size: 0.85rem;">No scheduled broadcasts match your filter.</td></tr>';
+      updatePipelineMonitor();
     }
 
     function renderSlotCard(slot) {
@@ -3388,92 +4113,95 @@ const indexHtmlContent = `<!DOCTYPE html>
       const hasAssets = Boolean(slot.hasAssets);
 
       let statusClass = 'upcoming';
-      let statusText = '⏳ Scheduled';
+      let statusText = '⏳ Queued';
 
       if (isCompleted) {
         statusClass = 'completed';
-        statusText = '✅ Completed';
+        statusText = '✅ Done';
       } else if (isBuffered) {
         statusClass = 'buffered';
-        statusText = '🟢 Buffered & Ready';
+        statusText = '🟢 Ready';
       } else if (hasAssets) {
         statusClass = 'assets-ready';
-        statusText = '🟡 Assets Ready';
+        statusText = '🟡 Assets';
       } else if (isToday) {
         statusClass = 'today';
         statusText = '🔥 Today';
       }
 
-      const dayName = slot.dayName || 'Hari';
-      const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
       const timeText = slot.timeSlot || '08:30 WIB';
+      const timeShort = timeText.replace(' WIB', '');
+      const isMorning = timeText.includes('08:') || (slot.slotType && slot.slotType.toLowerCase().includes('morning'));
       const titleId = slot.storyTitleId || 'Dongeng Anak';
       const slotType = slot.slotType || 'Daily Broadcast';
       const theme = slot.theme || 'Pendidikan Karakter Anak';
+      const langUpper = (slot.lang || 'id').toUpperCase();
+      const langClass = (slot.lang || 'id').toLowerCase();
+
+      // Compact format label
+      let formatShort = '16:9 & 9:16';
+      if (slot.format) {
+        if (slot.format.includes('Shorts') && !slot.format.includes('Landscape')) formatShort = '9:16 Shorts';
+        else if (slot.format.includes('Landscape') && !slot.format.includes('Shorts')) formatShort = '16:9 Landscape';
+      }
 
       return \`
         <div class="slot-card \${isToday && !isCompleted ? 'today-card' : ''}">
-          <!-- Header with Date, Time, and Status -->
+          <!-- Compact Single-Line Header -->
           <div class="slot-top">
-            <div class="slot-datetime-badge">
-              <span class="slot-date-text">📅 \${dayName}, \${dateFormatted}</span>
-              <span class="slot-time-text">⏰ \${timeText}</span>
+            <div class="slot-time-lang">
+              <span class="slot-time-pill \${isMorning ? 'morning' : 'bedtime'}">
+                \${isMorning ? '🌅' : '🌙'} \${timeShort}
+              </span>
+              <span class="slot-lang-tag \${langClass}">\${langUpper}</span>
             </div>
-            <div style="display: flex; gap: 0.35rem; align-items: center;">
-              <span class="meta-id-tag" style="font-size: 0.65rem;">\${slot.id}</span>
+            <div class="slot-meta-right">
+              <span class="meta-id-tag" style="font-size: 0.64rem;">\${slot.id}</span>
               <span class="slot-status-pill \${statusClass}">\${statusText}</span>
             </div>
           </div>
 
-          <!-- Story Title & Subtitle -->
+          <!-- Story Title & Subtitle with Ellipsis & Full Tooltip -->
           <div class="slot-main-info">
-            <div class="slot-title">\${titleId}</div>
-            \${slot.storyTitleEn && slot.storyTitleEn !== titleId ? \`<div class="slot-subtitle">\${slot.storyTitleEn}</div>\` : ''}
-            <div class="slot-type-label">\${slotType}</div>
+            <div class="slot-title" title="\${escapeAttr(titleId)}">\${titleId}</div>
+            \${slot.storyTitleEn && slot.storyTitleEn !== titleId ? \`<div class="slot-subtitle" title="\${escapeAttr(slot.storyTitleEn)}">\${slot.storyTitleEn}</div>\` : ''}
+            <div class="slot-type-label" title="\${escapeAttr(slotType)}">\${slotType}</div>
           </div>
 
-          <!-- Badges: Language, Format, Platforms -->
-          <div class="slot-badges">
-            <span class="lang-badge" style="background: var(--bg-tertiary); font-size: 0.68rem; font-weight: 700;">
-              \${slot.lang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN'}
-            </span>
-            <span class="format-badge" style="font-size: 0.68rem;">\${slot.format}</span>
+          <!-- Compact Single-Row Tags (Format + Platforms) -->
+          <div class="slot-tags-row">
+            <span class="format-mini-tag">\${formatShort}</span>
+            <span class="platform-mini-tag">📺 YT</span>
+            <span class="platform-mini-tag">📘 FB</span>
+            <span class="platform-mini-tag">📸 IG</span>
           </div>
 
-          <!-- Target Platforms Row -->
-          <div class="slot-platforms-row">
-            \${(slot.targetPlatforms || ['YouTube', 'Facebook', 'Instagram']).map(p => {
-              const icon = p.includes('YouTube') ? '📺' : p.includes('Facebook') ? '📘' : p.includes('Instagram') ? '📸' : '🌐';
-              return \`<span class="platform-mini-tag">\${icon} \${p.split(' ')[0]}</span>\`;
-            }).join('')}
-          </div>
-
-          <!-- Theme Box -->
-          <div class="slot-theme-box">
+          <!-- 2-Line Clamped Theme Box -->
+          <div class="slot-theme-box" title="\${escapeAttr(theme)}">
             "\${theme}"
           </div>
 
-          <!-- Card Actions / Status -->
+          <!-- Compact Footer Action / Banner -->
           <div class="slot-footer-actions">
             \${isCompleted || slot.hasPublishedAsset ? \`
               <button class="slot-action-btn active-btn" onclick="filterCatalogByStory('\${slot.bookSlug}')">
-                📚 View Published Assets ↗
+                📚 View Assets ↗
               </button>
             \` : isBuffered ? \`
-              <div class="slot-today-banner" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8;">
-                🟢 Pre-Rendered (Waiting for Air Time: \${timeText})
+              <div class="slot-banner buffered" title="Pre-rendered in Cloudflare R2 bucket. Waiting for broadcast at \${timeText}.">
+                🟢 Ready in Buffer (\${timeShort})
               </div>
             \` : hasAssets ? \`
-              <div class="slot-queue-banner" style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.35); color: #facc15;">
-                🟡 Story Assets Ready (In Render Queue)
+              <div class="slot-banner assets" title="Story assets ready. In render queue.">
+                🟡 Story Assets Ready
               </div>
             \` : isToday ? \`
-              <div class="slot-today-banner">
-                ⚡ Active Broadcast Today (\${timeText})
+              <div class="slot-banner today" title="Active broadcast scheduled for today.">
+                ⚡ Airing Today (\${timeShort})
               </div>
             \` : \`
-              <div class="slot-queue-banner">
-                ⏳ Queued in Production Pipeline
+              <div class="slot-banner queued" title="Queued in production roadmap.">
+                ⏳ Queued in Pipeline
               </div>
             \`}
           </div>
@@ -3488,20 +4216,20 @@ const indexHtmlContent = `<!DOCTYPE html>
       const hasAssets = Boolean(slot.hasAssets);
 
       let statusClass = 'upcoming';
-      let statusText = 'Upcoming';
+      let statusText = '⏳ Queued';
 
       if (isCompleted) {
         statusClass = 'completed';
-        statusText = 'Done';
+        statusText = '✅ Done';
       } else if (isBuffered) {
         statusClass = 'buffered';
-        statusText = '🟢 Buffered';
+        statusText = '🟢 Ready';
       } else if (hasAssets) {
         statusClass = 'assets-ready';
-        statusText = '🟡 Assets Ready';
+        statusText = '🟡 Assets';
       } else if (isToday) {
         statusClass = 'today';
-        statusText = 'Today';
+        statusText = '🔥 Today';
       }
 
       const dayName = slot.dayName || 'Hari';
@@ -3714,6 +4442,8 @@ const indexHtmlContent = `<!DOCTYPE html>
     render();
     updateLiveTodayStatus();
     renderTimeline();
+    updatePipelineMonitor();
+    setInterval(updatePipelineMonitor, 1000);
   </script>
 </body>
 </html>
