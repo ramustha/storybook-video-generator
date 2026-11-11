@@ -13,6 +13,33 @@ function formatSlugToTitle(slug: string): string {
 }
 
 export async function onRequest(context: { env: Env; request: Request }) {
+  const method = context.request.method;
+
+  // Handle CORS preflight securely
+  if (method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+      },
+    });
+  }
+
+  // Reject unsupported mutation methods
+  if (method !== "GET" && method !== "HEAD") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: {
+        "Content-Type": "application/json",
+        "Allow": "GET, HEAD, OPTIONS",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
+
   const db = context.env.DB;
 
   if (!db) {
@@ -26,6 +53,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
+          "X-Content-Type-Options": "nosniff",
         },
       }
     );
@@ -297,21 +325,26 @@ export async function onRequest(context: { env: Env; request: Request }) {
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "public, max-age=60, s-maxage=120",
+          "Cache-Control": "public, max-age=0, s-maxage=10, must-revalidate",
+          "CDN-Cache-Control": "max-age=10",
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
         },
       }
     );
   } catch (err: any) {
+    console.error("Cloudflare D1 Catalog API error:", err);
     return new Response(
       JSON.stringify({
         success: false,
-        error: err.message,
+        error: "Failed to retrieve catalog data",
       }),
       {
         status: 500,
         headers: {
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
+          "X-Content-Type-Options": "nosniff",
         },
       }
     );

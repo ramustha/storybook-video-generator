@@ -261,6 +261,136 @@
   },
   {
     "id": "AUD-011",
+    "storySlug": "dengarkan-tubuhku",
+    "storyTitleId": "Mendengarkan Tubuhku",
+    "storyTitleEn": "Listen to My Body",
+    "category": "Standalone Story",
+    "platform": "YouTube",
+    "platformIcon": "youtube",
+    "language": "en",
+    "format": "Landscape (16:9)",
+    "aspectRatio": "16:9",
+    "videoTitle": "Bedtime Story: Listen to My Body | Animated Read-Aloud Picture Book 🌙✨",
+    "videoId": "0kYkY1RfU3g",
+    "videoUrl": "https://youtu.be/0kYkY1RfU3g",
+    "publishedAt": "2026-11-10T18:03:49.404Z",
+    "status": "published",
+    "privacy": "public",
+    "thumbnailUrl": "https://img.youtube.com/vi/0kYkY1RfU3g/hqdefault.jpg",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "license": "CC BY 4.0",
+    "sourceUrl": "https://storyweaver.org.in/stories/40-listen-to-my-body",
+    "views": 0,
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": "AUD-012",
+    "storySlug": "dengarkan-tubuhku",
+    "storyTitleId": "Mendengarkan Tubuhku",
+    "storyTitleEn": "Listen to My Body",
+    "category": "Standalone Story",
+    "platform": "YouTube",
+    "platformIcon": "youtube",
+    "language": "en",
+    "format": "Shorts (9:16)",
+    "aspectRatio": "9:16",
+    "videoTitle": "Bedtime Story: Listen to My Body! 📖✨ #Shorts #KidsStories",
+    "videoId": "dZzMRStVFX8",
+    "videoUrl": "https://youtube.com/shorts/dZzMRStVFX8",
+    "publishedAt": "2026-11-10T18:04:28.106Z",
+    "status": "published",
+    "privacy": "public",
+    "thumbnailUrl": "https://img.youtube.com/vi/dZzMRStVFX8/hqdefault.jpg",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "license": "CC BY 4.0",
+    "sourceUrl": "https://storyweaver.org.in/stories/40-listen-to-my-body",
+    "views": 0,
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": "AUD-013",
+    "storySlug": "dengarkan-tubuhku",
+    "storyTitleId": "Mendengarkan Tubuhku",
+    "storyTitleEn": "Listen to My Body",
+    "category": "Standalone Story",
+    "platform": "Facebook",
+    "platformIcon": "facebook",
+    "language": "en",
+    "format": "Watch Video (16:9)",
+    "aspectRatio": "16:9",
+    "videoTitle": "Listen to My Body",
+    "videoId": "29443611191923996",
+    "videoUrl": "https://www.facebook.com/1473240609201601/videos/29443611191923996/",
+    "publishedAt": "2026-11-10T18:06:04.554Z",
+    "status": "published",
+    "privacy": "public",
+    "thumbnailUrl": "https://img.youtube.com/vi/0kYkY1RfU3g/hqdefault.jpg",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "license": "CC BY 4.0",
+    "sourceUrl": "https://storyweaver.org.in/stories/40-listen-to-my-body",
+    "views": 0,
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": "AUD-014",
+    "storySlug": "dengarkan-tubuhku",
+    "storyTitleId": "Mendengarkan Tubuhku",
+    "storyTitleEn": "Listen to My Body",
+    "category": "Standalone Story",
+    "platform": "Facebook",
+    "platformIcon": "facebook",
+    "language": "en",
+    "format": "Facebook Reel (9:16)",
+    "aspectRatio": "9:16",
+    "videoTitle": "Listen to My Body",
+    "videoId": "1861062161558498",
+    "videoUrl": "https://www.facebook.com/1473240609201601/videos/1861062161558498/",
+    "publishedAt": "2026-11-10T18:04:44.326Z",
+    "status": "published",
+    "privacy": "public",
+    "thumbnailUrl": "https://img.youtube.com/vi/dZzMRStVFX8/hqdefault.jpg",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "license": "CC BY 4.0",
+    "sourceUrl": "https://storyweaver.org.in/stories/40-listen-to-my-body",
+    "views": 0,
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": "AUD-015",
+    "storySlug": "dengarkan-tubuhku",
+    "storyTitleId": "Mendengarkan Tubuhku",
+    "storyTitleEn": "Listen to My Body",
+    "category": "Standalone Story",
+    "platform": "Instagram",
+    "platformIcon": "instagram",
+    "language": "en",
+    "format": "Instagram Reel (9:16)",
+    "aspectRatio": "9:16",
+    "videoTitle": "Listen to My Body",
+    "videoId": "17926662621441610",
+    "videoUrl": "https://www.instagram.com/reel/DfkgiEAlXt4/",
+    "publishedAt": "2026-11-10T18:05:58.057Z",
+    "status": "published",
+    "privacy": "public",
+    "thumbnailUrl": "https://img.youtube.com/vi/dZzMRStVFX8/hqdefault.jpg",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "license": "CC BY 4.0",
+    "sourceUrl": "https://storyweaver.org.in/stories/40-listen-to-my-body",
+    "views": 0,
+    "likes": 0,
+    "comments": 0
+  },
+  {
+    "id": "AUD-016",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -286,7 +416,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-012",
+    "id": "AUD-017",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -312,7 +442,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-013",
+    "id": "AUD-018",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -338,7 +468,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-014",
+    "id": "AUD-019",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -364,7 +494,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-015",
+    "id": "AUD-020",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -390,7 +520,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-016",
+    "id": "AUD-021",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -416,7 +546,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-017",
+    "id": "AUD-022",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -442,7 +572,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-018",
+    "id": "AUD-023",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -468,7 +598,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-019",
+    "id": "AUD-024",
     "storySlug": "gara-gara-kucing",
     "storyTitleId": "Gara-Gara Kucing!",
     "storyTitleEn": "It's All the Cat's Fault!",
@@ -494,7 +624,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-020",
+    "id": "AUD-025",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -520,7 +650,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-021",
+    "id": "AUD-026",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -546,7 +676,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-022",
+    "id": "AUD-027",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -572,7 +702,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-023",
+    "id": "AUD-028",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -598,7 +728,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-024",
+    "id": "AUD-029",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -624,7 +754,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-025",
+    "id": "AUD-030",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -650,7 +780,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-026",
+    "id": "AUD-031",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -676,7 +806,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-027",
+    "id": "AUD-032",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -702,7 +832,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-028",
+    "id": "AUD-033",
     "storySlug": "hari-cukur-rambut",
     "storyTitleId": "Hari Cukur Rambut Sringeri Srinivas!",
     "storyTitleEn": "Annual Haircut Day!",
@@ -728,7 +858,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-029",
+    "id": "AUD-034",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -754,7 +884,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-030",
+    "id": "AUD-035",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -780,7 +910,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-031",
+    "id": "AUD-036",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -806,7 +936,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-032",
+    "id": "AUD-037",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -832,7 +962,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-033",
+    "id": "AUD-038",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -858,7 +988,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-034",
+    "id": "AUD-039",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -884,7 +1014,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-035",
+    "id": "AUD-040",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -910,7 +1040,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-036",
+    "id": "AUD-041",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -936,7 +1066,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-037",
+    "id": "AUD-042",
     "storySlug": "jangan-sekarang",
     "storyTitleId": "Jangan Sekarang, Tunggu Dulu!",
     "storyTitleEn": "Not Now, Not Now!",
@@ -962,7 +1092,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-038",
+    "id": "AUD-043",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -988,7 +1118,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-039",
+    "id": "AUD-044",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1014,7 +1144,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-040",
+    "id": "AUD-045",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1040,7 +1170,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-041",
+    "id": "AUD-046",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1066,7 +1196,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-042",
+    "id": "AUD-047",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1092,7 +1222,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-043",
+    "id": "AUD-048",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1118,7 +1248,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-044",
+    "id": "AUD-049",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1144,7 +1274,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-045",
+    "id": "AUD-050",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1170,7 +1300,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-046",
+    "id": "AUD-051",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1196,7 +1326,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-047",
+    "id": "AUD-052",
     "storySlug": "jas-hujan-merah",
     "storyTitleId": "Jas Hujan Merah",
     "storyTitleEn": "The Red Raincoat",
@@ -1222,7 +1352,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-048",
+    "id": "AUD-053",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1248,7 +1378,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-049",
+    "id": "AUD-054",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1274,7 +1404,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-050",
+    "id": "AUD-055",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1300,7 +1430,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-051",
+    "id": "AUD-056",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1326,7 +1456,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-052",
+    "id": "AUD-057",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1352,7 +1482,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-053",
+    "id": "AUD-058",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1378,7 +1508,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-054",
+    "id": "AUD-059",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1404,7 +1534,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-055",
+    "id": "AUD-060",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1430,7 +1560,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-056",
+    "id": "AUD-061",
     "storySlug": "pisang-terlalu-banyak",
     "storyTitleId": "Pisang Terlalu Banyak!",
     "storyTitleEn": "Too Many Bananas!",
@@ -1456,7 +1586,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-057",
+    "id": "AUD-062",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1482,7 +1612,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-058",
+    "id": "AUD-063",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1508,7 +1638,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-059",
+    "id": "AUD-064",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1534,7 +1664,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-060",
+    "id": "AUD-065",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1560,7 +1690,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-061",
+    "id": "AUD-066",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1586,7 +1716,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-062",
+    "id": "AUD-067",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1612,7 +1742,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-063",
+    "id": "AUD-068",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1638,7 +1768,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-064",
+    "id": "AUD-069",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1664,7 +1794,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-065",
+    "id": "AUD-070",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1690,7 +1820,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-066",
+    "id": "AUD-071",
     "storySlug": "raja-gemuk-anjing-kurus",
     "storyTitleId": "Raja Gemuk, Anjing Kurus!",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1716,7 +1846,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-067",
+    "id": "AUD-072",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1742,7 +1872,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-068",
+    "id": "AUD-073",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1768,7 +1898,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-069",
+    "id": "AUD-074",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1794,7 +1924,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-070",
+    "id": "AUD-075",
     "storySlug": "raja-gemuk-remotion",
     "storyTitleId": "Raja Gemuk, Anjing Kurus! (Remotion Edition)",
     "storyTitleEn": "Fat King, Thin Dog!",
@@ -1820,7 +1950,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-071",
+    "id": "AUD-076",
     "storySlug": "terlalu-banyak-suara",
     "storyTitleId": "Terlalu Banyak Suara!",
     "storyTitleEn": "Too Much Noise!",
@@ -1846,7 +1976,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-072",
+    "id": "AUD-077",
     "storySlug": "terlalu-banyak-suara",
     "storyTitleId": "Terlalu Banyak Suara!",
     "storyTitleEn": "Too Much Noise!",
@@ -1872,7 +2002,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-073",
+    "id": "AUD-078",
     "storySlug": "terlalu-banyak-suara",
     "storyTitleId": "Terlalu Banyak Suara!",
     "storyTitleEn": "Too Much Noise!",
@@ -1898,7 +2028,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-074",
+    "id": "AUD-079",
     "storySlug": "terlalu-banyak-suara",
     "storyTitleId": "Terlalu Banyak Suara!",
     "storyTitleEn": "Too Much Noise!",
@@ -1924,7 +2054,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-075",
+    "id": "AUD-080",
     "storySlug": "terlalu-banyak-suara",
     "storyTitleId": "Terlalu Banyak Suara!",
     "storyTitleEn": "Too Much Noise!",
@@ -1950,7 +2080,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-076",
+    "id": "AUD-081",
     "storySlug": "terlalu-banyak-suara",
     "storyTitleId": "Terlalu Banyak Suara!",
     "storyTitleEn": "Too Much Noise!",
@@ -1976,7 +2106,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-077",
+    "id": "AUD-082",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2002,7 +2132,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-078",
+    "id": "AUD-083",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2028,7 +2158,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-079",
+    "id": "AUD-084",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2054,7 +2184,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-080",
+    "id": "AUD-085",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2080,7 +2210,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-081",
+    "id": "AUD-086",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2106,7 +2236,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-082",
+    "id": "AUD-087",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2132,7 +2262,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-083",
+    "id": "AUD-088",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2158,7 +2288,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-084",
+    "id": "AUD-089",
     "storySlug": "topsy-turvy-serba-terbalik",
     "storyTitleId": "Semua Serba Terbalik!",
     "storyTitleEn": "Topsy Turvy",
@@ -2184,7 +2314,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-085",
+    "id": "AUD-090",
     "storySlug": "bedtime-id",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
@@ -2211,7 +2341,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-086",
+    "id": "AUD-091",
     "storySlug": "bedtime-id",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
@@ -2238,7 +2368,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-087",
+    "id": "AUD-092",
     "storySlug": "bedtime-en",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",
@@ -2265,7 +2395,7 @@
     "comments": 0
   },
   {
-    "id": "AUD-088",
+    "id": "AUD-093",
     "storySlug": "bedtime-en",
     "storyTitleId": "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
     "storyTitleEn": "Bedtime Stories Marathon (5 Stories Non-Stop)",

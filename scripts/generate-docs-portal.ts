@@ -2589,7 +2589,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
       // 1. Try Cloudflare Pages Function /api/catalog
       try {
-        const res = await fetch('/api/catalog');
+        const res = await fetch('/api/catalog?_t=' + Date.now());
         if (res.ok) {
           const data = await res.json();
           if (data && data.success && Array.isArray(data.auditRecords) && data.auditRecords.length > 0) {
@@ -2675,6 +2675,18 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     // Auto-hydrate on startup
     hydrateLiveCatalog(false);
+
+    // Periodic background auto-sync every 60s
+    setInterval(() => {
+      hydrateLiveCatalog(false);
+    }, 60000);
+
+    // Re-sync immediately when browser tab regains focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        hydrateLiveCatalog(false);
+      }
+    });
 
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme');
