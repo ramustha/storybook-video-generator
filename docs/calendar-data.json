@@ -157,7 +157,7 @@
     "status": "completed",
     "isCompleted": true,
     "hasPublishedAsset": true,
-    "isBuffered": true,
+    "isBuffered": false,
     "hasAssets": true
   },
   {
@@ -180,7 +180,7 @@
     "status": "completed",
     "isCompleted": true,
     "hasPublishedAsset": true,
-    "isBuffered": true,
+    "isBuffered": false,
     "hasAssets": true
   },
   {
@@ -200,9 +200,9 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Listen to My Body! A Mindful Heartbeat Journey",
-    "status": "upcoming",
-    "isCompleted": false,
-    "hasPublishedAsset": false,
+    "status": "completed",
+    "isCompleted": true,
+    "hasPublishedAsset": true,
     "isBuffered": true,
     "hasAssets": true
   },
@@ -223,9 +223,9 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Mendengarkan Tubuhku! Mengenal Bunyi Ajaib dan Detak Jantung Diri Sendiri",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
-    "hasPublishedAsset": false,
+    "hasPublishedAsset": true,
     "isBuffered": true,
     "hasAssets": true
   },

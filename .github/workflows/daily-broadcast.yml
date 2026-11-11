@@ -286,6 +286,18 @@ jobs:
           echo "✔ Storybook publication metadata saved directly to Cloudflare D1 Serverless Database."
           echo "✔ Static Catalog Portal automatically hydrated in real-time without git commits."
 
+      - name: 🌐 Deploy Updated Static Baseline to Cloudflare Pages
+        if: ${{ !(inputs.dry_run) }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.PERSONAL_R2_ACCOUNT_ID || 'e5c0394bca4b8239f091b55cb3e9d3e6' }}
+        run: |
+          echo "📚 Rebuilding static catalog portal snapshot..."
+          npm run docs:portal || true
+          echo "🚀 Deploying to Cloudflare Pages (storybook-catalog)..."
+          npx --yes wrangler pages deploy docs --project-name storybook-catalog --branch main --commit-dirty=true || true
+
       - name: 🚨 Notify Telegram on Workflow Failure
         if: failure()
         run: |
