@@ -1,6 +1,16 @@
 import fs from "fs";
 import path from "path";
-import { DAILY_CALENDAR_MONTH_1, ScheduledSlot } from "./content-calendar";
+import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
+import {
+  applyTodayStatusToSlots,
+  formatSlugFallbackTitle,
+  getBrowserPortalSyncScript,
+  getWibDateIso,
+  isPrimaryPublishedRecord,
+  loadJsonArraySafe,
+  mergeAuditRecordLists,
+  mergeCalendarSlotLists,
+} from "./lib/portal-sync";
 
 interface AuditRecord {
   id: string; // unique audit id e.g. "AUD-001"
@@ -57,24 +67,34 @@ let bufferedStories: string[] = [];
 if (fs.existsSync(bufferedPath)) {
   try {
     bufferedStories = JSON.parse(fs.readFileSync(bufferedPath, "utf-8"));
-  } catch {}
+  } catch {
+    // Ignore parse error
+  }
 }
 
 if (!fs.existsSync(docsDir)) {
   fs.mkdirSync(docsDir, { recursive: true });
 }
 
+const auditJsonPath = path.join(docsDir, "audit-data.json");
+const calendarJsonPath = path.join(docsDir, "calendar-data.json");
+
+const existingAuditRecords = loadJsonArraySafe<AuditRecord>(auditJsonPath);
+const existingCalendarSlots = loadJsonArraySafe<EnrichedCalendarSlot>(calendarJsonPath);
+
 // 1. Build Story Titles Map
 const storyTitlesMap = new Map<string, { id: string; en: string }>();
 
-const stories = fs.readdirSync(storiesDir).filter((f) => {
-  try {
-    const stat = fs.statSync(path.join(storiesDir, f));
-    return stat.isDirectory() && fs.existsSync(path.join(storiesDir, f, "story.json"));
-  } catch {
-    return false;
-  }
-}).sort();
+const stories = fs.existsSync(storiesDir)
+  ? fs.readdirSync(storiesDir).filter((f) => {
+      try {
+        const stat = fs.statSync(path.join(storiesDir, f));
+        return stat.isDirectory() && fs.existsSync(path.join(storiesDir, f, "story.json"));
+      } catch {
+        return false;
+      }
+    }).sort()
+  : [];
 
 for (const s of stories) {
   const jsonPath = path.join(storiesDir, s, "story.json");
@@ -102,17 +122,25 @@ if (fs.existsSync(curatedPath)) {
   }
 }
 
-function formatSlugToTitle(slug: string): string {
-  return slug
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+for (const prevRec of existingAuditRecords) {
+  if (prevRec?.storySlug && !storyTitlesMap.has(prevRec.storySlug)) {
+    storyTitlesMap.set(prevRec.storySlug, {
+      id: prevRec.storyTitleId || formatSlugFallbackTitle(prevRec.storySlug),
+      en: prevRec.storyTitleEn || prevRec.storyTitleId || formatSlugFallbackTitle(prevRec.storySlug),
+    });
+  }
 }
 
-const allAssetSlugs: string[] = Array.from(new Set([...stories, ...Array.from(storyTitlesMap.keys())]));
+const existingAssetSlugs = existingCalendarSlots
+  .filter((slot) => slot?.bookSlug && slot.hasAssets)
+  .map((slot) => slot.bookSlug);
+
+const allAssetSlugs: string[] = Array.from(
+  new Set([...stories, ...Array.from(storyTitlesMap.keys()), ...existingAssetSlugs])
+);
 
 // 2. Build Audit Records
-const auditRecords: AuditRecord[] = [];
+const localAuditRecords: AuditRecord[] = [];
 let counter = 1;
 
 function padId(n: number): string {
@@ -160,7 +188,7 @@ for (const s of stories) {
     for (const fmt of ["landscape", "vertical"] as const) {
       const item = yt[lang][fmt];
       if (item && item.url) {
-        auditRecords.push({
+        localAuditRecords.push({
           id: padId(counter++),
           storySlug: s,
           storyTitleId: titleId,
@@ -195,7 +223,7 @@ for (const s of stories) {
       const item = fb[lang][fmt];
       if (item && item.url) {
         const thumbUrl = resolveStoryThumbnail(data, lang, fmt);
-        auditRecords.push({
+        localAuditRecords.push({
           id: padId(counter++),
           storySlug: s,
           storyTitleId: titleId,
@@ -228,7 +256,7 @@ for (const s of stories) {
     const item = ig[lang];
     if (item && item.url) {
       const thumbUrl = resolveStoryThumbnail(data, lang, "vertical");
-      auditRecords.push({
+      localAuditRecords.push({
         id: padId(counter++),
         storySlug: s,
         storyTitleId: titleId,
@@ -264,7 +292,7 @@ if (fs.existsSync(compPath)) {
     const title = comp.title;
 
     if (comp.permalink && comp.videoId) {
-      auditRecords.push({
+      localAuditRecords.push({
         id: padId(counter++),
         storySlug: key,
         storyTitleId: "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
@@ -291,7 +319,7 @@ if (fs.existsSync(compPath)) {
     }
 
     if (comp.youtube && comp.youtube.url) {
-      auditRecords.push({
+      localAuditRecords.push({
         id: padId(counter++),
         storySlug: key,
         storyTitleId: "Kumpulan Dongeng Sebelum Tidur (5 Cerita Non-Stop)",
@@ -319,31 +347,33 @@ if (fs.existsSync(compPath)) {
   }
 }
 
-// 3. Enrich Calendar Slots
-const publishedStorySlugs = new Set(auditRecords.map((r) => r.storySlug));
-
-// Calculate dynamic today in Western Indonesia Time (WIB, Asia/Jakarta)
-const todayIso = new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Asia/Jakarta",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-}).format(new Date());
-
-const currentHour = parseInt(
-  new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Jakarta",
-    hour: "numeric",
-    hour12: false,
-  }).format(new Date()),
-  10
+const auditRecords = mergeAuditRecordLists(
+  localAuditRecords,
+  existingAuditRecords,
+  true
 );
 
-const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, idx) => {
+// 3. Enrich Calendar Slots
+const publishedStorySlugs = new Set(
+  auditRecords.filter(isPrimaryPublishedRecord).map((r) => r.storySlug)
+);
+const todayIso = getWibDateIso(new Date());
+
+const currentHour =
+  parseInt(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Jakarta",
+      hour: "numeric",
+      hourCycle: "h23",
+    }).format(new Date()),
+    10
+  ) % 24;
+
+const localCalendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, idx) => {
   const dateStr = slot.date || "2026-11-07";
   const titles = storyTitlesMap.get(slot.bookSlug) || {
-    id: formatSlugToTitle(slot.bookSlug),
-    en: formatSlugToTitle(slot.bookSlug),
+    id: formatSlugFallbackTitle(slot.bookSlug),
+    en: formatSlugFallbackTitle(slot.bookSlug),
   };
 
   const hasPublishedAsset = publishedStorySlugs.has(slot.bookSlug);
@@ -367,23 +397,6 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
     isBuffered = true;
   }
 
-  const slotLang = slot.lang || "id";
-  const isSlotPublished = auditRecords.some(
-    (r) => r.storySlug === slot.bookSlug && (r.language === slotLang || (!r.language && slotLang === "id"))
-  );
-
-  let isCompleted = isSlotPublished;
-  let status: "completed" | "today" | "upcoming" = "upcoming";
-
-  if (dateStr < todayIso) {
-    status = "completed";
-    isCompleted = true;
-  } else if (dateStr === todayIso) {
-    status = isCompleted ? "completed" : "today";
-  } else {
-    status = "upcoming";
-  }
-
   return {
     id: `SLOT-${String(idx + 1).padStart(3, "0")}`,
     date: dateStr,
@@ -402,13 +415,21 @@ const calendarSlots: EnrichedCalendarSlot[] = DAILY_CALENDAR_MONTH_1.map((slot, 
         : "Landscape (16:9)",
     targetPlatforms: slot.targetPlatforms,
     theme: slot.theme,
-    status,
-    isCompleted,
+    status: "upcoming",
+    isCompleted: false,
     hasPublishedAsset,
     isBuffered,
     hasAssets,
   };
 });
+
+const mergedCalendarSlots = mergeCalendarSlotLists(localCalendarSlots, existingCalendarSlots);
+const calendarSlots = applyTodayStatusToSlots(
+  mergedCalendarSlots,
+  auditRecords,
+  todayIso
+);
+const browserSyncScript = getBrowserPortalSyncScript();
 
 // Merge stats-data.json if present
 const statsJsonPath = path.join(docsDir, "stats-data.json");
@@ -422,9 +443,9 @@ if (fs.existsSync(statsJsonPath)) {
     for (const rec of auditRecords as any[]) {
       const s = statsMap.get(rec.videoId) || statsMap.get(rec.id);
       if (s) {
-        rec.views = s.views || 0;
-        rec.likes = s.likes || 0;
-        rec.comments = s.comments || 0;
+        rec.views = Math.max(rec.views || 0, s.views || 0);
+        rec.likes = Math.max(rec.likes || 0, s.likes || 0);
+        rec.comments = Math.max(rec.comments || 0, s.comments || 0);
       } else {
         rec.views = rec.views || 0;
         rec.likes = rec.likes || 0;
@@ -438,11 +459,9 @@ if (fs.existsSync(statsJsonPath)) {
 }
 
 // Write audit-data.json and calendar-data.json
-const auditJsonPath = path.join(docsDir, "audit-data.json");
 fs.writeFileSync(auditJsonPath, JSON.stringify(auditRecords, null, 2));
 console.log(`Saved ${auditRecords.length} audit records to ${auditJsonPath}`);
 
-const calendarJsonPath = path.join(docsDir, "calendar-data.json");
 fs.writeFileSync(calendarJsonPath, JSON.stringify(calendarSlots, null, 2));
 console.log(`Saved ${calendarSlots.length} calendar slots to ${calendarJsonPath}`);
 
@@ -471,16 +490,18 @@ const initialStoryOptions = Array.from(initialStoryMap.entries()).sort((a, b) =>
 // Precompute calendar metrics
 const initialCalTotal = calendarSlots.length;
 const initialCalCompleted = calendarSlots.filter((s) => s.status === "completed" || s.isCompleted).length;
-const initialCalToday = calendarSlots.filter((s) => s.status === "today").length;
-const initialCalUpcoming = calendarSlots.filter((s) => s.status === "upcoming").length;
-const initialCalProgress = ((initialCalCompleted / initialCalTotal) * 100).toFixed(1);
+const initialCalToday = calendarSlots.filter((s) => s.date === todayIso).length;
+const initialCalUpcoming = calendarSlots.filter((s) => s.date > todayIso && !s.isCompleted).length;
+const initialCalProgress = initialCalTotal > 0 ? ((initialCalCompleted / initialCalTotal) * 100).toFixed(1) : "0.0";
 
 // Find active next-up slot dynamically
-const todaySlots = calendarSlots.filter((s) => s.status === "today");
-const nextUpSlot = todaySlots.find((s) => {
+const todaySlots = calendarSlots.filter((s) => s.date === todayIso);
+const todayPendingSlots = todaySlots.filter((s) => !s.isCompleted);
+const nextUpPool = todayPendingSlots.length > 0 ? todayPendingSlots : todaySlots;
+const nextUpSlot = nextUpPool.find((s) => {
   const isMorning = s.timeSlot.includes("08:") || s.slotType.toLowerCase().includes("morning");
   return currentHour < 12 ? isMorning : !isMorning;
-}) || todaySlots[0] || calendarSlots.find((s) => s.status === "upcoming");
+}) || nextUpPool[0] || calendarSlots.find((s) => s.status === "upcoming");
 
 // Generate docs/index.html
 const indexHtmlContent = `<!DOCTYPE html>
@@ -1487,6 +1508,15 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     tbody tr:hover {
       background: var(--card-hover);
+    }
+
+    tbody tr.today-row {
+      background: rgba(245, 158, 11, 0.09);
+      box-shadow: inset 3px 0 0 #f59e0b;
+    }
+
+    tbody tr.today-row:hover {
+      background: rgba(245, 158, 11, 0.15);
     }
 
     tbody td {
@@ -2619,7 +2649,7 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="stat-card gold">
             <div class="stat-title">Today's Schedule</div>
             <div class="stat-value" id="kpiCalToday" style="color: #f59e0b;">${initialCalToday}</div>
-            <div class="stat-desc">Active Production Broadcasts</div>
+            <div class="stat-desc" id="kpiCalTodayDesc">Active Production Broadcasts</div>
           </div>
           <div class="stat-card yt">
             <div class="stat-title">Upcoming</div>
@@ -2717,7 +2747,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-channel-pill">☁️ Cloudflare R2</span>
               <span class="stage-channel-pill">⚡ Zero Runner Delay</span>
             </div>
-            <div id="stageBufferStatus" class="stage-status-pill ready">🟢 4/4 Ready (Tomorrow Covered)</div>
+            <div id="stageBufferStatus" class="stage-status-pill queued">⏳ Checking Buffer...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Mon & Thu 07:00 WIB</div>
           </div>
 
@@ -2734,7 +2764,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-channel-pill">📘 FB Multi-Photo</span>
               <span class="stage-channel-pill">🧵 Threads</span>
             </div>
-            <div id="stageAnnounceStatus" class="stage-status-pill done">✅ Sent Today (07:15)</div>
+            <div id="stageAnnounceStatus" class="stage-status-pill queued">⏳ Checking Status...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageAnnounceNextText">Single Teaser per Day</div>
           </div>
 
@@ -2751,7 +2781,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-channel-pill">📘 FB Reels & Video</span>
               <span class="stage-channel-pill">📸 IG Reels</span>
             </div>
-            <div id="stageMorningStatus" class="stage-status-pill done">✅ Broadcasted Today</div>
+            <div id="stageMorningStatus" class="stage-status-pill queued">⏳ Checking Status...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageMorningNextText">Daily Morning Slot</div>
           </div>
 
@@ -2768,7 +2798,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-channel-pill">📘 FB Watch & Reels</span>
               <span class="stage-channel-pill">📸 IG Reels</span>
             </div>
-            <div id="stageBedtimeStatus" class="stage-status-pill live">🔥 Scheduled Tonight</div>
+            <div id="stageBedtimeStatus" class="stage-status-pill queued">⏳ Checking Status...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBedtimeNextText">Daily Prime Slot</div>
           </div>
         </div>
@@ -2896,8 +2926,19 @@ const indexHtmlContent = `<!DOCTYPE html>
   </div>
 
   <script>
-    // Embedded Datasets
-    let RAW_AUDIT_DATA = ${JSON.stringify(auditRecords)};
+    // Embedded Snapshots
+    const BUILD_AUDIT_SNAPSHOT = ${JSON.stringify(auditRecords)};
+    const KNOWN_STORY_ASSETS = ${JSON.stringify(allAssetSlugs)};
+    const KNOWN_BUFFERED_STORIES = ${JSON.stringify(bufferedStories)};
+    function cloneRecordList(list) {
+      return (list || []).map(function(item) { return Object.assign({}, item); });
+    }
+    let RAW_AUDIT_DATA = cloneRecordList(BUILD_AUDIT_SNAPSHOT);
+    let lastRenderedWibDate = '';
+    let activeCatalogSource = 'embedded';
+
+${browserSyncScript}
+
     // Defensive normalizer guaranteeing zero missing or undefined slot properties
     function normalizeCalendarSlot(s, idx) {
       if (!s) return null;
@@ -2910,7 +2951,7 @@ const indexHtmlContent = `<!DOCTYPE html>
       let storyTitleId = s.storyTitleId || s.title_id || s.titleId;
       let storyTitleEn = s.storyTitleEn || s.title_en || s.titleEn;
       if (!storyTitleId) {
-        storyTitleId = bookSlug.replace(/-/g, ' ').replace(/\\b\\w/g, function(l) { return l.toUpperCase(); });
+        storyTitleId = formatSlugFallbackTitle(bookSlug);
       }
       if (!storyTitleEn) {
         storyTitleEn = storyTitleId;
@@ -2932,7 +2973,9 @@ const indexHtmlContent = `<!DOCTYPE html>
         ? ['YouTube Shorts', 'Facebook Reels', 'Instagram Reels']
         : ['YouTube (16:9)', 'Facebook Watch (16:9)'];
 
-      const publishedSlugs = new Set((RAW_AUDIT_DATA || []).map(function(r) { return r.storySlug; }));
+      const publishedSlugs = new Set(
+        (RAW_AUDIT_DATA || []).filter(isPrimaryPublishedRecord).map(function(r) { return r.storySlug; })
+      );
       const hasPublishedAsset = Boolean(s.hasPublishedAsset || publishedSlugs.has(bookSlug));
       const isCompleted = Boolean(s.isCompleted || s.is_completed);
       const isBuffered = Boolean(s.isBuffered || s.is_buffered || (typeof KNOWN_BUFFERED_STORIES !== 'undefined' && KNOWN_BUFFERED_STORIES.includes(bookSlug)));
@@ -2959,9 +3002,8 @@ const indexHtmlContent = `<!DOCTYPE html>
       };
     }
 
-    const KNOWN_STORY_ASSETS = ${JSON.stringify(allAssetSlugs)};
-    const KNOWN_BUFFERED_STORIES = ${JSON.stringify(bufferedStories)};
-    let RAW_CALENDAR_DATA = ${JSON.stringify(calendarSlots)}.map(normalizeCalendarSlot);
+    const BUILD_CALENDAR_SNAPSHOT = ${JSON.stringify(calendarSlots)}.map(normalizeCalendarSlot);
+    let RAW_CALENDAR_DATA = cloneRecordList(BUILD_CALENDAR_SNAPSHOT);
 
     function escapeAttr(str) {
       if (!str) return '';
@@ -3110,7 +3152,21 @@ const indexHtmlContent = `<!DOCTYPE html>
       render();
     }
 
-    // 3-Tier Robust Hydration System:
+    async function fetchJsonSafe(url, timeoutMs) {
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = controller ? setTimeout(function() { controller.abort(); }, timeoutMs || 5000) : null;
+      try {
+        const res = await fetch(url, controller ? { signal: controller.signal } : undefined);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        return null;
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    }
+
+    // Monotonic 3-Tier Hydration System: merges live D1 + static snapshot + embedded baseline without ever regressing newer releases
     async function hydrateLiveCatalog(manual = false) {
       const pill = document.getElementById('d1-status-pill');
       const text = document.getElementById('d1StatusText');
@@ -3119,85 +3175,99 @@ const indexHtmlContent = `<!DOCTYPE html>
       if (dot) dot.classList.add('pulsing');
       if (text) text.textContent = 'Syncing...';
 
-      // 1. Try Cloudflare Pages Function /api/catalog
-      try {
-        const res = await fetch('/api/catalog?_t=' + Date.now());
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.success && Array.isArray(data.auditRecords) && data.auditRecords.length > 0) {
-            console.log('⚡ Live D1 hydration successful:', data.auditRecords.length, 'records');
-            RAW_AUDIT_DATA = data.auditRecords;
-            if (Array.isArray(data.calendarSlots) && data.calendarSlots.length > 0) {
-              RAW_CALENDAR_DATA = data.calendarSlots.map(normalizeCalendarSlot).filter(Boolean);
-            }
-            populateStoryDropdown();
-            renderKPIs();
-            render();
-            renderTimeline();
-            if (pill) {
-              pill.className = 'status-badge status-live';
-              pill.title = 'Live from Cloudflare D1 SQLite database (Click to refresh)';
-            }
-            if (text) text.textContent = '⚡ D1 Live (' + data.auditRecords.length + ')';
-            if (dot) dot.classList.remove('pulsing');
-            if (manual) showToast('Synchronized ' + data.auditRecords.length + ' records from Cloudflare D1!');
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('/api/catalog not reachable, checking static fallback...', err);
+      const isHttp = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+      const baseOrigin = isHttp ? '' : 'https://storybook-catalog.pages.dev';
+      const ts = Date.now();
+
+      const [apiData, staticAuditData, staticCalData] = await Promise.all([
+        fetchJsonSafe(baseOrigin + '/api/catalog?_t=' + ts, 5000),
+        fetchJsonSafe((isHttp ? './audit-data.json' : baseOrigin + '/audit-data.json') + '?_t=' + ts, 5000),
+        fetchJsonSafe((isHttp ? './calendar-data.json' : baseOrigin + '/calendar-data.json') + '?_t=' + ts, 5000)
+      ]);
+
+      const hasD1 = Boolean(apiData && apiData.success && Array.isArray(apiData.auditRecords) && apiData.auditRecords.length > 0);
+      const hasStatic = Boolean(Array.isArray(staticAuditData) && staticAuditData.length > 0);
+      const hasStaticCal = Boolean(Array.isArray(staticCalData) && staticCalData.length > 0);
+
+      let nextAuditPool = cloneRecordList(
+        RAW_AUDIT_DATA && RAW_AUDIT_DATA.length > 0 ? RAW_AUDIT_DATA : BUILD_AUDIT_SNAPSHOT
+      );
+      if (hasStatic) {
+        nextAuditPool = mergeAuditRecordLists(staticAuditData, nextAuditPool, true);
+      }
+      if (hasD1) {
+        nextAuditPool = mergeAuditRecordLists(apiData.auditRecords, nextAuditPool, true);
       }
 
-      // 2. Try static audit-data.json and calendar-data.json
-      try {
-        const res = await fetch('./audit-data.json');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            console.log('📁 Static audit-data.json loaded:', data.length, 'records');
-            RAW_AUDIT_DATA = data;
+      RAW_AUDIT_DATA = nextAuditPool;
 
-            try {
-              const calRes = await fetch('./calendar-data.json');
-              if (calRes.ok) {
-                const calData = await calRes.json();
-                if (Array.isArray(calData) && calData.length > 0) {
-                  RAW_CALENDAR_DATA = calData.map(normalizeCalendarSlot).filter(Boolean);
-                }
-              }
-            } catch {
-              // Ignore
-            }
-
-            populateStoryDropdown();
-            renderKPIs();
-            render();
-            renderTimeline();
-            if (pill) {
-              pill.className = 'status-badge status-snapshot';
-              pill.title = 'Snapshot from audit-data.json (Click to refresh)';
-            }
-            if (text) text.textContent = '📁 Snapshot (' + data.length + ')';
-            if (dot) dot.classList.remove('pulsing');
-            if (manual) showToast('Loaded ' + data.length + ' records from audit-data.json');
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('audit-data.json not reachable, using embedded snapshot...', err);
+      let nextCalendarPool = cloneRecordList(
+        RAW_CALENDAR_DATA && RAW_CALENDAR_DATA.length > 0 ? RAW_CALENDAR_DATA : BUILD_CALENDAR_SNAPSHOT
+      );
+      if (hasStaticCal) {
+        nextCalendarPool = mergeCalendarSlotLists(nextCalendarPool, staticCalData.map(normalizeCalendarSlot).filter(Boolean));
+      }
+      if (hasD1 && Array.isArray(apiData.calendarSlots) && apiData.calendarSlots.length > 0) {
+        nextCalendarPool = mergeCalendarSlotLists(nextCalendarPool, apiData.calendarSlots.map(normalizeCalendarSlot).filter(Boolean));
       }
 
-      // 3. Embedded snapshot fallback
+      RAW_CALENDAR_DATA = nextCalendarPool;
       populateStoryDropdown();
       renderKPIs();
       render();
       renderTimeline();
+
+      if (dot) dot.classList.remove('pulsing');
+
+      if (hasD1) {
+        activeCatalogSource = 'live';
+        const apiCount = apiData.auditRecords.length;
+        const mergedWithSnapshot = nextAuditPool.length > apiCount;
+        if (pill) {
+          pill.className = 'status-badge status-live';
+          pill.title = mergedWithSnapshot
+            ? 'Cloudflare D1 (' + apiCount + ') merged monotonically with newer static CI snapshot (Click to refresh)'
+            : 'Live from Cloudflare D1 SQLite database (Click to refresh)';
+        }
+        if (text) {
+          text.textContent = (mergedWithSnapshot ? '⚡ D1 + Snapshot (' : '⚡ D1 Live (') + nextAuditPool.length + ')';
+        }
+        if (manual) showToast('Synchronized ' + nextAuditPool.length + ' records (D1 live' + (mergedWithSnapshot ? ' + snapshot' : '') + ')!');
+        return;
+      }
+
+      if (hasStatic) {
+        if (activeCatalogSource !== 'live') activeCatalogSource = 'snapshot';
+        if (pill) {
+          pill.className = activeCatalogSource === 'live' ? 'status-badge status-live' : 'status-badge status-snapshot';
+          pill.title = activeCatalogSource === 'live'
+            ? 'Cached D1 live records merged with audit-data.json (D1 temporarily unreachable)'
+            : 'Snapshot from audit-data.json (Click to refresh)';
+        }
+        if (text) {
+          text.textContent = (activeCatalogSource === 'live' ? '⚡ D1 + Snapshot (' : '📁 Snapshot (') + nextAuditPool.length + ')';
+        }
+        if (manual) showToast('Loaded ' + nextAuditPool.length + ' records from audit-data.json');
+        return;
+      }
+
+      if (activeCatalogSource === 'live' || activeCatalogSource === 'snapshot') {
+        if (pill) {
+          pill.className = activeCatalogSource === 'live' ? 'status-badge status-live' : 'status-badge status-snapshot';
+          pill.title = 'Preserving hydrated records during temporary network unavailability (Click to retry)';
+        }
+        if (text) {
+          text.textContent = (activeCatalogSource === 'live' ? '⚡ D1 Cached (' : '📁 Snapshot Cached (') + RAW_AUDIT_DATA.length + ')';
+        }
+        if (manual) showToast('Network offline — kept ' + RAW_AUDIT_DATA.length + ' hydrated records');
+        return;
+      }
+
       if (pill) {
         pill.className = 'status-badge status-embedded';
         pill.title = 'Pre-rendered in HTML bundle (Click to refresh)';
       }
       if (text) text.textContent = '📦 Embedded (' + RAW_AUDIT_DATA.length + ')';
-      if (dot) dot.classList.remove('pulsing');
       if (manual) showToast('Using embedded dataset (' + RAW_AUDIT_DATA.length + ' records)');
     }
 
@@ -3337,9 +3407,17 @@ const indexHtmlContent = `<!DOCTYPE html>
     function formatDate(isoStr) {
       if (!isoStr || isoStr === 'N/A' || isoStr === 'undefined') return 'Scheduled';
       try {
-        const d = new Date(isoStr);
+        const normalized = /^\\d{4}-\\d{2}-\\d{2}$/.test(String(isoStr).trim())
+          ? String(isoStr).trim() + 'T00:00:00+07:00'
+          : isoStr;
+        const d = new Date(normalized);
         if (isNaN(d.getTime())) return isoStr;
-        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        return d.toLocaleDateString('en-GB', {
+          timeZone: 'Asia/Jakarta',
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
       } catch (e) {
         return isoStr;
       }
@@ -3664,6 +3742,7 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     function getFilteredTimelineData() {
+      const clientTodayIso = getWibDateIso();
       return RAW_CALENDAR_DATA.filter(item => {
         // 1. Scope filter
         if (timelineState.scopeFilter === 'active30') {
@@ -3674,7 +3753,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
         if (timelineState.statusFilter !== 'all') {
           if (timelineState.statusFilter === 'completed' && !item.isCompleted && item.status !== 'completed') return false;
-          if (timelineState.statusFilter === 'today' && item.status !== 'today') return false;
+          if (timelineState.statusFilter === 'today' && item.date !== clientTodayIso && item.status !== 'today') return false;
           if (timelineState.statusFilter === 'upcoming' && item.status !== 'upcoming') return false;
         }
 
@@ -3709,31 +3788,9 @@ const indexHtmlContent = `<!DOCTYPE html>
      */
     function updateLiveTodayStatus() {
       try {
-        const clientTodayIso = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'Asia/Jakarta',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).format(new Date());
-
-        RAW_CALENDAR_DATA.forEach(slot => {
-          const isSlotPublished = (RAW_AUDIT_DATA || []).some(
-            r => r.storySlug === slot.bookSlug && (r.language === slot.lang || (!r.language && slot.lang === 'id'))
-          );
-          if (isSlotPublished) {
-            slot.isCompleted = true;
-          }
-
-          if (slot.date < clientTodayIso) {
-            slot.status = 'completed';
-            slot.isCompleted = true;
-          } else if (slot.date === clientTodayIso) {
-            slot.status = slot.isCompleted ? 'completed' : 'today';
-          } else {
-            slot.status = 'upcoming';
-            if (slot.isCompleted === undefined) slot.isCompleted = false;
-          }
-        });
+        const clientTodayIso = getWibDateIso();
+        lastRenderedWibDate = clientTodayIso;
+        RAW_CALENDAR_DATA = applyTodayStatusToSlots(RAW_CALENDAR_DATA, RAW_AUDIT_DATA, clientTodayIso);
       } catch (e) {
         // Fallback silently if Intl fails
       }
@@ -3758,19 +3815,23 @@ const indexHtmlContent = `<!DOCTYPE html>
           minute: 'numeric',
           second: 'numeric',
           weekday: 'short',
-          hour12: false
+          hourCycle: 'h23'
         }).formatToParts(now);
 
         const getVal = (type) => parts.find(p => p.type === type)?.value;
         const wibYear = parseInt(getVal('year'), 10);
         const wibMonth = parseInt(getVal('month'), 10);
         const wibDay = parseInt(getVal('day'), 10);
-        const wibHour = parseInt(getVal('hour'), 10);
+        const wibHour = parseInt(getVal('hour'), 10) % 24;
         const wibMin = parseInt(getVal('minute'), 10);
         const wibSec = parseInt(getVal('second'), 10);
-        const wibDayOfWeek = getVal('weekday'); // 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+        const wibDayOfWeek = getVal('weekday');
 
         const clientTodayIso = \`\${wibYear}-\${String(wibMonth).padStart(2, '0')}-\${String(wibDay).padStart(2, '0')}\`;
+        if (lastRenderedWibDate && clientTodayIso !== lastRenderedWibDate) {
+          lastRenderedWibDate = clientTodayIso;
+          renderTimeline();
+        }
         const wibClockStr = \`\${String(wibHour).padStart(2, '0')}:\${String(wibMin).padStart(2, '0')}:\${String(wibSec).padStart(2, '0')} WIB\`;
 
         const clockEl = document.getElementById('pipelineClockWib');
@@ -3779,10 +3840,10 @@ const indexHtmlContent = `<!DOCTYPE html>
         const totalSecNow = wibHour * 3600 + wibMin * 60 + wibSec;
 
         // Schedule milestones in seconds:
-        const SEC_BUFFER = 7 * 3600;              // 07:00 WIB
-        const SEC_ANNOUNCE = 7 * 3600 + 15 * 60;  // 07:15 WIB
-        const SEC_MORNING = 8 * 3600 + 30 * 60;   // 08:30 WIB
-        const SEC_BEDTIME = 19 * 3600;            // 19:00 WIB
+        const SEC_BUFFER = 7 * 3600;
+        const SEC_ANNOUNCE = 7 * 3600 + 15 * 60;
+        const SEC_MORNING = 8 * 3600 + 30 * 60;
+        const SEC_BEDTIME = 19 * 3600;
 
         // Today's and upcoming slots
         const todaySlots = (RAW_CALENDAR_DATA || []).filter(s => s.date === clientTodayIso);
@@ -3797,14 +3858,18 @@ const indexHtmlContent = `<!DOCTYPE html>
         // Stage 1: Asset Buffering
         const bufferEl = document.getElementById('stageBufferStatus');
         const bufferNextEl = document.getElementById('stageBufferNextText');
-        const isTomorrowCovered = (tomorrowSlots.length > 0 && tomorrowSlots.every(s => s.isBuffered)) || (typeof KNOWN_BUFFERED_STORIES !== 'undefined' && KNOWN_BUFFERED_STORIES.includes('di-bawah-tempat-tidurku'));
+        const tomorrowBufferedCount = tomorrowSlots.filter(s => s.isBuffered || s.isCompleted).length;
+        const tomorrowTotalCount = tomorrowSlots.length;
         if (bufferEl) {
-          if (isTomorrowCovered) {
+          if (tomorrowTotalCount > 0 && tomorrowBufferedCount === tomorrowTotalCount) {
             bufferEl.className = 'stage-status-pill ready';
-            bufferEl.textContent = '🟢 4/4 Ready (Tomorrow Covered)';
+            bufferEl.textContent = '🟢 ' + tomorrowBufferedCount + '/' + tomorrowTotalCount + ' Tomorrow Ready';
+          } else if (tomorrowBufferedCount > 0) {
+            bufferEl.className = 'stage-status-pill live';
+            bufferEl.textContent = '🟡 ' + tomorrowBufferedCount + '/' + tomorrowTotalCount + ' Tomorrow Buffered';
           } else {
             bufferEl.className = 'stage-status-pill queued';
-            bufferEl.textContent = '🟡 Render Queue Active';
+            bufferEl.textContent = '⏳ Render Queue Active';
           }
         }
         if (bufferNextEl) {
@@ -3830,17 +3895,27 @@ const indexHtmlContent = `<!DOCTYPE html>
         // Stage 3: Morning English Broadcast
         const morningEl = document.getElementById('stageMorningStatus');
         const morningNextEl = document.getElementById('stageMorningNextText');
+        const morningDone = Boolean(todayMorning && (todayMorning.isCompleted || todayMorning.status === 'completed'));
         if (morningEl) {
-          if (totalSecNow >= SEC_MORNING) {
+          if (morningDone) {
             morningEl.className = 'stage-status-pill done';
             morningEl.textContent = '✅ Broadcasted Today';
+          } else if (!todayMorning) {
+            morningEl.className = 'stage-status-pill queued';
+            morningEl.textContent = '⏭️ No Morning Slot';
+          } else if (totalSecNow >= SEC_MORNING) {
+            morningEl.className = 'stage-status-pill live';
+            morningEl.textContent = '⏳ Pending / Syncing';
+          } else if (todayMorning.isBuffered) {
+            morningEl.className = 'stage-status-pill ready';
+            morningEl.textContent = '🟢 Buffered · 08:30 WIB';
           } else {
             morningEl.className = 'stage-status-pill live';
             morningEl.textContent = '🔥 Airing at 08:30 WIB';
           }
         }
         if (morningNextEl) {
-          if (totalSecNow >= SEC_MORNING && tomorrowMorning) {
+          if ((morningDone || totalSecNow >= SEC_MORNING) && tomorrowMorning) {
             morningNextEl.textContent = \`Next: Tomorrow 08:30 WIB · \${tomorrowMorning.storyTitleEn || tomorrowMorning.storyTitleId}\`;
           } else if (todayMorning) {
             morningNextEl.textContent = \`Today: \${todayMorning.storyTitleEn || todayMorning.storyTitleId} [EN]\`;
@@ -3850,17 +3925,27 @@ const indexHtmlContent = `<!DOCTYPE html>
         // Stage 4: Prime Bedtime Indonesian Broadcast
         const bedtimeEl = document.getElementById('stageBedtimeStatus');
         const bedtimeNextEl = document.getElementById('stageBedtimeNextText');
+        const bedtimeDone = Boolean(todayBedtime && (todayBedtime.isCompleted || todayBedtime.status === 'completed'));
         if (bedtimeEl) {
-          if (totalSecNow >= SEC_BEDTIME) {
+          if (bedtimeDone) {
             bedtimeEl.className = 'stage-status-pill done';
             bedtimeEl.textContent = '✅ Broadcasted Tonight';
+          } else if (!todayBedtime) {
+            bedtimeEl.className = 'stage-status-pill queued';
+            bedtimeEl.textContent = '⏭️ No Bedtime Slot';
+          } else if (totalSecNow >= SEC_BEDTIME) {
+            bedtimeEl.className = 'stage-status-pill live';
+            bedtimeEl.textContent = '⏳ Pending / Syncing';
+          } else if (todayBedtime.isBuffered) {
+            bedtimeEl.className = 'stage-status-pill ready';
+            bedtimeEl.textContent = '🟢 Buffered · 19:00 WIB';
           } else {
             bedtimeEl.className = 'stage-status-pill live';
             bedtimeEl.textContent = '🔥 Scheduled Tonight (19:00 WIB)';
           }
         }
         if (bedtimeNextEl) {
-          if (totalSecNow >= SEC_BEDTIME && tomorrowBedtime) {
+          if ((bedtimeDone || totalSecNow >= SEC_BEDTIME) && tomorrowBedtime) {
             bedtimeNextEl.textContent = \`Next: Tomorrow 19:00 WIB · \${tomorrowBedtime.storyTitleId}\`;
           } else if (todayBedtime) {
             bedtimeNextEl.textContent = \`Tonight: \${todayBedtime.storyTitleId} [ID]\`;
@@ -3956,6 +4041,7 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     function renderTimeline() {
       updateLiveTodayStatus();
+      const clientTodayIso = getWibDateIso();
 
       // Compute stats based on the active roadmap scope
       const scopeSlots = RAW_CALENDAR_DATA.filter(item => {
@@ -3966,8 +4052,10 @@ const indexHtmlContent = `<!DOCTYPE html>
 
       const total = scopeSlots.length;
       const completed = scopeSlots.filter(s => s.status === 'completed' || s.isCompleted).length;
-      const todayCount = scopeSlots.filter(s => s.status === 'today').length;
-      const upcoming = scopeSlots.filter(s => s.status === 'upcoming').length;
+      const todaySlotsInScope = scopeSlots.filter(s => s.date === clientTodayIso);
+      const todayCount = todaySlotsInScope.length;
+      const todayDoneCount = todaySlotsInScope.filter(s => s.status === 'completed' || s.isCompleted).length;
+      const upcoming = scopeSlots.filter(s => s.date > clientTodayIso && !s.isCompleted).length;
       const progress = total > 0 ? ((completed / total) * 100).toFixed(1) : '0.0';
 
       const elTotal = document.getElementById('kpiCalTotal');
@@ -3987,6 +4075,17 @@ const indexHtmlContent = `<!DOCTYPE html>
 
       const elToday = document.getElementById('kpiCalToday');
       if (elToday) elToday.textContent = todayCount;
+
+      const elTodayDesc = document.getElementById('kpiCalTodayDesc');
+      if (elTodayDesc) {
+        elTodayDesc.textContent = todayCount === 0
+          ? 'No Scheduled Broadcasts Today'
+          : todayDoneCount === todayCount
+          ? 'All ' + todayCount + ' Broadcasted Today'
+          : todayDoneCount > 0
+          ? todayDoneCount + ' Done · ' + (todayCount - todayDoneCount) + ' Remaining Today'
+          : todayCount + ' Scheduled Broadcasts Today';
+      }
 
       const elUpcoming = document.getElementById('kpiCalUpcoming');
       if (elUpcoming) elUpcoming.textContent = upcoming;
@@ -4068,7 +4167,7 @@ const indexHtmlContent = `<!DOCTYPE html>
         flowHtml = '<div style="text-align: center; padding: 2.5rem; color: var(--text-dim); font-size: 0.85rem;">No scheduled broadcasts match your filter.</div>';
       } else {
         for (const [dateStr, slots] of groups) {
-          const isToday = slots.some(s => s.status === 'today');
+          const isToday = slots.some(s => s.date === clientTodayIso || s.status === 'today');
           const dayName = slots[0]?.dayName || '';
 
           flowHtml += \`
@@ -4107,27 +4206,8 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     function renderSlotCard(slot) {
-      const isCompleted = Boolean(slot.isCompleted || slot.status === 'completed');
-      const isToday = slot.status === 'today';
-      const isBuffered = Boolean(slot.isBuffered);
-      const hasAssets = Boolean(slot.hasAssets);
-
-      let statusClass = 'upcoming';
-      let statusText = '⏳ Queued';
-
-      if (isCompleted) {
-        statusClass = 'completed';
-        statusText = '✅ Done';
-      } else if (isBuffered) {
-        statusClass = 'buffered';
-        statusText = '🟢 Ready';
-      } else if (hasAssets) {
-        statusClass = 'assets-ready';
-        statusText = '🟡 Assets';
-      } else if (isToday) {
-        statusClass = 'today';
-        statusText = '🔥 Today';
-      }
+      const display = resolveSlotDisplayState(slot, getWibDateIso());
+      const { statusClass, statusText, isTodayPending, footerKind } = display;
 
       const timeText = slot.timeSlot || '08:30 WIB';
       const timeShort = timeText.replace(' WIB', '');
@@ -4145,8 +4225,10 @@ const indexHtmlContent = `<!DOCTYPE html>
         else if (slot.format.includes('Landscape') && !slot.format.includes('Shorts')) formatShort = '16:9 Landscape';
       }
 
+      const todayBufferSuffix = display.isBuffered ? ' · 🟢 R2 Ready' : display.hasAssets ? ' · 🟡 Assets' : '';
+
       return \`
-        <div class="slot-card \${isToday && !isCompleted ? 'today-card' : ''}">
+        <div class="slot-card \${isTodayPending ? 'today-card' : ''}">
           <!-- Compact Single-Line Header -->
           <div class="slot-top">
             <div class="slot-time-lang">
@@ -4183,21 +4265,21 @@ const indexHtmlContent = `<!DOCTYPE html>
 
           <!-- Compact Footer Action / Banner -->
           <div class="slot-footer-actions">
-            \${isCompleted || slot.hasPublishedAsset ? \`
+            \${footerKind === 'completed' ? \`
               <button class="slot-action-btn active-btn" onclick="filterCatalogByStory('\${slot.bookSlug}')">
                 📚 View Assets ↗
               </button>
-            \` : isBuffered ? \`
+            \` : footerKind === 'today' ? \`
+              <div class="slot-banner today" title="Active broadcast scheduled for today at \${timeText}.">
+                ⚡ Airing Today (\${timeShort})\${todayBufferSuffix}
+              </div>
+            \` : footerKind === 'buffered' ? \`
               <div class="slot-banner buffered" title="Pre-rendered in Cloudflare R2 bucket. Waiting for broadcast at \${timeText}.">
                 🟢 Ready in Buffer (\${timeShort})
               </div>
-            \` : hasAssets ? \`
+            \` : footerKind === 'assets' ? \`
               <div class="slot-banner assets" title="Story assets ready. In render queue.">
                 🟡 Story Assets Ready
-              </div>
-            \` : isToday ? \`
-              <div class="slot-banner today" title="Active broadcast scheduled for today.">
-                ⚡ Airing Today (\${timeShort})
               </div>
             \` : \`
               <div class="slot-banner queued" title="Queued in production roadmap.">
@@ -4210,27 +4292,8 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     function renderSlotTableRow(slot) {
-      const isCompleted = Boolean(slot.isCompleted || slot.status === 'completed');
-      const isToday = slot.status === 'today';
-      const isBuffered = Boolean(slot.isBuffered);
-      const hasAssets = Boolean(slot.hasAssets);
-
-      let statusClass = 'upcoming';
-      let statusText = '⏳ Queued';
-
-      if (isCompleted) {
-        statusClass = 'completed';
-        statusText = '✅ Done';
-      } else if (isBuffered) {
-        statusClass = 'buffered';
-        statusText = '🟢 Ready';
-      } else if (hasAssets) {
-        statusClass = 'assets-ready';
-        statusText = '🟡 Assets';
-      } else if (isToday) {
-        statusClass = 'today';
-        statusText = '🔥 Today';
-      }
+      const display = resolveSlotDisplayState(slot, getWibDateIso());
+      const { statusClass, statusText, isTodayRow } = display;
 
       const dayName = slot.dayName || 'Hari';
       const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
@@ -4240,8 +4303,8 @@ const indexHtmlContent = `<!DOCTYPE html>
       const theme = slot.theme || 'Pendidikan Karakter Anak';
 
       return \`
-        <tr>
-          <td style="white-space: nowrap; font-weight: 700;">\${dateFormatted}</td>
+        <tr class="\${isTodayRow ? 'today-row' : ''}">
+          <td style="white-space: nowrap; font-weight: 700;">\${dateFormatted}\${isTodayRow ? ' <span class="slot-status-pill today" style="margin-left: 0.3rem; font-size: 0.58rem;">Today</span>' : ''}</td>
           <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;">\${timeText}</td>
           <td>\${dayName}</td>
           <td><span class="slot-status-pill \${statusClass}">\${statusText}</span></td>

@@ -223,8 +223,8 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Mendengarkan Tubuhku! Mengenal Bunyi Ajaib dan Detak Jantung Diri Sendiri",
-    "status": "today",
-    "isCompleted": false,
+    "status": "completed",
+    "isCompleted": true,
     "hasPublishedAsset": true,
     "isBuffered": true,
     "hasAssets": true
@@ -246,7 +246,7 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Under My Bed! Conquering Silly Nighttime Shadows",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": true,
@@ -269,7 +269,7 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Ada Harimau di Bawah Tempat Tidurku! Kisah Jenaka Menghadapi Rasa Takut",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": true,
