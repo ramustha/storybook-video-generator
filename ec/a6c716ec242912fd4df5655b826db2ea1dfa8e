@@ -1,0 +1,39 @@
+docs/index.html
+  1a8c61393d6b06aa 1997,2001,2013,2028,2033,2038,2082,2084,2092,2140,2155-2156,2163,2167,2217,2220,2343,2424-2425,2770
+scripts/migrate-to-d1.ts
+  1a8c61393d6b06aa 5-25,33,45,220-228,231,238-239,249-250,253,257-259
+scripts/test-portal-sync.ts
+  1a8c61393d6b06aa 16,403-460
+scripts/content-calendar.ts
+  1a8c61393d6b06aa 7,12,1020-1021,1046-1054,1099-1103,1106-1114,1116-1126,1130-1132,1145,1169,1238,1245
+docs/audit-data.json
+  1a8c61393d6b06aa 2423-2890
+scripts/lib/db.ts
+  1a8c61393d6b06aa 469-477,605,724-730,758-759
+docs/calendar-data.json
+  1a8c61393d6b06aa 113,136,249-251,274
+scripts/lib/portal-sync.ts
+  1a8c61393d6b06aa 20-23,29-53,103-162,173,184-190,207,279-365
+scripts/publish-all.ts
+  1a8c61393d6b06aa 8-14,97-104,111,113-114,118-119,132-155,157-160,163-165,171,173,178-197,336,355,374-382,509-521
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "eca6c716ec242912fd4df5655b826db2ea1dfa8e",
+  "prompts": {
+    "1a8c61393d6b06aa": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "cc7b054c-1d73-40ca-9da4-ff464de302af",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 954,
+      "total_deletions": 127,
+      "accepted_lines": 954,
+      "overriden_lines": 0
+    }
+  }
+}
