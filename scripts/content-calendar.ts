@@ -4,6 +4,13 @@ import path from "path";
 import { execSync, spawn } from "child_process";
 import { notifyTelegramFailure } from "./notify-telegram";
 import { db } from "./lib/db";
+import { pullStory } from "./manage-story-storage";
+import {
+  fetchRemoteSlotPublicationMap,
+  isSlugTitleFallback,
+  loadJsonArraySafe,
+  resolveExistingSlotPublications,
+} from "./lib/portal-sync";
 
 export interface ScheduledSlot {
   date?: string; // "YYYY-MM-DD" e.g. "2026-11-07"
@@ -806,8 +813,12 @@ function getTodaySlot(targetDate?: string): ScheduledSlot[] {
   return WEEKLY_SCHEDULE.filter((s) => s.dayName === todayName);
 }
 
-function checkPublicationStatus(bookSlug: string, lang: "id" | "en") {
-  const storyPath = path.resolve("./stories", bookSlug, "story.json");
+export function checkPublicationStatus(
+  bookSlug: string,
+  lang: "id" | "en",
+  storiesRoot: string = path.resolve("./stories")
+) {
+  const storyPath = path.join(storiesRoot, bookSlug, "story.json");
   if (!existsSync(storyPath)) {
     return { yt: false, fb: false, ig: false, ready: false };
   }
@@ -821,7 +832,17 @@ function checkPublicationStatus(bookSlug: string, lang: "id" | "en") {
     const fb = !!(pub.facebook?.[lang]?.landscape || pub.facebook?.[lang]?.vertical || (lang === "id" && pub.facebook?.landscape));
     const ig = !!(pub.instagram?.[lang] || (lang === "id" && pub.instagram?.id));
 
-    return { yt, fb, ig, ready: true, title: story.title || bookSlug };
+    const rawTitle =
+      typeof story.title === "object"
+        ? story.title?.[lang] || story.title?.id || story.title?.en
+        : lang === "en" && story.originalTitle
+        ? story.originalTitle
+        : story.title;
+
+    const resolvedLocalTitle =
+      rawTitle && !isSlugTitleFallback(String(rawTitle), bookSlug) ? String(rawTitle) : undefined;
+
+    return { yt, fb, ig, ready: true, title: resolvedLocalTitle };
   } catch {
     return { yt: false, fb: false, ig: false, ready: false };
   }
@@ -850,7 +871,6 @@ function printHeader() {
 async function showToday() {
   printHeader();
   const now = new Date();
-  const todayName = DAYS_ID[now.getDay()];
   const dateStr = new Intl.DateTimeFormat("id-ID", {
     timeZone: "Asia/Jakarta",
     weekday: "long",
@@ -877,23 +897,45 @@ async function showToday() {
     return;
   }
 
+  const remoteMap = await fetchRemoteSlotPublicationMap({
+    localAuditRecords: loadJsonArraySafe(path.resolve("./docs/audit-data.json")),
+    localCalendarSlots: loadJsonArraySafe(path.resolve("./docs/calendar-data.json")),
+  });
+
   console.log(`🎯 JADWAL TAYANG HARI INI (${todaySlots.length} Tayangan):`);
 
   todaySlots.forEach((slot, idx) => {
-    const status = checkPublicationStatus(slot.bookSlug, slot.lang);
+    const localStatus = checkPublicationStatus(slot.bookSlug, slot.lang);
+    const remoteStatus = remoteMap.get(`${slot.bookSlug}::${slot.lang.toLowerCase()}`);
+    const yt = localStatus.yt || Boolean(remoteStatus?.yt);
+    const fb = localStatus.fb || Boolean(remoteStatus?.fb);
+    const ig = localStatus.ig || Boolean(remoteStatus?.ig);
+    const resolvedTitle = localStatus.title || remoteStatus?.title || slot.bookSlug;
+    const syncedRemotely =
+      Boolean(remoteStatus) &&
+      ((remoteStatus!.yt && !localStatus.yt) ||
+        (remoteStatus!.fb && !localStatus.fb) ||
+        (remoteStatus!.ig && !localStatus.ig));
+
     console.log(`\n[Slot ${idx + 1}] ⏰ ${slot.timeSlot} — ${slot.slotType}`);
-    console.log(`   📖 Judul Buku    : ${status.title || slot.bookSlug} (${slot.lang.toUpperCase()})`);
+    console.log(`   📖 Judul Buku    : ${resolvedTitle} (${slot.lang.toUpperCase()})`);
     console.log(`   🎨 Tema / Nilai   : ${slot.theme}`);
     console.log(`   📐 Format Tayang : ${slot.format.toUpperCase()}`);
     console.log(`   📱 Platform      : ${slot.targetPlatforms.join(", ")}`);
+    if (syncedRemotely && remoteStatus) {
+      console.log(`   📡 Live Sync     : ${remoteStatus.sources.join(" + ")} (local story.json stale)`);
+    }
     console.log(`   📊 Status Rilis  :`);
-    console.log(`      - YouTube     : ${status.yt ? "✔ PUBLISHED" : "⏳ PENDING"}`);
-    console.log(`      - Facebook    : ${status.fb ? "✔ PUBLISHED" : "⏳ PENDING"}`);
-    console.log(`      - Instagram   : ${status.ig ? "✔ PUBLISHED" : "⏳ PENDING"}`);
+    console.log(`      - YouTube     : ${yt ? "✔ PUBLISHED" : "⏳ PENDING"}`);
+    console.log(`      - Facebook    : ${fb ? "✔ PUBLISHED" : "⏳ PENDING"}`);
+    console.log(`      - Instagram   : ${ig ? "✔ PUBLISHED" : "⏳ PENDING"}`);
 
-    const allPublished = status.yt && status.fb && status.ig;
+    const allPublished = yt && fb && ig;
     if (allPublished) {
       console.log(`   🎉 SEMUA PLATFORM SUDAH LIVE UNTUK SLOT INI!`);
+      if (syncedRemotely) {
+        console.log(`   💡 Sync lokal    : npm run story:pull ${slot.bookSlug}`);
+      }
     } else {
       console.log(`\n   👉 Perintah 1-Klik untuk Rilis:`);
       console.log(`      npx tsx scripts/publish-all.ts --book ${slot.bookSlug} --lang ${slot.lang}`);
@@ -975,7 +1017,8 @@ async function publishToday(
   dryRun: boolean,
   targetBook?: string,
   targetLang?: "id" | "en",
-  slotFilter?: "morning" | "evening" | "auto" | "all"
+  slotFilter?: "morning" | "evening" | "auto" | "all",
+  force: boolean = false
 ) {
   printHeader();
   let slots = getTodaySlot();
@@ -1000,14 +1043,15 @@ async function publishToday(
   }
 
   if (!targetBook && slotFilter && slotFilter !== "all") {
-    const jakartaHour = parseInt(
-      new Intl.DateTimeFormat("en-US", {
-        timeZone: "Asia/Jakarta",
-        hour: "numeric",
-        hour12: false,
-      }).format(new Date()),
-      10
-    );
+    const jakartaHour =
+      parseInt(
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Jakarta",
+          hour: "numeric",
+          hourCycle: "h23",
+        }).format(new Date()),
+        10
+      ) % 24;
 
     let isMorning = false;
     if (slotFilter === "morning") {
@@ -1049,19 +1093,43 @@ async function publishToday(
     console.log(`\n🚀 Memproses Jadwal: ${slot.bookSlug} [${slot.lang.toUpperCase()}] (${slot.timeSlot})`);
 
     try {
-      // Ensure story assets exist locally, pull from Cloudflare R2 if missing
       const storyDir = path.resolve("./stories", slot.bookSlug);
       const storyPath = path.join(storyDir, "story.json");
-      if (!existsSync(storyPath)) {
-        console.log(`📥 Story assets not found locally for [${slot.bookSlug}]. Pulling from Cloudflare R2...`);
-        await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug, "--include-videos"]);
+
+      // Refresh manifest first so remote CI broadcasts are visible even when story.json exists locally
+      try {
+        await pullStory(slot.bookSlug, { manifestOnly: true, force: true });
+      } catch {
+        // Offline or story manifest not yet in R2; continue with local/D1/portal checks
       }
 
-      const status = checkPublicationStatus(slot.bookSlug, slot.lang);
+      const localStatus = checkPublicationStatus(slot.bookSlug, slot.lang);
+      const resolvedStatus = await resolveExistingSlotPublications({
+        bookSlug: slot.bookSlug,
+        lang: slot.lang,
+        localFlags: localStatus,
+        localAuditRecords: loadJsonArraySafe(path.resolve("./docs/audit-data.json")),
+        localCalendarSlots: loadJsonArraySafe(path.resolve("./docs/calendar-data.json")),
+        queryD1Publications: (slug, lang) => db.getPublishedPublicationsForSlot(slug, lang),
+      });
 
-      if (status.yt && status.fb && status.ig && !dryRun) {
-        console.log(`✔ [ALREADY LIVE] Buku ${slot.bookSlug} (${slot.lang}) sudah terbit di semua platform. Lewati.`);
+      if (resolvedStatus.allPrimaryLive && !force) {
+        console.log(
+          `🛡️ [ZERO DUPLICATE GATE] Buku ${slot.bookSlug} (${slot.lang.toUpperCase()}) sudah live across YT/FB/IG (${resolvedStatus.sources.join(" + ")}). Lewati.`
+        );
+        if (!dryRun && slot.date) {
+          try {
+            await db.markCalendarSlotCompleted(slot.date, slot.timeSlot, slot.lang);
+          } catch {
+            // Non-fatal if D1 write token is temporarily unavailable
+          }
+        }
         continue;
+      }
+
+      if (!existsSync(storyPath)) {
+        console.log(`📥 Story assets not found locally for [${slot.bookSlug}]. Pulling from Cloudflare R2...`);
+        await pullStory(slot.bookSlug, { includeVideos: true });
       }
 
       // Step 1: Cek apakah file video sudah ada di disk. Jika belum, coba pull video pre-rendered dari R2!
@@ -1074,7 +1142,7 @@ async function publishToday(
       if (needRender) {
         console.log(`🔎 Video belum ada di disk lokal. Mencari buffer video pre-rendered di Cloudflare R2...`);
         try {
-          await runChildCommand("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slot.bookSlug, "--include-videos"]);
+          await pullStory(slot.bookSlug, { includeVideos: true });
           // Re-check after pulling videos
           storyJson = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
           vertPath = storyJson.exports?.[slot.lang]?.vertical?.path ? path.join(storyDir, storyJson.exports[slot.lang].vertical.path) : null;
@@ -1098,6 +1166,7 @@ async function publishToday(
       console.log(`📡 Mempublikasikan ke platform tujuan...`);
       const publishArgs = ["scripts/publish-all.ts", "--book", slot.bookSlug, "--lang", slot.lang];
       if (dryRun) publishArgs.push("--dry-run");
+      if (force) publishArgs.push("--force");
 
       await runChildCommand("npx", ["tsx", ...publishArgs]);
 
@@ -1166,13 +1235,14 @@ async function main() {
     });
   } else if (args.includes("--publish-today") || args.includes("--run-today")) {
     const dryRun = args.includes("--dry-run");
+    const force = args.includes("--force");
     const bookIdx = args.indexOf("--book");
     const book = bookIdx !== -1 && args[bookIdx + 1] !== "auto" ? args[bookIdx + 1] : undefined;
     const langIdx = args.indexOf("--lang");
     const lang = langIdx !== -1 && (args[langIdx + 1] === "id" || args[langIdx + 1] === "en") ? args[langIdx + 1] as "id" | "en" : undefined;
     const slotIdx = args.indexOf("--slot");
     const slot = slotIdx !== -1 ? (args[slotIdx + 1] as "morning" | "evening" | "auto" | "all") : "auto";
-    await publishToday(dryRun, book, lang, slot);
+    await publishToday(dryRun, book, lang, slot, force);
   } else {
     await showToday();
   }

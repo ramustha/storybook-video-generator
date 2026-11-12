@@ -2,6 +2,27 @@ import fs from "fs";
 import path from "path";
 import { db } from "./lib/db";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
+import { getWibDateIso, isPrimaryPublishedRecord } from "./lib/portal-sync";
+
+function collectProductionStorySlugs(storiesDir: string, baseSlugs: string[]): string[] {
+  const slugSet = new Set(baseSlugs);
+  if (fs.existsSync(storiesDir)) {
+    for (const entry of fs.readdirSync(storiesDir)) {
+      if (
+        entry === "branding" ||
+        entry.startsWith("test-") ||
+        entry.startsWith("poc-") ||
+        entry.startsWith("edu-")
+      ) {
+        continue;
+      }
+      if (fs.existsSync(path.join(storiesDir, entry, "story.json"))) {
+        slugSet.add(entry);
+      }
+    }
+  }
+  return Array.from(slugSet).sort();
+}
 
 async function main() {
   console.log("\n=======================================================");
@@ -9,7 +30,7 @@ async function main() {
   console.log("=======================================================\n");
 
   const storiesDir = path.resolve(process.cwd(), "stories");
-  const productionSlugs = [
+  const productionSlugs = collectProductionStorySlugs(storiesDir, [
     "bulan-dan-topi-biru",
     "gara-gara-kucing",
     "hari-cukur-rambut",
@@ -21,7 +42,7 @@ async function main() {
     "raja-gemuk-remotion",
     "terlalu-banyak-suara",
     "topsy-turvy-serba-terbalik",
-  ];
+  ]);
 
   // 1. Migrate Books & Scenes
   console.log("📚 Step 1: Migrating Stories & Scenes into D1...");
@@ -196,13 +217,26 @@ async function main() {
     }
   }
 
+  const allPubRows = await db.query<{ book_slug: string; platform: string; lang: string; status: string }>(
+    "SELECT book_slug, platform, lang, status FROM publications WHERE status = 'published'"
+  );
+  const publishedPrimaryPairs = new Set(
+    allPubRows
+      .filter((r) => isPrimaryPublishedRecord({ storySlug: r.book_slug, platform: r.platform, status: r.status }))
+      .map((r) => `${r.book_slug}::${(r.lang || "id").toLowerCase()}`)
+  );
+  const todayWibIso = getWibDateIso(new Date());
+
   let calendarCount = 0;
+  let completedSyncedCount = 0;
   const calChunkSize = 5;
   for (let i = 0; i < DAILY_CALENDAR_MONTH_1.length; i += calChunkSize) {
     const chunk = DAILY_CALENDAR_MONTH_1.slice(i, i + calChunkSize);
     await Promise.all(
       chunk.map(async (slot) => {
         if (!slot.date) return;
+        const slotDone =
+          slot.date <= todayWibIso && publishedPrimaryPairs.has(`${slot.bookSlug}::${slot.lang.toLowerCase()}`);
         await db.saveCalendarSlot({
           scheduled_date: slot.date,
           day_name: slot.dayName,
@@ -212,13 +246,17 @@ async function main() {
           lang: slot.lang,
           format: slot.format,
           theme: slot.theme,
-          is_completed: false,
+          is_completed: slotDone,
+          completed_at: slotDone ? new Date().toISOString() : undefined,
         });
         calendarCount++;
+        if (slotDone) completedSyncedCount++;
       })
     );
   }
-  console.log(`  ✔ Ingested ${calendarCount} calendar broadcast slots into content_calendar`);
+  console.log(
+    `  ✔ Ingested ${calendarCount} calendar broadcast slots into content_calendar (${completedSyncedCount} marked completed)`
+  );
 
   // 5. Setup GCP Quota Projects
   console.log("\n⚡ Step 5: Initializing GCP Quota Projects...");
