@@ -5,6 +5,13 @@ import path from "path";
 import { verifyStoryThumbnails, renderStoryThumbnails } from "./render-thumbnail";
 import { notifyTelegramPublish, notifyTelegramFailure } from "./notify-telegram";
 import { db } from "./lib/db";
+import { pullStory } from "./manage-story-storage";
+import {
+  AuditRecordLike,
+  CalendarSlotLike,
+  loadJsonArraySafe,
+  resolveExistingSlotPublications,
+} from "./lib/portal-sync";
 
 interface PublishAllOptions {
   bookSlug: string;
@@ -87,42 +94,29 @@ async function main() {
   const storyDir = path.resolve("./stories", options.bookSlug);
   const storyJsonPath = path.join(storyDir, "story.json");
 
+  if (!options.force) {
+    try {
+      await pullStory(options.bookSlug, { manifestOnly: true, force: true });
+    } catch {
+      // Offline or manifest not in R2 yet; fall back to local story.json and D1/portal checks
+    }
+  }
+
   if (!existsSync(storyJsonPath)) {
     throw new Error(`Story manifest not found at ${storyJsonPath}`);
   }
 
   const rawStory = await fs.readFile(storyJsonPath, "utf-8");
   const story = JSON.parse(rawStory);
-  console.log(`📚 Story Title: "${story.title}"\n`);
+  console.log(`📚 Story Title: "${typeof story.title === "object" ? story.title.id || story.title.en : story.title}"\n`);
 
-  const langsToProcess = options.lang === "all" ? ["id", "en"] : [options.lang];
-
-  // ── Pre-publish thumbnail verification gate ──────────────────────────────
-  console.log(`\n🔍 Verifying multi-platform thumbnails before publishing...`);
-  const thumbVerifs = await verifyStoryThumbnails(options.bookSlug, options.lang);
-  for (const v of thumbVerifs) {
-    if (!v.isValid) {
-      const missing = v.items
-        .filter((t) => !t.isValid)
-        .map((t) => `${t.type} (${t.error || "missing"})`)
-        .join(", ");
-      console.log(
-        `⚠️  Missing/invalid thumbnails for [${v.lang.toUpperCase()}]: ${missing}`
-      );
-      if (!options.dryRun) {
-        console.log(`🔧 Auto-rendering missing thumbnails for [${v.lang.toUpperCase()}]...`);
-        await renderStoryThumbnails({ bookSlug: options.bookSlug, lang: v.lang, silent: false });
-      } else {
-        console.log(`ℹ️  (DRY RUN) Would auto-render missing thumbnails for [${v.lang.toUpperCase()}].`);
-      }
-    } else {
-      console.log(`✔  All thumbnails valid for [${v.lang.toUpperCase()}]`);
-    }
-  }
-  // ─────────────────────────────────────────────────────────────────────────
+  const langsToProcess: Array<"id" | "en"> =
+    options.lang === "all" ? ["id", "en"] : [options.lang];
 
   let anyUploadOccurred = false;
   const allFailures: Array<{ platform: string; lang: string; error: string }> = [];
+  const localAuditRecords = loadJsonArraySafe<Partial<AuditRecordLike>>(path.resolve("./docs/audit-data.json"));
+  const localCalendarSlots = loadJsonArraySafe<Partial<CalendarSlotLike>>(path.resolve("./docs/calendar-data.json"));
 
   for (const currentLang of langsToProcess) {
     console.log(`\n======================================================`);
@@ -135,24 +129,72 @@ async function main() {
 
     const ytLandscapeId = getId(pub.youtube?.[currentLang]?.landscape) || story.exports?.[currentLang]?.landscape?.youtubeId;
     const ytVerticalId = getId(pub.youtube?.[currentLang]?.vertical);
-    const ytId = ytLandscapeId || ytVerticalId;
+    const localYtId = ytLandscapeId || ytVerticalId;
 
-    const igId = getId(pub.instagram?.[currentLang]) || (currentLang === "id" ? getId(pub.instagram?.id) : undefined);
-    const fbLandId = getId(pub.facebook?.[currentLang]?.landscape) || (currentLang === "id" ? getId(pub.facebook?.landscape) : undefined);
-    const fbVertId = getId(pub.facebook?.[currentLang]?.vertical) || (currentLang === "id" ? getId(pub.facebook?.vertical) : undefined);
+    const localIgId = getId(pub.instagram?.[currentLang]) || (currentLang === "id" ? getId(pub.instagram?.id) : undefined);
+    const localFbLandId = getId(pub.facebook?.[currentLang]?.landscape) || (currentLang === "id" ? getId(pub.facebook?.landscape) : undefined);
+    const localFbVertId = getId(pub.facebook?.[currentLang]?.vertical) || (currentLang === "id" ? getId(pub.facebook?.vertical) : undefined);
+
+    const remoteResolved = options.force
+      ? null
+      : await resolveExistingSlotPublications({
+          bookSlug: options.bookSlug,
+          lang: currentLang,
+          localFlags: {
+            yt: Boolean(localYtId),
+            ig: Boolean(localIgId),
+            fb: Boolean(localFbLandId || localFbVertId),
+            ytLand: Boolean(ytLandscapeId),
+            ytVert: Boolean(ytVerticalId),
+            fbLand: Boolean(localFbLandId),
+            fbVert: Boolean(localFbVertId),
+          },
+          localAuditRecords,
+          localCalendarSlots,
+          queryD1Publications: (slug, lang) => db.getPublishedPublicationsForSlot(slug, lang),
+        });
+
+    const ytId = localYtId || (remoteResolved?.yt ? "remote-published" : undefined);
+    const igId = localIgId || (remoteResolved?.ig ? "remote-published" : undefined);
+    const fbLandId = localFbLandId || (remoteResolved?.fbLand ? "remote-published" : undefined);
+    const fbVertId = localFbVertId || (remoteResolved?.fbVert ? "remote-published" : undefined);
 
     console.log(`\n🔍 PRE-PUBLISH DEDUPLICATION AUDIT:`);
+    if (remoteResolved && remoteResolved.sources.length > 0) {
+      console.log(`   - Sources Tracked : ${remoteResolved.sources.join(", ")}`);
+    }
     console.log(`   - YouTube Video : ${ytId ? `✔ LIVE (${ytId})` : "⏳ PENDING"}`);
     console.log(`   - Instagram Reel: ${igId ? `✔ LIVE (${igId})` : "⏳ PENDING"}`);
     console.log(`   - Facebook 16:9 : ${fbLandId ? `✔ LIVE (${fbLandId})` : "⏳ PENDING"}`);
     console.log(`   - Facebook 9:16 : ${fbVertId ? `✔ LIVE (${fbVertId})` : "⏳ PENDING"}`);
 
-    const isAllLive = ytId && igId && (fbLandId || fbVertId);
+    const isAllLive = ytId && igId && (fbLandId || fbVertId || remoteResolved?.fb);
     if (isAllLive && !options.force) {
-      console.log(`\n🛡️ [ZERO DUPLICATE GATE] Story "${story.title}" [${currentLang.toUpperCase()}] is ALREADY LIVE across all platforms!`);
+      console.log(`\n🛡️ [ZERO DUPLICATE GATE] Story "${options.bookSlug}" [${currentLang.toUpperCase()}] is ALREADY LIVE across all platforms!`);
       console.log(`   ⏩ SKIPPING publish to ensure ZERO DUPLICATE content.`);
       console.log(`   💡 Tip: Pass --force to replace or re-publish anyway.`);
       continue;
+    }
+
+    // ── Pre-publish thumbnail verification gate (only when language will upload) ─
+    console.log(`\n🔍 Verifying multi-platform thumbnails for [${currentLang.toUpperCase()}]...`);
+    const thumbVerifs = await verifyStoryThumbnails(options.bookSlug, currentLang);
+    for (const v of thumbVerifs) {
+      if (!v.isValid) {
+        const missing = v.items
+          .filter((t) => !t.isValid)
+          .map((t) => `${t.type} (${t.error || "missing"})`)
+          .join(", ");
+        console.log(`⚠️  Missing/invalid thumbnails for [${v.lang.toUpperCase()}]: ${missing}`);
+        if (!options.dryRun) {
+          console.log(`🔧 Auto-rendering missing thumbnails for [${v.lang.toUpperCase()}]...`);
+          await renderStoryThumbnails({ bookSlug: options.bookSlug, lang: v.lang, silent: false });
+        } else {
+          console.log(`ℹ️  (DRY RUN) Would auto-render missing thumbnails for [${v.lang.toUpperCase()}].`);
+        }
+      } else {
+        console.log(`✔  All thumbnails valid for [${v.lang.toUpperCase()}]`);
+      }
     }
     // ──────────────────────────────────────────────────────────────────────
 
@@ -291,6 +333,7 @@ async function main() {
 
         try {
           await runCommand("npx", ["tsx", ...tiktokArgs]);
+          anyUploadOccurred = true;
         } catch (err: any) {
           console.error("⚠️ TikTok API upload warning:", err.message);
           allFailures.push({ platform: "TikTok (API)", lang: currentLang, error: err.message });
@@ -309,6 +352,7 @@ async function main() {
 
         try {
           await runCommand("npx", ["tsx", ...tiktokBrowserArgs]);
+          anyUploadOccurred = true;
         } catch (err: any) {
           console.error("⚠️ TikTok Puppeteer browser upload warning:", err.message);
           allFailures.push({ platform: "TikTok (Browser)", lang: currentLang, error: err.message });
@@ -327,13 +371,15 @@ async function main() {
   console.log(`🎉 MULTI-PLATFORM PUBLISHING RUN COMPLETE!`);
   console.log(`==================================================================`);
 
-  // Generate Bilingual Social Promotion Kit for all platforms (Instagram, Facebook, YouTube Community, TikTok)
-  try {
-    console.log(`\n📢 Generating Multi-Platform Bilingual Social Promotion Kit...`);
-    await runCommand("npx", ["tsx", "scripts/generate-social-promo.ts", options.bookSlug]);
-    console.log(`✔ Social promotion kit saved to stories/${options.bookSlug}/exports/social-promotion-posts.md`);
-  } catch (promoErr: any) {
-    console.warn("⚠️ Warning: could not generate social promotion kit:", promoErr.message);
+  // Generate Bilingual Social Promotion Kit only when uploads actually ran or forced
+  if (anyUploadOccurred || options.force) {
+    try {
+      console.log(`\n📢 Generating Multi-Platform Bilingual Social Promotion Kit...`);
+      await runCommand("npx", ["tsx", "scripts/generate-social-promo.ts", options.bookSlug]);
+      console.log(`✔ Social promotion kit saved to stories/${options.bookSlug}/exports/social-promotion-posts.md`);
+    } catch (promoErr: any) {
+      console.warn("⚠️ Warning: could not generate social promotion kit:", promoErr.message);
+    }
   }
 
   // 4. Automated Multi-Platform Social Promotion (Facebook Page & Instagram Feed/Carousel)
@@ -460,15 +506,19 @@ async function main() {
       }
     }
 
-    try {
-      console.log(`\n✈️ Dispatching Telegram Broadcast Notification...`);
-      await notifyTelegramPublish({
-        bookSlug: options.bookSlug,
-        lang: options.lang === "all" ? "id" : options.lang,
-        dryRun: options.dryRun,
-      });
-    } catch (tgErr: any) {
-      console.warn("⚠️ Telegram notification dispatch warning:", tgErr.message);
+    if (anyUploadOccurred || options.force) {
+      try {
+        console.log(`\n✈️ Dispatching Telegram Broadcast Notification...`);
+        await notifyTelegramPublish({
+          bookSlug: options.bookSlug,
+          lang: options.lang === "all" ? "id" : options.lang,
+          dryRun: options.dryRun,
+        });
+      } catch (tgErr: any) {
+        console.warn("⚠️ Telegram notification dispatch warning:", tgErr.message);
+      }
+    } else {
+      console.log(`\n🛡️ [ZERO DUPLICATE GATE] Skipping Telegram broadcast notification (no new uploads occurred).`);
     }
   }
 

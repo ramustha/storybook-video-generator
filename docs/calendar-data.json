@@ -110,7 +110,7 @@
     "theme": "English Read-Aloud: Grandma's Glasses & The Great Spectacles Hunt",
     "status": "completed",
     "isCompleted": true,
-    "hasPublishedAsset": false,
+    "hasPublishedAsset": true,
     "isBuffered": false,
     "hasAssets": true
   },
@@ -133,7 +133,7 @@
     "theme": "Prime Bedtime Story: Misteri Kacamata Nenek yang Hilang & Kasih Sayang Cucu",
     "status": "completed",
     "isCompleted": true,
-    "hasPublishedAsset": false,
+    "hasPublishedAsset": true,
     "isBuffered": false,
     "hasAssets": true
   },
@@ -246,9 +246,9 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Under My Bed! Conquering Silly Nighttime Shadows",
-    "status": "today",
-    "isCompleted": false,
-    "hasPublishedAsset": false,
+    "status": "completed",
+    "isCompleted": true,
+    "hasPublishedAsset": true,
     "isBuffered": true,
     "hasAssets": true
   },
@@ -271,7 +271,7 @@
     "theme": "Prime Bedtime Story: Ada Harimau di Bawah Tempat Tidurku! Kisah Jenaka Menghadapi Rasa Takut",
     "status": "today",
     "isCompleted": false,
-    "hasPublishedAsset": false,
+    "hasPublishedAsset": true,
     "isBuffered": true,
     "hasAssets": true
   },

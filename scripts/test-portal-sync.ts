@@ -13,6 +13,7 @@ import {
   fetchRemoteSlotPublicationMap,
   mergeAuditRecordLists,
   mergeCalendarSlotLists,
+  resolveExistingSlotPublications,
   resolveSlotDisplayState,
 } from "./lib/portal-sync";
 
@@ -398,6 +399,65 @@ async function runUnitTests(): Promise<void> {
   } finally {
     fs.rmSync(tmpStoriesDir, { recursive: true, force: true });
   }
+
+  // Duplicate-publish prevention: stale local story.json must still see live D1 + snapshot publications
+  const resolvedDup = await resolveExistingSlotPublications({
+    bookSlug: "di-bawah-tempat-tidurku",
+    lang: "en",
+    localFlags: { yt: false, fb: false, ig: false },
+    localAuditRecords: [
+      makeAuditRecord({ platform: "YouTube", language: "en", format: "Landscape (16:9)", aspectRatio: "16:9" }),
+    ],
+    catalogApiUrl: "https://mock.invalid/api/catalog",
+    snapshotAuditUrl: "https://mock.invalid/audit-data.json",
+    fetcher: async (url: string) => {
+      if (url.includes("/api/catalog")) {
+        return {
+          ok: true,
+          json: async () => ({
+            success: true,
+            auditRecords: [
+              makeAuditRecord({ platform: "Instagram", language: "en", format: "Instagram Reel (9:16)", aspectRatio: "9:16" }),
+            ],
+          }),
+        };
+      }
+      return { ok: true, json: async () => [] };
+    },
+    queryD1Publications: async () => [
+      { platform: "facebook", format: "vertical", status: "published", external_id: "fbv1" },
+      { platform: "facebook", format: "landscape", status: "failed", external_id: "" },
+    ],
+  });
+  assert.equal(resolvedDup.yt, true);
+  assert.equal(resolvedDup.ytLand, true);
+  assert.equal(resolvedDup.ytVert, false);
+  assert.equal(resolvedDup.ig, true);
+  assert.equal(resolvedDup.fb, true);
+  assert.equal(resolvedDup.fbVert, true);
+  assert.equal(resolvedDup.fbLand, false);
+  assert.equal(resolvedDup.allPrimaryLive, true);
+  assert.deepEqual(
+    resolvedDup.sources.sort(),
+    ["d1:publications", "docs/audit-data.json", "pages.dev/api/catalog"].sort()
+  );
+
+  // Telegram/failed rows must not block publish
+  const resolvedUnpublished = await resolveExistingSlotPublications({
+    bookSlug: "di-bawah-tempat-tidurku",
+    lang: "id",
+    localFlags: { yt: false, fb: false, ig: false },
+    catalogApiUrl: "",
+    snapshotAuditUrl: "",
+    queryD1Publications: async () => [
+      { platform: "telegram", format: "notification", status: "published", external_id: "tg1" },
+      { platform: "youtube", format: "landscape", status: "failed", external_id: "y1" },
+    ],
+  });
+  assert.equal(resolvedUnpublished.yt, false);
+  assert.equal(resolvedUnpublished.fb, false);
+  assert.equal(resolvedUnpublished.ig, false);
+  assert.equal(resolvedUnpublished.allPrimaryLive, false);
 
   console.log("✅ All unit tests passed.");
 }

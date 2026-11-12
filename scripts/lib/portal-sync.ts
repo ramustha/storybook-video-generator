@@ -17,6 +17,40 @@ export interface RemoteSlotPublicationInfo {
   yt: boolean;
   fb: boolean;
   ig: boolean;
+  ytLand: boolean;
+  ytVert: boolean;
+  fbLand: boolean;
+  fbVert: boolean;
+  title: string | null;
+  sources: string[];
+}
+
+/**
+ * Per-platform publication flags extracted from local or remote story state.
+ */
+export interface LocalPublicationFlags {
+  yt?: boolean;
+  fb?: boolean;
+  ig?: boolean;
+  ytLand?: boolean;
+  ytVert?: boolean;
+  fbLand?: boolean;
+  fbVert?: boolean;
+  title?: string | null;
+}
+
+/**
+ * Combined multi-source deduplication verdict for a single `(bookSlug, lang)` edition.
+ */
+export interface ResolvedSlotPublications {
+  yt: boolean;
+  fb: boolean;
+  ig: boolean;
+  ytLand: boolean;
+  ytVert: boolean;
+  fbLand: boolean;
+  fbVert: boolean;
+  allPrimaryLive: boolean;
   title: string | null;
   sources: string[];
 }
@@ -66,6 +100,66 @@ export function getBrowserPortalSyncScript(): string {
   return transpiled.outputText.trim();
 }
 
+function getOrCreateRemoteEntry(
+  targetMap: Map<string, RemoteSlotPublicationInfo>,
+  key: string
+): RemoteSlotPublicationInfo {
+  const existing = targetMap.get(key);
+  if (existing) return existing;
+  const fresh: RemoteSlotPublicationInfo = {
+    yt: false,
+    fb: false,
+    ig: false,
+    ytLand: false,
+    ytVert: false,
+    fbLand: false,
+    fbVert: false,
+    title: null,
+    sources: [],
+  };
+  targetMap.set(key, fresh);
+  return fresh;
+}
+
+function isVerticalFormat(format?: string, aspectRatio?: string): boolean {
+  const fmt = String(format || "").trim().toLowerCase();
+  const ratio = String(aspectRatio || "").trim().toLowerCase();
+  return (
+    ratio === "9:16" ||
+    fmt.includes("vertical") ||
+    fmt.includes("short") ||
+    fmt.includes("reel") ||
+    fmt.includes("9:16")
+  );
+}
+
+function applyPlatformPublicationFlags(
+  entry: RemoteSlotPublicationInfo,
+  platform: string,
+  format: string | undefined,
+  aspectRatio: string | undefined,
+  sourceLabel: string
+): void {
+  const plat = platform.trim().toLowerCase();
+  const isVert = isVerticalFormat(format, aspectRatio);
+  if (plat === "youtube") {
+    entry.yt = true;
+    if (isVert) entry.ytVert = true;
+    else entry.ytLand = true;
+  } else if (plat === "facebook") {
+    entry.fb = true;
+    if (isVert) entry.fbVert = true;
+    else entry.fbLand = true;
+  } else if (plat === "instagram") {
+    entry.ig = true;
+  } else {
+    return;
+  }
+  if (!entry.sources.includes(sourceLabel)) {
+    entry.sources.push(sourceLabel);
+  }
+}
+
 function collectPublicationsBySlot(
   records: Partial<AuditRecordLike>[],
   sourceLabel: string,
@@ -76,13 +170,7 @@ function collectPublicationsBySlot(
     const slug = String(rec.storySlug).trim().toLowerCase();
     const lang = String(rec.language || "id").trim().toLowerCase();
     const key = slug + "::" + lang;
-    const entry = targetMap.get(key) || {
-      yt: false,
-      fb: false,
-      ig: false,
-      title: null,
-      sources: [],
-    };
+    const entry = getOrCreateRemoteEntry(targetMap, key);
 
     if (!entry.title) {
       const candidateTitle =
@@ -93,16 +181,14 @@ function collectPublicationsBySlot(
     }
 
     if (isPrimaryPublishedRecord(rec)) {
-      const platform = String(rec.platform || "").trim().toLowerCase();
-      if (platform === "youtube") entry.yt = true;
-      if (platform === "facebook") entry.fb = true;
-      if (platform === "instagram") entry.ig = true;
-      if (!entry.sources.includes(sourceLabel)) {
-        entry.sources.push(sourceLabel);
-      }
+      applyPlatformPublicationFlags(
+        entry,
+        String(rec.platform || ""),
+        rec.format,
+        rec.aspectRatio,
+        sourceLabel
+      );
     }
-
-    targetMap.set(key, entry);
   }
 }
 
@@ -118,16 +204,9 @@ function collectSlotTitlesFromCalendar(
     const candidateTitle =
       lang === "en" ? slot.storyTitleEn || slot.storyTitleId : slot.storyTitleId || slot.storyTitleEn;
     if (!candidateTitle || isSlugTitleFallback(candidateTitle, slug)) continue;
-    const existing = targetMap.get(key) || {
-      yt: false,
-      fb: false,
-      ig: false,
-      title: null,
-      sources: [],
-    };
+    const existing = getOrCreateRemoteEntry(targetMap, key);
     if (!existing.title) {
       existing.title = candidateTitle;
-      targetMap.set(key, existing);
     }
   }
 }
@@ -196,4 +275,92 @@ export async function fetchRemoteSlotPublicationMap(options: {
   }
 
   return result;
+}
+
+/**
+ * Resolves unified multi-source publication flags across local manifest state,
+ * direct D1 rows, and deployed portal snapshots to prevent duplicate uploads.
+ */
+export async function resolveExistingSlotPublications(options: {
+  bookSlug: string;
+  lang: "id" | "en" | string;
+  localFlags?: LocalPublicationFlags;
+  localAuditRecords?: Partial<AuditRecordLike>[];
+  localCalendarSlots?: Partial<CalendarSlotLike>[];
+  queryD1Publications?: (
+    bookSlug: string,
+    lang: string
+  ) => Promise<Array<{ platform?: string; format?: string; status?: string; external_id?: string; video_url?: string }>>;
+  catalogApiUrl?: string;
+  snapshotAuditUrl?: string;
+  timeoutMs?: number;
+  fetcher?: FetchLike;
+}): Promise<ResolvedSlotPublications> {
+  const slugKey = String(options.bookSlug || "").trim().toLowerCase();
+  const langKey = String(options.lang || "id").trim().toLowerCase();
+  const slotKey = `${slugKey}::${langKey}`;
+
+  const merged: RemoteSlotPublicationInfo = {
+    yt: Boolean(options.localFlags?.yt),
+    fb: Boolean(options.localFlags?.fb),
+    ig: Boolean(options.localFlags?.ig),
+    ytLand: Boolean(options.localFlags?.ytLand),
+    ytVert: Boolean(options.localFlags?.ytVert),
+    fbLand: Boolean(options.localFlags?.fbLand),
+    fbVert: Boolean(options.localFlags?.fbVert),
+    title: options.localFlags?.title || null,
+    sources: options.localFlags && (options.localFlags.yt || options.localFlags.fb || options.localFlags.ig)
+      ? ["story.json"]
+      : [],
+  };
+
+  const [remoteMap, d1Rows] = await Promise.all([
+    fetchRemoteSlotPublicationMap({
+      localAuditRecords: options.localAuditRecords,
+      localCalendarSlots: options.localCalendarSlots,
+      catalogApiUrl: options.catalogApiUrl,
+      snapshotAuditUrl: options.snapshotAuditUrl,
+      timeoutMs: options.timeoutMs,
+      fetcher: options.fetcher,
+    }),
+    options.queryD1Publications
+      ? options.queryD1Publications(slugKey, langKey).catch(() => [])
+      : Promise.resolve([]),
+  ]);
+
+  const remoteInfo = remoteMap.get(slotKey);
+  if (remoteInfo) {
+    merged.yt = merged.yt || remoteInfo.yt;
+    merged.fb = merged.fb || remoteInfo.fb;
+    merged.ig = merged.ig || remoteInfo.ig;
+    merged.ytLand = merged.ytLand || remoteInfo.ytLand;
+    merged.ytVert = merged.ytVert || remoteInfo.ytVert;
+    merged.fbLand = merged.fbLand || remoteInfo.fbLand;
+    merged.fbVert = merged.fbVert || remoteInfo.fbVert;
+    if (!merged.title && remoteInfo.title) {
+      merged.title = remoteInfo.title;
+    }
+    for (const s of remoteInfo.sources) {
+      if (!merged.sources.includes(s)) merged.sources.push(s);
+    }
+  }
+
+  for (const row of d1Rows || []) {
+    if (!row) continue;
+    const status = row.status ? String(row.status).trim().toLowerCase() : "published";
+    if (status !== "published") continue;
+    if (!row.external_id && !row.video_url) continue;
+    applyPlatformPublicationFlags(
+      merged,
+      String(row.platform || ""),
+      row.format,
+      undefined,
+      "d1:publications"
+    );
+  }
+
+  return {
+    ...merged,
+    allPrimaryLive: Boolean(merged.yt && merged.fb && merged.ig),
+  };
 }

@@ -466,8 +466,15 @@ class StorybookDB {
    */
   async saveStory(manifest: any): Promise<void> {
     const slug = manifest.slug;
-    const titleId = manifest.title || "";
-    const titleEn = manifest.titleEn || manifest.originalTitle || "";
+    const titleId =
+      typeof manifest.title === "object"
+        ? manifest.title?.id || manifest.title?.en || ""
+        : manifest.title || "";
+    const titleEn =
+      manifest.titleEn ||
+      manifest.originalTitle ||
+      (typeof manifest.title === "object" ? manifest.title?.en || titleId : "") ||
+      "";
     const originalTitle = manifest.originalTitle || "";
     const author = manifest.author || manifest.source?.originalAuthor || "Unknown";
     const illustrator = manifest.illustrator || manifest.source?.originalIllustrator || "Unknown";
@@ -595,7 +602,7 @@ class StorybookDB {
         for (const [langKey, langData] of Object.entries(platformData as Record<string, any>)) {
           if (!langData || typeof langData !== "object") continue;
           const lang = langKey === "en" ? "en" : "id";
-          const fallbackTitle = lang === "en" ? (manifest.originalTitle || manifest.title) : manifest.title;
+          const fallbackTitle = lang === "en" ? titleEn : titleId;
 
           // Helper to resolve YouTube thumbnail matching aspect ratio
           const resolveFallbackThumb = (targetFormat: string): string | null => {
@@ -714,6 +721,13 @@ class StorybookDB {
     ]);
   }
 
+  async getPublishedPublicationsForSlot(bookSlug: string, lang: string): Promise<PublicationRecord[]> {
+    return this.query<PublicationRecord>(
+      "SELECT * FROM publications WHERE book_slug = ? AND lang = ? AND status = 'published'",
+      [bookSlug, lang]
+    );
+  }
+
   // ============================================================================
   // CONTENT CALENDAR OPERATIONS
   // ============================================================================
@@ -741,8 +755,8 @@ class StorybookDB {
         book_slug = excluded.book_slug,
         format = excluded.format,
         theme = excluded.theme,
-        is_completed = excluded.is_completed,
-        completed_at = excluded.completed_at;
+        is_completed = MAX(COALESCE(content_calendar.is_completed, 0), COALESCE(excluded.is_completed, 0)),
+        completed_at = COALESCE(content_calendar.completed_at, excluded.completed_at);
     `;
 
     await this.execute(sql, [
