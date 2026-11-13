@@ -1,0 +1,25 @@
+docs/index.html
+  89b8b12d6e53291f 1771-1809,2207,2374,2376,2464,2834,3510,3553,3555,3841-3851,3863-3864,3882,3884,3934-3935,3939,3945,4023-4077,4101-4118,4156-4169
+scripts/generate-docs-portal.ts
+  89b8b12d6e53291f 2277-2315,2713,2880,2882,3069,3745,3788,3790,4076-4086,4098-4099,4117,4119,4169-4170,4174,4180,4258-4312,4336-4353,4391-4404
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "a48907024c09a85527e032f779c8b1a1e4b608cb",
+  "prompts": {
+    "89b8b12d6e53291f": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "804f6537-0957-426e-b395-2f565b7c4d07",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 313,
+      "total_deletions": 31,
+      "accepted_lines": 313,
+      "overriden_lines": 0
+    }
+  }
+}
