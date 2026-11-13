@@ -1,0 +1,29 @@
+scripts/lib/pdf-story-extractor.ts
+  89b8b12d6e53291f 3,53,60-61,64-184,214-234
+scripts/prepare-plates-hybrid.ts
+  89b8b12d6e53291f 357,359-360
+scripts/audit-story-quality.ts
+  89b8b12d6e53291f 447-449,452,454,458-460,463,465
+scripts/ingest-story.ts
+  89b8b12d6e53291f 9,92,228,230-231,235,242-243
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "4a551cd919c4b5e721dfbd5e2b6a9c0cbdb85170",
+  "prompts": {
+    "89b8b12d6e53291f": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "804f6537-0957-426e-b395-2f565b7c4d07",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 169,
+      "total_deletions": 19,
+      "accepted_lines": 169,
+      "overriden_lines": 0
+    }
+  }
+}
