@@ -71,9 +71,8 @@ export async function extractPdfPages(storyDir: string): Promise<string[]> {
 
   // 2. Fallback to Swift PDFKit on macOS
   if (!extractedWithPdftoppm && process.platform === "darwin") {
-    const slug = path.basename(storyDir);
     console.log(`⚙️ Extracting pages using macOS Swift PDFKit engine...`);
-    execSync(`swift scripts/prepare-plates.swift --book "${slug}" --skip-inpaint`, {
+    execSync(`swift scripts/render-pdf-pages.swift "${pdfPath}" "${pagesDir}"`, {
       stdio: "inherit",
     });
   }
@@ -155,9 +154,10 @@ Analyze this book page:
   };
 
   const candidateModels = [
+    "models/gemini-3.8-flash",
+    "models/gemini-3.7-flash",
     "models/gemini-3.5-flash",
-    "models/gemini-3.5-flash-lite",
-    "models/gemini-flash-lite-latest",
+    "models/gemini-flash-latest",
   ];
 
   let lastError: Error | null = null;

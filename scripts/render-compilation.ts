@@ -3,6 +3,7 @@ import { renderMedia, selectComposition } from "@remotion/renderer";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync, readdirSync, readFileSync } from "fs";
+import { pullStory } from "./manage-story-storage";
 
 interface CompilationStoryConfig {
   slug: string;
@@ -23,7 +24,69 @@ interface CompilationPreset {
   suggestedTitleEn: string;
 }
 
-const THEME_PRESETS: CompilationPreset[] = [
+export const THEME_PRESETS: CompilationPreset[] = [
+  {
+    id: "keluarga-ceria",
+    name: "🏡 Marathon 1: Kompilasi Kehangatan Rumah & Keluarga",
+    description: "Kompilasi kisah ceria rumah, keluarga, nenek tersayang, dan kamar penuh imajinasi.",
+    targetAudience: "Keluarga dan anak usia 3-8 tahun menjelang tidur Minggu malam.",
+    storySlugs: [
+      "kacamata-nenek",
+      "jangan-sekarang",
+      "di-bawah-tempat-tidurku",
+      "topsy-turvy-serba-terbalik",
+    ],
+    suggestedTitleId: "Kompilasi Kehangatan Rumah & Keluarga Ceria (~20 Menit) | Dongeng Animasi Zayn Storybook 🏡✨",
+    suggestedTitleEn: "Cozy Family & Home Stories Marathon (~20 Mins) | Animated Picture Books by Zayn Storybook 🏡✨",
+  },
+  {
+    id: "fabel-hewan",
+    name: "🐾 Marathon 2: Kompilasi Fabel Rimba & Hewan Ceria",
+    description: "Kompilasi fabel hewan lucu, cerdik, dan penuh nilai persahabatan.",
+    targetAudience: "Anak-anak usia 3-9 tahun dan keluarga.",
+    storySlugs: [
+      "gara-gara-kucing",
+      "raja-gemuk-anjing-kurus",
+      "tersenyumlah",
+      "pipit-dan-buah",
+    ],
+    suggestedTitleId: "Kompilasi Fabel Rimba & Hewan Ceria (~20 Menit) | Dongeng Binatang Penuh Tawa 🐾✨",
+    suggestedTitleEn: "Cheerful Animal Fables Marathon (~20 Mins) | Funny Forest Friends Picture Books 🐾✨",
+  },
+  {
+    id: "dongeng-menenangkan",
+    name: "🌙 Marathon 3: Kompilasi Petualangan Alam & Imajinasi Bintang",
+    description: "Dongeng menenangkan tentang alam, ketenangan tubuh, hujan, dan bintang malam.",
+    targetAudience: "Waktu tidur malam yang tenang bersama orang tua.",
+    storySlugs: [
+      "bulan-dan-topi-biru",
+      "jas-hujan-merah",
+      "dengarkan-tubuhku",
+      "vayu-sang-angin",
+    ],
+    suggestedTitleId: "Kompilasi Petualangan Alam & Bintang Malam (~20 Menit) | Dongeng Pengantar Tidur 🌙✨",
+    suggestedTitleEn: "Soothing Nature & Starry Bedtime Stories (~20 Mins) | Calming Kids Marathon 🌙✨",
+  },
+  {
+    id: "bedtime-60m",
+    name: "🌟 Grand Finale: Mega Dongeng Pengantar Tidur Zayn",
+    description: "Parade maraton dongeng terbaik Zayn Storybook non-stop untuk menutup Bulan 1.",
+    targetAudience: "Set-and-forget maraton keluarga sebelum tidur.",
+    storySlugs: [
+      "terlalu-banyak-suara",
+      "topsy-turvy-serba-terbalik",
+      "kacamata-nenek",
+      "jangan-sekarang",
+      "dengarkan-tubuhku",
+      "di-bawah-tempat-tidurku",
+      "gara-gara-kucing",
+      "hari-cukur-rambut",
+      "jas-hujan-merah",
+      "pisang-terlalu-banyak",
+    ],
+    suggestedTitleId: "Mega Dongeng Pengantar Tidur Zayn (Grand Finale Non-Stop) | Kompilasi Pilihan 🌙🌟",
+    suggestedTitleEn: "Grand Finale Bedtime Storybook Marathon | Best Animated Picture Books Collection 🌙🌟",
+  },
   {
     id: "bedtime",
     name: "🌙 Paket Pengantar Tidur Nyenyak (Bedtime Stories Marathon)",
@@ -242,6 +305,15 @@ async function renderCompilation() {
       const storyJsonPath = path.join(storyDir, "story.json");
 
       if (!existsSync(storyJsonPath)) {
+        try {
+          console.log(`⬇️ Pulling missing compilation story [${slug}] from Cloudflare R2...`);
+          await pullStory(slug);
+        } catch (pullErr: any) {
+          console.warn(`⚠️ Could not pull [${slug}] from R2: ${pullErr.message}`);
+        }
+      }
+
+      if (!existsSync(storyJsonPath)) {
         console.warn(`⚠️ Warning: Story ${slug} not found at ${storyJsonPath}, skipping.`);
         continue;
       }
@@ -380,6 +452,12 @@ async function renderCompilation() {
       `==================================================================`,
     ].join("\n");
 
+    if (items.length === 0) {
+      throw new Error(
+        `No valid component stories available for compilation [${preset.id}] (${targetSlugs.join(", ")}).`
+      );
+    }
+
     const metaFilename = `kompilasi-${preset.id}-${currentLang}-metadata.txt`;
     const metaFilePath = path.join(outDir, metaFilename);
     await fs.writeFile(metaFilePath, chaptersText, "utf-8");
@@ -457,7 +535,9 @@ async function renderCompilation() {
   }
 }
 
-renderCompilation().catch((err) => {
-  console.error("Fatal error:", err);
-  process.exit(1);
-});
+if (process.argv[1]?.includes("render-compilation")) {
+  renderCompilation().catch((err) => {
+    console.error("Fatal error:", err);
+    process.exit(1);
+  });
+}

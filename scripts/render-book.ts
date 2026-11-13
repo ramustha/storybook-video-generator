@@ -5,7 +5,7 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { db } from "./lib/db";
-import { renderEduMotionVideo } from "../src/motion/render-motion-stage";
+import { renderEduMotionVideo, resolveFfmpegBinaries } from "../src/motion/render-motion-stage";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -165,10 +165,21 @@ async function main() {
         } else {
           // Guarantee NO audio truncation and provide natural breathing room (1.2s tail buffer)
           try {
-            const out = execSync(`afinfo "${fullAudio}" 2>/dev/null`).toString();
-            const m = out.match(/estimated duration:\s*([\d.]+)\s*sec/);
-            if (m) {
-              const audioDur = parseFloat(m[1]);
+            let audioDur = NaN;
+            if (process.platform === "darwin") {
+              const out = execSync(`afinfo "${fullAudio}" 2>/dev/null`).toString();
+              const m = out.match(/estimated duration:\s*([\d.]+)\s*sec/);
+              if (m) audioDur = parseFloat(m[1]);
+            } else {
+              const { ffprobe } = resolveFfmpegBinaries();
+              const out = execSync(
+                `${ffprobe} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${fullAudio}" 2>/dev/null`
+              )
+                .toString()
+                .trim();
+              audioDur = parseFloat(out);
+            }
+            if (Number.isFinite(audioDur) && audioDur > 0) {
               const safeDur = parseFloat((audioDur + 1.2).toFixed(2));
               scene.durationSeconds = Math.max(scene.durationSeconds || 0, safeDur);
               if (scene.audio) scene.audio.durationSeconds = audioDur;

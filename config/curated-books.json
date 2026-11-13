@@ -958,5 +958,965 @@
         "en": "Chirp, chirp! The baby bird is safely home in its nest. Momo cheers with immense joy. He has found the courage to swing again!"
       }
     ]
+  },
+  {
+    "slug": "tersenyumlah",
+    "title": "Tersenyumlah!",
+    "originalTitle": "Smile Please!",
+    "author": "Manisha Chaudhry",
+    "illustrator": "Ajit Narayan",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 1,
+    "sourceUrl": "https://storyweaver.org.in/stories/2-smile-please",
+    "pdfUrl": "https://content.digitallibrary.io/wp-content/uploads/2020/10/15513-7c82e3c3967af7cd0fc0bc6c6c18d468.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Tersenyumlah! Hangatnya Senyum Sahabat Rimba",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Forest Meadow", "palette": {} },
+    "moral": {
+      "headlineId": "Tetap Tersenyum dan Bangkit Saat Terjatuh!",
+      "spokenId": "Saat kita terjatuh atau mengalami hal lucu yang mengejutkan, tetaplah tersenyum dengan hati gembira bersama teman-teman!",
+      "headlineEn": "Keep Smiling and Get Back Up!",
+      "spokenEn": "Whenever we stumble or hit a funny surprise, let's keep smiling and get right back up with joyful hearts!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "TERSENYUMLAH!",
+        "headlineBottom": "PETUALANGAN ANAK RUSA 😊🦌",
+        "hook": "SIAPA YANG BIKIN HUTAN PENUH TAWA?!",
+        "hookEmoji": "🦌😊✨",
+        "badge": "DONGENG CERIA ANAK RIMBA",
+        "sticker": "Senyum Ceria! 😊",
+        "bedtimeTitle": "Tersenyumlah!",
+        "bedtimeHook": "Kisah Hangat Anak Rusa Berlari & Tersenyum Bersama Sahabat Hutan"
+      },
+      "en": {
+        "headlineTop": "SMILE PLEASE!",
+        "headlineBottom": "LITTLE DEER'S JOY! 😊🦌",
+        "hook": "WHO MAKES THE WHOLE FOREST SMILE?!",
+        "hookEmoji": "🦌😊✨",
+        "badge": "HEARTWARMING FOREST TALE",
+        "sticker": "Big Bright Smile! 😊",
+        "bedtimeTitle": "Smile Please!",
+        "bedtimeHook": "A Sweet Forest Journey of Laughter, Friendship, and Smiles"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "pesta-ulang-tahun",
+    "title": "Pesta Ulang Tahun!",
+    "originalTitle": "The Birthday Party",
+    "author": "Megha Vishwanath",
+    "illustrator": "Megha Vishwanath",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/4084-the-birthday-party",
+    "pdfUrl": "https://archive.org/download/TheBirthdayParty-English-Pratham/4084-the-birthday-party.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Pesta Ulang Tahun & Empati Hangat Keluarga",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Warm Family Home", "palette": {} },
+    "moral": {
+      "headlineId": "Peka dan Peduli pada Perasaan Orang Tua!",
+      "spokenId": "Kegembiraan terasa semakin bermakna saat kita memperhatikan dan memeluk orang-orang tersayang di rumah.",
+      "headlineEn": "Notice and Care for Those We Love!",
+      "spokenEn": "Celebrations shine brightest when we notice others' feelings and share warmth with family."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "PESTA ULANG TAHUN!",
+        "headlineBottom": "KADO KAMERA AJAIB 📸🎂",
+        "hook": "KENAPA IBU MENANGIS DI DAPUR?!",
+        "hookEmoji": "🎂📸❤️",
+        "badge": "KISAH HANGAT KELUARGA",
+        "sticker": "Penuh Kasih! ❤️",
+        "bedtimeTitle": "Pesta Ulang Tahun!",
+        "bedtimeHook": "Kisah Menyentuh Tentang Kado Spesial & Kasih Sayang Ibu"
+      },
+      "en": {
+        "headlineTop": "THE BIRTHDAY PARTY!",
+        "headlineBottom": "A SPECIAL GIFT SURPRISE 📸🎂",
+        "hook": "WHAT DID HE NOTICE AFTER OPENING GIFTS?!",
+        "hookEmoji": "🎂📸❤️",
+        "badge": "WARM FAMILY STORY",
+        "sticker": "Sweet Surprise! ❤️",
+        "bedtimeTitle": "The Birthday Party",
+        "bedtimeHook": "A Heartwarming Tale of Gifts, Kindness, and Family Empathy"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "sringeri-srinivas-belajar-tertawa",
+    "title": "Sringeri Srinivas Belajar Tertawa!",
+    "originalTitle": "Sringeri Srinivas Learns to Laugh",
+    "author": "Rohini Nilekani",
+    "illustrator": "Angie & Upesh",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/8223-sringeri-srinivas-learns-to-laugh",
+    "pdfUrl": "https://content.digitallibrary.io/wp-content/uploads/2020/10/15723-7c82e3c3967af7cd0fc0bc6c6c18d468.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Sringeri Srinivas Belajar Tertawa: Kebahagiaan yang Menular",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Sringeri Village", "palette": {} },
+    "moral": {
+      "headlineId": "Tawa Tulus Mampu Mencairkan Hari Terberat!",
+      "spokenId": "Saat segala hal terasa serba salah, belajarlah menertawakan kejadian lucu dengan hati lapang.",
+      "headlineEn": "A Good Laugh Brightens Any Gloomy Day!",
+      "spokenEn": "Even on grumpy mornings, seeing the funny side turns frowns into joyful laughter!"
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "PAK SRINIVAS TERTAWA!",
+        "headlineBottom": "TERPELESET KULIT PISANG?! 😂🍌",
+        "hook": "MONYET USIL BIKIN SATU DESA NGAKAK!",
+        "hookEmoji": "🍌🐒🤣",
+        "badge": "KOMEDI KELUARGA SRINGERI",
+        "sticker": "Ngakak Bareng! 🤣",
+        "bedtimeTitle": "Sringeri Srinivas Belajar Tertawa",
+        "bedtimeHook": "Komedi Jenaka Pak Petani Pisang & Monyet Usil di Sringeri"
+      },
+      "en": {
+        "headlineTop": "SRINGERI LEARNS TO LAUGH!",
+        "headlineBottom": "BANANA PEEL TUMBLE?! 😂🍌",
+        "hook": "HOW DID A SILLY MONKEY MAKE HIM LAUGH?!",
+        "hookEmoji": "🍌🐒🤣",
+        "badge": "HILARIOUS SRINGERI COMEDY",
+        "sticker": "Laugh Out Loud! 🤣",
+        "bedtimeTitle": "Sringeri Srinivas Learns to Laugh",
+        "bedtimeHook": "A Joyful Comedy of a Grumpy Farmer and One Cheeky Monkey"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "pakai-baju-apa-hari-ini",
+    "title": "Pakai Baju Apa Hari Ini?",
+    "originalTitle": "What Shall I Wear Today?",
+    "author": "Natasha Sharma",
+    "illustrator": "Tanvi Bhat",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/191-what-shall-i-wear-today",
+    "pdfUrl": "https://archive.org/download/WhatShallIWearToday-English-Pratham/191-what-shall-i-wear-today.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Ekspresi Diri, Imajinasi & Pakaian Ceria Anak",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Colorful Closet", "palette": {} },
+    "moral": {
+      "headlineId": "Percaya Diri Menjadi Diri Sendiri yang Unik!",
+      "spokenId": "Berani berkreasi dan bersyukur atas pilihan kita membuat setiap hari terasa seru dan penuh warna.",
+      "headlineEn": "Be Proud and Creative Just as You Are!",
+      "spokenEn": "Creative expression and self-confidence turn ordinary mornings into colorful adventures."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "PAKAI BAJU APA HARI INI?",
+        "headlineBottom": "KOSTUM UNIK SUPER SERU! 👕🌈",
+        "hook": "BAJU AJAIB ATAU PAKAIAN FAVORIT?!",
+        "hookEmoji": "👕✨🌈",
+        "badge": "CERITA IMAJINASI ANAK",
+        "sticker": "Penuh Warna! 🎨",
+        "bedtimeTitle": "Pakai Baju Apa Hari Ini?",
+        "bedtimeHook": "Kisah Jenaka Memilih Kostum Pagi Penuh Warna dan Canda"
+      },
+      "en": {
+        "headlineTop": "WHAT SHALL I WEAR TODAY?",
+        "headlineBottom": "COLORFUL DRESS-UP FUN! 👕🌈",
+        "hook": "SO MANY SILLY OUTFITS TO CHOOSE FROM!",
+        "hookEmoji": "👕✨🌈",
+        "badge": "CREATIVE KIDS PICTURE BOOK",
+        "sticker": "Super Stylish! 🎨",
+        "bedtimeTitle": "What Shall I Wear Today?",
+        "bedtimeHook": "A Playful Morning Adventure of Colors, Clothes, and Imagination"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "bima-tukang-tidur",
+    "title": "Bima si Tukang Tidur",
+    "originalTitle": "Bheema, the Sleepyhead",
+    "author": "Rajesh Khar",
+    "illustrator": "Shweta Mohapatra",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 1,
+    "sourceUrl": "https://storyweaver.org.in/stories/332-bheema-the-sleepyhead",
+    "pdfUrl": "https://content.digitallibrary.io/wp-json/pdf-generator/v1/book/19483?download=true",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Disiplin Pagi & Persahabatan Hewan Desa",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Sleepy Village", "palette": {} },
+    "moral": {
+      "headlineId": "Bantuan Sahabat Kecil Bisa Sangat Berarti!",
+      "spokenId": "Jangan pernah meremehkan teman yang mungil, karena kepedulian kecil bisa memberi pertolongan besar.",
+      "headlineEn": "Even the Smallest Friend Can Be a Big Hero!",
+      "spokenEn": "Never underestimate a tiny helper—caring friends always find a clever way to help."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "BIMA SI TUKANG TIDUR!",
+        "headlineBottom": "SIAPA YANG BISA BANGUNKAN BIMA?! 😴🐴",
+        "hook": "SAPI HINGGA ANJING MENYERAH, TAPI...",
+        "hookEmoji": "🐴😴⏰",
+        "badge": "FABEL ANAK PENUH TAWA",
+        "sticker": "Bangun Pagi! ☀️",
+        "bedtimeTitle": "Bima si Tukang Tidur",
+        "bedtimeHook": "Kisah Jenaka Keledai Pulas dan Sahabat Mungil yang Cerdik"
+      },
+      "en": {
+        "headlineTop": "BHEEMA THE SLEEPYHEAD!",
+        "headlineBottom": "WHO CAN WAKE HIM UP?! 😴🐴",
+        "hook": "WHO WILL HELP SLEEPY BHEEMA WAKE ON TIME?!",
+        "hookEmoji": "🐴😴⏰",
+        "badge": "FUNNY ANIMAL PICTURE BOOK",
+        "sticker": "Rise & Shine! ☀️",
+        "bedtimeTitle": "Bheema, the Sleepyhead",
+        "bedtimeHook": "A Cozy Tale of a Sleepy Donkey and One Clever Little Friend"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "payung-merah",
+    "title": "Dolly dan Payung Merah Kecilnya",
+    "originalTitle": "Dolly and Her Little Red Umbrella",
+    "author": "Wong Chew Wee",
+    "illustrator": "Wong Chew Wee",
+    "publisher": "National Library Board, Singapore",
+    "license": "CC BY 4.0",
+    "readingLevel": 3,
+    "sourceUrl": "https://digitallibrary.io/book/dolly-and-her-little-red-umbrella/",
+    "pdfUrl": "https://content.digitallibrary.io/wp-json/pdf-generator/v1/book/35802?download=true",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Musim Hujan, Ketelitian & Kepedulian",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Rainy Neighborhood", "palette": {} },
+    "moral": {
+      "headlineId": "Menjaga Barang Kesayangan dengan Teliti!",
+      "spokenId": "Merapikan dan mengingat tempat menaruh barang membantu kita tetap tenang saat hujan turun.",
+      "headlineEn": "Take Careful Care of Your Belongings!",
+      "spokenEn": "Remembering where we put our favorite things keeps us calm and ready for rainy days."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "PAYUNG MERAH DOLLY!",
+        "headlineBottom": "KEMANA PERGINYA PAYUNG ITU?! ☔😱",
+        "hook": "HUJAN TURUN DERAS, PAYUNGNYA HILANG!",
+        "hookEmoji": "☔❤️🔎",
+        "badge": "CERITA MISTERI CILIK",
+        "sticker": "Ketemu Deh! ☔",
+        "bedtimeTitle": "Dolly dan Payung Merah Kecilnya",
+        "bedtimeHook": "Petualangan Ceria Mencari Payung Merah di Hari Hujan"
+      },
+      "en": {
+        "headlineTop": "THE LITTLE RED UMBRELLA!",
+        "headlineBottom": "WHERE DID IT GO?! ☔😱",
+        "hook": "DOLLY CAN'T FIND HER FAVORITE UMBRELLA!",
+        "hookEmoji": "☔❤️🔎",
+        "badge": "RAINY DAY MYSTERY TALE",
+        "sticker": "Found It! ☔",
+        "bedtimeTitle": "Dolly and Her Little Red Umbrella",
+        "bedtimeHook": "A Sweet Rainy-Day Search Filled with Warmth and Kindness"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "bagaimana-jika",
+    "title": "Bagaimana Jika?",
+    "originalTitle": "What If?",
+    "author": "Hari Kumar Nair",
+    "illustrator": "Hari Kumar Nair",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 1,
+    "sourceUrl": "https://storyweaver.org.in/stories/880-what-if",
+    "pdfUrl": "https://archive.org/download/WhatIf-English-Pratham/880-what-if.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Imajinasi Rasa Ingin Tahu Anak Sebelum Tidur",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Dreamland Sky", "palette": {} },
+    "moral": {
+      "headlineId": "Jangan Pernah Berhenti Bertanya dan Berimajinasi!",
+      "spokenId": "Rasa ingin tahu adalah pintu menuju ilmu pengetahuan dan petualangan seru setiap hari.",
+      "headlineEn": "Keep Wondering and Dreaming Big!",
+      "spokenEn": "Curiosity turns every quiet bedtime into a gateway of wonder and discovery."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "BAGAIMANA JIKA?!",
+        "headlineBottom": "DUNIA IMAJINASI PENUH KEAJAIBAN! 🌟🤔",
+        "hook": "KALAU AWAN BISA DINAIIKI... SERU KAN?!",
+        "hookEmoji": "✨☁️🤔",
+        "badge": "DONGENG IMAJINASI ANAK",
+        "sticker": "Penuh Tanya! 💭",
+        "bedtimeTitle": "Bagaimana Jika?",
+        "bedtimeHook": "Kisah Lembut Pengantar Tidur yang Memantik Rasa Ingin Tahu Anak"
+      },
+      "en": {
+        "headlineTop": "WHAT IF?!",
+        "headlineBottom": "A WORLD OF WILD WONDER! 🌟🤔",
+        "hook": "WHAT AMAZING QUESTIONS WILL SPARK TONIGHT?!",
+        "hookEmoji": "✨☁️🤔",
+        "badge": "CURIOSITY BEDTIME TALE",
+        "sticker": "Big Dreamer! 💭",
+        "bedtimeTitle": "What If?",
+        "bedtimeHook": "A Joyful Spark of Bedtime Curiosity and Imagination"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "pipit-dan-buah",
+    "title": "Burung Pipit dan Buah Misterius",
+    "originalTitle": "The Sparrow and The Fruit",
+    "author": "Divaspathy Hegde",
+    "illustrator": "Padmanabh",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 3,
+    "sourceUrl": "https://storyweaver.org.in/stories/749-the-sparrow-and-the-fruit",
+    "pdfUrl": "https://archive.org/download/TheSparrowAndTheFruit-English-Pratham/749-the-sparrow-and-the-fruit.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kecerdikan Hewan Rimba & Berbagi Hasil Panen",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Orchard Canopy", "palette": {} },
+    "moral": {
+      "headlineId": "Ketekunan dan Sikap Baik Membawa Keberhasilan!",
+      "spokenId": "Menghormati alam dan teman sekitar membuat segala usaha membuahkan hasil manis.",
+      "headlineEn": "Patience and Kindness Bring Sweet Rewards!",
+      "spokenEn": "Respecting friends and staying patient helps us overcome any tricky orchard puzzle."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "PIPIT & BUAH LEZAT!",
+        "headlineBottom": "SIAPA PEMILIK BUAH KEBUN?! 🐦🍎",
+        "hook": "FABEL CERDIK BURUNG PIPIT PENUH AKAL!",
+        "hookEmoji": "🐦🍎🌳",
+        "badge": "FABEL RIMBA KLASIK",
+        "sticker": "Cerdik Banget! ✨",
+        "bedtimeTitle": "Burung Pipit dan Buah Misterius",
+        "bedtimeHook": "Kisah Fabel Burung Pipit yang Cerdik Menjaga Kebun Buah"
+      },
+      "en": {
+        "headlineTop": "THE SPARROW & THE FRUIT!",
+        "headlineBottom": "WHO WILL SHARE THE HARVEST?! 🐦🍎",
+        "hook": "A CLEVER LITTLE SPARROW'S ORCHARD TALE!",
+        "hookEmoji": "🐦🍎🌳",
+        "badge": "CLASSIC ANIMAL FABLE",
+        "sticker": "Smart & Kind! ✨",
+        "bedtimeTitle": "The Sparrow and The Fruit",
+        "bedtimeHook": "A Delightful Woodland Fable of Wit and Patience"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "burung-gagak-cerdik",
+    "title": "Burung Gagak yang Dermawan",
+    "originalTitle": "The Generous Crow",
+    "author": "Venkatramana Gowda",
+    "illustrator": "Padmanabh",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 3,
+    "sourceUrl": "https://digitallibrary.io/book/the-generous-crow-2/",
+    "pdfUrl": "https://content.digitallibrary.io/wp-json/pdf-generator/v1/book/36011?download=true",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kedermawanan & Kecantikan Hati di Atas Segalanya",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Forest Nest", "palette": {} },
+    "moral": {
+      "headlineId": "Kebaikan Hati Lebih Berharga dari Rupa Indah!",
+      "spokenId": "Bukan warna bulu atau suara merdu yang paling mulia, melainkan ketulusan berbagi kepada yang membutuhkan.",
+      "headlineEn": "A Generous Heart Shines Brighter Than Looks!",
+      "spokenEn": "Kindness and generosity make us truly noble far more than fancy feathers or songs."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "BURUNG GAGAK DERMAWAN!",
+        "headlineBottom": "BAIK HATI KALAHKAN MERAK?! 🪶💖",
+        "hook": "TAK SEINDAH MERAK, TAPI HATINYA EMAS!",
+        "hookEmoji": "🖤💖🪶",
+        "badge": "FABEL BUDI PEKERTI",
+        "sticker": "Hati Mulia! 💖",
+        "bedtimeTitle": "Burung Gagak yang Dermawan",
+        "bedtimeHook": "Kisah Indah Tentang Ketulusan Berbagi dari Sang Gagak Hitam"
+      },
+      "en": {
+        "headlineTop": "THE GENEROUS CROW!",
+        "headlineBottom": "WHAT MAKES HIM TRULY NOBLE?! 🪶💖",
+        "hook": "HE CAN'T SING LIKE A CUCKOO, YET HE SHINES!",
+        "hookEmoji": "🖤💖🪶",
+        "badge": "HEARTWARMING MORAL FABLE",
+        "sticker": "Heart of Gold! 💖",
+        "bedtimeTitle": "The Generous Crow",
+        "bedtimeHook": "A Classic Moral Story Celebrating Kindness and Sharing"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "katak-ingin-terbang",
+    "title": "Impian Bintang Sang Katak",
+    "originalTitle": "Frog's Starry Wish",
+    "author": "Sheesh Pal",
+    "illustrator": "Proiti Roy",
+    "publisher": "Room to Read",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://digitallibrary.io/book/frogs-starry-wish-2/",
+    "pdfUrl": "https://content.digitallibrary.io/wp-json/pdf-generator/v1/book/35413?download=true",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Semangat Pantang Menyerah & Kejutan Langit Malam",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Starlit Pond", "palette": {} },
+    "moral": {
+      "headlineId": "Mimpi Tinggi Selalu Punya Cara Indah Tersendiri!",
+      "spokenId": "Tetaplah berusaha dengan hati gembira; kadang keajaiban yang kita cari sebenarnya sudah sangat dekat dengan kita.",
+      "headlineEn": "Keep Reaching High With Wonder and Hope!",
+      "spokenEn": "Stay curious and hopeful—sometimes the stars we chase are already shining right beside us."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "KATAK & BINTANG MALAM!",
+        "headlineBottom": "BERHASILKAH MENYENTUH BINTANG?! ⭐🐸",
+        "hook": "DARI BATU HINGGA POHON KELAPA TINGGI!",
+        "hookEmoji": "🐸⭐🌙",
+        "badge": "DONGENG PENGANTAR TIDUR",
+        "sticker": "Pantang Menyerah! ⭐",
+        "bedtimeTitle": "Impian Bintang Sang Katak",
+        "bedtimeHook": "Kisah Katak Kecil yang Memanjat Tinggi Meraih Bintang Malam"
+      },
+      "en": {
+        "headlineTop": "FROG'S STARRY WISH!",
+        "headlineBottom": "CAN HE TOUCH THE STARS?! ⭐🐸",
+        "hook": "HE CLIMBS HIGHER AND HIGHER ALL NIGHT!",
+        "hookEmoji": "🐸⭐🌙",
+        "badge": "STARRY BEDTIME FAVORITE",
+        "sticker": "Reach the Stars! ⭐",
+        "bedtimeTitle": "Frog's Starry Wish",
+        "bedtimeHook": "A Sweet Nighttime Tale of Big Dreams and a Peaceful Pond"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "vayu-sang-angin",
+    "title": "Vayu Sang Angin!",
+    "originalTitle": "Vayu, the Wind",
+    "author": "Madhuri Pai",
+    "illustrator": "Madhuri Pai",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://archive.org/details/VayuTheWind-English-Pratham",
+    "pdfUrl": "https://archive.org/download/VayuTheWind-English-Pratham/16-vayu-the-wind.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Keajaiban Alam: Angin Sejuk, Layangan & Awan Hujan",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Breezy Sky", "palette": {} },
+    "moral": {
+      "headlineId": "Bersyukur atas Anugerah Alam yang Menyejukkan!",
+      "spokenId": "Angin, awan, dan alam semesta bekerja harmonis menjaga bumi tetap segar dan indah bagi kita semua.",
+      "headlineEn": "Appreciate the Gentle Wonders of Nature!",
+      "spokenEn": "Wind, clouds, and sky work in quiet harmony to keep our world fresh and alive."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "VAYU SANG ANGIN!",
+        "headlineBottom": "MENIUP AWAN & LAYANGAN TINGGI! 🌬️☁️",
+        "hook": "HEMBUSAN ANGIN BAWA PETUALANGAN SERU!",
+        "hookEmoji": "🌬️☁️🪁",
+        "badge": "CERITA SAINS & ALAM ANAK",
+        "sticker": "Angin Ajaib! 🌬️",
+        "bedtimeTitle": "Vayu Sang Angin!",
+        "bedtimeHook": "Perjalanan Lembut Angin Menggerakkan Awan, Daun & Layang-Layang"
+      },
+      "en": {
+        "headlineTop": "VAYU THE WIND!",
+        "headlineBottom": "BLOWING CLOUDS ACROSS THE SKY! 🌬️☁️",
+        "hook": "FOLLOW THE BREEZE ON A SKY ADVENTURE!",
+        "hookEmoji": "🌬️☁️🪁",
+        "badge": "NATURE & WONDER PICTURE BOOK",
+        "sticker": "Wild Breeze! 🌬️",
+        "bedtimeTitle": "Vayu, the Wind",
+        "bedtimeHook": "A Soothing Journey with the Wind Through Skies and Gardens"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "buaya-dan-kupu-kupu",
+    "title": "Si Buaya & Kupu-Kupu Ceria",
+    "originalTitle": "Sniffles, the Crocodile and Punch, the Butterfly",
+    "author": "Harminder Ohri",
+    "illustrator": "Harminder Ohri",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://archive.org/details/SnifflesTheCrocodileAndPunchTheButterfly-English-Pratham",
+    "pdfUrl": "https://archive.org/download/SnifflesTheCrocodileAndPunchTheButterfly-English-Pratham/790-sniffles-the-crocodile-and-punch-the-butterfly.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Persahabatan Unik & Keindahan Kebersamaan",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Riverbank Garden", "palette": {} },
+    "moral": {
+      "headlineId": "Persahabatan Sejati Tidak Mengenal Perbedaan!",
+      "spokenId": "Siapa pun bisa berteman akrab saat kita saling menghormati, peduli, dan bersikap lembut.",
+      "headlineEn": "True Friendship Welcomes Every Difference!",
+      "spokenEn": "Anyone can become best friends when we treat each other with warmth and respect."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "BUAYA & KUPU-KUPU!",
+        "headlineBottom": "BERSAHABAT AKRAB DI TEPI SUNGAI?! 🐊🦋",
+        "hook": "BESAR DAN MUNGIL SALING MENJAGA!",
+        "hookEmoji": "🐊🦋🌈",
+        "badge": "FABEL PERSAHABATAN HANGAT",
+        "sticker": "Sahabat Unik! 🦋",
+        "bedtimeTitle": "Si Buaya & Kupu-Kupu Ceria",
+        "bedtimeHook": "Kisah Persahabatan Manis Antara Buaya Besar dan Kupu-Kupu Cantik"
+      },
+      "en": {
+        "headlineTop": "SNIFFLES & PUNCH BUTTERFLY!",
+        "headlineBottom": "AN UNLIKELY BEST FRIENDSHIP?! 🐊🦋",
+        "hook": "HOW CAN A CROCODILE & BUTTERFLY BE FRIENDS?!",
+        "hookEmoji": "🐊🦋🌈",
+        "badge": "SWEET FRIENDSHIP FABLE",
+        "sticker": "Best Buddies! 🦋",
+        "bedtimeTitle": "Sniffles & Punch, the Butterfly",
+        "bedtimeHook": "A Heartwarming Tale of Unlikely Friendship by the Riverbank"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "burung-gajah",
+    "title": "Kisah Burung Gajah",
+    "originalTitle": "The Elephant Bird",
+    "author": "Arefa Tehsin",
+    "illustrator": "Sonal Goyal & Sumit Sakhuja",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 3,
+    "sourceUrl": "https://archive.org/details/TheElephantBird-English-Pratham",
+    "pdfUrl": "https://archive.org/download/TheElephantBird-English-Pratham/1101-the-elephant-bird1.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Keunikan Diri & Petualangan Anak Rimba",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Magical Jungle", "palette": {} },
+    "moral": {
+      "headlineId": "Setiap Makhluk Punya Keistimewaan Unik!",
+      "spokenId": "Menghargai keunikan teman dan menjaga alam menjadikan dunia penuh warna dan keajaiban.",
+      "headlineEn": "Every Creature Carries a Special Magic!",
+      "spokenEn": "Celebrating what makes us unique makes our world richer, kinder, and full of wonder."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "KISAH BURUNG GAJAH!",
+        "headlineBottom": "BENARKAH GAJAH BISA TERBANG?! 🐘🦅",
+        "hook": "PETUALANGAN PENUH MISTERI & KEAJAIBAN!",
+        "hookEmoji": "🐘🪽✨",
+        "badge": "DONGENG PETUALANGAN ALAM",
+        "sticker": "Penuh Kejutan! ✨",
+        "bedtimeTitle": "Kisah Burung Gajah",
+        "bedtimeHook": "Petualangan Imajinatif Tentang Keunikan Diri dan Hutan Ajaib"
+      },
+      "en": {
+        "headlineTop": "THE ELEPHANT BIRD!",
+        "headlineBottom": "A MAGICAL FOREST MYSTERY?! 🐘🦅",
+        "hook": "WHAT HIDES INSIDE THE GREAT JUNGLE SKY?!",
+        "hookEmoji": "🐘🪽✨",
+        "badge": "ADVENTURE PICTURE BOOK",
+        "sticker": "Pure Wonder! ✨",
+        "bedtimeTitle": "The Elephant Bird",
+        "bedtimeHook": "An Enchanting Picture Book Celebrating Uniqueness and Nature"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "lalat-di-langit",
+    "title": "Lalat Kecil di Langit Luas",
+    "originalTitle": "A Fly in the Sky",
+    "author": "Maneka",
+    "illustrator": "Sonal Goyal & Sumit Sakhuja",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://archive.org/details/AFlyInTheSky-English-Pratham",
+    "pdfUrl": "https://archive.org/download/AFlyInTheSky-English-Pratham/7786-a-fly-in-the-sky.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Keberanian Terbang Tinggi & Eksplorasi Langit",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Open Breeze Sky", "palette": {} },
+    "moral": {
+      "headlineId": "Jangan Takut Mencoba Langkah Pertamamu!",
+      "spokenId": "Hal besar selalu dimulai dari keberanian kecil menatap luasnya dunia dengan rasa syukur.",
+      "headlineEn": "Have Courage to Spread Your Little Wings!",
+      "spokenEn": "Even tiny wings can explore wide skies when fueled by curiosity and courage."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "TERBANG DI LANGIT LUAS!",
+        "headlineBottom": "PETUALANGAN SI MUNGIL BERANI! 🪰🌤️",
+        "hook": "APA SAJA YANG DILIHAT DARI ATAS AWAN?!",
+        "hookEmoji": "🌤️🪽✨",
+        "badge": "CERITA KEBERANIAN ANAK",
+        "sticker": "Terbang Tinggi! 🌤️",
+        "bedtimeTitle": "Lalat Kecil di Langit Luas",
+        "bedtimeHook": "Kisah Ceria Menjelajah Angin Sore dari Balik Awan Putih"
+      },
+      "en": {
+        "headlineTop": "A FLY IN THE SKY!",
+        "headlineBottom": "SOARING ABOVE THE BREEZE! 🪰🌤️",
+        "hook": "WHAT WONDERS WAIT UP IN THE CLOUDS?!",
+        "hookEmoji": "🌤️🪽✨",
+        "badge": "SKY EXPLORATION STORY",
+        "sticker": "Fly High! 🌤️",
+        "bedtimeTitle": "A Fly in the Sky",
+        "bedtimeHook": "A Joyful Sky Journey Full of Breeze and Courage"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "kheer-bulan-purnama",
+    "title": "Puding Manis di Malam Purnama",
+    "originalTitle": "Kheer on a Full Moon Night",
+    "author": "Mala Kumar & Manisha Chaudhry",
+    "illustrator": "Priya Kuriyan",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/88-kheer-on-a-full-moon-night",
+    "pdfUrl": "https://archive.org/download/KheerOnAFullMoonNight-English-Pratham/88-kheer-on-a-full-moon-night.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kehangatan Dapur Keluarga & Pesta Bulan Purnama",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Moonlit Kitchen", "palette": {} },
+    "moral": {
+      "headlineId": "Makanan Terasa Lebih Nikmat Saat Dibagikan!",
+      "spokenId": "Memasak dan berbagi hidangan bersama keluarga membuat malam purnama penuh kehangatan dan tawa.",
+      "headlineEn": "Sweet Treats Taste Best When Shared!",
+      "spokenEn": "Cooking together and sharing with neighbors turns a full moon night into pure warmth."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "PUDING MALAM PURNAMA!",
+        "headlineBottom": "KESERUAN MASAK DI DAPUR! 🥣🌕",
+        "hook": "AROMA MANIS MENGUNDANG SATU KELUARGA!",
+        "hookEmoji": "🥣🌕😋",
+        "badge": "KOMEDI DAPUR KELUARGA",
+        "sticker": "Lezatnya! 😋",
+        "bedtimeTitle": "Puding Manis di Malam Purnama",
+        "bedtimeHook": "Kisah Hangat Keluarga Memasak Hidangan Spesial Bulan Purnama"
+      },
+      "en": {
+        "headlineTop": "KHEER ON A FULL MOON NIGHT!",
+        "headlineBottom": "SWEET KITCHEN MAGIC! 🥣🌕",
+        "hook": "EVERYONE GATHERS UNDER THE FULL MOON!",
+        "hookEmoji": "🥣🌕😋",
+        "badge": "COZY FAMILY KITCHEN TALE",
+        "sticker": "So Yummy! 😋",
+        "bedtimeTitle": "Kheer on a Full Moon Night",
+        "bedtimeHook": "A Sweet Bedtime Story of Family Cooking and Sharing"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "uluran-tangan",
+    "title": "Sebuah Uluran Tangan",
+    "originalTitle": "A Helping Hand",
+    "author": "Payal Dhar",
+    "illustrator": "Vartika Sharma",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 3,
+    "sourceUrl": "https://storyweaver.org.in/stories/5144-a-helping-hand",
+    "pdfUrl": "https://archive.org/download/AHelpingHand-English-Pratham/5144-a-helping-hand.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kerja Sama, Empati & Saling Menolong",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Kindness Street", "palette": {} },
+    "moral": {
+      "headlineId": "Kerja Sama Membuat Hal Sulit Jadi Ringan!",
+      "spokenId": "Saling mengalah dan mengulurkan tangan saat teman kesusahan memperkuat persahabatan kita.",
+      "headlineEn": "Lending a Hand Makes Every Path Easier!",
+      "spokenEn": "Cooperation and a helping hand turn tough obstacles into shared moments of kindness."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "SEBUAH ULURAN TANGAN!",
+        "headlineBottom": "BERSATU JADI LEBIH KUAT! 🤝✨",
+        "hook": "KEBAIKAN KECIL BIKIN SEMUA TERSENYUM!",
+        "hookEmoji": "🤝💖🌟",
+        "badge": "KISAH EMPATI & KERJA SAMA",
+        "sticker": "Saling Bantu! 🤝",
+        "bedtimeTitle": "Sebuah Uluran Tangan",
+        "bedtimeHook": "Kisah Bermakna Tentang Pentingnya Saling Tolong dan Mengalah"
+      },
+      "en": {
+        "headlineTop": "A HELPING HAND!",
+        "headlineBottom": "TOGETHER WE MAKE IT WORK! 🤝✨",
+        "hook": "ONE KIND ACT CHANGES EVERYTHING!",
+        "hookEmoji": "🤝💖🌟",
+        "badge": "COOPERATION & KINDNESS TALE",
+        "sticker": "Teamwork Wins! 🤝",
+        "bedtimeTitle": "A Helping Hand",
+        "bedtimeHook": "A Thoughtful Story of Kindness, Sharing, and Helping Others"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "tersesat-di-malam-hari",
+    "title": "Tersesat di Malam Hari",
+    "originalTitle": "Lost in the Night",
+    "author": "Janaki Latha",
+    "illustrator": "Bindia Thapar",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://archive.org/details/LostInTheNight-English-Pratham",
+    "pdfUrl": "https://archive.org/download/LostInTheNight-English-Pratham/7845-lost-in-the-night.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Keberanian Mengatasi Gelap Malam & Cahaya Bintang",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Quiet Starlit Forest", "palette": {} },
+    "moral": {
+      "headlineId": "Tetap Tenang Saat Gelap Tiba!",
+      "spokenId": "Langit malam dipenuhi cahaya bintang dan sahabat baik yang siap menuntun kita pulang dengan aman.",
+      "headlineEn": "Stay Calm and Spot the Night's Gentle Light!",
+      "spokenEn": "Even the dark night sparkles with friendly stars waiting to guide us safely home."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "TERSESAT DI MALAM HARI?!",
+        "headlineBottom": "BERANI DI BAWAH BINTANG! 🌙🦉",
+        "hook": "TERNYATA MALAM PENUH CAHAYA INDAH!",
+        "hookEmoji": "🌙✨🦉",
+        "badge": "DONGENG MALAM BERANI",
+        "sticker": "Berani & Tenang! 🌙",
+        "bedtimeTitle": "Tersesat di Malam Hari",
+        "bedtimeHook": "Kisah Pengantar Tidur Tentang Keberanian Menjelajahi Malam Berbintang"
+      },
+      "en": {
+        "headlineTop": "LOST IN THE NIGHT?!",
+        "headlineBottom": "GUIDED BY STARLIGHT! 🌙🦉",
+        "hook": "DISCOVER THE PEACEFUL BEAUTY OF THE NIGHT!",
+        "hookEmoji": "🌙✨🦉",
+        "badge": "COZY NIGHTTIME TALE",
+        "sticker": "Brave & Calm! 🌙",
+        "bedtimeTitle": "Lost in the Night",
+        "bedtimeHook": "A Soothing Nighttime Tale of Calm Courage Under the Stars"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "sona-pintar-membantu-ibu",
+    "title": "Sona Cerdas Membantu Ibu",
+    "originalTitle": "Smart Sona Helps Her Mother",
+    "author": "Manisha Chaudhry",
+    "illustrator": "Suvidha Mistry",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/944-smart-sona-helps-her-mother",
+    "pdfUrl": "https://archive.org/download/SmartSonaHelpsHerMother-English-Pratham/944-smart-sona-helps-her-mother.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Kemandirian & Semangat Anak Membantu Orang Tua",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Sona's Home", "palette": {} },
+    "moral": {
+      "headlineId": "Anak Hebat Bangga Membantu dengan Cerdas!",
+      "spokenId": "Berlatih mandiri dan sigap membantu orang tua di rumah membuat kita tumbuh makin percaya diri.",
+      "headlineEn": "Smart Kids Love Helping at Home!",
+      "spokenEn": "Pitching in with cheerful curiosity builds independence and makes family life shine."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "SONA BANTU IBU!",
+        "headlineBottom": "ANAK MANDIRI & CERDAS! 💡👧",
+        "hook": "IDE PINTAR SONA BIKIN IBU TERSENYUM!",
+        "hookEmoji": "👧💡❤️",
+        "badge": "CERITA KEMANDIRIAN ANAK",
+        "sticker": "Anak Hebat! 💡",
+        "bedtimeTitle": "Sona Cerdas Membantu Ibu",
+        "bedtimeHook": "Kisah Inspiratif Anak Cilik yang Mandiri dan Sayang Ibu"
+      },
+      "en": {
+        "headlineTop": "SMART SONA HELPS MOM!",
+        "headlineBottom": "CLEVER & INDEPENDENT KID! 💡👧",
+        "hook": "LOOK HOW SMART SONA SOLVES EVERY CHORE!",
+        "hookEmoji": "👧💡❤️",
+        "badge": "INDEPENDENCE STORY FOR KIDS",
+        "sticker": "Smart Helper! 💡",
+        "bedtimeTitle": "Smart Sona Helps Her Mother",
+        "bedtimeHook": "An Inspiring Tale of Independence and Helpful Hands"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "hari-hujan-ikan",
+    "title": "Hari Ketika Hujan Ikan",
+    "originalTitle": "The Day It Rained Fish",
+    "author": "Ramendra Kumar",
+    "illustrator": "Delwyn Remedios",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 3,
+    "sourceUrl": "https://archive.org/details/TheDayItRainedFish-English-Pratham",
+    "pdfUrl": "https://archive.org/download/TheDayItRainedFish-English-Pratham/2711-the-day-it-rained-fish.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Menyayangi Makhluk Air & Keajaiban Sungai",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Riverside Town", "palette": {} },
+    "moral": {
+      "headlineId": "Sayangi Semua Makhluk Hidup di Sungai dan Alam!",
+      "spokenId": "Merawat ikan dan menjaga kebersihan sungai menjaga kehidupan tetap lestari dan penuh keajaiban.",
+      "headlineEn": "Care Kindly for Every Living Creature!",
+      "spokenEn": "Caring for fish and keeping rivers clean preserves wonder for everyone."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "HUJAN IKAN DARI LANGIT?!",
+        "headlineBottom": "KEAJAIBAN DI SUNGAI DESA! 🐟🌧️",
+        "hook": "KOK BISA ADA IKAN JATUH DARI AWAN?!",
+        "hookEmoji": "🐟🌧️😲",
+        "badge": "CERITA ANAK PENUH KEAJAIBAN",
+        "sticker": "Sayang Hewan! 🐟",
+        "bedtimeTitle": "Hari Ketika Hujan Ikan",
+        "bedtimeHook": "Kisah Ajaib Tentang Hujan Ikan dan Kasih Sayang Pada Makhluk Hidup"
+      },
+      "en": {
+        "headlineTop": "THE DAY IT RAINED FISH!",
+        "headlineBottom": "A SPLASHING SKY SURPRISE! 🐟🌧️",
+        "hook": "COULD FISH REALLY FALL FROM RAIN CLOUDS?!",
+        "hookEmoji": "🐟🌧️😲",
+        "badge": "MAGICAL NATURE STORY",
+        "sticker": "Save the Fish! 🐟",
+        "bedtimeTitle": "The Day It Rained Fish",
+        "bedtimeHook": "A Whimsical Tale of Rain, Rivers, and Kindness to Creatures"
+      }
+    },
+    "scenes": []
+  },
+  {
+    "slug": "pohon-ajaib",
+    "title": "Sang Pohon Sahabat",
+    "originalTitle": "The Tree",
+    "author": "Madhav Chavan",
+    "illustrator": "Ketan Raut",
+    "publisher": "Pratham Books",
+    "license": "CC BY 4.0",
+    "readingLevel": 2,
+    "sourceUrl": "https://storyweaver.org.in/stories/212-the-tree",
+    "pdfUrl": "https://archive.org/download/TheTree-English-Pratham/212-the-tree.pdf",
+    "coverPage": 1,
+    "avatarPage": 2,
+    "theme": "Persahabatan Hangat di Dahan Pohon Rindang",
+    "characterBible": { "protagonists": [] },
+    "worldBible": { "village": "Shady Banyan Tree", "palette": {} },
+    "moral": {
+      "headlineId": "Jaga Pohon Rindang Rumah bagi Banyak Sahabat!",
+      "spokenId": "Sebatang pohon menjadi rumah hangat bagi burung, tupai, dan kedamaian alam di sekitar kita.",
+      "headlineEn": "Trees Give Shelter and Joy to All Friends!",
+      "spokenEn": "One gentle tree welcomes birds, creatures, and warm friendships in every season."
+    },
+    "thumbnailConfig": {
+      "heroImage": "assets/scene_01.png",
+      "backdropImage": "assets/cover.png",
+      "id": {
+        "headlineTop": "POHON PENUH SAHABAT!",
+        "headlineBottom": "RUMAH HANGAT DI ATAS DAHAN! 🌳🐿️",
+        "hook": "SIAPA SAJA YANG BERKUMPUL DI POHON INI?!",
+        "hookEmoji": "🌳🐦🐿️",
+        "badge": "DONGENG PERSAHABATAN ALAM",
+        "sticker": "Cinta Pohon! 🌳",
+        "bedtimeTitle": "Sang Pohon Sahabat",
+        "bedtimeHook": "Kisah Hangat Burung dan Sahabat Kecil di Rindangnya Dahan Pohon"
+      },
+      "en": {
+        "headlineTop": "FRIENDS IN THE TREE!",
+        "headlineBottom": "COZY HOMES AMONG LEAVES! 🌳🐿️",
+        "hook": "MEET ALL THE LITTLE FRIENDS IN ONE TREE!",
+        "hookEmoji": "🌳🐦🐿️",
+        "badge": "HEARTWARMING NATURE TALE",
+        "sticker": "Tree Friends! 🌳",
+        "bedtimeTitle": "The Tree",
+        "bedtimeHook": "A Peaceful Picture Book About Friendship and Nature's Shelter"
+      }
+    },
+    "scenes": []
   }
 ]

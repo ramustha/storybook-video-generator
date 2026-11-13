@@ -108,6 +108,16 @@ export default {
         );
       }
     }
+    // 4. Nightly Pre-Render Buffer (19:00 UTC = 02:00 WIB Daily)
+    else if (cron === "0 19 * * *") {
+      ctx.waitUntil(
+        dispatchWorkflow(env, "buffer-prerender.yml", {
+          days: "3",
+          force: false,
+          dry_run: false,
+        })
+      );
+    }
     else {
       // Fallback based on hour if invoked by manual cron testing
       const utcHour = now.getUTCHours();
@@ -150,6 +160,13 @@ export default {
         force: url.searchParams.get("force") === "true",
         dry_run: dryRun,
         skip_qc: url.searchParams.get("skip_qc") === "true",
+        run_buffer: url.searchParams.get("run_buffer") !== "false",
+      };
+    } else if (workflow === "buffer-prerender.yml") {
+      inputs = {
+        days: url.searchParams.get("days") || "3",
+        force: url.searchParams.get("force") === "true",
+        dry_run: dryRun,
       };
     }
 

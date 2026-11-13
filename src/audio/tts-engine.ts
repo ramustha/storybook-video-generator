@@ -5,6 +5,7 @@ import path from "path";
 import os from "os";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { VoiceActorRole, getVoiceActor } from "./voice-actors";
+import { resolveFfmpegBinaries } from "../motion/render-motion-stage";
 
 export interface DialogueLine {
   speakerRole: VoiceActorRole;
@@ -135,13 +136,24 @@ async function synthesizeLine(
         }
       }
 
-      // Measure true audio file duration and add natural breathing room tail (+0.8s)
+      // Measure true audio file duration (ffprobe on Linux/macOS, afinfo fallback) and add natural breathing tail (+0.8s)
       let actualAudioSec = durationSec;
       try {
-        const afOut = execSync(`afinfo "${audioFilePath}" 2>/dev/null`).toString();
-        const m = afOut.match(/estimated duration:\s*([\d.]+)\s*sec/);
-        if (m) {
-          actualAudioSec = parseFloat(m[1]);
+        if (process.platform === "darwin") {
+          const afOut = execSync(`afinfo "${audioFilePath}" 2>/dev/null`).toString();
+          const m = afOut.match(/estimated duration:\s*([\d.]+)\s*sec/);
+          if (m) actualAudioSec = parseFloat(m[1]);
+        } else {
+          const { ffprobe } = resolveFfmpegBinaries();
+          const probeOut = execSync(
+            `${ffprobe} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioFilePath}" 2>/dev/null`
+          )
+            .toString()
+            .trim();
+          const parsedDur = parseFloat(probeOut);
+          if (Number.isFinite(parsedDur) && parsedDur > 0) {
+            actualAudioSec = parsedDur;
+          }
         }
       } catch {
         actualAudioSec = durationSec + 0.5;
