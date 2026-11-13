@@ -354,11 +354,11 @@ export async function prepareStoryPlatesHybrid(
       execSync(`swift scripts/prepare-plates.swift --book "${slug}"`, { stdio: "inherit" });
       return;
     } else {
-      throw new Error("Gemini API key is required for plate inpainting on Linux/Ubuntu.");
+      console.log("⚠️ No Gemini API key found on Linux. Using ambient 16:9 plate fallback...");
     }
+  } else {
+    console.log("🚀 Executing Primary Engine: Gemini Vision OCR + Smart Re-Centering (Sharp)...");
   }
-
-  console.log("🚀 Executing Primary Engine: Gemini Vision OCR + Smart Re-Centering (Sharp)...");
 
   // Helper to resolve page file for a 1-based page number
   const getPageFile = (pageNumber: number): string => {
