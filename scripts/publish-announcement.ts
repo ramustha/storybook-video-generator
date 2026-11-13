@@ -322,10 +322,24 @@ export function generateDailyLineupCopy(
   eveningSlot: any,
   dateStr: string
 ): TailoredTeaserCopies {
-  const morningRawTitle = morningStory.originalTitle || morningStory.title || "Morning English Story";
+  const morningLang: "id" | "en" = (morningSlot.lang || "en") === "id" ? "id" : "en";
+  const morningRawTitle =
+    morningLang === "id"
+      ? morningStory.title || morningStory.originalTitle || "Cerita Pagi Ceria"
+      : morningStory.originalTitle || morningStory.title || "Morning English Story";
   const morningCleanTitle = morningRawTitle.replace(/[!]+$/, "").trim();
-  const morningThumb = morningStory.thumbnailConfig?.en;
-  const morningHook = morningThumb?.hook || "A joyful, cheerful English read-aloud journey for young learners!";
+  const morningThumb = morningLang === "id" ? morningStory.thumbnailConfig?.id : morningStory.thumbnailConfig?.en;
+  const morningHook =
+    morningThumb?.hook ||
+    (morningLang === "id"
+      ? "Cerita pagi ceria penuh semangat untuk mengawali hari si kecil!"
+      : "A joyful, cheerful English read-aloud journey for young learners!");
+  const morningHeaderLabel = morningLang === "id" ? "Cerita Pagi Ceria" : "English Read-Aloud";
+  const morningEditionLabel = morningLang === "id" ? "Edisi Bahasa Indonesia" : "English Edition";
+  const morningDescLine =
+    morningLang === "id"
+      ? "🎈 Mengawali pagi penuh semangat & menumbuhkan kecintaan membaca si kecil!"
+      : "🎈 Melatih kepekaan mendengar & kosakata bahasa Inggris si kecil lewat cerita riang saat sarapan pagi!";
 
   const eveningRawTitle = eveningStory.title || eveningStory.originalTitle || "Dongeng Pengantar Tidur";
   const eveningCleanTitle = eveningRawTitle.replace(/[!]+$/, "").trim();
@@ -341,10 +355,10 @@ export function generateDailyLineupCopy(
 Selamat pagi Ayah, Bunda & Adik-adik tersayang! 🥰👋
 Hari ini ada 2 cerita bergambar istimewa siap menemani hari ceria si kecil di @zayn.storybook:
 
-🌅 [PAGI · ${morningTime}] English Read-Aloud:
-📖 "${morningCleanTitle}" (English Edition)
+🌅 [PAGI · ${morningTime}] ${morningHeaderLabel}:
+📖 "${morningCleanTitle}" (${morningEditionLabel})
 ✨ ${morningHook}
-🎈 Melatih kepekaan mendengar & kosakata bahasa Inggris si kecil lewat cerita riang saat sarapan pagi!
+${morningDescLine}
 
 🌙 [MALAM · ${eveningTime}] Prime Bedtime Story:
 📖 "${eveningCleanTitle}" (Edisi Bahasa Indonesia)
@@ -363,10 +377,10 @@ ${eveningMoral}
   const captionFacebook = `🌟 JADWAL DONGENG ZAYN HARI INI (${dateStr}) 🌟
 Selamat pagi Ayah & Bunda! Awali hari si kecil dengan keceriaan dan tutup malamnya dengan mimpi indah bersama 2 dongeng animasi bergambar pilihan hari ini di kanal YouTube Zayn Storybook:
 
-🌅 [PAGI · Pukul ${morningTime}] English Read-Aloud:
-📖 "${morningCleanTitle}" (English Edition)
+🌅 [PAGI · Pukul ${morningTime}] ${morningHeaderLabel}:
+📖 "${morningCleanTitle}" (${morningEditionLabel})
 👉 ${morningHook}
-Momen pas saat sarapan atau bersiap sekolah untuk melatih kecakapan mendengar bahasa Inggris dengan intonasi ceria dan ramah anak.
+${morningLang === "id" ? "Cerita ringan penuh keceriaan untuk menemani sarapan pagi atau bersiap berangkat beraktivitas." : "Momen pas saat sarapan atau bersiap sekolah untuk melatih kecakapan mendengar bahasa Inggris dengan intonasi ceria dan ramah anak."}
 
 🌙 [MALAM · Pukul ${eveningTime}] Prime Bedtime Story:
 📖 "${eveningCleanTitle}" (Edisi Bahasa Indonesia)
@@ -386,8 +400,8 @@ Dari kedua cerita hari ini, mana nih yang paling membuat si kecil penasaran? Yuk
   const captionThreads = `Selamat pagi Ayah & Bunda! 🌟
 Berikut Menu Dongeng Zayn Storybook hari ini:
 
-🌅 ${morningTime} [EN]: "${morningCleanTitle}" 📖🎈
-👉 English Read-Aloud ceria saat sarapan!
+🌅 ${morningTime} [${morningLang.toUpperCase()}]: "${morningCleanTitle}" 📖🎈
+👉 ${morningLang === "id" ? "Cerita pagi ceria saat sarapan!" : "English Read-Aloud ceria saat sarapan!"}
 
 🌙 ${eveningTime} [ID]: "${eveningCleanTitle}" 🌙✨
 👉 Dongeng pengantar tidur nyenyak & pesan budi pekerti.
@@ -472,8 +486,12 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   console.log(`🌙 Evening Slot  : [${eveningBook}] [${eveningSlot.lang || "id"}] @ ${eveningSlot.time_slot || eveningSlot.timeSlot || "19:00 WIB"}`);
   console.log("==================================================================\n");
 
-  // 2. Ensure stories exist locally
-  const storiesToEnsure = Array.from(new Set([morningBook, eveningBook]));
+  // 2. Ensure stories exist locally (skip compilation slugs which have no individual story.json)
+  const isMorningComp = morningBook.startsWith("kompilasi-");
+  const isEveningComp = eveningBook.startsWith("kompilasi-");
+  const storiesToEnsure = Array.from(new Set([morningBook, eveningBook])).filter(
+    (s) => !s.startsWith("kompilasi-")
+  );
   for (const slug of storiesToEnsure) {
     const sDir = path.resolve("./stories", slug);
     const sJson = path.join(sDir, "story.json");
@@ -488,8 +506,20 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
 
   const morningStoryPath = path.resolve("./stories", morningBook, "story.json");
   const eveningStoryPath = path.resolve("./stories", eveningBook, "story.json");
-  const morningStory = JSON.parse(await fs.readFile(morningStoryPath, "utf-8"));
-  const eveningStory = JSON.parse(await fs.readFile(eveningStoryPath, "utf-8"));
+  const buildCompilationStory = (slug: string, slot: any) => ({
+    slug,
+    title: slot.theme || slug,
+    originalTitle: slot.theme || slug,
+    moral: {
+      headlineId: "Kumpulan dongeng pilihan penuh kehangatan dan pesan budi pekerti untuk keluarga.",
+    },
+  });
+  const morningStory: any = isMorningComp
+    ? buildCompilationStory(morningBook, morningSlot)
+    : JSON.parse(await fs.readFile(morningStoryPath, "utf-8"));
+  const eveningStory: any = isEveningComp
+    ? buildCompilationStory(eveningBook, eveningSlot)
+    : JSON.parse(await fs.readFile(eveningStoryPath, "utf-8"));
 
   // 3. Deduplication Check across platforms
   if (!morningStory.publications) morningStory.publications = {};
@@ -513,15 +543,23 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   }
 
   // 4. Resolve Visual Assets for both books
+  const morningLang: "id" | "en" = (morningSlot.lang || "en") === "id" ? "id" : "en";
+  const eveningLang: "id" | "en" = (eveningSlot.lang || "id") === "en" ? "en" : "id";
   const morningStoryDir = path.resolve("./stories", morningBook);
   const eveningStoryDir = path.resolve("./stories", eveningBook);
-  const morningPhoto = resolveBestPhoto(morningStoryDir, "en");
-  const eveningPhoto = resolveBestPhoto(eveningStoryDir, "id");
-  const imagePaths = [morningPhoto, eveningPhoto];
+  const morningPhoto = isMorningComp
+    ? resolveBestPhoto(eveningStoryDir, eveningLang)
+    : resolveBestPhoto(morningStoryDir, morningLang);
+  const eveningPhoto = isEveningComp
+    ? morningPhoto
+    : resolveBestPhoto(eveningStoryDir, eveningLang);
+  const imagePaths = morningPhoto === eveningPhoto ? [morningPhoto] : [morningPhoto, eveningPhoto];
 
   console.log(`\n🖼️ Visual Slides Selected:`);
-  console.log(`   - Slide 1 [Morning EN]: ${path.basename(morningPhoto)}`);
-  console.log(`   - Slide 2 [Evening ID]: ${path.basename(eveningPhoto)}`);
+  console.log(`   - Slide 1 [Morning ${morningLang.toUpperCase()}]: ${path.basename(morningPhoto)}`);
+  if (imagePaths.length > 1) {
+    console.log(`   - Slide 2 [Evening ${eveningLang.toUpperCase()}]: ${path.basename(eveningPhoto)}`);
+  }
 
   // 5. Generate Tailored Captions
   const captions = generateDailyLineupCopy(morningStory, morningSlot, eveningStory, eveningSlot, targetDate);
@@ -566,7 +604,7 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
       });
       if (!options.dryRun && igRes.success) {
         igResult = {
-          id: igRes.id,
+          id: igRes.mediaId || (igRes as any).id,
           url: igRes.permalink,
           publishedAt: new Date().toISOString(),
           status: "published",
@@ -615,11 +653,13 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
       threads: thResult,
     };
 
-    morningStory.publications.announcements[targetDate].dailyLineup = updatedLineup;
-    await fs.writeFile(morningStoryPath, JSON.stringify(morningStory, null, 2), "utf-8");
-    await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "push", morningBook, "--manifest-only"]);
+    if (!isMorningComp) {
+      morningStory.publications.announcements[targetDate].dailyLineup = updatedLineup;
+      await fs.writeFile(morningStoryPath, JSON.stringify(morningStory, null, 2), "utf-8");
+      await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "push", morningBook, "--manifest-only"]);
+    }
 
-    if (eveningBook !== morningBook) {
+    if (eveningBook !== morningBook && !isEveningComp) {
       if (!eveningStory.publications) eveningStory.publications = {};
       if (!eveningStory.publications.announcements) eveningStory.publications.announcements = {};
       if (!eveningStory.publications.announcements[targetDate]) eveningStory.publications.announcements[targetDate] = {};
@@ -634,7 +674,7 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
     try {
       await notifyTelegramFailure({
         bookSlug: `${morningBook}+${eveningBook}`,
-        lang: "bilingual",
+        lang: morningLang,
         slot: `Daily Lineup (${targetDate})`,
         platform: "Single Daily Announcement Dispatcher",
         error: errors.join("\n"),
