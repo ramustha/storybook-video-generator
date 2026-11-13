@@ -1,0 +1,35 @@
+scripts/prepare-plates-hybrid.ts
+  2679446fe3008337 75,157-159
+scripts/render-pdf-pages.swift
+  2679446fe3008337 1-26
+functions/api/catalog.ts
+  2679446fe3008337 249
+scripts/audit-story-quality.ts
+  2679446fe3008337 241
+scripts/content-calendar.ts
+  2679446fe3008337 210,214,364,368,518,522,672,676
+scripts/ingest-story.ts
+  2679446fe3008337 2,13,221-241,514
+scripts/lib/pdf-story-extractor.ts
+  2679446fe3008337 62-64,257,267-302
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "85eabddd20e802f291e0ba8f735dfffa829b84e3",
+  "prompts": {
+    "2679446fe3008337": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "cf055bac-2b93-49c7-bb6a-b3f7352c8b63",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 105,
+      "total_deletions": 67,
+      "accepted_lines": 105,
+      "overriden_lines": 0
+    }
+  }
+}
