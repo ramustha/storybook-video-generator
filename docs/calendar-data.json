@@ -269,8 +269,8 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Ada Harimau di Bawah Tempat Tidurku! Kisah Jenaka Menghadapi Rasa Takut",
-    "status": "today",
-    "isCompleted": false,
+    "status": "completed",
+    "isCompleted": true,
     "hasPublishedAsset": true,
     "isBuffered": true,
     "hasAssets": true
@@ -282,8 +282,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "tersenyumlah",
-    "storyTitleId": "Tersenyumlah",
-    "storyTitleEn": "Tersenyumlah",
+    "storyTitleId": "Tersenyumlah!",
+    "storyTitleEn": "Smile Please!",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -292,11 +292,11 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Smile Please! A Sweet Forest Smile Journey",
-    "status": "upcoming",
-    "isCompleted": false,
-    "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "status": "completed",
+    "isCompleted": true,
+    "hasPublishedAsset": true,
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-014",
@@ -305,8 +305,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "tersenyumlah",
-    "storyTitleId": "Tersenyumlah",
-    "storyTitleEn": "Tersenyumlah",
+    "storyTitleId": "Tersenyumlah!",
+    "storyTitleEn": "Smile Please!",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -315,11 +315,11 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Tersenyumlah! Hangatnya Senyum Sahabat Rimba",
-    "status": "upcoming",
-    "isCompleted": false,
-    "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "status": "completed",
+    "isCompleted": true,
+    "hasPublishedAsset": true,
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-015",
@@ -327,9 +327,9 @@
     "dayName": "Sabtu",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "kue-ulang-tahun-untuk-mimi",
-    "storyTitleId": "Kue Ulang Tahun Untuk Mimi",
-    "storyTitleEn": "Kue Ulang Tahun Untuk Mimi",
+    "bookSlug": "pesta-ulang-tahun",
+    "storyTitleId": "Pesta Ulang Tahun!",
+    "storyTitleEn": "The Birthday Party",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -337,12 +337,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: A Birthday Cake for Mimi (Baking Joy & Friendship)",
-    "status": "upcoming",
+    "theme": "English Read-Aloud: The Birthday Party (Family Empathy & Surprise)",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-016",
@@ -350,9 +350,9 @@
     "dayName": "Sabtu",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "kue-ulang-tahun-untuk-mimi",
-    "storyTitleId": "Kue Ulang Tahun Untuk Mimi",
-    "storyTitleEn": "Kue Ulang Tahun Untuk Mimi",
+    "bookSlug": "pesta-ulang-tahun",
+    "storyTitleId": "Pesta Ulang Tahun!",
+    "storyTitleEn": "The Birthday Party",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -360,57 +360,59 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Kue Ulang Tahun untuk Mimi (Keseruan Dapur & Cinta Sahabat)",
-    "status": "upcoming",
+    "theme": "Prime Bedtime Story: Pesta Ulang Tahun! (Kejutan Kamera & Kasih Ibu)",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-017",
     "date": "2026-11-15",
     "dayName": "Minggu",
     "timeSlot": "08:30 WIB",
-    "slotType": "Morning Energy Short",
-    "bookSlug": "tersenyumlah",
-    "storyTitleId": "Tersenyumlah",
-    "storyTitleEn": "Tersenyumlah",
-    "lang": "id",
-    "format": "Shorts / Reels (9:16)",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "ayo-berayun-momo",
+    "storyTitleId": "Ayo, Berayun, Momo!",
+    "storyTitleEn": "Swing High, Momo!",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
-      "YouTube Shorts",
-      "Instagram Reels",
-      "Facebook Reels"
+      "YouTube Master (16:9 & Shorts)",
+      "Facebook Watch",
+      "Instagram Reels"
     ],
-    "theme": "Morning Joy Short: Hewan Hutan Bergembira & Belajar Tersenyum",
+    "theme": "English Read-Aloud: Swing High, Momo! Joyful Playground Adventure",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-018",
     "date": "2026-11-15",
     "dayName": "Minggu",
-    "timeSlot": "19:30 WIB",
-    "slotType": "Mega Bedtime Marathon",
-    "bookSlug": "kompilasi-keluarga-ceria",
-    "storyTitleId": "Kompilasi Keluarga Ceria",
-    "storyTitleEn": "Kompilasi Keluarga Ceria",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "ayo-berayun-momo",
+    "storyTitleId": "Ayo, Berayun, Momo!",
+    "storyTitleEn": "Swing High, Momo!",
     "lang": "id",
-    "format": "Landscape (16:9)",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
       "YouTube Master (16:9)",
-      "Facebook Watch"
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
     ],
-    "theme": "Marathon 1: Kompilasi Kehangatan Rumah & Keluarga (~20m)",
+    "theme": "Prime Bedtime Story: Ayo, Berayun, Momo! Petualangan Ceria di Taman Bermain",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-019",
@@ -419,8 +421,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "sringeri-srinivas-belajar-tertawa",
-    "storyTitleId": "Sringeri Srinivas Belajar Tertawa",
-    "storyTitleEn": "Sringeri Srinivas Belajar Tertawa",
+    "storyTitleId": "Sringeri Srinivas Belajar Tertawa!",
+    "storyTitleEn": "Sringeri Srinivas Learns to Laugh",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -432,8 +434,8 @@
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-020",
@@ -442,8 +444,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "sringeri-srinivas-belajar-tertawa",
-    "storyTitleId": "Sringeri Srinivas Belajar Tertawa",
-    "storyTitleEn": "Sringeri Srinivas Belajar Tertawa",
+    "storyTitleId": "Sringeri Srinivas Belajar Tertawa!",
+    "storyTitleEn": "Sringeri Srinivas Learns to Laugh",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -455,8 +457,8 @@
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-021",
@@ -464,9 +466,9 @@
     "dayName": "Selasa",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "baju-baru-sang-kodok",
-    "storyTitleId": "Baju Baru Sang Kodok",
-    "storyTitleEn": "Baju Baru Sang Kodok",
+    "bookSlug": "pakai-baju-apa-hari-ini",
+    "storyTitleId": "Pakai Baju Apa Hari Ini?",
+    "storyTitleEn": "What Shall I Wear Today?",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -474,12 +476,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Frog's New Clothes",
+    "theme": "English Read-Aloud: What Shall I Wear Today?",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-022",
@@ -487,9 +489,9 @@
     "dayName": "Selasa",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "baju-baru-sang-kodok",
-    "storyTitleId": "Baju Baru Sang Kodok",
-    "storyTitleEn": "Baju Baru Sang Kodok",
+    "bookSlug": "pakai-baju-apa-hari-ini",
+    "storyTitleId": "Pakai Baju Apa Hari Ini?",
+    "storyTitleEn": "What Shall I Wear Today?",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -497,12 +499,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Baju Baru Sang Kodok & Menerima Diri Apa Adanya",
+    "theme": "Prime Bedtime Story: Pakai Baju Apa Hari Ini? & Percaya Diri",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
-    "hasAssets": false
+    "isBuffered": true,
+    "hasAssets": true
   },
   {
     "id": "SLOT-023",
@@ -511,8 +513,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "bima-tukang-tidur",
-    "storyTitleId": "Bima Tukang Tidur",
-    "storyTitleEn": "Bima Tukang Tidur",
+    "storyTitleId": "Bima si Tukang Tidur",
+    "storyTitleEn": "Bheema, the Sleepyhead",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -520,12 +522,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: Bheema the Sleepyhead",
+    "theme": "English Read-Aloud: Bheema, the Sleepyhead",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-024",
@@ -534,8 +536,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "bima-tukang-tidur",
-    "storyTitleId": "Bima Tukang Tidur",
-    "storyTitleEn": "Bima Tukang Tidur",
+    "storyTitleId": "Bima si Tukang Tidur",
+    "storyTitleEn": "Bheema, the Sleepyhead",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -543,12 +545,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Bima si Tukang Tidur (Banteng Raksasa Hobi Tidur Nyenyak)",
+    "theme": "Prime Bedtime Story: Bima si Tukang Tidur (Keledai Lucu Hobi Tidur Nyenyak)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-025",
@@ -557,8 +559,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "payung-merah",
-    "storyTitleId": "Payung Merah",
-    "storyTitleEn": "Payung Merah",
+    "storyTitleId": "Dolly dan Payung Merah Kecilnya",
+    "storyTitleEn": "Dolly and Her Little Red Umbrella",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -566,12 +568,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Red Umbrella (Wind, Rain, and Kindness)",
+    "theme": "English Read-Aloud: Dolly and Her Little Red Umbrella (Rainy Day Mystery)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-026",
@@ -580,8 +582,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "payung-merah",
-    "storyTitleId": "Payung Merah",
-    "storyTitleEn": "Payung Merah",
+    "storyTitleId": "Dolly dan Payung Merah Kecilnya",
+    "storyTitleEn": "Dolly and Her Little Red Umbrella",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -589,12 +591,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Payung Merah (Petualangan Terbang Sahabat Rimba di Musim Hujan)",
+    "theme": "Prime Bedtime Story: Dolly dan Payung Merah Kecilnya di Musim Hujan",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-027",
@@ -603,8 +605,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "bagaimana-jika",
-    "storyTitleId": "Bagaimana Jika",
-    "storyTitleEn": "Bagaimana Jika",
+    "storyTitleId": "Bagaimana Jika?",
+    "storyTitleEn": "What If?",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -617,7 +619,7 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-028",
@@ -626,8 +628,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "bagaimana-jika",
-    "storyTitleId": "Bagaimana Jika",
-    "storyTitleEn": "Bagaimana Jika",
+    "storyTitleId": "Bagaimana Jika?",
+    "storyTitleEn": "What If?",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -640,7 +642,7 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-029",
@@ -648,9 +650,9 @@
     "dayName": "Sabtu",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "siapa-mengambil-apelku",
-    "storyTitleId": "Siapa Mengambil Apelku",
-    "storyTitleEn": "Siapa Mengambil Apelku",
+    "bookSlug": "pipit-dan-buah",
+    "storyTitleId": "Burung Pipit dan Buah Misterius",
+    "storyTitleEn": "The Sparrow and The Fruit",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -658,12 +660,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: Who Took My Apple? A Fun Animal Detective Tale",
+    "theme": "English Read-Aloud: The Sparrow and The Fruit (Clever Woodland Fable)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-030",
@@ -671,9 +673,9 @@
     "dayName": "Sabtu",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "siapa-mengambil-apelku",
-    "storyTitleId": "Siapa Mengambil Apelku",
-    "storyTitleEn": "Siapa Mengambil Apelku",
+    "bookSlug": "pipit-dan-buah",
+    "storyTitleId": "Burung Pipit dan Buah Misterius",
+    "storyTitleEn": "The Sparrow and The Fruit",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -681,57 +683,59 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Siapa yang Mengambil Apelku? Teka-teki Seru Jejak Hewan Kebun",
+    "theme": "Prime Bedtime Story: Burung Pipit dan Buah Misterius di Kebun",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-031",
     "date": "2026-11-22",
     "dayName": "Minggu",
     "timeSlot": "08:30 WIB",
-    "slotType": "Morning Energy Short",
-    "bookSlug": "siapa-mengambil-apelku",
-    "storyTitleId": "Siapa Mengambil Apelku",
-    "storyTitleEn": "Siapa Mengambil Apelku",
-    "lang": "id",
-    "format": "Shorts / Reels (9:16)",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "cerita-putri-gema",
+    "storyTitleId": "Cerita Putri Gema",
+    "storyTitleEn": "Cerita Putri Gema",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
-      "YouTube Shorts",
-      "Instagram Reels",
-      "Facebook Reels"
+      "YouTube Master (16:9 & Shorts)",
+      "Facebook Watch",
+      "Instagram Reels"
     ],
-    "theme": "Morning Short: Monyet & Apel Misterius di Kebun",
+    "theme": "English Read-Aloud: Princess Gema's Story (Magic of Voice & Nature)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-032",
     "date": "2026-11-22",
     "dayName": "Minggu",
-    "timeSlot": "19:30 WIB",
-    "slotType": "Mega Bedtime Marathon",
-    "bookSlug": "kompilasi-fabel-hewan",
-    "storyTitleId": "Kompilasi Fabel Hewan",
-    "storyTitleEn": "Kompilasi Fabel Hewan",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "cerita-putri-gema",
+    "storyTitleId": "Cerita Putri Gema",
+    "storyTitleEn": "Cerita Putri Gema",
     "lang": "id",
-    "format": "Landscape (16:9)",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
       "YouTube Master (16:9)",
-      "Facebook Watch"
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
     ],
-    "theme": "Marathon 2: Kompilasi 5 Fabel Rimba & Hewan Ceria (~20m)",
+    "theme": "Prime Bedtime Story: Cerita Putri Gema (Keajaiban Suara & Alam)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-033",
@@ -740,8 +744,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "burung-gagak-cerdik",
-    "storyTitleId": "Burung Gagak Cerdik",
-    "storyTitleEn": "Burung Gagak Cerdik",
+    "storyTitleId": "Burung Gagak yang Dermawan",
+    "storyTitleEn": "The Generous Crow",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -749,12 +753,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Clever Crow (Problem Solving with Pebbles)",
+    "theme": "English Read-Aloud: The Generous Crow (Kindness & Sharing)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-034",
@@ -763,8 +767,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "burung-gagak-cerdik",
-    "storyTitleId": "Burung Gagak Cerdik",
-    "storyTitleEn": "Burung Gagak Cerdik",
+    "storyTitleId": "Burung Gagak yang Dermawan",
+    "storyTitleEn": "The Generous Crow",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -772,12 +776,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Burung Gagak yang Cerdik (Fabel Klasik Kecerdikan & Ketekunan)",
+    "theme": "Prime Bedtime Story: Burung Gagak yang Dermawan (Fabel Klasik Kebaikan Hati)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-035",
@@ -786,8 +790,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
     "bookSlug": "katak-ingin-terbang",
-    "storyTitleId": "Katak Ingin Terbang",
-    "storyTitleEn": "Katak Ingin Terbang",
+    "storyTitleId": "Impian Bintang Sang Katak",
+    "storyTitleEn": "Frog's Starry Wish",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -795,12 +799,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Frog Who Wanted to Fly",
+    "theme": "English Read-Aloud: Frog's Starry Wish",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-036",
@@ -809,8 +813,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "katak-ingin-terbang",
-    "storyTitleId": "Katak Ingin Terbang",
-    "storyTitleEn": "Katak Ingin Terbang",
+    "storyTitleId": "Impian Bintang Sang Katak",
+    "storyTitleEn": "Frog's Starry Wish",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -818,12 +822,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Katak yang Ingin Terbang (Semangat Pantang Menyerah & Persahabatan)",
+    "theme": "Prime Bedtime Story: Impian Bintang Sang Katak (Semangat Pantang Menyerah)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-037",
@@ -831,9 +835,9 @@
     "dayName": "Rabu",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "awan-kecil-yang-haus",
-    "storyTitleId": "Awan Kecil Yang Haus",
-    "storyTitleEn": "Awan Kecil Yang Haus",
+    "bookSlug": "vayu-sang-angin",
+    "storyTitleId": "Vayu Sang Angin!",
+    "storyTitleEn": "Vayu, the Wind",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -841,12 +845,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Little Thirsty Cloud",
+    "theme": "English Read-Aloud: Vayu, the Wind (Gentle Nature Wonders)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-038",
@@ -854,9 +858,9 @@
     "dayName": "Rabu",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "awan-kecil-yang-haus",
-    "storyTitleId": "Awan Kecil Yang Haus",
-    "storyTitleEn": "Awan Kecil Yang Haus",
+    "bookSlug": "vayu-sang-angin",
+    "storyTitleId": "Vayu Sang Angin!",
+    "storyTitleEn": "Vayu, the Wind",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -864,12 +868,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Awan Kecil yang Haus (Perjalanan Membasahi Padang Bunga)",
+    "theme": "Prime Bedtime Story: Vayu Sang Angin! (Menyapa Awan & Taman Bunga)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-039",
@@ -877,9 +881,9 @@
     "dayName": "Kamis",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "kupu-kupu-sayap-pelangi",
-    "storyTitleId": "Kupu Kupu Sayap Pelangi",
-    "storyTitleEn": "Kupu Kupu Sayap Pelangi",
+    "bookSlug": "buaya-dan-kupu-kupu",
+    "storyTitleId": "Si Buaya & Kupu-Kupu Ceria",
+    "storyTitleEn": "Sniffles, the Crocodile and Punch, the Butterfly",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -887,12 +891,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Butterfly with Rainbow Wings",
+    "theme": "English Read-Aloud: Sniffles, the Crocodile and Punch, the Butterfly",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-040",
@@ -900,9 +904,9 @@
     "dayName": "Kamis",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "kupu-kupu-sayap-pelangi",
-    "storyTitleId": "Kupu Kupu Sayap Pelangi",
-    "storyTitleEn": "Kupu Kupu Sayap Pelangi",
+    "bookSlug": "buaya-dan-kupu-kupu",
+    "storyTitleId": "Si Buaya & Kupu-Kupu Ceria",
+    "storyTitleEn": "Sniffles, the Crocodile and Punch, the Butterfly",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -910,12 +914,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Kupu-Kupu Sayap Pelangi (Keindahan Berbagi Warna di Taman)",
+    "theme": "Prime Bedtime Story: Si Buaya & Kupu-Kupu Ceria (Persahabatan Tanpa Perbedaan)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-041",
@@ -923,9 +927,9 @@
     "dayName": "Jumat",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "milo-si-anak-gajah",
-    "storyTitleId": "Milo Si Anak Gajah",
-    "storyTitleEn": "Milo Si Anak Gajah",
+    "bookSlug": "burung-gajah",
+    "storyTitleId": "Kisah Burung Gajah",
+    "storyTitleEn": "The Elephant Bird",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -933,12 +937,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: Milo The Little Elephant",
+    "theme": "English Read-Aloud: The Elephant Bird",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-042",
@@ -946,9 +950,9 @@
     "dayName": "Jumat",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "milo-si-anak-gajah",
-    "storyTitleId": "Milo Si Anak Gajah",
-    "storyTitleEn": "Milo Si Anak Gajah",
+    "bookSlug": "burung-gajah",
+    "storyTitleId": "Kisah Burung Gajah",
+    "storyTitleEn": "The Elephant Bird",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -956,12 +960,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Milo Si Anak Gajah (Menemukan Keistimewaan Diri)",
+    "theme": "Prime Bedtime Story: Kisah Burung Gajah (Menemukan Keistimewaan Diri)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-043",
@@ -969,9 +973,9 @@
     "dayName": "Sabtu",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "layang-layang-kiki",
-    "storyTitleId": "Layang Layang Kiki",
-    "storyTitleEn": "Layang Layang Kiki",
+    "bookSlug": "lalat-di-langit",
+    "storyTitleId": "Lalat Kecil di Langit Luas",
+    "storyTitleEn": "A Fly in the Sky",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -979,12 +983,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: Kiki's Flying Kite",
+    "theme": "English Read-Aloud: A Fly in the Sky",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-044",
@@ -992,9 +996,9 @@
     "dayName": "Sabtu",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "layang-layang-kiki",
-    "storyTitleId": "Layang Layang Kiki",
-    "storyTitleEn": "Layang Layang Kiki",
+    "bookSlug": "lalat-di-langit",
+    "storyTitleId": "Lalat Kecil di Langit Luas",
+    "storyTitleEn": "A Fly in the Sky",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1002,57 +1006,59 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Layang-Layang Kiki yang Terbang Tinggi (Keceriaan Angin Sore)",
+    "theme": "Prime Bedtime Story: Lalat Kecil di Langit Luas (Petualangan Angin Sore)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-045",
     "date": "2026-11-29",
     "dayName": "Minggu",
     "timeSlot": "08:30 WIB",
-    "slotType": "Morning Energy Short",
-    "bookSlug": "kupu-kupu-sayap-pelangi",
-    "storyTitleId": "Kupu Kupu Sayap Pelangi",
-    "storyTitleEn": "Kupu Kupu Sayap Pelangi",
-    "lang": "id",
-    "format": "Shorts / Reels (9:16)",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "gara-gara-ole",
+    "storyTitleId": "Gara-Gara Ole",
+    "storyTitleEn": "Gara-Gara Ole",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
-      "YouTube Shorts",
-      "Instagram Reels",
-      "Facebook Reels"
+      "YouTube Master (16:9 & Shorts)",
+      "Facebook Watch",
+      "Instagram Reels"
     ],
-    "theme": "Morning Short: Sayap Pelangi di Taman Bunga",
+    "theme": "English Read-Aloud: Because of Ole (Learning Responsibility Joyfully)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-046",
     "date": "2026-11-29",
     "dayName": "Minggu",
-    "timeSlot": "19:30 WIB",
-    "slotType": "Mega Bedtime Marathon",
-    "bookSlug": "kompilasi-dongeng-menenangkan",
-    "storyTitleId": "Kompilasi Dongeng Menenangkan",
-    "storyTitleEn": "Kompilasi Dongeng Menenangkan",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "gara-gara-ole",
+    "storyTitleId": "Gara-Gara Ole",
+    "storyTitleEn": "Gara-Gara Ole",
     "lang": "id",
-    "format": "Landscape (16:9)",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
       "YouTube Master (16:9)",
-      "Facebook Watch"
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
     ],
-    "theme": "Marathon 3: Kompilasi Petualangan Alam & Imajinasi Bintang (~20m)",
+    "theme": "Prime Bedtime Story: Gara-Gara Ole (Belajar Bertanggung Jawab dengan Ceria)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-047",
@@ -1060,9 +1066,9 @@
     "dayName": "Senin",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "roti-canai-terbang",
-    "storyTitleId": "Roti Canai Terbang",
-    "storyTitleEn": "Roti Canai Terbang",
+    "bookSlug": "kheer-bulan-purnama",
+    "storyTitleId": "Puding Manis di Malam Purnama",
+    "storyTitleEn": "Kheer on a Full Moon Night",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1070,12 +1076,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Runaway Chapati (Kitchen Fun Comedy)",
+    "theme": "English Read-Aloud: Kheer on a Full Moon Night (Kitchen Family Joy)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-048",
@@ -1083,9 +1089,9 @@
     "dayName": "Senin",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "roti-canai-terbang",
-    "storyTitleId": "Roti Canai Terbang",
-    "storyTitleEn": "Roti Canai Terbang",
+    "bookSlug": "kheer-bulan-purnama",
+    "storyTitleId": "Puding Manis di Malam Purnama",
+    "storyTitleEn": "Kheer on a Full Moon Night",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1093,12 +1099,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Roti Terbang yang Lari (Komedi Dapur Mengejar Roti Menggelinding)",
+    "theme": "Prime Bedtime Story: Puding Manis di Malam Purnama (Kebersamaan Dapur)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-049",
@@ -1106,9 +1112,9 @@
     "dayName": "Selasa",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "kambing-dan-jembatan-sempit",
-    "storyTitleId": "Kambing Dan Jembatan Sempit",
-    "storyTitleEn": "Kambing Dan Jembatan Sempit",
+    "bookSlug": "uluran-tangan",
+    "storyTitleId": "Sebuah Uluran Tangan",
+    "storyTitleEn": "A Helping Hand",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1116,12 +1122,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Two Goats (Cooperation & Kindness)",
+    "theme": "English Read-Aloud: A Helping Hand (Cooperation & Kindness)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-050",
@@ -1129,9 +1135,9 @@
     "dayName": "Selasa",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "kambing-dan-jembatan-sempit",
-    "storyTitleId": "Kambing Dan Jembatan Sempit",
-    "storyTitleEn": "Kambing Dan Jembatan Sempit",
+    "bookSlug": "uluran-tangan",
+    "storyTitleId": "Sebuah Uluran Tangan",
+    "storyTitleEn": "A Helping Hand",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1139,12 +1145,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Dua Kambing dan Jembatan Sempit (Pentingnya Mengalah & Kerja Sama)",
+    "theme": "Prime Bedtime Story: Sebuah Uluran Tangan (Pentingnya Saling Tolong & Kerja Sama)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-051",
@@ -1152,9 +1158,9 @@
     "dayName": "Rabu",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "burung-hantu-takut-gelap",
-    "storyTitleId": "Burung Hantu Takut Gelap",
-    "storyTitleEn": "Burung Hantu Takut Gelap",
+    "bookSlug": "tersesat-di-malam-hari",
+    "storyTitleId": "Tersesat di Malam Hari",
+    "storyTitleEn": "Lost in the Night",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1162,12 +1168,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Owl Who Was Afraid of the Dark",
+    "theme": "English Read-Aloud: Lost in the Night",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-052",
@@ -1175,9 +1181,9 @@
     "dayName": "Rabu",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "burung-hantu-takut-gelap",
-    "storyTitleId": "Burung Hantu Takut Gelap",
-    "storyTitleEn": "Burung Hantu Takut Gelap",
+    "bookSlug": "tersesat-di-malam-hari",
+    "storyTitleId": "Tersesat di Malam Hari",
+    "storyTitleEn": "Lost in the Night",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1185,12 +1191,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Burung Hantu Cilik yang Takut Gelap (Melihat Keindahan Bintang Malam)",
+    "theme": "Prime Bedtime Story: Tersesat di Malam Hari (Melihat Keindahan Bintang Malam)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-053",
@@ -1198,9 +1204,9 @@
     "dayName": "Kamis",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "sepatu-merah-kiki",
-    "storyTitleId": "Sepatu Merah Kiki",
-    "storyTitleEn": "Sepatu Merah Kiki",
+    "bookSlug": "sona-pintar-membantu-ibu",
+    "storyTitleId": "Sona Cerdas Membantu Ibu",
+    "storyTitleEn": "Smart Sona Helps Her Mother",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1208,12 +1214,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: Red Shoes for Kiki",
+    "theme": "English Read-Aloud: Smart Sona Helps Her Mother",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-054",
@@ -1221,9 +1227,9 @@
     "dayName": "Kamis",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "sepatu-merah-kiki",
-    "storyTitleId": "Sepatu Merah Kiki",
-    "storyTitleEn": "Sepatu Merah Kiki",
+    "bookSlug": "sona-pintar-membantu-ibu",
+    "storyTitleId": "Sona Cerdas Membantu Ibu",
+    "storyTitleEn": "Smart Sona Helps Her Mother",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1231,12 +1237,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Sepatu Merah Kiki (Kemandirian & Belajar Memakai Sepatu Baru)",
+    "theme": "Prime Bedtime Story: Sona Cerdas Membantu Ibu (Kemandirian & Cinta Keluarga)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-055",
@@ -1244,9 +1250,9 @@
     "dayName": "Jumat",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "ikan-emas-dan-sungai-ajaib",
-    "storyTitleId": "Ikan Emas Dan Sungai Ajaib",
-    "storyTitleEn": "Ikan Emas Dan Sungai Ajaib",
+    "bookSlug": "hari-hujan-ikan",
+    "storyTitleId": "Hari Ketika Hujan Ikan",
+    "storyTitleEn": "The Day It Rained Fish",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1254,12 +1260,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: The Golden Fish (Free Swimming & Kindness)",
+    "theme": "English Read-Aloud: The Day It Rained Fish (River & Nature Kindness)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-056",
@@ -1267,9 +1273,9 @@
     "dayName": "Jumat",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "ikan-emas-dan-sungai-ajaib",
-    "storyTitleId": "Ikan Emas Dan Sungai Ajaib",
-    "storyTitleEn": "Ikan Emas Dan Sungai Ajaib",
+    "bookSlug": "hari-hujan-ikan",
+    "storyTitleId": "Hari Ketika Hujan Ikan",
+    "storyTitleEn": "The Day It Rained Fish",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1277,12 +1283,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Ikan Emas Berenang Bebas (Menyayangi Makhluk Hidup)",
+    "theme": "Prime Bedtime Story: Hari Ketika Hujan Ikan (Menyayangi Makhluk Hidup)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-057",
@@ -1290,9 +1296,9 @@
     "dayName": "Sabtu",
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature",
-    "bookSlug": "sahabat-di-atas-pohon",
-    "storyTitleId": "Sahabat Di Atas Pohon",
-    "storyTitleEn": "Sahabat Di Atas Pohon",
+    "bookSlug": "pohon-ajaib",
+    "storyTitleId": "Sang Pohon Sahabat",
+    "storyTitleEn": "The Tree",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1300,12 +1306,12 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "English Read-Aloud: Friends in the Trees",
+    "theme": "English Read-Aloud: The Tree (Friends Under the Leaves)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-058",
@@ -1313,9 +1319,9 @@
     "dayName": "Sabtu",
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
-    "bookSlug": "sahabat-di-atas-pohon",
-    "storyTitleId": "Sahabat Di Atas Pohon",
-    "storyTitleEn": "Sahabat Di Atas Pohon",
+    "bookSlug": "pohon-ajaib",
+    "storyTitleId": "Sang Pohon Sahabat",
+    "storyTitleEn": "The Tree",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -1323,56 +1329,1258 @@
       "Facebook (Watch & Reels)",
       "Instagram Reels"
     ],
-    "theme": "Prime Bedtime Story: Sahabat di Atas Pohon (Persahabatan Hangat Tupai & Burung Pipit)",
+    "theme": "Prime Bedtime Story: Sang Pohon Sahabat (Persahabatan Hangat di Alam)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-059",
     "date": "2026-12-06",
     "dayName": "Minggu",
     "timeSlot": "08:30 WIB",
-    "slotType": "Morning Energy Short",
-    "bookSlug": "sahabat-di-atas-pohon",
-    "storyTitleId": "Sahabat Di Atas Pohon",
-    "storyTitleEn": "Sahabat Di Atas Pohon",
-    "lang": "id",
-    "format": "Shorts / Reels (9:16)",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "jangan-dekat-dekat",
+    "storyTitleId": "Jangan Dekat-dekat",
+    "storyTitleEn": "Jangan Dekat-dekat",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
-      "YouTube Shorts",
-      "Instagram Reels",
-      "Facebook Reels"
+      "YouTube Master (16:9 & Shorts)",
+      "Facebook Watch",
+      "Instagram Reels"
     ],
-    "theme": "Morning Short: Parade Karakter Favorit Zayn Storybook",
+    "theme": "English Read-Aloud: Don't Come Too Close (Safe Boundaries & Hygiene)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
   },
   {
     "id": "SLOT-060",
     "date": "2026-12-06",
     "dayName": "Minggu",
-    "timeSlot": "19:30 WIB",
-    "slotType": "Grand Finale Mega Marathon",
-    "bookSlug": "kompilasi-bedtime-60m",
-    "storyTitleId": "Kompilasi Bedtime 60m",
-    "storyTitleEn": "Kompilasi Bedtime 60m",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "jangan-dekat-dekat",
+    "storyTitleId": "Jangan Dekat-dekat",
+    "storyTitleEn": "Jangan Dekat-dekat",
     "lang": "id",
-    "format": "Landscape (16:9)",
+    "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
       "YouTube Master (16:9)",
-      "Facebook Watch"
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
     ],
-    "theme": "Grand Finale: 60 Menit Mega Dongeng Pengantar Tidur Zayn (~60m)",
+    "theme": "Prime Bedtime Story: Jangan Dekat-Dekat (Mengenal Batas Aman & Kebersihan Diri)",
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
-    "hasAssets": false
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-061",
+    "date": "2026-12-07",
+    "dayName": "Senin",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "aku-anak-kajang",
+    "storyTitleId": "Aku Anak Kajang",
+    "storyTitleEn": "Aku Anak Kajang",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Aku Anak Kajang: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-062",
+    "date": "2026-12-07",
+    "dayName": "Senin",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "aku-anak-kajang",
+    "storyTitleId": "Aku Anak Kajang",
+    "storyTitleEn": "Aku Anak Kajang",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Aku Anak Kajang: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-063",
+    "date": "2026-12-08",
+    "dayName": "Selasa",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "aku-ingin-sekolah",
+    "storyTitleId": "Aku Ingin Sekolah",
+    "storyTitleEn": "Aku Ingin Sekolah",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Aku Ingin Sekolah: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-064",
+    "date": "2026-12-08",
+    "dayName": "Selasa",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "aku-ingin-sekolah",
+    "storyTitleId": "Aku Ingin Sekolah",
+    "storyTitleEn": "Aku Ingin Sekolah",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Aku Ingin Sekolah: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-065",
+    "date": "2026-12-09",
+    "dayName": "Rabu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "alif-anak-kampung-nelayan",
+    "storyTitleId": "Alif Anak Kampung Nelayan",
+    "storyTitleEn": "Alif Anak Kampung Nelayan",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alif Anak Kampung Nelayan: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-066",
+    "date": "2026-12-09",
+    "dayName": "Rabu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "alif-anak-kampung-nelayan",
+    "storyTitleId": "Alif Anak Kampung Nelayan",
+    "storyTitleEn": "Alif Anak Kampung Nelayan",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alif Anak Kampung Nelayan: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-067",
+    "date": "2026-12-10",
+    "dayName": "Kamis",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "amir-si-tukang-semir",
+    "storyTitleId": "Amir Si Tukang Semir",
+    "storyTitleEn": "Amir Si Tukang Semir",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Amir Si Tukang Semir: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-068",
+    "date": "2026-12-10",
+    "dayName": "Kamis",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "amir-si-tukang-semir",
+    "storyTitleId": "Amir Si Tukang Semir",
+    "storyTitleEn": "Amir Si Tukang Semir",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Amir Si Tukang Semir: Cerita Edukatif Anak Nusantara",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-069",
+    "date": "2026-12-11",
+    "dayName": "Jumat",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "kue-lapis-harimau",
+    "storyTitleId": "Kue Lapis Harimau",
+    "storyTitleEn": "Kue Lapis Harimau",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Kuliner",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-070",
+    "date": "2026-12-11",
+    "dayName": "Jumat",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "kue-lapis-harimau",
+    "storyTitleId": "Kue Lapis Harimau",
+    "storyTitleEn": "Kue Lapis Harimau",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Kuliner",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-071",
+    "date": "2026-12-12",
+    "dayName": "Sabtu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "gerubak-takung",
+    "storyTitleId": "Gerubak Takung",
+    "storyTitleEn": "Gerubak Takung",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Kearifan Lokal melalui Permainan Tradisional dan Bahasa Daerah",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-072",
+    "date": "2026-12-12",
+    "dayName": "Sabtu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "gerubak-takung",
+    "storyTitleId": "Gerubak Takung",
+    "storyTitleEn": "Gerubak Takung",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Kearifan Lokal melalui Permainan Tradisional dan Bahasa Daerah",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-073",
+    "date": "2026-12-13",
+    "dayName": "Minggu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "anak-getuk",
+    "storyTitleId": "Anak Getuk",
+    "storyTitleEn": "Anak Getuk",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "English Read-Aloud: Anak Getuk (Cerita Pagi Penuh Makna)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-074",
+    "date": "2026-12-13",
+    "dayName": "Minggu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "anak-getuk",
+    "storyTitleId": "Anak Getuk",
+    "storyTitleEn": "Anak Getuk",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Prime Bedtime Story: Anak Getuk (Cerita Malam Nusantara)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-075",
+    "date": "2026-12-14",
+    "dayName": "Senin",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "celengan-ruru",
+    "storyTitleId": "Celengan Ruru",
+    "storyTitleEn": "Celengan Ruru",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-076",
+    "date": "2026-12-14",
+    "dayName": "Senin",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "celengan-ruru",
+    "storyTitleId": "Celengan Ruru",
+    "storyTitleEn": "Celengan Ruru",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-077",
+    "date": "2026-12-15",
+    "dayName": "Selasa",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "ela-si-kecil-yang-baik-hati",
+    "storyTitleId": "Ela, si Kecil yang Baik Hati",
+    "storyTitleEn": "Ela, si Kecil yang Baik Hati",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alam dan Lingkungan",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-078",
+    "date": "2026-12-15",
+    "dayName": "Selasa",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "ela-si-kecil-yang-baik-hati",
+    "storyTitleId": "Ela, si Kecil yang Baik Hati",
+    "storyTitleEn": "Ela, si Kecil yang Baik Hati",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alam dan Lingkungan",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-079",
+    "date": "2026-12-16",
+    "dayName": "Rabu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "jujur-itu-keren",
+    "storyTitleId": "Jujur Itu Keren",
+    "storyTitleEn": "Jujur Itu Keren",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Keberagaman",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-080",
+    "date": "2026-12-16",
+    "dayName": "Rabu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "jujur-itu-keren",
+    "storyTitleId": "Jujur Itu Keren",
+    "storyTitleEn": "Jujur Itu Keren",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Keberagaman",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-081",
+    "date": "2026-12-17",
+    "dayName": "Kamis",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "lomba-tebak-cepat",
+    "storyTitleId": "Lomba Tebak Cepat",
+    "storyTitleEn": "Lomba Tebak Cepat",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-082",
+    "date": "2026-12-17",
+    "dayName": "Kamis",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "lomba-tebak-cepat",
+    "storyTitleId": "Lomba Tebak Cepat",
+    "storyTitleEn": "Lomba Tebak Cepat",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-083",
+    "date": "2026-12-18",
+    "dayName": "Jumat",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "awan-lalat",
+    "storyTitleId": "Awan Lalat",
+    "storyTitleEn": "Awan Lalat",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alam dan Lingkungan",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-084",
+    "date": "2026-12-18",
+    "dayName": "Jumat",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "awan-lalat",
+    "storyTitleId": "Awan Lalat",
+    "storyTitleEn": "Awan Lalat",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alam dan Lingkungan",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-085",
+    "date": "2026-12-19",
+    "dayName": "Sabtu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "merah",
+    "storyTitleId": "Merah",
+    "storyTitleEn": "Merah",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-086",
+    "date": "2026-12-19",
+    "dayName": "Sabtu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "merah",
+    "storyTitleId": "Merah",
+    "storyTitleEn": "Merah",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-087",
+    "date": "2026-12-20",
+    "dayName": "Minggu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "ansuang-bakeng",
+    "storyTitleId": "Ansuang Bakeng",
+    "storyTitleEn": "Ansuang Bakeng",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "English Read-Aloud: Ansuang Bakeng (Cerita Pagi Penuh Makna)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-088",
+    "date": "2026-12-20",
+    "dayName": "Minggu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "ansuang-bakeng",
+    "storyTitleId": "Ansuang Bakeng",
+    "storyTitleEn": "Ansuang Bakeng",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Prime Bedtime Story: Ansuang Bakeng (Cerita Malam Nusantara)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-089",
+    "date": "2026-12-21",
+    "dayName": "Senin",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "fokus-fokus-lempar",
+    "storyTitleId": "Fokus! Fokus! Lempar!",
+    "storyTitleEn": "Fokus! Fokus! Lempar!",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Perangkulan Anak Berkebutuhan Khusus",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-090",
+    "date": "2026-12-21",
+    "dayName": "Senin",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "fokus-fokus-lempar",
+    "storyTitleId": "Fokus! Fokus! Lempar!",
+    "storyTitleEn": "Fokus! Fokus! Lempar!",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Perangkulan Anak Berkebutuhan Khusus",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-091",
+    "date": "2026-12-22",
+    "dayName": "Selasa",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "adik-kecil-dan-kucing",
+    "storyTitleId": "Adik Kecil dan Kucing",
+    "storyTitleEn": "Adik Kecil dan Kucing",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-092",
+    "date": "2026-12-22",
+    "dayName": "Selasa",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "adik-kecil-dan-kucing",
+    "storyTitleId": "Adik Kecil dan Kucing",
+    "storyTitleEn": "Adik Kecil dan Kucing",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-093",
+    "date": "2026-12-23",
+    "dayName": "Rabu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "lihat-kebunku",
+    "storyTitleId": "Lihat Kebunku",
+    "storyTitleEn": "Lihat Kebunku",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-094",
+    "date": "2026-12-23",
+    "dayName": "Rabu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "lihat-kebunku",
+    "storyTitleId": "Lihat Kebunku",
+    "storyTitleEn": "Lihat Kebunku",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-095",
+    "date": "2026-12-24",
+    "dayName": "Kamis",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "si-rancak-sakit",
+    "storyTitleId": "Si Rancak Sakit",
+    "storyTitleEn": "Si Rancak Sakit",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alam dan Lingkungan",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-096",
+    "date": "2026-12-24",
+    "dayName": "Kamis",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "si-rancak-sakit",
+    "storyTitleId": "Si Rancak Sakit",
+    "storyTitleEn": "Si Rancak Sakit",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Alam dan Lingkungan",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-097",
+    "date": "2026-12-25",
+    "dayName": "Jumat",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "mimpi-loni",
+    "storyTitleId": "Mimpi Loni",
+    "storyTitleEn": "Mimpi Loni",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-098",
+    "date": "2026-12-25",
+    "dayName": "Jumat",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "mimpi-loni",
+    "storyTitleId": "Mimpi Loni",
+    "storyTitleEn": "Mimpi Loni",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-099",
+    "date": "2026-12-26",
+    "dayName": "Sabtu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "dung-trek-trek-dung",
+    "storyTitleId": "Dung Trek Trek Dung",
+    "storyTitleEn": "Dung Trek Trek Dung",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Seni dan Budaya",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-100",
+    "date": "2026-12-26",
+    "dayName": "Sabtu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "dung-trek-trek-dung",
+    "storyTitleId": "Dung Trek Trek Dung",
+    "storyTitleEn": "Dung Trek Trek Dung",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Seni dan Budaya",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-101",
+    "date": "2026-12-27",
+    "dayName": "Minggu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning Energy & English Read-Aloud",
+    "bookSlug": "arian-dan-naya",
+    "storyTitleId": "Arian dan Naya",
+    "storyTitleEn": "Arian dan Naya",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "English Read-Aloud: Arian dan Naya (Cerita Pagi Penuh Makna)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-102",
+    "date": "2026-12-27",
+    "dayName": "Minggu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "arian-dan-naya",
+    "storyTitleId": "Arian dan Naya",
+    "storyTitleEn": "Arian dan Naya",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Prime Bedtime Story: Arian dan Naya (Cerita Malam Nusantara)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-103",
+    "date": "2026-12-28",
+    "dayName": "Senin",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "uli-ingin-sendiri",
+    "storyTitleId": "Uli Ingin Sendiri",
+    "storyTitleEn": "Uli Ingin Sendiri",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-104",
+    "date": "2026-12-28",
+    "dayName": "Senin",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "uli-ingin-sendiri",
+    "storyTitleId": "Uli Ingin Sendiri",
+    "storyTitleEn": "Uli Ingin Sendiri",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-105",
+    "date": "2026-12-29",
+    "dayName": "Selasa",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "daun-daun-istimewa",
+    "storyTitleId": "Daun-Daun Istimewa",
+    "storyTitleEn": "Daun-Daun Istimewa",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Cerita Rakyat",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-106",
+    "date": "2026-12-29",
+    "dayName": "Selasa",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "daun-daun-istimewa",
+    "storyTitleId": "Daun-Daun Istimewa",
+    "storyTitleEn": "Daun-Daun Istimewa",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Cerita Rakyat",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-107",
+    "date": "2026-12-30",
+    "dayName": "Rabu",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "di-mana-sepatuku",
+    "storyTitleId": "Di Mana Sepatuku",
+    "storyTitleEn": "Di Mana Sepatuku",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-108",
+    "date": "2026-12-30",
+    "dayName": "Rabu",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "di-mana-sepatuku",
+    "storyTitleId": "Di Mana Sepatuku",
+    "storyTitleEn": "Di Mana Sepatuku",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-109",
+    "date": "2026-12-31",
+    "dayName": "Kamis",
+    "timeSlot": "08:30 WIB",
+    "slotType": "Morning English Feature & Read-Aloud",
+    "bookSlug": "pemberian-pak-beruang",
+    "storyTitleId": "Pemberian Pak Beruang",
+    "storyTitleEn": "Pemberian Pak Beruang",
+    "lang": "en",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-110",
+    "date": "2026-12-31",
+    "dayName": "Kamis",
+    "timeSlot": "19:00 WIB",
+    "slotType": "Prime Bedtime Story",
+    "bookSlug": "pemberian-pak-beruang",
+    "storyTitleId": "Pemberian Pak Beruang",
+    "storyTitleEn": "Pemberian Pak Beruang",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube Master (16:9)",
+      "Facebook Watch",
+      "Instagram Reels",
+      "YouTube Shorts"
+    ],
+    "theme": "Anak Indonesia",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": true
   }
 ]
