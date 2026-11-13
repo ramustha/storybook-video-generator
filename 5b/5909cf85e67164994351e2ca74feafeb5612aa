@@ -1,0 +1,55 @@
+scripts/ingest-story.ts
+  1a8c61393d6b06aa 9,11-19,110-113,117-130,210,216-243,247-250,255,307-310,323,327,340-341,378,409,440-441,445-446,448-453,456-457,461-463,475,542-549,607-616,623-626,634-644,647-680,683,726,736-744,752,756-761
+scripts/buffer-prerender.ts
+  1a8c61393d6b06aa 5-9,12-17,44-93,114,119,122,127,135-136,138,141,153,156-169,174-203,215-222,227,229-240
+scripts/content-calendar.ts
+  1a8c61393d6b06aa 7-8,188,192,199,203,254,258,265,269,280,291,302,313,342,346,353,357,364,368,390,401,412,423,430,434,441,445,452,456,463,467,474,478,485,489,496,500,507,511,518,522,540,544,551,555,562,566,573,577,584,588,595,599,606,610,617,621,628,632,639,643,650,654,661,665,672,1131-1175
+cloudflare/daily-broadcast-cron/wrangler.toml
+  1a8c61393d6b06aa 11,13
+scripts/prepare-plates-hybrid.ts
+  1a8c61393d6b06aa 158-159
+functions/api/catalog.ts
+  1a8c61393d6b06aa 278-279
+scripts/audit-story-quality.ts
+  1a8c61393d6b06aa 241
+scripts/render-book.ts
+  1a8c61393d6b06aa 8,168-182
+src/audio/tts-engine.ts
+  1a8c61393d6b06aa 8,139,142-156
+scripts/manage-story-storage.ts
+  1a8c61393d6b06aa 481-589
+config/curated-books.json
+  1a8c61393d6b06aa 961-1920
+scripts/lib/pdf-story-extractor.ts
+  1a8c61393d6b06aa 1-299
+.github/workflows/buffer-prerender.yml
+  1a8c61393d6b06aa 88-89,91-94,103-122
+.github/workflows/daily-story-ingest.yml
+  1a8c61393d6b06aa 34-38,47,72,91-99,105-109,113,140-169
+cloudflare/daily-broadcast-cron/src/index.js
+  1a8c61393d6b06aa 111-120,163-169
+scripts/render-compilation.ts
+  1a8c61393d6b06aa 6,27,29-89,308-315,455-460,538-543
+scripts/lib/batch-queue.ts
+  1a8c61393d6b06aa 1-240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "5b5909cf85e67164994351e2ca74feafeb5612aa",
+  "prompts": {
+    "1a8c61393d6b06aa": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "cc7b054c-1d73-40ca-9da4-ff464de302af",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 2264,
+      "total_deletions": 228,
+      "accepted_lines": 2263,
+      "overriden_lines": 0
+    }
+  }
+}
