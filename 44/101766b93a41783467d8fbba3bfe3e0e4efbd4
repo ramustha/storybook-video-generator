@@ -1,0 +1,33 @@
+.github/workflows/buffer-prerender.yml
+  89b8b12d6e53291f 90
+.github/workflows/daily-story-ingest.yml
+  89b8b12d6e53291f 105,146
+scripts/audit-story-quality.ts
+  89b8b12d6e53291f 133-242,549,553,569-576,580
+scripts/lib/pdf-story-extractor.ts
+  89b8b12d6e53291f 62,65-70,194-248,279-282,285-300,305
+scripts/ingest-story.ts
+  89b8b12d6e53291f 9,229,231-232,244
+.github/workflows/cloud-render.yml
+  89b8b12d6e53291f 83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "44101766b93a41783467d8fbba3bfe3e0e4efbd4",
+  "prompts": {
+    "89b8b12d6e53291f": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "804f6537-0957-426e-b395-2f565b7c4d07",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 218,
+      "total_deletions": 17,
+      "accepted_lines": 218,
+      "overriden_lines": 0
+    }
+  }
+}
