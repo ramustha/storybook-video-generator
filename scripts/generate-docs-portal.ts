@@ -2274,6 +2274,45 @@ const indexHtmlContent = `<!DOCTYPE html>
       color: var(--text-dim);
     }
 
+    .slot-runner-countdowns {
+      display: flex;
+      flex-direction: column;
+      gap: 0.22rem;
+      margin-bottom: 0.45rem;
+      padding: 0.34rem 0.46rem;
+      background: rgba(0, 0, 0, 0.24);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xs);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.63rem;
+    }
+
+    .slot-runner-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .slot-runner-label {
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .slot-countdown-chip {
+      color: #38bdf8;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .slot-countdown-chip.done {
+      color: #34d399;
+    }
+
+    .slot-countdown-chip.imminent {
+      color: #fbbf24;
+    }
+
     .slot-action-btn {
       width: 100%;
       height: 26px;
@@ -2671,7 +2710,7 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="progress-labels">
             <span>🚀 Launch: <strong id="roadmapLaunchDate">07 Nov 2026</strong></span>
             <span id="progressBarLabel"><strong>${initialCalCompleted} of ${initialCalTotal} Slots</strong> (${initialCalProgress}%)</span>
-            <span>🏁 Finale: <strong id="roadmapFinaleDate">06 Dec 2026</strong></span>
+            <span>🏁 Finale: <strong id="roadmapFinaleDate">31 Dec 2026</strong></span>
           </div>
         </div>
       </div>
@@ -2838,9 +2877,9 @@ const indexHtmlContent = `<!DOCTYPE html>
 
         <div class="filter-chips-row">
           <span class="filter-label">Roadmap:</span>
-          <button class="filter-chip active" data-cal-filter="scope" data-value="active30" onclick="setTimelineScopeFilter('active30', this)">🌟 Active 30 Days (60)</button>
+          <button class="filter-chip active" data-cal-filter="scope" data-value="active30" onclick="setTimelineScopeFilter('active30', this)">🌟 2026 Launch</button>
           <button class="filter-chip" data-cal-filter="scope" data-value="all" onclick="setTimelineScopeFilter('all', this)">🚀 2-Year Master Plan (1,530)</button>
-          <button class="filter-chip" data-cal-filter="scope" data-value="budi" onclick="setTimelineScopeFilter('budi', this)">📚 BUDI 2026–2028 (1,470)</button>
+          <button class="filter-chip" data-cal-filter="scope" data-value="budi" onclick="setTimelineScopeFilter('budi', this)">📚 BUDI 2027–2028</button>
 
           <span class="filter-label" style="margin-left: 0.5rem;">Status:</span>
           <button class="filter-chip active" data-cal-filter="status" data-value="all" onclick="setTimelineStatusFilter('all', this)">All (${initialCalTotal})</button>
@@ -3027,7 +3066,7 @@ ${browserSyncScript}
       statusFilter: 'all',
       langFilter: 'all',
       viewMode: 'flow', // 'flow' | 'table'
-      maxDisplayCount: 60
+      maxDisplayCount: 120
     };
 
     // Tab Navigation
@@ -3703,7 +3742,7 @@ ${browserSyncScript}
     // =========================================================================
     function setTimelineScopeFilter(val, btn) {
       timelineState.scopeFilter = val;
-      timelineState.maxDisplayCount = val === 'active30' ? 60 : 120;
+      timelineState.maxDisplayCount = val === 'active30' ? 120 : 120;
       document.querySelectorAll('[data-cal-filter="scope"]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderTimeline();
@@ -3746,9 +3785,9 @@ ${browserSyncScript}
       return RAW_CALENDAR_DATA.filter(item => {
         // 1. Scope filter
         if (timelineState.scopeFilter === 'active30') {
-          if (item.date > '2026-12-06') return false;
+          if (item.date > '2026-12-31') return false;
         } else if (timelineState.scopeFilter === 'budi') {
-          if (item.date < '2026-12-07') return false;
+          if (item.date < '2027-01-01') return false;
         }
 
         if (timelineState.statusFilter !== 'all') {
@@ -4034,6 +4073,17 @@ ${browserSyncScript}
         if (headerPillText) {
           headerPillText.textContent = \`⚡ Next: \${shortActionName} in \${String(cdHours).padStart(2, '0')}h \${String(cdMins).padStart(2, '0')}m\`;
         }
+
+        // Tick per-card runner countdowns in-place
+        const nowMs = Date.now();
+        document.querySelectorAll('.slot-countdown-chip[data-target-ms]').forEach(function(el) {
+          const targetMs = Number(el.getAttribute('data-target-ms'));
+          if (!Number.isFinite(targetMs)) return;
+          const text = formatRunnerCountdown(targetMs, nowMs);
+          el.textContent = text;
+          const diffSec = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
+          el.classList.toggle('imminent', diffSec > 0 && diffSec <= 3600);
+        });
       } catch (err) {
         console.warn('Pipeline monitor update error:', err);
       }
@@ -4045,8 +4095,8 @@ ${browserSyncScript}
 
       // Compute stats based on the active roadmap scope
       const scopeSlots = RAW_CALENDAR_DATA.filter(item => {
-        if (timelineState.scopeFilter === 'active30') return item.date <= '2026-12-06';
-        if (timelineState.scopeFilter === 'budi') return item.date >= '2026-12-07';
+        if (timelineState.scopeFilter === 'active30') return item.date <= '2026-12-31';
+        if (timelineState.scopeFilter === 'budi') return item.date >= '2027-01-01';
         return true;
       });
 
@@ -4064,9 +4114,9 @@ ${browserSyncScript}
       const elPlanDesc = document.getElementById('kpiCalPlanDesc');
       if (elPlanDesc) {
         elPlanDesc.textContent = timelineState.scopeFilter === 'active30'
-          ? 'Active 30 Days Launch Roadmap (Month 1)'
+          ? '2026 Launch Roadmap (Nov–Dec 2026)'
           : timelineState.scopeFilter === 'budi'
-          ? 'BUDI Kemendikdasmen (2026–2028 · 626 Books)'
+          ? 'BUDI Kemendikdasmen (2027–2028)'
           : 'Full 2-Year Editorial Masterplan (2026–2028)';
       }
 
@@ -4116,18 +4166,18 @@ ${browserSyncScript}
       if (elTabBadge) elTabBadge.textContent = completed + '/' + total + ' (' + progress + '%)';
 
       // Dynamically update scope buttons from loaded dataset
-      const active30Count = RAW_CALENDAR_DATA.filter(function(s) { return s.date <= '2026-12-06'; }).length;
-      const budiCount = RAW_CALENDAR_DATA.filter(function(s) { return s.date >= '2026-12-07'; }).length;
+      const active30Count = RAW_CALENDAR_DATA.filter(function(s) { return s.date <= '2026-12-31'; }).length;
+      const budiCount = RAW_CALENDAR_DATA.filter(function(s) { return s.date >= '2027-01-01'; }).length;
       const totalAll = RAW_CALENDAR_DATA.length;
 
       const btnActive30 = document.querySelector('[data-cal-filter="scope"][data-value="active30"]');
-      if (btnActive30) btnActive30.textContent = '🌟 Active 30 Days (' + active30Count + ')';
+      if (btnActive30) btnActive30.textContent = '🌟 2026 Launch (' + active30Count + ')';
 
       const btnAll = document.querySelector('[data-cal-filter="scope"][data-value="all"]');
       if (btnAll) btnAll.textContent = '🚀 2-Year Master Plan (' + totalAll + ')';
 
       const btnBudi = document.querySelector('[data-cal-filter="scope"][data-value="budi"]');
-      if (btnBudi) btnBudi.textContent = '📚 BUDI 2026–2028 (' + budiCount + ')';
+      if (btnBudi) btnBudi.textContent = '📚 BUDI 2027–2028 (' + budiCount + ')';
 
       // Update filter chip text counts
       const chipAll = document.querySelector('[data-cal-filter="status"][data-value="all"]');
@@ -4205,6 +4255,63 @@ ${browserSyncScript}
       updatePipelineMonitor();
     }
 
+    function formatRunnerCountdown(targetMs, nowMs) {
+      const diffSec = Math.max(0, Math.floor((targetMs - nowMs) / 1000));
+      if (diffSec === 0) return '⏳ Due / Running';
+      const days = Math.floor(diffSec / 86400);
+      const hrs = Math.floor((diffSec % 86400) / 3600);
+      const mins = Math.floor((diffSec % 3600) / 60);
+      const secs = diffSec % 60;
+      if (days > 0) {
+        return \`T-\${days}d \${String(hrs).padStart(2, '0')}h \${String(mins).padStart(2, '0')}m\`;
+      }
+      return \`T-\${String(hrs).padStart(2, '0')}h \${String(mins).padStart(2, '0')}m \${String(secs).padStart(2, '0')}s\`;
+    }
+
+    function nextDailyWibMs(hourWib, nowMs) {
+      const wibNow = new Date(nowMs + 7 * 3600000);
+      const y = wibNow.getUTCFullYear();
+      const m = String(wibNow.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(wibNow.getUTCDate()).padStart(2, '0');
+      let candidate = new Date(\`\${y}-\${m}-\${d}T\${String(hourWib).padStart(2, '0')}:00:00+07:00\`).getTime();
+      if (candidate <= nowMs) candidate += 86400000;
+      return candidate;
+    }
+
+    function nextMonThuWibMs(hourWib, nowMs) {
+      let candidate = nextDailyWibMs(hourWib, nowMs);
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(candidate + 7 * 3600000).getUTCDay();
+        if (day === 1 || day === 4) return candidate;
+        candidate += 86400000;
+      }
+      return candidate;
+    }
+
+    function computeSlotRunnerTargets(slot, isMorning, nowMs) {
+      const dateStr = slot.date && /^\\d{4}-\\d{2}-\\d{2}$/.test(slot.date) ? slot.date : null;
+      if (!dateStr) return { ingestMs: null, bufferMs: null, publishMs: null };
+
+      const publishTime = isMorning ? '08:30:00' : '19:00:00';
+      const publishMs = new Date(\`\${dateStr}T\${publishTime}+07:00\`).getTime();
+
+      // Nightly pre-render buffer runs at 02:00 WIB for the next 3 days
+      const dayMidnightMs = new Date(\`\${dateStr}T00:00:00+07:00\`).getTime();
+      let bufferMs = dayMidnightMs - 3 * 86400000 + 2 * 3600000;
+      if (bufferMs <= nowMs) bufferMs = nextDailyWibMs(2, nowMs);
+
+      // Batch ingestion runs Mon & Thu at 07:00 WIB on or before slot.date
+      let ingestMs = dayMidnightMs + 7 * 3600000;
+      for (let i = 0; i < 7; i++) {
+        const day = new Date(ingestMs + 7 * 3600000).getUTCDay();
+        if (day === 1 || day === 4) break;
+        ingestMs -= 86400000;
+      }
+      if (ingestMs <= nowMs) ingestMs = nextMonThuWibMs(7, nowMs);
+
+      return { ingestMs, bufferMs, publishMs };
+    }
+
     function renderSlotCard(slot) {
       const display = resolveSlotDisplayState(slot, getWibDateIso());
       const { statusClass, statusText, isTodayPending, footerKind } = display;
@@ -4226,6 +4333,24 @@ ${browserSyncScript}
       }
 
       const todayBufferSuffix = display.isBuffered ? ' · 🟢 R2 Ready' : display.hasAssets ? ' · 🟡 Assets' : '';
+      const nowMs = Date.now();
+      const { ingestMs, bufferMs, publishMs } = computeSlotRunnerTargets(slot, isMorning, nowMs);
+      const isDone = footerKind === 'completed';
+      const ingestChip = (isDone || display.hasAssets || display.isBuffered)
+        ? '<span class="slot-countdown-chip done">✅ Done</span>'
+        : ingestMs
+        ? \`<span class="slot-countdown-chip" data-target-ms="\${ingestMs}">\${formatRunnerCountdown(ingestMs, nowMs)}</span>\`
+        : '<span class="slot-countdown-chip">—</span>';
+      const bufferChip = (isDone || display.isBuffered)
+        ? '<span class="slot-countdown-chip done">🟢 R2 Ready</span>'
+        : bufferMs
+        ? \`<span class="slot-countdown-chip" data-target-ms="\${bufferMs}">\${formatRunnerCountdown(bufferMs, nowMs)}</span>\`
+        : '<span class="slot-countdown-chip">—</span>';
+      const publishChip = isDone
+        ? '<span class="slot-countdown-chip done">✅ Live</span>'
+        : publishMs
+        ? \`<span class="slot-countdown-chip" data-target-ms="\${publishMs}">\${formatRunnerCountdown(publishMs, nowMs)}</span>\`
+        : '<span class="slot-countdown-chip">—</span>';
 
       return \`
         <div class="slot-card \${isTodayPending ? 'today-card' : ''}">
@@ -4261,6 +4386,22 @@ ${browserSyncScript}
           <!-- 2-Line Clamped Theme Box -->
           <div class="slot-theme-box" title="\${escapeAttr(theme)}">
             "\${theme}"
+          </div>
+
+          <!-- Per-Slot Runner Countdowns (Ingest · Pre-render Buffer · Broadcast) -->
+          <div class="slot-runner-countdowns">
+            <div class="slot-runner-row" title="Batch Ingestion Runner (Mon & Thu 07:00 WIB)">
+              <span class="slot-runner-label">📥 Ingest</span>
+              \${ingestChip}
+            </div>
+            <div class="slot-runner-row" title="Pre-render Buffer Runner (Daily 02:00 WIB, 3-day window)">
+              <span class="slot-runner-label">📦 Buffer</span>
+              \${bufferChip}
+            </div>
+            <div class="slot-runner-row" title="Broadcast & Publish (\${timeText})">
+              <span class="slot-runner-label">🚀 Publish</span>
+              \${publishChip}
+            </div>
           </div>
 
           <!-- Compact Footer Action / Banner -->
