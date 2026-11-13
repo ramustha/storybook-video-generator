@@ -59,7 +59,14 @@ export interface ExtractStoryInput {
   theme: string;
   apiKey?: string;
   groqApiKey?: string;
+  openRouterApiKey?: string;
 }
+
+export const OPENROUTER_FREE_MODELS = [
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "nvidia/nemotron-3.5-super-vl:free",
+] as const;
 
 export const GROQ_EXTRACTION_MODELS = [
   "openai/gpt-oss-120b",
@@ -184,6 +191,63 @@ async function extractStoryDataWithGroq(
   throw lastError || new Error("Groq PDF extraction failed.");
 }
 
+async function extractStoryDataWithOpenRouter(
+  input: ExtractStoryInput,
+  totalPages: number,
+  pageTexts: string[],
+  openRouterApiKey: string
+): Promise<ExtractedStoryPackage> {
+  const pageDump = pageTexts
+    .map((txt, idx) => `Page ${idx + 1}:\n${txt || "(illustration only / no text)"}`)
+    .join("\n\n---\n\n")
+    .slice(0, 60000);
+
+  const prompt = [
+    `Extract the complete children's picture book into faithful bilingual read-aloud scenes.`,
+    `Return ONLY valid JSON matching: { "coverPage": 1, "avatarPage": 7, "scenes": [{ "index": 0, "type": "story", "pageNumber": 7, "id": "Indonesian", "en": "English" }], "moral": { "headlineId": "...", "spokenId": "...", "headlineEn": "...", "spokenEn": "..." }, "thumbnailConfig": { "heroImage": "assets/cover.png", "backdropImage": "assets/scene_01.png", "id": { "headlineTop": "...", "headlineBottom": "...", "hook": "...", "hookEmoji": "...", "badge": "...", "sticker": "...", "bedtimeTitle": "...", "bedtimeHook": "..." }, "en": { "headlineTop": "...", "headlineBottom": "...", "hook": "...", "hookEmoji": "...", "badge": "...", "sticker": "...", "bedtimeTitle": "...", "bedtimeHook": "..." } } }`,
+    `Book Metadata: Slug=${input.slug}, TitleID=${input.title}, TitleEN=${input.originalTitle}, Author=${input.author}, Illustrator=${input.illustrator}, Theme=${input.theme}, TotalPages=${totalPages}.`,
+    `Rules: Transcribe EVERY actual story page in order (skip cover, blank, KDT/copyright, Kata Pengantar/Sekapur Sirih, and back-matter bio/glossary). pageNumber MUST be exact 1-based Page N label.`,
+    ``,
+    `Extracted Per-Page Text:`,
+    pageDump,
+  ].join("\n");
+
+  let lastError: Error | null = null;
+  for (const model of OPENROUTER_FREE_MODELS) {
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openRouterApiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: "You are a bilingual children's storybook editor. Output valid JSON only." },
+            { role: "user", content: prompt },
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.2,
+          max_tokens: 8192,
+        }),
+      });
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenRouter ${model} HTTP ${response.status}: ${errText.slice(0, 250)}`);
+      }
+      const data: any = await response.json();
+      const rawText = data?.choices?.[0]?.message?.content;
+      if (!rawText) throw new Error(`OpenRouter ${model} returned empty content.`);
+      return normalizeExtractedPackage(JSON.parse(rawText), totalPages, input.slug);
+    } catch (err: any) {
+      lastError = err;
+      console.warn(`⚠️ OpenRouter PDF extraction failed (${model}): ${err.message}`);
+    }
+  }
+  throw lastError || new Error("OpenRouter PDF extraction failed.");
+}
+
 export const GEMINI_VISION_MODELS = [
   "models/gemini-3.8-flash",
   "models/gemini-3.7-flash",
@@ -212,24 +276,33 @@ export async function extractStoryDataFromPdfPages(
 
   const totalPages = allPageFiles.length;
   const resolvedPdfPath = input.pdfPath || path.resolve(input.pagesDir, "../source-book.pdf");
+  const pageTexts =
+    input.groqApiKey || input.openRouterApiKey
+      ? await extractPdfTextPerPage(resolvedPdfPath, totalPages)
+      : [];
 
   // 1. Primary Engine: Groq AI (text extraction + bilingual structuring)
-  if (input.groqApiKey) {
-    const pageTexts = await extractPdfTextPerPage(resolvedPdfPath, totalPages);
-    if (pageTexts.length > 0) {
-      console.log(`⚡ Using Groq AI (${GROQ_EXTRACTION_MODELS[0]}) as primary story extractor...`);
-      try {
-        return await extractStoryDataWithGroq(input, totalPages, pageTexts, input.groqApiKey);
-      } catch (err: any) {
-        console.warn(`⚠️ Groq primary extraction failed (${err.message}).`);
-      }
-    } else {
-      console.warn(`⚠️ No embedded PDF text found for Groq extraction; falling back to vision if available.`);
+  if (input.groqApiKey && pageTexts.length > 0) {
+    console.log(`⚡ Using Groq AI (${GROQ_EXTRACTION_MODELS[0]}) as primary story extractor...`);
+    try {
+      return await extractStoryDataWithGroq(input, totalPages, pageTexts, input.groqApiKey);
+    } catch (err: any) {
+      console.warn(`⚠️ Groq primary extraction failed (${err.message}).`);
+    }
+  }
+
+  // 2. Secondary Engine: OpenRouter (:free models)
+  if (input.openRouterApiKey && pageTexts.length > 0) {
+    console.log(`🔀 Activating OpenRouter (${OPENROUTER_FREE_MODELS[0]}) story extractor...`);
+    try {
+      return await extractStoryDataWithOpenRouter(input, totalPages, pageTexts, input.openRouterApiKey);
+    } catch (err: any) {
+      console.warn(`⚠️ OpenRouter extraction failed (${err.message}).`);
     }
   }
 
   if (!input.apiKey) {
-    throw new Error(`Groq extraction failed/unavailable and no GEMINI_API_KEY fallback provided for [${input.slug}].`);
+    throw new Error(`Groq/OpenRouter extraction failed/unavailable and no GEMINI_API_KEY fallback provided for [${input.slug}].`);
   }
 
   const maxPages = 36;
