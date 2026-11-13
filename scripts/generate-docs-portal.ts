@@ -2778,7 +2778,7 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="pipeline-stage-card" id="stageCardBuffer">
             <div class="stage-card-top">
               <span class="stage-step-tag">STAGE 1 · CLOUD BUFFER</span>
-              <span class="stage-time-tag">Mon & Thu 07:00</span>
+              <span class="stage-time-tag">Daily 07:00</span>
             </div>
             <div class="stage-name">📦 Asset Pre-render Buffer</div>
             <div class="stage-desc">Pre-renders 1080p landscape & vertical MP4s and caches them to Cloudflare R2 bucket 48h in advance.</div>
@@ -2787,7 +2787,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-channel-pill">⚡ Zero Runner Delay</span>
             </div>
             <div id="stageBufferStatus" class="stage-status-pill queued">⏳ Checking Buffer...</div>
-            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Mon & Thu 07:00 WIB</div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Daily 07:00 WIB</div>
           </div>
 
           <!-- Stage 2: Daily Announcement -->
@@ -3912,7 +3912,7 @@ ${browserSyncScript}
           }
         }
         if (bufferNextEl) {
-          bufferNextEl.textContent = 'Next Cron: Mon & Thu 07:00 WIB (R2 CDN)';
+          bufferNextEl.textContent = 'Next Cron: Daily 07:00 WIB (R2 CDN)';
         }
 
         // Stage 2: Daily Bilingual Announcement
@@ -4300,14 +4300,9 @@ ${browserSyncScript}
       let bufferMs = dayMidnightMs - 3 * 86400000 + 2 * 3600000;
       if (bufferMs <= nowMs) bufferMs = nextDailyWibMs(2, nowMs);
 
-      // Batch ingestion runs Mon & Thu at 07:00 WIB on or before slot.date
+      // Daily ingestion runs at 07:00 WIB on or before slot.date
       let ingestMs = dayMidnightMs + 7 * 3600000;
-      for (let i = 0; i < 7; i++) {
-        const day = new Date(ingestMs + 7 * 3600000).getUTCDay();
-        if (day === 1 || day === 4) break;
-        ingestMs -= 86400000;
-      }
-      if (ingestMs <= nowMs) ingestMs = nextMonThuWibMs(7, nowMs);
+      if (ingestMs <= nowMs) ingestMs = nextDailyWibMs(7, nowMs);
 
       return { ingestMs, bufferMs, publishMs };
     }
@@ -4390,7 +4385,7 @@ ${browserSyncScript}
 
           <!-- Per-Slot Runner Countdowns (Ingest · Pre-render Buffer · Broadcast) -->
           <div class="slot-runner-countdowns">
-            <div class="slot-runner-row" title="Batch Ingestion Runner (Mon & Thu 07:00 WIB)">
+            <div class="slot-runner-row" title="Daily Ingestion Runner (Daily 07:00 WIB)">
               <span class="slot-runner-label">📥 Ingest</span>
               \${ingestChip}
             </div>

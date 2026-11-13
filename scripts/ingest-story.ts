@@ -14,9 +14,10 @@ import { extractStoryDataFromPdfPages, normalizeExtractedPackage } from "./lib/p
 import {
   buildCuratedBookFromBudi,
   getWibDateOffsetIso,
+  normalizeStoryTitle,
   selectUpcomingIngestionQueue,
 } from "./lib/batch-queue";
-import { notifyTelegramFailure } from "./notify-telegram";
+import { notifyTelegramFailure, notifyTelegramIngestSummary } from "./notify-telegram";
 
 export interface CuratedScene {
   index: number;
@@ -629,6 +630,7 @@ async function main() {
   }
 
   const booksToProcess: CuratedBook[] = [];
+  let skippedDuplicateTitles: Array<{ slug: string; title: string }> = [];
 
   if (requestedSlug) {
     let found = curatedPool.find((b) => b.slug === requestedSlug);
@@ -642,7 +644,20 @@ async function main() {
     if (!found) {
       throw new Error(`Requested book slug "${requestedSlug}" not found in config/curated-books.json or config/budi-catalog.json!`);
     }
-    booksToProcess.push(found);
+    if (!force && !r2Slugs.has(found.slug)) {
+      const targetNorm = normalizeStoryTitle(found.title);
+      const dupInR2 = [...curatedPool, ...budiBooks].find(
+        (b: any) => b.slug !== found!.slug && r2Slugs.has(b.slug) && normalizeStoryTitle(b.title) === targetNorm
+      );
+      if (dupInR2) {
+        console.warn(`⏭️ Skipping duplicate title "${found.title}" (${found.slug}) — already ingested as [${dupInR2.slug}]. Use --force to override.`);
+        skippedDuplicateTitles.push({ slug: found.slug, title: found.title });
+      } else {
+        booksToProcess.push(found);
+      }
+    } else {
+      booksToProcess.push(found);
+    }
   } else if (allFlag || autoNext || limitArg) {
     let d1Slots: Array<{ date?: string; bookSlug: string; lang: string; format?: string }> = [];
     try {
@@ -670,7 +685,7 @@ async function main() {
     ];
 
     const count = limitArg ? Math.max(1, parseInt(limitArg, 10)) : 1;
-    const { queue, uncuratedUpcomingSlugs } = selectUpcomingIngestionQueue({
+    const { queue, uncuratedUpcomingSlugs, skippedDuplicateTitles: dupTitles } = selectUpcomingIngestionQueue({
       calendarSlots: mergedCalendar,
       curatedBooks: curatedPool,
       budiBooks,
@@ -680,6 +695,13 @@ async function main() {
       includeAll: allFlag,
       force,
     });
+    skippedDuplicateTitles = dupTitles;
+
+    if (skippedDuplicateTitles.length > 0) {
+      console.warn(
+        `⏭️ Skipped duplicate-title books: ${skippedDuplicateTitles.map((d) => `"${d.title}" (${d.slug})`).join(", ")}`
+      );
+    }
 
     if (uncuratedUpcomingSlugs.length > 0) {
       console.warn(
@@ -690,6 +712,16 @@ async function main() {
     if (queue.length === 0) {
       console.log(`\n🎉 All upcoming scheduled stories and curated pool items are already ingested in Cloudflare R2!`);
       console.log(`   Buffer is 100% full. Exiting cleanly.`);
+      try {
+        await notifyTelegramIngestSummary({
+          succeeded: [],
+          failures: [],
+          skippedDuplicateTitles,
+          durationMin: "0.0",
+          bufferFull: true,
+          dryRun,
+        });
+      } catch {}
       process.exit(0);
     }
 
@@ -735,7 +767,7 @@ Options:
   };
 
   const startTime = Date.now();
-  let successCount = 0;
+  const succeeded: Array<{ slug: string; title: string }> = [];
   const failures: Array<{ slug: string; error: string }> = [];
 
   for (let i = 0; i < booksToProcess.length; i++) {
@@ -743,29 +775,32 @@ Options:
     console.log(`\n▶️  [${i + 1}/${booksToProcess.length}] Processing "${book.title}"...`);
     try {
       await processSingleStory(book, options);
-      successCount++;
+      succeeded.push({ slug: book.slug, title: book.title });
     } catch (err: any) {
       console.error(`\n❌ Error processing [${book.slug}]:`, err.message);
       failures.push({ slug: book.slug, error: err.message });
-      try {
-        await notifyTelegramFailure({
-          bookSlug: book.slug,
-          platform: "Batch Story Ingestion",
-          error: err,
-          dryRun,
-        });
-      } catch {}
     }
   }
 
   const totalMin = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
   console.log(`\n======================================================`);
   console.log(`🎉 BATCH INGESTION RUN FINISHED!`);
-  console.log(`   Processed : ${successCount}/${booksToProcess.length} books succeeded`);
+  console.log(`   Processed : ${succeeded.length}/${booksToProcess.length} books succeeded`);
   console.log(`   Failed    : ${failures.length} books`);
   console.log(`   Duration  : ${totalMin} minutes`);
   console.log(`   Buffer in R2 is now expanded and ready for broadcast.`);
   console.log(`======================================================\n`);
+
+  try {
+    await notifyTelegramIngestSummary({
+      succeeded,
+      failures,
+      skippedDuplicateTitles,
+      durationMin: totalMin,
+      bufferFull: booksToProcess.length === 0 && failures.length === 0,
+      dryRun,
+    });
+  } catch {}
 
   if (failures.length > 0) {
     throw new Error(

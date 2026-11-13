@@ -83,13 +83,13 @@ export default {
         })
       );
     }
-    // 3. Ingestion & Analytics (00:00 UTC = 07:00 WIB Mon & Thu)
-    else if (cron === "0 0 * * 1,4") {
-      // Ingest buffer on Monday & Thursday
+    // 3. Daily Ingestion & Monday Analytics (00:00 UTC = 07:00 WIB Daily)
+    else if (cron === "0 0 * * *" || cron === "0 0 * * 1,4") {
+      // Ingest next upcoming story daily
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-story-ingest.yml", {
           book: "auto",
-          batch_size: "4",
+          batch_size: "1",
           force: false,
           dry_run: false,
           skip_qc: false,
