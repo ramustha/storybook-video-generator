@@ -4,8 +4,8 @@ on:
   # Automated triggers migrated to Cloudflare Worker to avoid GitHub queue delays:
   # https://zayn-storybook-cron-trigger.atkcollection110.workers.dev
   # schedule:
-  #   # 00:00 UTC = 07:00 WIB (Batch Buffer Ingestion on Monday & Thursday)
-  #   - cron: '0 0 * * 1,4'
+  #   # 00:00 UTC = 07:00 WIB (Daily Story Ingestion)
+  #   - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       book:
@@ -158,6 +158,20 @@ jobs:
           npm run docs:portal || true
           npx --yes wrangler pages deploy docs --project-name storybook-catalog --branch main --commit-dirty=true || true
 
+      - name: 🔑 Check OAuth & Social Token Health
+        if: ${{ inputs.dry_run != true }}
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          META_ACCESS_TOKEN: ${{ secrets.PERSONAL_META_ACCESS_TOKEN }}
+          META_APP_ID: ${{ secrets.PERSONAL_META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.PERSONAL_META_APP_SECRET }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.PERSONAL_THREADS_ACCESS_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
+        run: npx tsx scripts/check-token-health.ts || true
+
       - name: 🚨 Notify Telegram on Ingestion Failure
         if: failure()
         env:
@@ -177,7 +191,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Details |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| **Workflow** | Bi-Weekly Batch Ingestion & Plate Cleaning Engine |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Workflow** | Daily Story Ingestion & Plate Cleaning Engine |" >> $GITHUB_STEP_SUMMARY
           echo "| **Trigger** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **Target Book** | ${{ inputs.book || 'Batch Buffer (4 stories)' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| **AI Editorial & Moral Gate** | Google Gemini (Primary) + Groq (Failover) |" >> $GITHUB_STEP_SUMMARY

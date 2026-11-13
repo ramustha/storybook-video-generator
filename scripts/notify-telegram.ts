@@ -511,6 +511,121 @@ export async function notifyTelegramAnalytics(options: AnalyticsReportOptions): 
   return await sendTelegramMessage(config, captionHtml);
 }
 
+export interface IngestSummaryOptions {
+  succeeded: Array<{ slug: string; title: string }>;
+  failures: Array<{ slug: string; error: string }>;
+  skippedDuplicateTitles?: Array<{ slug: string; title: string }>;
+  durationMin: string;
+  bufferFull?: boolean;
+  dryRun?: boolean;
+}
+
+export interface TokenRotationIssue {
+  platform: string;
+  status: "EXPIRED" | "EXPIRING_SOON" | "INVALID";
+  detail: string;
+  actionCommand: string;
+}
+
+/**
+ * Dispatches a daily ingestion status summary (success, buffer-full, or failure) to Telegram.
+ */
+export async function notifyTelegramIngestSummary(options: IngestSummaryOptions): Promise<boolean> {
+  const config = getTelegramConfig();
+  if (!config) {
+    console.warn("⚠️ Cannot send Telegram ingestion summary: Credentials not configured.");
+    return false;
+  }
+
+  const wibTime = formatWibTimestamp(new Date(), "id");
+  const total = options.succeeded.length + options.failures.length;
+  const header = options.bufferFull
+    ? "✅ <b>Zayn Storybook: Daily Ingestion — Buffer Penuh!</b>"
+    : options.failures.length === 0
+    ? "✅ <b>Zayn Storybook: Daily Ingestion Berhasil!</b>"
+    : options.succeeded.length > 0
+    ? "⚠️ <b>Zayn Storybook: Daily Ingestion Parsial</b>"
+    : "🚨 <b>Zayn Storybook: Daily Ingestion Gagal!</b>";
+
+  const lines: string[] = [
+    header,
+    `\n⏰ <b>Waktu:</b> ${wibTime}`,
+    `📚 <b>Hasil:</b> ${options.succeeded.length}/${total} buku berhasil (${options.durationMin} menit)`,
+  ];
+
+  if (options.bufferFull) {
+    lines.push(`🟢 Semua jadwal mendatang & katalog kurasi sudah ter-ingest di R2.`);
+  }
+
+  if (options.succeeded.length > 0) {
+    lines.push(`\n<b>Buku Ter-ingest:</b>`);
+    options.succeeded.slice(0, 8).forEach((b) => {
+      lines.push(`  • ${b.title} (<code>${b.slug}</code>)`);
+    });
+  }
+
+  if (options.skippedDuplicateTitles && options.skippedDuplicateTitles.length > 0) {
+    lines.push(`\n⏭️ <b>Duplikat Judul Dilewati (${options.skippedDuplicateTitles.length}):</b>`);
+    options.skippedDuplicateTitles.slice(0, 5).forEach((d) => {
+      lines.push(`  • ${d.title} (<code>${d.slug}</code>)`);
+    });
+  }
+
+  if (options.failures.length > 0) {
+    lines.push(`\n❌ <b>Gagal (${options.failures.length}):</b>`);
+    options.failures.slice(0, 5).forEach((f) => {
+      const safeErr = f.error.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").slice(0, 140);
+      lines.push(`  • <code>${f.slug}</code>: ${safeErr}`);
+    });
+  }
+
+  const msgHtml = lines.join("\n");
+  if (options.dryRun) {
+    console.log("\n[DRY RUN] TELEGRAM INGEST SUMMARY:\n" + msgHtml + "\n");
+    return true;
+  }
+  return await sendTelegramMessage(config, msgHtml);
+}
+
+/**
+ * Alerts Telegram when any OAuth/platform token is expired, invalid, or expiring soon.
+ */
+export async function notifyTelegramTokenRotation(
+  issues: TokenRotationIssue[],
+  dryRun = false
+): Promise<boolean> {
+  if (issues.length === 0) return true;
+  const config = getTelegramConfig();
+  if (!config) {
+    console.warn("⚠️ Cannot send Telegram token rotation alert: Credentials not configured.");
+    return false;
+  }
+
+  const wibTime = formatWibTimestamp(new Date(), "id");
+  const lines: string[] = [
+    `🔑 <b>Zayn Storybook: Rotasi Token Diperlukan!</b> ⚠️\n`,
+    `⏰ <b>Waktu Cek:</b> ${wibTime}`,
+    `Ditemukan kredensial API yang kedaluwarsa atau akan segera habis masa berlakunya:\n`,
+  ];
+
+  for (const issue of issues) {
+    const icon = issue.status === "EXPIRING_SOON" ? "⏳" : "🚨";
+    const safeDetail = issue.detail.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    lines.push(`${icon} <b>${issue.platform}</b> [${issue.status}]`);
+    lines.push(`   • Info: ${safeDetail}`);
+    lines.push(`   • Aksi: <code>${issue.actionCommand}</code>\n`);
+  }
+
+  lines.push(`💡 Setelah rotasi di lokal, jalankan <code>npx tsx scripts/sync-github-secrets.ts</code> atau update secret di GitHub Actions.`);
+  const msgHtml = lines.join("\n");
+
+  if (dryRun) {
+    console.log("\n[DRY RUN] TELEGRAM TOKEN ROTATION ALERT:\n" + msgHtml + "\n");
+    return true;
+  }
+  return await sendTelegramMessage(config, msgHtml);
+}
+
 // ── CLI Runner ─────────────────────────────────────────────────────────────
 async function main() {
   const args = process.argv.slice(2);

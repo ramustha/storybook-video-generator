@@ -153,8 +153,22 @@ export function buildCuratedBookFromBudi(b: BudiBookCandidate): CuratedBookCandi
 }
 
 /**
+ * Normalizes a story title for duplicate-title detection across slugs/catalogs.
+ */
+export function normalizeStoryTitle(title: string): string {
+  return String(title || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
  * Selects the next standalone books to ingest, prioritizing upcoming calendar dates (>= startDateIso)
  * starting tomorrow before falling back to remaining un-ingested entries in curatedBooks.
+ * Deduplicates by both slug and normalized title (unless force=true).
  */
 export function selectUpcomingIngestionQueue<T extends CuratedBookCandidate>(params: {
   calendarSlots: CalendarSlotCandidate[];
@@ -168,9 +182,26 @@ export function selectUpcomingIngestionQueue<T extends CuratedBookCandidate>(par
 }): {
   queue: T[];
   uncuratedUpcomingSlugs: string[];
+  skippedDuplicateTitles: Array<{ slug: string; title: string }>;
 } {
   const curatedMap = new Map<string, T>(params.curatedBooks.map((b) => [b.slug, b]));
   const budiMap = new Map<string, BudiBookCandidate>(params.budiBooks.map((b) => [b.slug, b]));
+
+  const seenTitles = new Set<string>();
+  if (!params.force) {
+    for (const b of params.curatedBooks) {
+      if (params.r2Slugs.has(b.slug)) {
+        const norm = normalizeStoryTitle(b.title);
+        if (norm) seenTitles.add(norm);
+      }
+    }
+    for (const b of params.budiBooks) {
+      if (params.r2Slugs.has(b.slug)) {
+        const norm = normalizeStoryTitle(b.title);
+        if (norm) seenTitles.add(norm);
+      }
+    }
+  }
 
   const upcomingSlots = params.calendarSlots
     .filter((s) => Boolean(s.date) && s.date! >= params.startDateIso && !parseCompilationTheme(s.bookSlug))
@@ -179,6 +210,17 @@ export function selectUpcomingIngestionQueue<T extends CuratedBookCandidate>(par
   const seen = new Set<string>();
   const orderedCandidates: T[] = [];
   const uncuratedUpcomingSlugs: string[] = [];
+  const skippedDuplicateTitles: Array<{ slug: string; title: string }> = [];
+
+  const pushIfUniqueTitle = (candidate: T) => {
+    const norm = normalizeStoryTitle(candidate.title);
+    if (!params.force && norm && seenTitles.has(norm) && !params.r2Slugs.has(candidate.slug)) {
+      skippedDuplicateTitles.push({ slug: candidate.slug, title: candidate.title });
+      return;
+    }
+    if (norm) seenTitles.add(norm);
+    orderedCandidates.push(candidate);
+  };
 
   for (const slot of upcomingSlots) {
     if (seen.has(slot.bookSlug)) continue;
@@ -186,13 +228,13 @@ export function selectUpcomingIngestionQueue<T extends CuratedBookCandidate>(par
 
     const curated = curatedMap.get(slot.bookSlug);
     if (curated) {
-      orderedCandidates.push(curated);
+      pushIfUniqueTitle(curated);
       continue;
     }
 
     const budi = budiMap.get(slot.bookSlug);
     if (budi) {
-      orderedCandidates.push(buildCuratedBookFromBudi(budi) as T);
+      pushIfUniqueTitle(buildCuratedBookFromBudi(budi) as T);
       continue;
     }
 
@@ -202,7 +244,7 @@ export function selectUpcomingIngestionQueue<T extends CuratedBookCandidate>(par
   for (const book of params.curatedBooks) {
     if (!seen.has(book.slug)) {
       seen.add(book.slug);
-      orderedCandidates.push(book);
+      pushIfUniqueTitle(book);
     }
   }
 
@@ -211,7 +253,7 @@ export function selectUpcomingIngestionQueue<T extends CuratedBookCandidate>(par
     : orderedCandidates.filter((b) => !params.r2Slugs.has(b.slug));
 
   const queue = params.includeAll ? eligible : eligible.slice(0, Math.max(1, params.limit));
-  return { queue, uncuratedUpcomingSlugs };
+  return { queue, uncuratedUpcomingSlugs, skippedDuplicateTitles };
 }
 
 /**
