@@ -155,8 +155,8 @@ Analyze this book page:
   };
 
   const candidateModels = [
-    "models/gemini-3.5-flash",
-    "models/gemini-3.5-flash-lite",
+    "models/gemini-2.5-flash",
+    "models/gemini-flash-latest",
     "models/gemini-flash-lite-latest",
   ];
 

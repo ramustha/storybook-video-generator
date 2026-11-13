@@ -6,8 +6,17 @@ import { pipeline } from "stream/promises";
 import { Readable } from "stream";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { loadR2Config, pushStory } from "./manage-story-storage";
-import { auditAndRefineStoryQuality, QualityAuditResult } from "./audit-story-quality";
+import { auditAndRefineStoryQuality, getGeminiApiKey, QualityAuditResult } from "./audit-story-quality";
 import { db } from "./lib/db";
+import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
+import { extractPdfPages } from "./prepare-plates-hybrid";
+import { extractStoryDataFromPdfPages } from "./lib/pdf-story-extractor";
+import {
+  buildCuratedBookFromBudi,
+  getWibDateOffsetIso,
+  selectUpcomingIngestionQueue,
+} from "./lib/batch-queue";
+import { notifyTelegramFailure } from "./notify-telegram";
 
 export interface CuratedScene {
   index: number;
@@ -98,7 +107,27 @@ async function downloadFile(url: string, destPath: string): Promise<void> {
   // @ts-ignore - Readable.fromWeb is supported in Node 18+
   await pipeline(Readable.fromWeb(response.body), fileStream);
   const stats = await fs.stat(destPath);
+  if (!(await isValidPdfFile(destPath))) {
+    await fs.rm(destPath, { force: true });
+    throw new Error(`Downloaded file from ${url} is not a valid PDF (missing %PDF- header).`);
+  }
   console.log(`✔ Downloaded: ${(stats.size / (1024 * 1024)).toFixed(2)} MB -> ${destPath}`);
+}
+
+async function isValidPdfFile(filePath: string): Promise<boolean> {
+  if (!existsSync(filePath)) return false;
+  try {
+    const fh = await fs.open(filePath, "r");
+    try {
+      const buf = Buffer.alloc(5);
+      await fh.read(buf, 0, 5, 0);
+      return buf.toString("utf8") === "%PDF-";
+    } finally {
+      await fh.close();
+    }
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -178,20 +207,52 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   await fs.mkdir(path.join(storyDir, "exports/en"), { recursive: true });
 
   // 2. Download authentic open-access source PDF
-  if (!existsSync(pdfPath) || options.force) {
+  if (!(await isValidPdfFile(pdfPath)) || options.force) {
     await downloadFile(targetBook.pdfUrl, pdfPath);
   } else {
     console.log(`✔ Source PDF already present at ${pdfPath}`);
   }
 
+  // 2.2 Extract authentic scenes from PDF automatically when metadata has scenes: []
+  let resolvedBook: CuratedBook = targetBook;
+  if (!resolvedBook.scenes || resolvedBook.scenes.length === 0) {
+    console.log(`\n📖 Auto-extracting bilingual story scenes from PDF pages for [${slug}]...`);
+    await extractPdfPages(storyDir);
+    const geminiKey = getGeminiApiKey();
+    if (!geminiKey) {
+      throw new Error(`GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
+    }
+    const extracted = await extractStoryDataFromPdfPages({
+      pagesDir: path.join(rawDir, "pages"),
+      slug,
+      title: resolvedBook.title,
+      originalTitle: resolvedBook.originalTitle,
+      author: resolvedBook.author,
+      illustrator: resolvedBook.illustrator,
+      theme: resolvedBook.theme,
+      apiKey: geminiKey,
+    });
+    resolvedBook = {
+      ...resolvedBook,
+      coverPage: extracted.coverPage,
+      avatarPage: extracted.avatarPage,
+      scenes: extracted.scenes,
+      moral: extracted.moral,
+      thumbnailConfig: extracted.thumbnailConfig,
+    };
+    console.log(`✔ Extracted ${resolvedBook.scenes.length} bilingual scenes from source PDF.`);
+  }
+
   // 2.5. AI Quality Control & Moral Audit Gate
-  let refinedMoral = { ...targetBook.moral };
-  let refinedThumbnailConfig = targetBook.thumbnailConfig ? JSON.parse(JSON.stringify(targetBook.thumbnailConfig)) : undefined;
+  let refinedMoral = { ...resolvedBook.moral };
+  let refinedThumbnailConfig = resolvedBook.thumbnailConfig
+    ? JSON.parse(JSON.stringify(resolvedBook.thumbnailConfig))
+    : undefined;
   let auditReport: QualityAuditResult | null = null;
 
   if (!options.skipQC) {
     try {
-      auditReport = await auditAndRefineStoryQuality(targetBook, { force: options.force, dryRun: options.dryRun });
+      auditReport = await auditAndRefineStoryQuality(resolvedBook, { force: options.force, dryRun: options.dryRun });
       if (auditReport && (auditReport.overallVerdict === "AUTO_REFINED" || auditReport.overallVerdict === "PASS")) {
         refinedMoral = {
           headlineId: auditReport.moralAudit.refinedHeadlineId || refinedMoral.headlineId,
@@ -243,10 +304,10 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   ];
 
   const scenesPayload: any[] = [];
-  const cleanIdIllustrator = targetBook.illustrator.replace(/&/g, "dan");
-  const cleanEnIllustrator = targetBook.illustrator.replace(/&/g, "and");
-  const cleanIdTitle = targetBook.title.replace(/!+$/, "");
-  const cleanEnTitle = targetBook.originalTitle.replace(/!+$/, "");
+  const cleanIdIllustrator = resolvedBook.illustrator.replace(/&/g, "dan");
+  const cleanEnIllustrator = resolvedBook.illustrator.replace(/&/g, "and");
+  const cleanIdTitle = resolvedBook.title.replace(/!+$/, "");
+  const cleanEnTitle = resolvedBook.originalTitle.replace(/!+$/, "");
 
   // Scene 0: Cover
   scenesPayload.push({
@@ -259,11 +320,11 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
       status: "ready",
     },
     audio: {
-      text: `${cleanIdTitle}! Karya ${targetBook.author}, ilustrasi oleh ${cleanIdIllustrator}.`,
+      text: `${cleanIdTitle}! Karya ${resolvedBook.author}, ilustrasi oleh ${cleanIdIllustrator}.`,
       audioPath: "assets/id/cover.mp3",
       wordsPath: "assets/id/cover_words.json",
       en: {
-        text: `${cleanEnTitle}! Written by ${targetBook.author}, illustrated by ${cleanEnIllustrator}.`,
+        text: `${cleanEnTitle}! Written by ${resolvedBook.author}, illustrated by ${cleanEnIllustrator}.`,
         audioPath: "assets/en/cover.mp3",
         wordsPath: "assets/en/cover_words.json",
         durationSeconds: 7.0,
@@ -276,8 +337,8 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   });
 
   // Story Scenes
-  for (let i = 0; i < targetBook.scenes.length; i++) {
-    const s = targetBook.scenes[i];
+  for (let i = 0; i < resolvedBook.scenes.length; i++) {
+    const s = resolvedBook.scenes[i];
     const sceneId = `scene_${String(i + 1).padStart(2, "0")}`;
     const sfxPath = sfxList[i % sfxList.length];
 
@@ -314,7 +375,7 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   }
 
   // Moral Scene
-  const moralIdx = targetBook.scenes.length + 1;
+  const moralIdx = resolvedBook.scenes.length + 1;
   scenesPayload.push({
     index: moralIdx,
     sceneId: "moral",
@@ -345,7 +406,7 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   });
 
   // Outro Scene
-  const outroIdx = targetBook.scenes.length + 2;
+  const outroIdx = resolvedBook.scenes.length + 2;
   scenesPayload.push({
     index: outroIdx,
     sceneId: "outro",
@@ -376,30 +437,30 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     version: "1.0.0",
     id: slug,
     slug,
-    title: targetBook.title,
-    originalTitle: targetBook.originalTitle,
+    title: resolvedBook.title,
+    originalTitle: resolvedBook.originalTitle,
     language: "id-ID",
     coverOrientation: "landscape",
     coverAspectRatio: 1.25,
-    coverPage: targetBook.coverPage || 1,
-    avatarPage: targetBook.avatarPage || 2,
+    coverPage: resolvedBook.coverPage || 1,
+    avatarPage: resolvedBook.avatarPage || 2,
     source: {
-      repository: `Pratham Books (${targetBook.publisher})`,
-      license: targetBook.license,
-      originalAuthor: targetBook.author,
-      originalIllustrator: targetBook.illustrator,
-      sourceUrl: targetBook.sourceUrl,
-      pdfUrl: targetBook.pdfUrl,
+      repository: `${resolvedBook.publisher} (${resolvedBook.license})`,
+      license: resolvedBook.license,
+      originalAuthor: resolvedBook.author,
+      originalIllustrator: resolvedBook.illustrator,
+      sourceUrl: resolvedBook.sourceUrl,
+      pdfUrl: resolvedBook.pdfUrl,
     },
     stylePreset: {
-      artMedium: `${targetBook.illustrator} Authentic Illustration`,
-      artistInfluences: targetBook.illustrator,
+      artMedium: `${resolvedBook.illustrator} Authentic Illustration`,
+      artistInfluences: resolvedBook.illustrator,
       renderingConstraints:
         "authentic 16:9 plates from open-license source, inpaint typography and page numbers, preserve full illustrator expression",
     },
-    thumbnailConfig: refinedThumbnailConfig || targetBook.thumbnailConfig,
-    characterBible: targetBook.characterBible,
-    worldBible: targetBook.worldBible,
+    thumbnailConfig: refinedThumbnailConfig || resolvedBook.thumbnailConfig,
+    characterBible: resolvedBook.characterBible,
+    worldBible: resolvedBook.worldBible,
     scenes: scenesPayload,
     audio: {
       bgMusicPath: "assets/audio/bgm_whimsical_story.m4a",
@@ -411,7 +472,7 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   await fs.writeFile(manifestPath, JSON.stringify(fullManifest, null, 2), "utf-8");
   console.log(`✔ Manifest created at ${manifestPath} (${scenesPayload.length} scenes)`);
 
-  // Sync ingested book to Cloudflare D1
+  // Initial Cloudflare D1 sync (refreshed again after audio/thumbnail paths finalize)
   try {
     await db.saveStory(fullManifest);
     await db.markCuratedBookStatus(slug, "ingested");
@@ -478,6 +539,16 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     console.log(`⏩ Skipping thumbnail render (--skip-thumbnail).`);
   }
 
+  // 7.5 Persist updated manifest (with audio durations + thumbnail paths) to Cloudflare D1
+  try {
+    const finalizedManifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
+    await db.saveStory(finalizedManifest);
+    await db.markCuratedBookStatus(slug, "ingested");
+    console.log(`☁️ Cloudflare D1 updated with final audio/thumbnail manifest for [${slug}].`);
+  } catch (d1Err: any) {
+    console.warn("⚠️ Cloudflare D1 final sync warning:", d1Err.message);
+  }
+
   // 8. Upload Assets & Manifest to Cloudflare R2
   if (!options.skipUpload) {
     console.log(`\n☁️  Uploading Story Package to Cloudflare R2 (zayn-storybook)...`);
@@ -533,68 +604,26 @@ async function main() {
   const r2Slugs = await getExistingR2Stories();
   console.log(`☁️  Cloudflare R2 Catalog : ${r2Slugs.size} existing stories found.`);
 
+  const budiPath = path.resolve("./config/budi-catalog.json");
+  let budiBooks: any[] = [];
+  if (existsSync(budiPath)) {
+    try {
+      const budiCat = JSON.parse(await fs.readFile(budiPath, "utf-8"));
+      budiBooks = budiCat.books || [];
+    } catch (e) {
+      console.warn("BUDI catalog parse warning:", e);
+    }
+  }
+
   const booksToProcess: CuratedBook[] = [];
 
   if (requestedSlug) {
     let found = curatedPool.find((b) => b.slug === requestedSlug);
     if (!found) {
-      const budiPath = path.resolve("./config/budi-catalog.json");
-      if (existsSync(budiPath)) {
-        try {
-          const budiCat = JSON.parse(await fs.readFile(budiPath, "utf-8"));
-          const b = (budiCat.books || []).find((x: any) => x.slug === requestedSlug);
-          if (b) {
-            found = {
-              slug: b.slug,
-              title: b.title,
-              originalTitle: b.title,
-              author: b.author || "Penulis BUDI Kemendikdasmen RI",
-              illustrator: b.illustrator && b.illustrator !== "-" ? b.illustrator : "Ilustrator BUDI Kemendikdasmen RI",
-              publisher: "Badan Pengembangan dan Pembinaan Bahasa, Kemendikdasmen RI",
-              license: "Lisensi Terbuka Kemendikdasmen RI",
-              readingLevel: b.level === "PAUD" ? 1 : 2,
-              sourceUrl: b.budiPageUrl || `https://budi.kemendikdasmen.go.id/baca/digital/${b.slug}`,
-              pdfUrl: b.pdfDownloadUrl || `https://budi.kemendikdasmen.go.id/unduh-file/${b.slug}/digital`,
-              theme: b.theme || "Cerita Anak Indonesia",
-              characterBible: { protagonists: [] },
-              worldBible: { village: "Indonesia", palette: {} },
-              moral: {
-                headlineId: "Budi Pekerti Anak",
-                spokenId: "Cerita ini mengajarkan kebaikan, keberanian, dan budi pekerti yang luhur.",
-                headlineEn: "Character & Courage",
-                spokenEn: "This story teaches kindness, courage, and great character.",
-              },
-              thumbnailConfig: {
-                heroImage: "assets/cover.png",
-                backdropImage: "assets/cover.png",
-                id: {
-                  headlineTop: b.title.toUpperCase(),
-                  headlineBottom: "CERITA NUSANTARA 🌟📖",
-                  hook: "Petualangan Seru Penuh Nilai Kebaikan!",
-                  hookEmoji: "🌟📖💖",
-                  badge: "Kisah Pilihan",
-                  sticker: "Cerita Edukatif! 🌟",
-                  bedtimeTitle: b.title,
-                  bedtimeHook: "Dongeng Pengantar Tidur Penuh Ketenangan",
-                },
-                en: {
-                  headlineTop: b.title.toUpperCase(),
-                  headlineBottom: "INDONESIAN TALE 🌟📖",
-                  hook: "A Heartwarming Journey of Kindness!",
-                  hookEmoji: "🌟📖💖",
-                  badge: "Featured Story",
-                  sticker: "Bedtime Classic! 🌟",
-                  bedtimeTitle: b.title,
-                  bedtimeHook: "A Soothing Bedtime Story for Sweet Dreams",
-                },
-              },
-              scenes: [],
-            };
-            console.log(`   ✔ Resolved "${requestedSlug}" dynamically from BUDI catalog.`);
-          }
-        } catch (e) {
-          console.warn("BUDI catalog parse error:", e);
-        }
+      const b = budiBooks.find((x: any) => x.slug === requestedSlug);
+      if (b) {
+        found = buildCuratedBookFromBudi(b) as CuratedBook;
+        console.log(`   ✔ Resolved "${requestedSlug}" dynamically from BUDI catalog.`);
       }
     }
     if (!found) {
@@ -602,21 +631,56 @@ async function main() {
     }
     booksToProcess.push(found);
   } else if (allFlag || autoNext || limitArg) {
-    const uningested = curatedPool.filter((b) => !r2Slugs.has(b.slug));
-    if (uningested.length === 0) {
-      console.log(`\n🎉 All ${curatedPool.length} books in the curated pool are already ingested in Cloudflare R2!`);
+    let d1Slots: Array<{ date?: string; bookSlug: string; lang: string; format?: string }> = [];
+    try {
+      const remoteCal = await db.getCalendar();
+      d1Slots = remoteCal.map((r) => ({
+        date: r.scheduled_date,
+        bookSlug: r.book_slug,
+        lang: r.lang,
+        format: r.format,
+      }));
+    } catch (err: any) {
+      console.warn(`⚠️ D1 calendar lookup skipped (${err.message}); using local Month-1 schedule.`);
+    }
+
+    // Merge local DAILY_CALENDAR_MONTH_1 (authoritative for Month-1 dates) + future D1 slots
+    const month1Dates = new Set(DAILY_CALENDAR_MONTH_1.map((s) => s.date).filter(Boolean));
+    const mergedCalendar = [
+      ...DAILY_CALENDAR_MONTH_1.map((s) => ({
+        date: s.date,
+        bookSlug: s.bookSlug,
+        lang: s.lang,
+        format: s.format,
+      })),
+      ...d1Slots.filter((s) => s.date && !month1Dates.has(s.date)),
+    ];
+
+    const count = limitArg ? Math.max(1, parseInt(limitArg, 10)) : 1;
+    const { queue, uncuratedUpcomingSlugs } = selectUpcomingIngestionQueue({
+      calendarSlots: mergedCalendar,
+      curatedBooks: curatedPool,
+      budiBooks,
+      r2Slugs,
+      startDateIso: getWibDateOffsetIso(0),
+      limit: count,
+      includeAll: allFlag,
+      force,
+    });
+
+    if (uncuratedUpcomingSlugs.length > 0) {
+      console.warn(
+        `⚠️ Upcoming scheduled books missing from curated/BUDI catalog: ${uncuratedUpcomingSlugs.join(", ")}`
+      );
+    }
+
+    if (queue.length === 0) {
+      console.log(`\n🎉 All upcoming scheduled stories and curated pool items are already ingested in Cloudflare R2!`);
       console.log(`   Buffer is 100% full. Exiting cleanly.`);
       process.exit(0);
     }
 
-    let count = 1;
-    if (allFlag) {
-      count = uningested.length;
-    } else if (limitArg) {
-      count = Math.max(1, parseInt(limitArg, 10));
-    }
-
-    booksToProcess.push(...uningested.slice(0, count));
+    booksToProcess.push(...queue);
   } else {
     console.log(`
 Usage:
@@ -659,6 +723,7 @@ Options:
 
   const startTime = Date.now();
   let successCount = 0;
+  const failures: Array<{ slug: string; error: string }> = [];
 
   for (let i = 0; i < booksToProcess.length; i++) {
     const book = booksToProcess[i];
@@ -668,7 +733,15 @@ Options:
       successCount++;
     } catch (err: any) {
       console.error(`\n❌ Error processing [${book.slug}]:`, err.message);
-      console.error(`   Continuing with remaining books in queue...`);
+      failures.push({ slug: book.slug, error: err.message });
+      try {
+        await notifyTelegramFailure({
+          bookSlug: book.slug,
+          platform: "Batch Story Ingestion",
+          error: err,
+          dryRun,
+        });
+      } catch {}
     }
   }
 
@@ -676,9 +749,16 @@ Options:
   console.log(`\n======================================================`);
   console.log(`🎉 BATCH INGESTION RUN FINISHED!`);
   console.log(`   Processed : ${successCount}/${booksToProcess.length} books succeeded`);
+  console.log(`   Failed    : ${failures.length} books`);
   console.log(`   Duration  : ${totalMin} minutes`);
   console.log(`   Buffer in R2 is now expanded and ready for broadcast.`);
   console.log(`======================================================\n`);
+
+  if (failures.length > 0) {
+    throw new Error(
+      `Batch ingestion failed for ${failures.length} book(s): ${failures.map((f) => `${f.slug} (${f.error})`).join("; ")}`
+    );
+  }
 }
 
 if (process.argv[1]?.includes("ingest-story")) {

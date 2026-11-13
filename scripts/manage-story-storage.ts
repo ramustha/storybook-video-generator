@@ -478,6 +478,116 @@ export async function pullStory(
  * Lists all stories stored in Cloudflare R2 with statistics.
  */
 /**
+ * Checks whether story.json exists in Cloudflare R2 for a story slug.
+ */
+export async function hasStoryManifestInR2(bookSlug: string): Promise<boolean> {
+  try {
+    const r2 = await loadR2Config();
+    const s3 = getS3Client(r2);
+    await s3.send(
+      new HeadObjectCommand({
+        Bucket: r2.bucketName,
+        Key: `stories/${bookSlug}/story.json`,
+      })
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Pushes rendered compilation MP4s & metadata from exports/compilations to R2 under stories/${compSlug}/exports/${lang}/.
+ */
+export async function pushCompilationBuffer(
+  compSlug: string,
+  lang: "id" | "en"
+): Promise<number> {
+  const r2 = await loadR2Config();
+  const s3 = getS3Client(r2);
+  const compDir = path.resolve("./exports/compilations");
+  if (!existsSync(compDir)) {
+    throw new Error(`Compilations directory not found at ${compDir}`);
+  }
+
+  const expectedPrefix = `${compSlug}-${lang}`;
+  const files = (await fs.readdir(compDir)).filter(
+    (name) => name.startsWith(expectedPrefix) && (name.endsWith(".mp4") || name.endsWith("-metadata.txt"))
+  );
+
+  if (files.length === 0) {
+    throw new Error(`No compilation artifacts found in ${compDir} matching ${expectedPrefix}*`);
+  }
+
+  for (const file of files) {
+    const localPath = path.join(compDir, file);
+    const stat = await fs.stat(localPath);
+    const r2Key = `stories/${compSlug}/exports/${lang}/${file}`;
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: r2.bucketName,
+        Key: r2Key,
+        Body: createReadStream(localPath),
+        ContentType: getContentType(localPath),
+        ContentLength: stat.size,
+      })
+    );
+    console.log(`   ✔ Uploaded compilation buffer: ${r2Key} (${formatBytes(stat.size)})`);
+  }
+
+  return files.length;
+}
+
+/**
+ * Pulls rendered compilation MP4s & metadata from R2 into ./exports/compilations.
+ */
+export async function pullCompilationBuffer(
+  compSlug: string,
+  lang: "id" | "en"
+): Promise<boolean> {
+  try {
+    const r2 = await loadR2Config();
+    const s3 = getS3Client(r2);
+    const prefix = `stories/${compSlug}/exports/${lang}/`;
+    const res = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: r2.bucketName,
+        Prefix: prefix,
+      })
+    );
+    const items = (res.Contents || []).filter((obj) => obj.Key && !obj.Key.endsWith("/"));
+    if (items.length === 0) return false;
+
+    const compDir = path.resolve("./exports/compilations");
+    await fs.mkdir(compDir, { recursive: true });
+
+    for (const obj of items) {
+      const filename = path.basename(obj.Key!);
+      const localPath = path.join(compDir, filename);
+      if (existsSync(localPath)) {
+        const stat = await fs.stat(localPath);
+        if (stat.size === obj.Size) continue;
+      }
+      const getRes = await s3.send(
+        new GetObjectCommand({
+          Bucket: r2.bucketName,
+          Key: obj.Key!,
+        })
+      );
+      if (getRes.Body) {
+        const out = createWriteStream(localPath);
+        // @ts-ignore - stream.pipeline works cleanly with AWS SDK v3 Body stream
+        await pipeline(getRes.Body as any, out);
+        console.log(`   ✔ Pulled compilation buffer: ${localPath}`);
+      }
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Checks whether rendered MP4 videos exist in Cloudflare R2 for a given story.
  */
 export async function checkStoryBufferedVideos(bookSlug: string): Promise<{

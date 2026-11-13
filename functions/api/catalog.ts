@@ -275,7 +275,8 @@ export async function onRequest(context: { env: Env; request: Request }) {
               ? ["YouTube (16:9)", "Facebook Watch (16:9)"]
               : ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"];
 
-          const hasAssets = hasAsset || bookMap.has(bookSlug);
+          const bookRecord = bookMap.get(bookSlug);
+          const hasAssets = hasAsset || Boolean(bookRecord && Number(bookRecord.total_scenes || 0) > 0);
           const isBuffered = Boolean(c.is_buffered);
 
           return {
