@@ -1,0 +1,39 @@
+.github/workflows/daily-story-ingest.yml
+  89b8b12d6e53291f 7-8,161-174,194
+cloudflare/daily-broadcast-cron/wrangler.toml
+  89b8b12d6e53291f 10,13
+docs/index.html
+  89b8b12d6e53291f 2275,2284,3680,4068,4070,4153
+scripts/generate-docs-portal.ts
+  89b8b12d6e53291f 2781,2790,3915,4303,4305,4388
+scripts/lib/batch-queue.ts
+  89b8b12d6e53291f 156-167,171,185,190-204,213-223,231,237,247,256
+scripts/check-token-health.ts
+  89b8b12d6e53291f 1-178
+scripts/notify-telegram.ts
+  89b8b12d6e53291f 514-628
+scripts/ingest-story.ts
+  89b8b12d6e53291f 17,20,633,647-660,688,698,700-704,715-724,770,778,788,794-803
+cloudflare/daily-broadcast-cron/src/index.js
+  89b8b12d6e53291f 86-88,92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "d2c707137b0a4f5b98da0bdfbdff779007bb7da3",
+  "prompts": {
+    "89b8b12d6e53291f": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "804f6537-0957-426e-b395-2f565b7c4d07",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 423,
+      "total_deletions": 49,
+      "accepted_lines": 423,
+      "overriden_lines": 0
+    }
+  }
+}
