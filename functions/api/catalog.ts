@@ -246,7 +246,7 @@ export async function onRequest(context: { env: Env; request: Request }) {
             (r) => r.storySlug === bookSlug && (r.language === slotLang || (!r.language && slotLang === "id"))
           );
 
-          let isCompleted = Boolean(c.is_completed) || isSlotPublished;
+          let isCompleted = Boolean(c.is_completed) || (dateStr <= todayIso && isSlotPublished);
           let status: "completed" | "today" | "upcoming" = "upcoming";
           if (dateStr < todayIso) {
             status = "completed";

@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { existsSync, createWriteStream } from "fs";
+import { existsSync, createWriteStream, readdirSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { pipeline } from "stream/promises";
@@ -10,7 +10,7 @@ import { auditAndRefineStoryQuality, getGeminiApiKey, QualityAuditResult } from 
 import { db } from "./lib/db";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { extractPdfPages } from "./prepare-plates-hybrid";
-import { extractStoryDataFromPdfPages } from "./lib/pdf-story-extractor";
+import { extractStoryDataFromPdfPages, normalizeExtractedPackage } from "./lib/pdf-story-extractor";
 import {
   buildCuratedBookFromBudi,
   getWibDateOffsetIso,
@@ -218,20 +218,28 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   if (!resolvedBook.scenes || resolvedBook.scenes.length === 0) {
     console.log(`\n📖 Auto-extracting bilingual story scenes from PDF pages for [${slug}]...`);
     await extractPdfPages(storyDir);
-    const geminiKey = getGeminiApiKey();
-    if (!geminiKey) {
-      throw new Error(`GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
+    const localExtractPath = path.join(rawDir, "extracted.json");
+    let extracted: Awaited<ReturnType<typeof extractStoryDataFromPdfPages>>;
+    if (existsSync(localExtractPath)) {
+      console.log(`✔ Using locally authored extraction: ${localExtractPath}`);
+      const pageCount = readdirSync(path.join(rawDir, "pages")).filter((f) => f.endsWith(".png")).length;
+      extracted = normalizeExtractedPackage(JSON.parse(await fs.readFile(localExtractPath, "utf-8")), pageCount, slug);
+    } else {
+      const geminiKey = getGeminiApiKey();
+      if (!geminiKey) {
+        throw new Error(`GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
+      }
+      extracted = await extractStoryDataFromPdfPages({
+        pagesDir: path.join(rawDir, "pages"),
+        slug,
+        title: resolvedBook.title,
+        originalTitle: resolvedBook.originalTitle,
+        author: resolvedBook.author,
+        illustrator: resolvedBook.illustrator,
+        theme: resolvedBook.theme,
+        apiKey: geminiKey,
+      });
     }
-    const extracted = await extractStoryDataFromPdfPages({
-      pagesDir: path.join(rawDir, "pages"),
-      slug,
-      title: resolvedBook.title,
-      originalTitle: resolvedBook.originalTitle,
-      author: resolvedBook.author,
-      illustrator: resolvedBook.illustrator,
-      theme: resolvedBook.theme,
-      apiKey: geminiKey,
-    });
     resolvedBook = {
       ...resolvedBook,
       coverPage: extracted.coverPage,
@@ -503,7 +511,7 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
   // 5. Plate Extraction & Text Inpainting via Hybrid Engine (Gemini Vision OCR + Smart Centering + Apple Fallback)
   if (!options.skipPlates) {
     console.log(`\n🎨 Executing Hybrid Plate Inpainting & Smart Re-Centering Engine...`);
-    execSync(`npx tsx scripts/prepare-plates-hybrid.ts --book ${slug}`, {
+    execSync(`npx tsx scripts/prepare-plates-hybrid.ts --book ${slug} --engine ${process.env.PLATE_ENGINE || "auto"}`, {
       stdio: "inherit",
     });
 

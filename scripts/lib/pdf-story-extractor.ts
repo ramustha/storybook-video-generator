@@ -59,9 +59,10 @@ export interface ExtractStoryInput {
 }
 
 export const GEMINI_VISION_MODELS = [
-  "models/gemini-2.5-flash",
+  "models/gemini-3.8-flash",
+  "models/gemini-3.7-flash",
+  "models/gemini-3.5-flash",
   "models/gemini-flash-latest",
-  "models/gemini-flash-lite-latest",
 ] as const;
 
 /**
@@ -253,41 +254,7 @@ export async function extractStoryDataFromPdfPages(
           throw new Error(`Model ${model} returned empty candidate content.`);
         }
 
-        const parsed = JSON.parse(rawText);
-        const clampPage = (p: number, fallback: number) =>
-          Number.isFinite(p) ? Math.max(1, Math.min(totalPages, Math.round(p))) : fallback;
-
-        const validScenes: ExtractedStoryScene[] = (parsed.scenes || [])
-          .filter((s: any) => s && (s.id || s.en))
-          .map((s: any, idx: number) => ({
-            index: idx + 1,
-            type: "story" as const,
-            pageNumber: clampPage(Number(s.pageNumber), Math.min(totalPages, idx + 2)),
-            id: String(s.id || s.en).trim(),
-            en: String(s.en || s.id).trim(),
-          }));
-
-        if (validScenes.length < 2) {
-          throw new Error(
-            `Extracted only ${validScenes.length} scenes from ${totalPages} pages for [${input.slug}].`
-          );
-        }
-
-        const safeHero = validScenes.length > 0 ? "assets/scene_01.png" : "assets/cover.png";
-        const safeBackdrop = validScenes.length > 1 ? "assets/scene_02.png" : "assets/cover.png";
-
-        return {
-          coverPage: clampPage(Number(parsed.coverPage), 1),
-          avatarPage: clampPage(Number(parsed.avatarPage), validScenes[0]?.pageNumber || 2),
-          scenes: validScenes,
-          moral: parsed.moral,
-          thumbnailConfig: {
-            heroImage: safeHero,
-            backdropImage: safeBackdrop,
-            id: parsed.thumbnailConfig.id,
-            en: parsed.thumbnailConfig.en,
-          },
-        };
+        return normalizeExtractedPackage(JSON.parse(rawText), totalPages, input.slug);
       } catch (err: any) {
         lastError = err;
         console.warn(`⚠️ PDF extraction attempt failed (${model}): ${err.message}`);
@@ -296,4 +263,41 @@ export async function extractStoryDataFromPdfPages(
   }
 
   throw lastError || new Error(`Failed to extract scenes from PDF pages for [${input.slug}]`);
+}
+
+/** Normalizes raw model/agent JSON (coverPage, avatarPage, scenes, moral, thumbnailConfig) into a package. */
+export function normalizeExtractedPackage(
+  parsed: any,
+  totalPages: number,
+  slug: string
+): ExtractedStoryPackage {
+  const clampPage = (p: number, fallback: number) =>
+    Number.isFinite(p) ? Math.max(1, Math.min(totalPages, Math.round(p))) : fallback;
+
+  const validScenes: ExtractedStoryScene[] = (parsed.scenes || [])
+    .filter((s: any) => s && (s.id || s.en))
+    .map((s: any, idx: number) => ({
+      index: idx + 1,
+      type: "story" as const,
+      pageNumber: clampPage(Number(s.pageNumber), Math.min(totalPages, idx + 2)),
+      id: String(s.id || s.en).trim(),
+      en: String(s.en || s.id).trim(),
+    }));
+
+  if (validScenes.length < 2) {
+    throw new Error(`Extracted only ${validScenes.length} scenes from ${totalPages} pages for [${slug}].`);
+  }
+
+  return {
+    coverPage: clampPage(Number(parsed.coverPage), 1),
+    avatarPage: clampPage(Number(parsed.avatarPage), validScenes[0].pageNumber),
+    scenes: validScenes,
+    moral: parsed.moral,
+    thumbnailConfig: {
+      heroImage: "assets/scene_01.png",
+      backdropImage: "assets/scene_02.png",
+      id: parsed.thumbnailConfig.id,
+      en: parsed.thumbnailConfig.en,
+    },
+  };
 }
