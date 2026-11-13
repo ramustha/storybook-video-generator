@@ -1,0 +1,23 @@
+scripts/publish-announcement.ts
+  4493a34312c5a87d 325-329,331-342,358-359,361,380-381,383,403-404,489-494,509-522,546-547,550-556,559-562,607,656-660,662,677
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "ffe8cdd564c9a6e6078ea01143fc4b7bf5db8562",
+  "prompts": {
+    "4493a34312c5a87d": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "ebbf7a38-706d-4318-83ba-359808bdb4f0",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 66,
+      "total_deletions": 26,
+      "accepted_lines": 66,
+      "overriden_lines": 0
+    }
+  }
+}
