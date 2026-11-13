@@ -6,7 +6,7 @@ import { pipeline } from "stream/promises";
 import { Readable } from "stream";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { loadR2Config, pushStory } from "./manage-story-storage";
-import { auditAndRefineStoryQuality, getGeminiApiKey, QualityAuditResult } from "./audit-story-quality";
+import { auditAndRefineStoryQuality, getGeminiApiKey, getGroqApiKey, QualityAuditResult } from "./audit-story-quality";
 import { db } from "./lib/db";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { extractPdfPages } from "./prepare-plates-hybrid";
@@ -89,7 +89,7 @@ async function downloadFile(url: string, destPath: string): Promise<void> {
   console.log(`⬇️  Downloading source PDF from: ${url}`);
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "ZaynStorybookDailyIngestion/1.0 (+https://github.com/ramustha/storybook-video-generator)",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
     },
     redirect: "follow",
   });
@@ -225,19 +225,22 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
       const pageCount = readdirSync(path.join(rawDir, "pages")).filter((f) => f.endsWith(".png")).length;
       extracted = normalizeExtractedPackage(JSON.parse(await fs.readFile(localExtractPath, "utf-8")), pageCount, slug);
     } else {
+      const groqKey = getGroqApiKey();
       const geminiKey = getGeminiApiKey();
-      if (!geminiKey) {
-        throw new Error(`GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
+      if (!groqKey && !geminiKey) {
+        throw new Error(`GROQ_API_KEY or GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
       }
       extracted = await extractStoryDataFromPdfPages({
         pagesDir: path.join(rawDir, "pages"),
+        pdfPath,
         slug,
         title: resolvedBook.title,
         originalTitle: resolvedBook.originalTitle,
         author: resolvedBook.author,
         illustrator: resolvedBook.illustrator,
         theme: resolvedBook.theme,
-        apiKey: geminiKey,
+        groqApiKey: groqKey || undefined,
+        apiKey: geminiKey || undefined,
       });
     }
     resolvedBook = {

@@ -444,25 +444,25 @@ export async function auditAndRefineStoryQuality(
 
   let auditResult: QualityAuditResult | null = null;
 
-  // 1. Try Google Gemini (if auto or gemini requested)
-  if (geminiKey && (preferredEngine === "auto" || preferredEngine === "gemini")) {
-    console.log(`\n🤖 Calling Primary Engine: Google AI (Gemini Flash Latest)...`);
-    console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
-    try {
-      auditResult = await auditWithGemini(targetBook, geminiKey);
-    } catch (err: any) {
-      console.warn(`⚠️ Google AI failed (${err.message}).`);
-    }
-  }
-
-  // 2. Failover to Groq Cloud (if auto failover or groq explicitly requested)
-  if (!auditResult && groqKey && (preferredEngine === "auto" || preferredEngine === "groq")) {
-    console.log(`\n⚡ Activating Failover Engine: Groq Cloud (GPT OSS 120B)...`);
+  // 1. Try Groq Cloud first (if auto or groq requested)
+  if (groqKey && (preferredEngine === "auto" || preferredEngine === "groq")) {
+    console.log(`\n⚡ Calling Primary Engine: Groq Cloud (GPT OSS 120B)...`);
     console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
     try {
       auditResult = await auditWithGroq(targetBook, groqKey);
     } catch (err: any) {
-      console.warn(`⚠️ Groq Cloud failover failed (${err.message}).`);
+      console.warn(`⚠️ Groq Cloud failed (${err.message}).`);
+    }
+  }
+
+  // 2. Failover to Google Gemini (if auto failover or gemini explicitly requested)
+  if (!auditResult && geminiKey && (preferredEngine === "auto" || preferredEngine === "gemini")) {
+    console.log(`\n🤖 Activating Failover Engine: Google AI (Gemini Flash)...`);
+    console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
+    try {
+      auditResult = await auditWithGemini(targetBook, geminiKey);
+    } catch (err: any) {
+      console.warn(`⚠️ Google AI failover failed (${err.message}).`);
     }
   }
 
