@@ -130,6 +130,116 @@ export function getGroqApiKey(): string | null {
   return null;
 }
 
+/**
+ * Resolves OpenRouter API key from environment or local .env file.
+ */
+export function getOpenRouterApiKey(): string | null {
+  if (process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY.trim() !== "") {
+    return process.env.OPENROUTER_API_KEY.trim();
+  }
+
+  const envPath = path.resolve("./.env");
+  if (existsSync(envPath)) {
+    try {
+      const content = readFileSync(envPath, "utf-8");
+      const match = content.match(/^OPENROUTER_API_KEY\s*=\s*["']?([^"'\r\n]+)["']?/m);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    } catch {
+      // Ignore read errors
+    }
+  }
+
+  return null;
+}
+
+const OPENROUTER_FREE_MODELS = [
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "nvidia/nemotron-3.5-super-vl:free",
+] as const;
+
+async function auditWithOpenRouter(targetBook: CuratedBook, apiKey: string): Promise<QualityAuditResult> {
+  const userPrompt = [
+    `Story Title (ID): ${targetBook.title}`,
+    `Original Title (EN): ${targetBook.originalTitle}`,
+    `Author: ${targetBook.author}`,
+    `Existing Moral (ID): ${targetBook.moral.spokenId}`,
+    `Existing Moral (EN): ${targetBook.moral.spokenEn}`,
+    ``,
+    `Scenes Summary:`,
+    ...targetBook.scenes.map((s, idx) => `[Scene ${idx + 1} / Page ${s.pageNumber}] ID: "${s.id}" | EN: "${s.en}"`),
+    ``,
+    `Return ONLY valid JSON with keys: safetyAudit ({isKidSafe, coppaCompliant, safetyScore, flaggedConcerns}), moralAudit ({coreValues, moralClarityScore, isConstructive, isAgeAppropriate, refinedHeadlineId, refinedSpokenId, refinedHeadlineEn, refinedSpokenEn, educationalNotes}), thumbnailRefinement ({suggestedBadgeTextId, suggestedBadgeTextEn, suggestedHookSubtitleId, suggestedHookSubtitleEn}), overallVerdict ("APPROVED"|"NEEDS_REVISION"|"REJECTED"), reasoning.`,
+  ].join("\n");
+
+  let lastErr: Error | null = null;
+  for (const model of OPENROUTER_FREE_MODELS) {
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: SYSTEM_INSTRUCTION },
+            { role: "user", content: userPrompt },
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.2,
+        }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenRouter ${model} HTTP ${response.status}: ${errorText.slice(0, 250)}`);
+      }
+      const data: any = await response.json();
+      const rawText = data?.choices?.[0]?.message?.content;
+      if (!rawText) throw new Error(`Empty response from OpenRouter ${model}`);
+      const cleaned = rawText.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
+      const parsed = JSON.parse(cleaned);
+      const safety = parsed.safetyAudit || {};
+      const moral = parsed.moralAudit || {};
+      return {
+        bookSlug: targetBook.slug,
+        evaluatedAt: new Date().toISOString(),
+        model: `openrouter/${model}`,
+        safetyAudit: {
+          isKidSafe: safety.isKidSafe ?? true,
+          coppaCompliant: safety.coppaCompliant ?? true,
+          safetyScore: safety.safetyScore ?? 100,
+          flaggedConcerns: Array.isArray(safety.flaggedConcerns) ? safety.flaggedConcerns : [],
+        },
+        moralAudit: {
+          coreValues: Array.isArray(moral.coreValues) ? moral.coreValues : [],
+          moralClarityScore: moral.moralClarityScore ?? 90,
+          isConstructive: moral.isConstructive ?? true,
+          isAgeAppropriate: moral.isAgeAppropriate ?? true,
+          originalHeadlineId: targetBook.moral.headlineId,
+          originalSpokenId: targetBook.moral.spokenId,
+          originalHeadlineEn: targetBook.moral.headlineEn,
+          originalSpokenEn: targetBook.moral.spokenEn,
+          refinedHeadlineId: moral.refinedHeadlineId || targetBook.moral.headlineId,
+          refinedSpokenId: moral.refinedSpokenId || targetBook.moral.spokenId,
+          refinedHeadlineEn: moral.refinedHeadlineEn || targetBook.moral.headlineEn,
+          refinedSpokenEn: moral.refinedSpokenEn || targetBook.moral.spokenEn,
+          educationalNotes: moral.educationalNotes || "",
+        },
+        thumbnailRefinement: parsed.thumbnailRefinement,
+        overallVerdict: parsed.overallVerdict || "APPROVED",
+        reasoning: parsed.reasoning || `Audited via OpenRouter (${model}).`,
+      };
+    } catch (err: any) {
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error("All OpenRouter free models failed.");
+}
+
 const SYSTEM_INSTRUCTION = `You are the Lead Children's Literature Editor & Safety Gatekeeper for Zayn Storybook, a globally acclaimed bilingual animated storybook channel for toddlers and young children aged 2-8 (YouTube Kids, COPPA compliant).
 Your job is to audit incoming storybook manuscripts:
 1. Safety Audit: Guarantee ZERO violence, harsh language, trauma, cruel bullying, or scary elements. Verify COPPA & YouTube Kids safety.
@@ -436,10 +546,11 @@ async function auditWithGroq(targetBook: CuratedBook, apiKey: string): Promise<Q
  */
 export async function auditAndRefineStoryQuality(
   targetBook: CuratedBook,
-  options: { force?: boolean; dryRun?: boolean; engine?: "auto" | "gemini" | "groq" } = {}
+  options: { force?: boolean; dryRun?: boolean; engine?: "auto" | "gemini" | "groq" | "openrouter" } = {}
 ): Promise<QualityAuditResult> {
   const geminiKey = getGeminiApiKey();
   const groqKey = getGroqApiKey();
+  const openRouterKey = getOpenRouterApiKey();
   const preferredEngine = options.engine || "auto";
 
   let auditResult: QualityAuditResult | null = null;
@@ -455,7 +566,18 @@ export async function auditAndRefineStoryQuality(
     }
   }
 
-  // 2. Failover to Google Gemini (if auto failover or gemini explicitly requested)
+  // 2. Failover to OpenRouter Free Models (if auto or openrouter requested)
+  if (!auditResult && openRouterKey && (preferredEngine === "auto" || preferredEngine === "openrouter")) {
+    console.log(`\n🔀 Activating Failover Engine: OpenRouter (:free)...`);
+    console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);
+    try {
+      auditResult = await auditWithOpenRouter(targetBook, openRouterKey);
+    } catch (err: any) {
+      console.warn(`⚠️ OpenRouter failover failed (${err.message}).`);
+    }
+  }
+
+  // 3. Failover to Google Gemini (if auto failover or gemini explicitly requested)
   if (!auditResult && geminiKey && (preferredEngine === "auto" || preferredEngine === "gemini")) {
     console.log(`\n🤖 Activating Failover Engine: Google AI (Gemini Flash)...`);
     console.log(`   Target Story: "${targetBook.title}" (${targetBook.slug})`);

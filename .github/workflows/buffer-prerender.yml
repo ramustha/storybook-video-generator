@@ -87,6 +87,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.PERSONAL_GEMINI_API_KEY || secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.PERSONAL_GROQ_API_KEY || secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.PERSONAL_R2_ACCOUNT_ID || 'e5c0394bca4b8239f091b55cb3e9d3e6' }}

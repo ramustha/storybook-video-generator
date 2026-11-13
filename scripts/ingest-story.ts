@@ -6,7 +6,7 @@ import { pipeline } from "stream/promises";
 import { Readable } from "stream";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { loadR2Config, pushStory } from "./manage-story-storage";
-import { auditAndRefineStoryQuality, getGeminiApiKey, getGroqApiKey, QualityAuditResult } from "./audit-story-quality";
+import { auditAndRefineStoryQuality, getGeminiApiKey, getGroqApiKey, getOpenRouterApiKey, QualityAuditResult } from "./audit-story-quality";
 import { db } from "./lib/db";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { extractPdfPages } from "./prepare-plates-hybrid";
@@ -226,9 +226,10 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
       extracted = normalizeExtractedPackage(JSON.parse(await fs.readFile(localExtractPath, "utf-8")), pageCount, slug);
     } else {
       const groqKey = getGroqApiKey();
+      const openRouterKey = getOpenRouterApiKey();
       const geminiKey = getGeminiApiKey();
-      if (!groqKey && !geminiKey) {
-        throw new Error(`GROQ_API_KEY or GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
+      if (!groqKey && !openRouterKey && !geminiKey) {
+        throw new Error(`GROQ_API_KEY, OPENROUTER_API_KEY, or GEMINI_API_KEY is required to extract scenes automatically for [${slug}].`);
       }
       extracted = await extractStoryDataFromPdfPages({
         pagesDir: path.join(rawDir, "pages"),
@@ -240,6 +241,7 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
         illustrator: resolvedBook.illustrator,
         theme: resolvedBook.theme,
         groqApiKey: groqKey || undefined,
+        openRouterApiKey: openRouterKey || undefined,
         apiKey: geminiKey || undefined,
       });
     }
