@@ -526,7 +526,7 @@
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
+    "isBuffered": true,
     "hasAssets": true
   },
   {
@@ -549,7 +549,7 @@
     "status": "upcoming",
     "isCompleted": false,
     "hasPublishedAsset": false,
-    "isBuffered": false,
+    "isBuffered": true,
     "hasAssets": true
   },
   {

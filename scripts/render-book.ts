@@ -5,6 +5,7 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
 import { db } from "./lib/db";
+import { getOptimalRenderOptions } from "./lib/render-options";
 import { renderEduMotionVideo, resolveFfmpegBinaries } from "../src/motion/render-motion-stage";
 
 async function main() {
@@ -226,8 +227,9 @@ async function main() {
       const outputFileName = `${baseName}-${format === "vertical" ? "9x16" : "16x9"}${is4K ? "-4k" : ""}.mp4`;
       const outputLocation = path.join(exportLangDir, outputFileName);
 
+      const renderOpts = getOptimalRenderOptions();
       console.log(
-        `🚀 Rendering ${lang.toUpperCase()} ${format.toUpperCase()} video (${width}x${height}, ${composition.durationInFrames} frames @ ${composition.fps}fps)...`
+        `🚀 Rendering ${lang.toUpperCase()} ${format.toUpperCase()} video (${width}x${height}, ${composition.durationInFrames} frames @ ${composition.fps}fps, concurrency=${renderOpts.concurrency}, gl=${renderOpts.chromiumOptions.gl}, img=${renderOpts.imageFormat})...`
       );
       const startTime = Date.now();
 
@@ -242,13 +244,7 @@ async function main() {
         codec: "h264",
         outputLocation,
         inputProps,
-        concurrency: 2,
-        x264Preset: "veryfast",
-        crf: 20,
-        pixelFormat: "yuv420p",
-        chromiumOptions: {
-          enableMultiProcessOnLinux: true,
-        },
+        ...renderOpts,
         onProgress: ({ renderedFrames, progress }) => {
           const percent = Math.floor(progress * 100);
           if (percent >= lastLoggedPercent + 10 || percent === 100) {

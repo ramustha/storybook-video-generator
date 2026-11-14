@@ -125,8 +125,12 @@ async function main() {
 
   console.log(`📋 Found ${slotsToBuffer.length} broadcast slots in the buffer window:\n`);
   const failures: Array<{ bookSlug: string; lang: string; date?: string; error: string }> = [];
+  const handledSlotKeys = new Set<string>();
 
   for (const slot of slotsToBuffer) {
+    const slotKey = `${slot.date}::${slot.timeSlot}::${slot.lang}`;
+    if (handledSlotKeys.has(slotKey)) continue;
+
     console.log(`------------------------------------------------------------------`);
     console.log(`📖 Story     : ${slot.bookSlug} [${slot.lang.toUpperCase()}]`);
     console.log(`📅 Scheduled : ${slot.dayName}, ${slot.date} @ ${slot.timeSlot} (${slot.slotType})`);
@@ -150,7 +154,24 @@ async function main() {
       continue;
     }
 
-    console.log(`   🟡 [BUFFER MISS] Video not yet buffered in R2 for [${slot.lang.toUpperCase()} / ${req.renderFormatArg}].`);
+    // Batch sibling language slot for the same non-compilation story so pull/bundle/push run once.
+    const batchedSlots: ScheduledSlot[] = [slot];
+    if (!compTheme) {
+      for (const peer of slotsToBuffer) {
+        const peerKey = `${peer.date}::${peer.timeSlot}::${peer.lang}`;
+        if (peerKey === slotKey || handledSlotKeys.has(peerKey) || peer.bookSlug !== slot.bookSlug) continue;
+        const peerReq = getRequiredBufferOrientations(peer.format, peer.lang);
+        const peerReady = hasRequiredBufferVideos(bufferStatus, peer.format, peer.lang);
+        if ((!peerReady || force) && peerReq.renderFormatArg === req.renderFormatArg && peer.lang !== slot.lang) {
+          batchedSlots.push(peer);
+          handledSlotKeys.add(peerKey);
+        }
+      }
+    }
+    const langArg = batchedSlots.length > 1 ? "all" : slot.lang;
+    const langLabel = batchedSlots.map((s) => s.lang.toUpperCase()).join("+");
+
+    console.log(`   🟡 [BUFFER MISS] Video not yet buffered in R2 for [${langLabel} / ${req.renderFormatArg}].`);
 
     if (dryRun) {
       if (compTheme) {
@@ -164,7 +185,7 @@ async function main() {
           console.log(`     0. npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`);
         }
         console.log(`     1. npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`);
-        console.log(`     2. npx tsx scripts/render-book.ts --book "${slot.bookSlug}" --lang ${slot.lang} --format ${req.renderFormatArg} --resolution 1080p`);
+        console.log(`     2. npx tsx scripts/render-book.ts --book "${slot.bookSlug}" --lang ${langArg} --format ${req.renderFormatArg} --resolution 1080p`);
         console.log(`     3. npx tsx scripts/manage-story-storage.ts push ${slot.bookSlug} --include-videos`);
       }
       continue;
@@ -190,10 +211,10 @@ async function main() {
         console.log(`   ⬇️ Pulling story assets from Cloudflare R2...`);
         execSync(`npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`, { stdio: "inherit" });
 
-        // Step 2: Render required orientation(s)
-        console.log(`   🎬 Rendering Remotion videos (${req.renderFormatArg}) for [${slot.lang.toUpperCase()}]...`);
+        // Step 2: Render required orientation(s) in a single bundle pass
+        console.log(`   🎬 Rendering Remotion videos (${req.renderFormatArg}) for [${langLabel}]...`);
         execSync(
-          `npx tsx scripts/render-book.ts --book "${slot.bookSlug}" --lang "${slot.lang}" --format "${req.renderFormatArg}" --resolution 1080p`,
+          `npx tsx scripts/render-book.ts --book "${slot.bookSlug}" --lang "${langArg}" --format "${req.renderFormatArg}" --resolution 1080p`,
           { stdio: "inherit" }
         );
 
@@ -202,24 +223,28 @@ async function main() {
         execSync(`npx tsx scripts/manage-story-storage.ts push ${slot.bookSlug} --include-videos`, { stdio: "inherit" });
       }
 
-      try {
-        await db.markCalendarSlotBuffered(slot.bookSlug, slot.lang);
-        await recordBufferedStory(slot.bookSlug);
-        console.log(`   ✔ Marked calendar slot as buffered in Cloudflare D1 for [${slot.bookSlug}] [${slot.lang}]`);
-      } catch (d1Err: any) {
-        console.warn(`   ⚠️ D1 buffer flag update warning: ${d1Err.message}`);
+      for (const bSlot of batchedSlots) {
+        try {
+          await db.markCalendarSlotBuffered(bSlot.bookSlug, bSlot.lang);
+          await recordBufferedStory(bSlot.bookSlug);
+          console.log(`   ✔ Marked calendar slot as buffered in Cloudflare D1 for [${bSlot.bookSlug}] [${bSlot.lang}]`);
+        } catch (d1Err: any) {
+          console.warn(`   ⚠️ D1 buffer flag update warning: ${d1Err.message}`);
+        }
       }
 
-      console.log(`   🎉 SUCCESS! Pre-render buffer complete for [${slot.bookSlug}] on ${slot.date}!`);
+      console.log(`   🎉 SUCCESS! Pre-render buffer complete for [${slot.bookSlug}] (${langLabel}) on ${slot.date}!`);
     } catch (err: any) {
       const errMsg = err?.message || String(err);
       console.error(`   ❌ Error buffering [${slot.bookSlug}]:`, errMsg);
-      failures.push({
-        bookSlug: slot.bookSlug,
-        lang: slot.lang,
-        date: slot.date,
-        error: errMsg,
-      });
+      for (const bSlot of batchedSlots) {
+        failures.push({
+          bookSlug: bSlot.bookSlug,
+          lang: bSlot.lang,
+          date: bSlot.date,
+          error: errMsg,
+        });
+      }
     }
   }
 

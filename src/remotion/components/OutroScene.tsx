@@ -82,13 +82,13 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
         fontFamily: "'Fredoka', 'Quicksand', system-ui, -apple-system, sans-serif",
       }}
     >
-      {/* Layer 1: Ambient Blurred Backdrop Plate */}
+      {/* Layer 1: Ambient Blurred Backdrop Plate (Static scale so blur caches once) */}
       {bgImgSrc ? (
         <div
           style={{
             position: "absolute",
             inset: 0,
-            transform: `scale(${bgScale})`,
+            transform: "scale(1.16)",
             filter: "blur(42px) brightness(0.38) saturate(1.4)",
             zIndex: 1,
           }}

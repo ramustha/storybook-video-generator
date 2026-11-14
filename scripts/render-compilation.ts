@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs/promises";
 import { existsSync, readdirSync, readFileSync } from "fs";
 import { pullStory } from "./manage-story-storage";
+import { getOptimalRenderOptions } from "./lib/render-options";
 
 interface CompilationStoryConfig {
   slug: string;
@@ -504,13 +505,14 @@ async function renderCompilation() {
 
     const startTime = Date.now();
 
+    const renderOpts = getOptimalRenderOptions();
     let lastReportedPct = -1;
     await renderMedia({
       composition,
       serveUrl,
       codec: "h264",
       outputLocation: outputPath,
-      concurrency: 2,
+      ...renderOpts,
       inputProps: {
         title: isEn ? preset.suggestedTitleEn : preset.suggestedTitleId,
         theme: preset.id,

@@ -93,12 +93,12 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
         boxSizing: "border-box",
       }}
     >
-      {/* Ambient Blurred Background (Zero-Crop Pillarbox Canvas) */}
+      {/* Ambient Blurred Background (Static scale so blur caches once per scene) */}
       <div
         style={{
           position: "absolute",
           inset: 0,
-          transform: `scale(${bgScale})`,
+          transform: "scale(1.18)",
           filter: "blur(40px) brightness(0.42) saturate(1.4)",
           zIndex: 1,
         }}
