@@ -40,7 +40,7 @@ flowchart TD
   * *Compilation Strategy*: Archive the 16:9 render for bundling into a multi-story compilation (e.g. *“5 Dongeng Lucu 1 Menit”*) once 4–5 micro-stories are created.
 * **Editing & Subtitle Rules**:
   * Visual pace: Snappy cuts (1.5s – 2.5s per beat).
-  * Subtitle placement: Center-bottom (`bottom: 260px` in 9:16) with high-contrast text stroke.
+  * Subtitle placement: Universal safe-zone (`bottom: 420px`, `left: 36px`, `right: 148px`, `48px` font size in 9:16) clearing Shorts/Reels/TikTok chrome and right-rail buttons with high-contrast text stroke.
   * Captions: Under 100 characters with curiosity gap: e.g. *“Tebak apa yang terjadi selanjutnya?! 😱 #Shorts”*.
 
 ---
