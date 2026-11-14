@@ -1,0 +1,43 @@
+scripts/buffer-prerender.ts
+  698ac31901cd73e0 128,131-133,157-169,171-172,174,188,214-215,217,226-233,236,240-247
+config/buffered-stories.json
+  698ac31901cd73e0 9-10
+src/remotion/components/CoverScene.tsx
+  698ac31901cd73e0 96,101
+docs/calendar-data.json
+  698ac31901cd73e0 529,552
+src/remotion/components/MoralScene.tsx
+  698ac31901cd73e0 73,79
+scripts/render-compilation.ts
+  698ac31901cd73e0 7,508,515
+docs/index.html
+  698ac31901cd73e0 2735,3079
+src/remotion/components/OutroScene.tsx
+  698ac31901cd73e0 85,91
+scripts/render-book.ts
+  698ac31901cd73e0 8,230,232,247
+src/remotion/components/StoryScene.tsx
+  698ac31901cd73e0 44,154,159,191,305
+scripts/lib/render-options.ts
+  698ac31901cd73e0 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "8f2b472286d8b692470ee42e883f5e67f6038aca",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 105,
+      "total_deletions": 47,
+      "accepted_lines": 105,
+      "overriden_lines": 0
+    }
+  }
+}
