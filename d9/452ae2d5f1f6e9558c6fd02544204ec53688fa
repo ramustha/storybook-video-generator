@@ -1,0 +1,29 @@
+skills/storybook-video-generator/references/voiceover-subtitles.md
+  698ac31901cd73e0 127-130
+skills/storybook-video-generator/SKILL.md
+  698ac31901cd73e0 217-220,222,225-230,233,240-241
+skills/storybook-video-generator/references/remotion-renderer.md
+  698ac31901cd73e0 161-190
+skills/storybook-video-generator/references/video-duration-strategy.md
+  698ac31901cd73e0 43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "d9452ae2d5f1f6e9558c6fd02544204ec53688fa",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 49,
+      "total_deletions": 15,
+      "accepted_lines": 49,
+      "overriden_lines": 0
+    }
+  }
+}
