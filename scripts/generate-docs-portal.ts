@@ -433,9 +433,17 @@ const browserSyncScript = getBrowserPortalSyncScript();
 
 // Merge stats-data.json if present
 const statsJsonPath = path.join(docsDir, "stats-data.json");
+let statsSummaryPayload: { recordedAt: string | null; summary: any } = {
+  recordedAt: null,
+  summary: null,
+};
 if (fs.existsSync(statsJsonPath)) {
   try {
     const statsData = JSON.parse(fs.readFileSync(statsJsonPath, "utf-8"));
+    statsSummaryPayload = {
+      recordedAt: statsData.recordedAt || null,
+      summary: statsData.summary || null,
+    };
     const statsMap = new Map<string, any>();
     for (const item of statsData.items || []) {
       if (item.id) statsMap.set(item.id, item);
@@ -765,12 +773,27 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     /* Main Navigation Tabs */
     .main-nav-tabs {
+      position: sticky;
+      top: 0;
+      z-index: 45;
       display: flex;
       gap: 0.5rem;
       align-items: center;
       margin-bottom: 0.75rem;
       border-bottom: 2px solid var(--card-border);
-      padding-bottom: 0.45rem;
+      padding: 0.45rem 0;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(14px);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .main-nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    [data-theme="light"] .main-nav-tabs {
+      background: rgba(248, 250, 252, 0.9);
     }
 
     .nav-tab-btn {
@@ -2480,14 +2503,297 @@ const indexHtmlContent = `<!DOCTYPE html>
       color: var(--accent-primary);
     }
 
+    /* Analytics Dashboard & Insights */
+    .analytics-grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .analytics-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      min-width: 0;
+    }
+
+    .analytics-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.45rem;
+    }
+
+    .analytics-panel-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .analytics-panel-sub {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    .analytics-bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .analytics-bar-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      gap: 0.5rem;
+    }
+
+    .analytics-bar-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    [data-theme="light"] .analytics-bar-track {
+      background: rgba(15, 23, 42, 0.08);
+    }
+
+    .analytics-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.35s ease;
+    }
+
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.5rem 0.65rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--card-border);
+      transition: var(--transition);
+    }
+
+    .leaderboard-item:hover {
+      border-color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
+    .leaderboard-rank {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+
+    .leaderboard-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .leaderboard-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .leaderboard-meta {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    /* Story Hub Coverage Matrix */
+    .story-coverage-matrix {
+      display: flex;
+      flex-direction: column;
+      gap: 0.32rem;
+      margin: 0.45rem 0;
+      padding: 0.45rem;
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+    }
+
+    [data-theme="light"] .story-coverage-matrix {
+      background: rgba(15, 23, 42, 0.03);
+    }
+
+    .coverage-lang-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    .coverage-lang-label {
+      font-size: 0.66rem;
+      font-weight: 800;
+      min-width: 34px;
+      color: var(--text-main);
+    }
+
+    .coverage-pill {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.12rem 0.36rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--card-border);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      cursor: pointer;
+    }
+
+    .coverage-pill.done {
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .coverage-pill.missing {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-dim);
+      opacity: 0.55;
+      cursor: default;
+    }
+
+    .day-readiness-pill {
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 0.14rem 0.48rem;
+      border-radius: var(--radius-full);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+
+    .day-readiness-pill.done {
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.38);
+      color: #34d399;
+    }
+
+    /* Sticky Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+      display: none;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.12rem;
+      padding: 0.28rem 0.2rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mobile-nav-item span:first-child {
+      font-size: 1rem;
+      line-height: 1.1;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--accent-primary);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    @media (max-width: 1024px) {
+      .analytics-grid-2col { grid-template-columns: 1fr; }
+      .pipeline-stages-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
     @media (max-width: 768px) {
-      .container { padding: 0.65rem 0.75rem; }
-      .brand-heading h1 { font-size: 1.1rem; }
+      html, body { max-width: 100%; overflow-x: hidden; }
+      body { padding-bottom: 68px; }
+      .container { max-width: 100%; overflow-x: clip; padding: 0.65rem 0.75rem; }
+      .brand-heading h1 { font-size: 1.08rem; }
+      .nav-tab-btn { flex-shrink: 0; white-space: nowrap; }
+      .pipeline-spotlight-left { width: 100%; max-width: 100%; flex-wrap: wrap; }
+      .pipeline-spotlight-info { width: 100%; max-width: 100%; }
+      .pipeline-spotlight-title { white-space: normal; word-break: break-word; }
+      .pipeline-monitor-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 0.25rem;
+        scrollbar-width: none;
+      }
+      .header-actions::-webkit-scrollbar { display: none; }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; }
       .cards-grid { grid-template-columns: 1fr; }
       .timeline-slots-grid { grid-template-columns: 1fr; }
-      .toolbar { padding: 0.5rem; }
+      .pipeline-stages-grid { grid-template-columns: 1fr; }
+      .pipeline-spotlight-bar { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .toolbar { padding: 0.55rem; }
       .search-box { min-width: 100%; }
+      .view-toggles { width: 100%; overflow-x: auto; }
+      .filter-chips-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 0.2rem;
+      }
+      .filter-chips-row::-webkit-scrollbar { display: none; }
+      .filter-chip, .filter-label, .filter-select { flex-shrink: 0; }
+      .modal-window { width: 96vw; max-width: 96vw; margin: 0.5rem; }
       footer { flex-direction: column; align-items: flex-start; }
+      .mobile-bottom-nav {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.25rem;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 60;
+        background: rgba(17, 24, 39, 0.94);
+        border-top: 1px solid var(--card-border);
+        padding: 0.35rem 0.45rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
+        backdrop-filter: blur(16px);
+      }
+      [data-theme="light"] .mobile-bottom-nav {
+        background: rgba(255, 255, 255, 0.96);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stat-value { font-size: 1.15rem; }
+      .nav-tab-btn { padding: 0.38rem 0.65rem; font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -2545,6 +2851,10 @@ const indexHtmlContent = `<!DOCTYPE html>
         <span>📅</span> Release Roadmap
         <span class="tab-badge" id="tabTimelineBadge">${initialCalCompleted}/${initialCalTotal} (${initialCalProgress}%)</span>
       </button>
+      <button class="nav-tab-btn" id="tabAnalyticsBtn" onclick="switchMainTab('analytics')">
+        <span>📊</span> Analytics & Insights
+        <span class="tab-badge" id="tabAnalyticsBadge">${initialTotalViews.toLocaleString()} views</span>
+      </button>
     </nav>
 
     <!-- =========================================================================
@@ -2596,6 +2906,9 @@ const indexHtmlContent = `<!DOCTYPE html>
             <button id="viewGroupedBtn" class="view-btn active" onclick="setViewMode('grouped')">
               <span>📦</span> Ratio Hub
             </button>
+            <button id="viewStoryBtn" class="view-btn" onclick="setViewMode('story')">
+              <span>📖</span> Story Hub
+            </button>
             <button id="viewCardBtn" class="view-btn" onclick="setViewMode('card')">
               <span>⊞</span> All Cards
             </button>
@@ -2603,6 +2916,12 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span>☰</span> Table
             </button>
           </div>
+          <select id="catalogSortSelect" class="filter-select" onchange="handleSortChange()" title="Sort Assets">
+            <option value="newest">🆕 Latest Published</option>
+            <option value="views">👀 Most Viewed</option>
+            <option value="likes">❤️ Most Liked</option>
+            <option value="title">🔤 Title A–Z</option>
+          </select>
         </div>
 
         <div class="filter-chips-row">
@@ -2866,6 +3185,9 @@ const indexHtmlContent = `<!DOCTYPE html>
             <input type="text" id="timelineSearchInput" class="search-input" placeholder="Search scheduled story, date, theme, or slot type..." oninput="handleTimelineSearch()">
           </div>
           <div class="view-toggles">
+            <button class="view-btn" onclick="jumpToTodaySchedule()" title="Scroll directly to Today's broadcast slots">
+              <span>🎯</span> Today
+            </button>
             <button id="viewCalFlowBtn" class="view-btn active" onclick="setTimelineViewMode('flow')">
               <span>⊞</span> Day Cards
             </button>
@@ -2891,6 +3213,12 @@ const indexHtmlContent = `<!DOCTYPE html>
           <button class="filter-chip active" data-cal-filter="lang" data-value="all" onclick="setTimelineLangFilter('all', this)">All</button>
           <button class="filter-chip" data-cal-filter="lang" data-value="id" onclick="setTimelineLangFilter('id', this)">🇮🇩 ID</button>
           <button class="filter-chip" data-cal-filter="lang" data-value="en" onclick="setTimelineLangFilter('en', this)">🇬🇧 EN</button>
+
+          <span class="filter-label" style="margin-left: 0.5rem;">Readiness:</span>
+          <button class="filter-chip active" data-cal-filter="readiness" data-value="all" onclick="setTimelineReadinessFilter('all', this)">All</button>
+          <button class="filter-chip" data-cal-filter="readiness" data-value="buffered" onclick="setTimelineReadinessFilter('buffered', this)">🟢 R2 Ready</button>
+          <button class="filter-chip" data-cal-filter="readiness" data-value="assets" onclick="setTimelineReadinessFilter('assets', this)">🟡 Assets Ready</button>
+          <button class="filter-chip" data-cal-filter="readiness" data-value="queued" onclick="setTimelineReadinessFilter('queued', this)">⏳ Queued</button>
         </div>
       </section>
 
@@ -2931,6 +3259,83 @@ const indexHtmlContent = `<!DOCTYPE html>
       </div>
     </div>
 
+    <!-- =========================================================================
+         SECTION 3: CROSS-PLATFORM ANALYTICS & PRODUCTION TELEMETRY
+         ========================================================================= -->
+    <div id="analyticsViewSection" style="display: none;">
+      <section class="stats-grid" style="margin-bottom: 0.85rem;">
+        <div class="stat-card" style="border-color: rgba(56, 189, 248, 0.35);">
+          <div class="stat-title">Total Reach (Views)</div>
+          <div class="stat-value" id="anTotalViews" style="color: #38bdf8;">${initialTotalViews.toLocaleString()}</div>
+          <div class="stat-desc" id="anTotalViewsSub">Across YT, FB, IG & Threads</div>
+        </div>
+        <div class="stat-card ig">
+          <div class="stat-title">Total Engagement</div>
+          <div class="stat-value" id="anTotalLikes" style="color: #f472b6;">${initialTotalLikes.toLocaleString()}</div>
+          <div class="stat-desc" id="anEngagementRate">Likes & Comments</div>
+        </div>
+        <div class="stat-card yt">
+          <div class="stat-title">YouTube Channel</div>
+          <div class="stat-value" id="anYtChannelViews">0</div>
+          <div class="stat-desc" id="anYtSubs">Channel Telemetry</div>
+        </div>
+        <div class="stat-card stories">
+          <div class="stat-title">Story Coverage</div>
+          <div class="stat-value" id="anUniqueStories">${initialStoriesCount}</div>
+          <div class="stat-desc" id="anStoriesIngested">Published vs R2 Assets</div>
+        </div>
+        <div class="stat-card cc">
+          <div class="stat-title">R2 Buffer Health</div>
+          <div class="stat-value" id="anBufferHealth">0%</div>
+          <div class="stat-desc" id="anBufferHealthSub">Upcoming Pre-Rendered Slots</div>
+        </div>
+      </section>
+
+      <div class="analytics-grid-2col">
+        <div class="analytics-panel">
+          <div class="analytics-panel-header">
+            <div>
+              <div class="analytics-panel-title">🌐 Platform Performance Share</div>
+              <div class="analytics-panel-sub" id="anStatsRecordedAt">Weekly harvested metrics & catalog views</div>
+            </div>
+          </div>
+          <div id="anPlatformBreakdown"></div>
+        </div>
+
+        <div class="analytics-panel">
+          <div class="analytics-panel-header">
+            <div>
+              <div class="analytics-panel-title">🎭 Language & Format Split</div>
+              <div class="analytics-panel-sub">ID vs EN & Landscape (16:9) vs Vertical (9:16)</div>
+            </div>
+          </div>
+          <div id="anFormatLangBreakdown"></div>
+        </div>
+      </div>
+
+      <div class="analytics-grid-2col">
+        <div class="analytics-panel">
+          <div class="analytics-panel-header">
+            <div>
+              <div class="analytics-panel-title">🏆 Top Performing Videos</div>
+              <div class="analytics-panel-sub">Ranked by cross-platform views (click to play/open)</div>
+            </div>
+          </div>
+          <div id="anTopVideosList" style="display: flex; flex-direction: column; gap: 0.45rem;"></div>
+        </div>
+
+        <div class="analytics-panel">
+          <div class="analytics-panel-header">
+            <div>
+              <div class="analytics-panel-title">📚 Top Stories by Combined Reach</div>
+              <div class="analytics-panel-sub">Aggregated views across all platforms & ratios</div>
+            </div>
+          </div>
+          <div id="anTopStoriesList" style="display: flex; flex-direction: column; gap: 0.45rem;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Video Modal Preview -->
     <div id="videoModal" class="modal-backdrop" onclick="closeModal(event)">
       <div class="modal-window" onclick="event.stopPropagation()">
@@ -2963,6 +3368,26 @@ const indexHtmlContent = `<!DOCTYPE html>
       </div>
     </footer>
   </div>
+
+  <!-- Sticky Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+    <button class="mobile-nav-item active" id="mobNavCatalog" onclick="switchMainTab('catalog')">
+      <span>📚</span>
+      <span>Assets</span>
+    </button>
+    <button class="mobile-nav-item" id="mobNavTimeline" onclick="switchMainTab('timeline')">
+      <span>📅</span>
+      <span>Schedule</span>
+    </button>
+    <button class="mobile-nav-item" id="mobNavAnalytics" onclick="switchMainTab('analytics')">
+      <span>📊</span>
+      <span>Analytics</span>
+    </button>
+    <button class="mobile-nav-item" id="mobNavToday" onclick="jumpToTodaySchedule()">
+      <span>🎯</span>
+      <span>Today</span>
+    </button>
+  </nav>
 
   <script>
     // Embedded Snapshots
@@ -3042,14 +3467,20 @@ ${browserSyncScript}
     }
 
     const BUILD_CALENDAR_SNAPSHOT = ${JSON.stringify(calendarSlots)}.map(normalizeCalendarSlot);
+    const BUILD_STATS_SNAPSHOT = ${JSON.stringify(statsSummaryPayload)};
     let RAW_CALENDAR_DATA = cloneRecordList(BUILD_CALENDAR_SNAPSHOT);
+    let LIVE_STATS_SUMMARY = BUILD_STATS_SNAPSHOT || { recordedAt: null, summary: null };
+
+    function isBudiSlot(s) {
+      return (s && s.date >= '2027-01-01') || String((s && s.bookSlug) || '').indexOf('budi-') === 0;
+    }
 
     function escapeAttr(str) {
       if (!str) return '';
       return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    let activeTab = 'catalog'; // 'catalog' | 'timeline'
+    let activeTab = 'catalog'; // 'catalog' | 'timeline' | 'analytics'
 
     let state = {
       searchQuery: '',
@@ -3057,6 +3488,7 @@ ${browserSyncScript}
       langFilter: 'all',
       storyFilter: 'all',
       ratioFilter: 'all',
+      sortBy: 'newest',
       viewMode: 'grouped'
     };
 
@@ -3065,6 +3497,7 @@ ${browserSyncScript}
       scopeFilter: 'active30', // 'active30' | 'all' | 'budi'
       statusFilter: 'all',
       langFilter: 'all',
+      readinessFilter: 'all',
       viewMode: 'flow', // 'flow' | 'table'
       maxDisplayCount: 120
     };
@@ -3072,16 +3505,25 @@ ${browserSyncScript}
     // Tab Navigation
     function switchMainTab(tab) {
       activeTab = tab;
-      document.getElementById('tabCatalogBtn').classList.toggle('active', tab === 'catalog');
-      document.getElementById('tabTimelineBtn').classList.toggle('active', tab === 'timeline');
+      document.getElementById('tabCatalogBtn')?.classList.toggle('active', tab === 'catalog');
+      document.getElementById('tabTimelineBtn')?.classList.toggle('active', tab === 'timeline');
+      document.getElementById('tabAnalyticsBtn')?.classList.toggle('active', tab === 'analytics');
+
+      document.getElementById('mobNavCatalog')?.classList.toggle('active', tab === 'catalog');
+      document.getElementById('mobNavTimeline')?.classList.toggle('active', tab === 'timeline');
+      document.getElementById('mobNavAnalytics')?.classList.toggle('active', tab === 'analytics');
 
       document.getElementById('catalogViewSection').style.display = tab === 'catalog' ? 'block' : 'none';
       document.getElementById('timelineViewSection').style.display = tab === 'timeline' ? 'block' : 'none';
+      const analyticsEl = document.getElementById('analyticsViewSection');
+      if (analyticsEl) analyticsEl.style.display = tab === 'analytics' ? 'block' : 'none';
 
       localStorage.setItem('zayn_main_tab', tab);
 
       if (tab === 'timeline') {
         renderTimeline();
+      } else if (tab === 'analytics') {
+        renderAnalytics();
       }
     }
 
@@ -3138,6 +3580,9 @@ ${browserSyncScript}
 
       const tabCatCount = document.getElementById('tabCatalogCount');
       if (tabCatCount) tabCatCount.textContent = total;
+
+      const tabAnBadge = document.getElementById('tabAnalyticsBadge');
+      if (tabAnBadge) tabAnBadge.textContent = totalViews.toLocaleString() + ' views';
 
       // Update counts inside platform filter chips
       const chipAll = document.querySelector('[data-filter="platform"][data-value="all"]');
@@ -3218,11 +3663,19 @@ ${browserSyncScript}
       const baseOrigin = isHttp ? '' : 'https://storybook-catalog.pages.dev';
       const ts = Date.now();
 
-      const [apiData, staticAuditData, staticCalData] = await Promise.all([
+      const [apiData, staticAuditData, staticCalData, staticStatsData] = await Promise.all([
         fetchJsonSafe(baseOrigin + '/api/catalog?_t=' + ts, 5000),
         fetchJsonSafe((isHttp ? './audit-data.json' : baseOrigin + '/audit-data.json') + '?_t=' + ts, 5000),
-        fetchJsonSafe((isHttp ? './calendar-data.json' : baseOrigin + '/calendar-data.json') + '?_t=' + ts, 5000)
+        fetchJsonSafe((isHttp ? './calendar-data.json' : baseOrigin + '/calendar-data.json') + '?_t=' + ts, 5000),
+        fetchJsonSafe((isHttp ? './stats-data.json' : baseOrigin + '/stats-data.json') + '?_t=' + ts, 5000)
       ]);
+
+      if (staticStatsData && staticStatsData.summary) {
+        LIVE_STATS_SUMMARY = {
+          recordedAt: staticStatsData.recordedAt || null,
+          summary: staticStatsData.summary
+        };
+      }
 
       const hasD1 = Boolean(apiData && apiData.success && Array.isArray(apiData.auditRecords) && apiData.auditRecords.length > 0);
       const hasStatic = Boolean(Array.isArray(staticAuditData) && staticAuditData.length > 0);
@@ -3255,6 +3708,7 @@ ${browserSyncScript}
       renderKPIs();
       render();
       renderTimeline();
+      renderAnalytics();
 
       if (dot) dot.classList.remove('pulsing');
 
@@ -3340,8 +3794,8 @@ ${browserSyncScript}
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     const savedTab = localStorage.getItem('zayn_main_tab');
-    if (savedTab === 'timeline') {
-      switchMainTab('timeline');
+    if (savedTab === 'timeline' || savedTab === 'analytics') {
+      switchMainTab(savedTab);
     }
 
     function showToast(msg) {
@@ -3363,13 +3817,21 @@ ${browserSyncScript}
     function setViewMode(mode) {
       state.viewMode = mode;
       const btnGrouped = document.getElementById('viewGroupedBtn');
+      const btnStory = document.getElementById('viewStoryBtn');
       const btnCard = document.getElementById('viewCardBtn');
       const btnTable = document.getElementById('viewTableBtn');
       if (btnGrouped) btnGrouped.classList.toggle('active', mode === 'grouped');
+      if (btnStory) btnStory.classList.toggle('active', mode === 'story');
       if (btnCard) btnCard.classList.toggle('active', mode === 'card');
       if (btnTable) btnTable.classList.toggle('active', mode === 'table');
-      document.getElementById('cardViewContainer').style.display = (mode === 'grouped' || mode === 'card') ? 'grid' : 'none';
+      document.getElementById('cardViewContainer').style.display = (mode === 'grouped' || mode === 'story' || mode === 'card') ? 'grid' : 'none';
       document.getElementById('tableViewContainer').style.display = mode === 'table' ? 'block' : 'none';
+      render();
+    }
+
+    function handleSortChange() {
+      const sel = document.getElementById('catalogSortSelect');
+      state.sortBy = sel ? sel.value : 'newest';
       render();
     }
 
@@ -3405,7 +3867,7 @@ ${browserSyncScript}
     }
 
     function getFilteredData() {
-      return RAW_AUDIT_DATA.filter(item => {
+      const filtered = RAW_AUDIT_DATA.filter(item => {
         if (state.ratioFilter !== 'all' && item.aspectRatio !== state.ratioFilter) {
           return false;
         }
@@ -3441,6 +3903,20 @@ ${browserSyncScript}
 
         return true;
       });
+
+      if (state.sortBy === 'views') {
+        return filtered.slice().sort((a, b) => (b.views || 0) - (a.views || 0));
+      }
+      if (state.sortBy === 'likes') {
+        return filtered.slice().sort((a, b) => (b.likes || 0) - (a.likes || 0));
+      }
+      if (state.sortBy === 'title') {
+        return filtered.slice().sort((a, b) => (a.storyTitleId || '').localeCompare(b.storyTitleId || ''));
+      }
+      if (state.sortBy === 'newest') {
+        return filtered.slice().sort((a, b) => String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')));
+      }
+      return filtered;
     }
 
     function formatDate(isoStr) {
@@ -3704,6 +4180,257 @@ ${browserSyncScript}
       \`;
     }
 
+    function getStoryHubGroups(items) {
+      const stories = new Map();
+      for (const item of items) {
+        const slug = item.storySlug || 'unknown';
+        if (!stories.has(slug)) {
+          stories.set(slug, {
+            storySlug: slug,
+            storyTitleId: item.storyTitleId || slug,
+            storyTitleEn: item.storyTitleEn || item.storyTitleId || slug,
+            author: item.author || 'Unknown',
+            illustrator: item.illustrator || 'Unknown',
+            thumbnailUrl: item.thumbnailUrl || '',
+            latestPublishedAt: item.publishedAt || '',
+            primaryVideoId: item.id,
+            totalViews: 0,
+            totalLikes: 0,
+            publications: [],
+            slots: {}
+          });
+        }
+        const g = stories.get(slug);
+        g.totalViews += (item.views || 0);
+        g.totalLikes += (item.likes || 0);
+        g.publications.push(item);
+        if (item.publishedAt && item.publishedAt > g.latestPublishedAt) {
+          g.latestPublishedAt = item.publishedAt;
+        }
+        if (item.platform === 'YouTube' && item.aspectRatio === '16:9' && item.thumbnailUrl && !item.thumbnailUrl.includes('branding')) {
+          g.thumbnailUrl = item.thumbnailUrl;
+          g.primaryVideoId = item.id;
+        } else if (!g.thumbnailUrl && item.thumbnailUrl) {
+          g.thumbnailUrl = item.thumbnailUrl;
+        }
+        const langKey = (item.language || 'id').toLowerCase();
+        const platCode = item.platform === 'YouTube' ? 'YT' : item.platform === 'Facebook' ? 'FB' : 'IG';
+        const cellKey = langKey + '_' + platCode + '_' + (item.aspectRatio === '9:16' ? '9:16' : '16:9');
+        g.slots[cellKey] = item;
+      }
+      const list = Array.from(stories.values());
+      if (state.sortBy === 'views') list.sort((a, b) => b.totalViews - a.totalViews);
+      else if (state.sortBy === 'likes') list.sort((a, b) => b.totalLikes - a.totalLikes);
+      else if (state.sortBy === 'title') list.sort((a, b) => a.storyTitleId.localeCompare(b.storyTitleId));
+      else list.sort((a, b) => String(b.latestPublishedAt || '').localeCompare(String(a.latestPublishedAt || '')));
+      return list;
+    }
+
+    function renderStoryBookCard(story) {
+      const thumbSrc = story.thumbnailUrl || 'branding/cover-facebook-1640x924.png';
+      const matrixCols = [
+        { k: 'YT_16:9', label: 'YT 16:9' },
+        { k: 'YT_9:16', label: 'YT 9:16' },
+        { k: 'FB_16:9', label: 'FB 16:9' },
+        { k: 'FB_9:16', label: 'FB 9:16' },
+        { k: 'IG_9:16', label: 'IG 9:16' }
+      ];
+      const matrixHtml = ['id', 'en'].map(lang => {
+        const pills = matrixCols.map(c => {
+          const hit = story.slots[lang + '_' + c.k];
+          return hit
+            ? \`<button type="button" class="coverage-pill done" onclick="openPreviewModal('\${hit.id}')" title="\${hit.platform} \${hit.aspectRatio} (\${(hit.views || 0).toLocaleString()} views)">✓ \${c.label}</button>\`
+            : \`<span class="coverage-pill missing" title="Not yet published">\${c.label}</span>\`;
+        }).join('');
+        return \`<div class="coverage-lang-row"><span class="coverage-lang-label">\${lang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN'}</span>\${pills}</div>\`;
+      }).join('');
+
+      return \`
+        <div class="video-card grouped-card">
+          <div class="card-thumb-wrapper">
+            <img src="\${thumbSrc}" alt="\${escapeAttr(story.storyTitleId)}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='branding/cover-facebook-1640x924.png'}">
+            <div class="thumb-overlay-badge">
+              <span class="lang-badge">ID+EN</span>
+            </div>
+            <span class="thumb-count-badge">\${story.publications.length}/10 Releases\${story.totalViews > 0 ? \` · 👀 \${story.totalViews.toLocaleString()}\` : ''}</span>
+          </div>
+          <div class="card-content">
+            <div class="card-story-title" title="\${escapeAttr(story.storyTitleId)}">\${story.storyTitleId}</div>
+            \${story.storyTitleEn && story.storyTitleEn !== story.storyTitleId ? \`<div class="card-subtitle-en">\${story.storyTitleEn}</div>\` : ''}
+            <div class="story-coverage-matrix">\${matrixHtml}</div>
+            <div class="card-meta-list">
+              <div class="card-meta-row">
+                <span>Credits:</span>
+                <span>\${story.author} · \${story.illustrator}</span>
+              </div>
+              <div class="card-meta-row">
+                <span>Reach:</span>
+                <span style="color: #38bdf8; font-weight: 700;">👀 \${story.totalViews.toLocaleString()} · ❤️ \${story.totalLikes.toLocaleString()}</span>
+              </div>
+              <div class="card-meta-row">
+                <span>Updated:</span>
+                <span>\${formatDate(story.latestPublishedAt)}</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-card" onclick="openPreviewModal('\${story.primaryVideoId}')" title="Play Preview">▶ Preview</button>
+              <button class="btn-card primary" onclick="filterCatalogByStory('\${story.storySlug}')">🔍 All (\${story.publications.length})</button>
+            </div>
+          </div>
+        </div>
+      \`;
+    }
+
+    function renderAnalytics() {
+      const summary = (LIVE_STATS_SUMMARY && LIVE_STATS_SUMMARY.summary) || {};
+      const auditViews = RAW_AUDIT_DATA.reduce((s, d) => s + (d.views || 0), 0);
+      const auditLikes = RAW_AUDIT_DATA.reduce((s, d) => s + (d.likes || 0), 0);
+      const totalViews = Math.max(auditViews, summary.totalViews || 0);
+      const totalLikes = Math.max(auditLikes, summary.totalLikes || 0);
+      const totalComments = summary.totalComments || 0;
+      const engRate = totalViews > 0 ? (((totalLikes + totalComments) / totalViews) * 100).toFixed(2) : '0.00';
+
+      const publishedStories = new Set(RAW_AUDIT_DATA.filter(d => d.category !== 'Compilation Marathon').map(d => d.storySlug));
+      const futureSlots = RAW_CALENDAR_DATA.filter(s => !s.isCompleted);
+      const bufferedCount = futureSlots.filter(s => s.isBuffered).length;
+      const bufferPct = futureSlots.length > 0 ? Math.round((bufferedCount / futureSlots.length) * 100) : 100;
+
+      const elViews = document.getElementById('anTotalViews');
+      if (elViews) elViews.textContent = totalViews.toLocaleString();
+      const elLikes = document.getElementById('anTotalLikes');
+      if (elLikes) elLikes.textContent = totalLikes.toLocaleString();
+      const elEng = document.getElementById('anEngagementRate');
+      if (elEng) elEng.textContent = engRate + '% engagement (' + totalComments + ' comments)';
+      const ytSummary = summary.youtube || {};
+      const elYtChan = document.getElementById('anYtChannelViews');
+      if (elYtChan) elYtChan.textContent = (ytSummary.totalChannelViews || ytSummary.views || 0).toLocaleString();
+      const elYtSubs = document.getElementById('anYtSubs');
+      if (elYtSubs) elYtSubs.textContent = (ytSummary.subscribers || 0) + ' subscribers · ' + (ytSummary.videoCount || RAW_AUDIT_DATA.filter(d => d.platform === 'YouTube').length) + ' videos';
+      const elStories = document.getElementById('anUniqueStories');
+      if (elStories) elStories.textContent = publishedStories.size + ' / ' + Math.max(publishedStories.size, (KNOWN_STORY_ASSETS || []).length);
+      const elBuf = document.getElementById('anBufferHealth');
+      if (elBuf) elBuf.textContent = bufferedCount + ' slots';
+      const elBufSub = document.getElementById('anBufferHealthSub');
+      if (elBufSub) elBufSub.textContent = bufferPct + '% of ' + futureSlots.length + ' upcoming slots buffered in R2';
+
+      const recAtEl = document.getElementById('anStatsRecordedAt');
+      if (recAtEl && LIVE_STATS_SUMMARY && LIVE_STATS_SUMMARY.recordedAt) {
+        recAtEl.textContent = 'Last stats harvest: ' + formatDate(LIVE_STATS_SUMMARY.recordedAt);
+      }
+
+      // Platform Share Bars
+      const plats = [
+        { name: 'YouTube', color: 'var(--yt-color)', icon: '📺', summaryKey: 'youtube' },
+        { name: 'Facebook', color: 'var(--fb-color)', icon: '📘', summaryKey: 'facebook' },
+        { name: 'Instagram', color: 'var(--ig-color)', icon: '📸', summaryKey: 'instagram' },
+        { name: 'Threads', color: '#a855f7', icon: '🧵', summaryKey: 'threads' }
+      ].map(p => {
+        const items = RAW_AUDIT_DATA.filter(d => d.platform === p.name);
+        const sumObj = summary[p.summaryKey] || {};
+        const views = Math.max(items.reduce((s, d) => s + (d.views || 0), 0), sumObj.views || 0);
+        const likes = Math.max(items.reduce((s, d) => s + (d.likes || 0), 0), sumObj.likes || 0);
+        const count = Math.max(items.length, sumObj.videoCount || 0);
+        return { ...p, views, likes, count };
+      });
+      const platTotalViews = Math.max(1, plats.reduce((s, p) => s + p.views, 0));
+      const platHtml = plats.map(p => {
+        const pct = Math.round((p.views / platTotalViews) * 100);
+        const avg = p.count > 0 ? Math.round(p.views / p.count) : 0;
+        return \`
+          <div class="analytics-bar-row">
+            <div class="analytics-bar-meta">
+              <span><strong>\${p.icon} \${p.name}</strong> <span style="color: var(--text-dim);">(\${p.count} assets · avg \${avg} views)</span></span>
+              <span><strong>\${p.views.toLocaleString()}</strong> views (\${pct}%) · ❤️ \${p.likes}</span>
+            </div>
+            <div class="analytics-bar-track">
+              <div class="analytics-bar-fill" style="width: \${pct}%; background: \${p.color};"></div>
+            </div>
+          </div>
+        \`;
+      }).join('');
+      const platEl = document.getElementById('anPlatformBreakdown');
+      if (platEl) platEl.innerHTML = platHtml;
+
+      // Language & Aspect Ratio Split
+      const splitRows = [
+        { label: '🇮🇩 Indonesian Stories (ID)', filter: d => d.language === 'id', color: '#ef4444' },
+        { label: '🇬🇧 English Stories (EN)', filter: d => d.language === 'en', color: '#38bdf8' },
+        { label: '📱 Vertical Shorts / Reels (9:16)', filter: d => d.aspectRatio === '9:16', color: '#ec4899' },
+        { label: '📺 Landscape Widescreen (16:9)', filter: d => d.aspectRatio === '16:9', color: '#10b981' }
+      ].map(r => {
+        const items = RAW_AUDIT_DATA.filter(r.filter);
+        const views = items.reduce((s, d) => s + (d.views || 0), 0);
+        return { ...r, count: items.length, views };
+      });
+      const maxSplitViews = Math.max(1, ...splitRows.map(r => r.views));
+      const splitHtml = splitRows.map(r => {
+        const pct = Math.round((r.views / maxSplitViews) * 100);
+        return \`
+          <div class="analytics-bar-row">
+            <div class="analytics-bar-meta">
+              <span><strong>\${r.label}</strong> <span style="color: var(--text-dim);">(\${r.count} releases)</span></span>
+              <span><strong>\${r.views.toLocaleString()}</strong> views</span>
+            </div>
+            <div class="analytics-bar-track">
+              <div class="analytics-bar-fill" style="width: \${pct}%; background: \${r.color};"></div>
+            </div>
+          </div>
+        \`;
+      }).join('');
+      const splitEl = document.getElementById('anFormatLangBreakdown');
+      if (splitEl) splitEl.innerHTML = splitHtml;
+
+      // Top 10 Performing Videos
+      const topVideos = RAW_AUDIT_DATA
+        .slice()
+        .sort((a, b) => ((b.views || 0) - (a.views || 0)) || ((b.likes || 0) - (a.likes || 0)))
+        .slice(0, 8);
+      const topVidEl = document.getElementById('anTopVideosList');
+      if (topVidEl) {
+        topVidEl.innerHTML = topVideos.map((v, idx) => \`
+          <div class="leaderboard-item">
+            <span class="leaderboard-rank">\${idx + 1}</span>
+            <div class="leaderboard-info">
+              <div class="leaderboard-title" title="\${escapeAttr(v.videoTitle)}">\${v.videoTitle}</div>
+              <div class="leaderboard-meta">
+                <span>\${v.platform}</span>·<span>\${v.language.toUpperCase()}</span>·<span>\${v.aspectRatio}</span>·<span>👀 \${(v.views || 0).toLocaleString()}</span>·<span>❤️ \${v.likes || 0}</span>
+              </div>
+            </div>
+            <button class="hub-btn-play" onclick="openPreviewModal('\${v.id}')" title="Play Preview">▶</button>
+          </div>
+        \`).join('') || '<div style="color: var(--text-dim); font-size: 0.8rem;">No video telemetry yet.</div>';
+      }
+
+      // Top Stories by Combined Reach
+      const storyMap = new Map();
+      RAW_AUDIT_DATA.forEach(v => {
+        const slug = v.storySlug || 'unknown';
+        if (!storyMap.has(slug)) {
+          storyMap.set(slug, { slug, title: v.storyTitleId || slug, views: 0, likes: 0, count: 0 });
+        }
+        const s = storyMap.get(slug);
+        s.views += (v.views || 0);
+        s.likes += (v.likes || 0);
+        s.count += 1;
+      });
+      const topStories = Array.from(storyMap.values()).sort((a, b) => b.views - a.views).slice(0, 8);
+      const topStoryEl = document.getElementById('anTopStoriesList');
+      if (topStoryEl) {
+        topStoryEl.innerHTML = topStories.map((st, idx) => \`
+          <div class="leaderboard-item" style="cursor: pointer;" onclick="filterCatalogByStory('\${st.slug}')">
+            <span class="leaderboard-rank">\${idx + 1}</span>
+            <div class="leaderboard-info">
+              <div class="leaderboard-title" title="\${escapeAttr(st.title)}">\${st.title}</div>
+              <div class="leaderboard-meta">
+                <span>\${st.count} releases</span>·<span>👀 \${st.views.toLocaleString()} views</span>·<span>❤️ \${st.likes} likes</span>
+              </div>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700;">View ↗</span>
+          </div>
+        \`).join('');
+      }
+    }
+
     function render() {
       const data = getFilteredData();
       const visibleEl = document.getElementById('visibleCount');
@@ -3715,8 +4442,25 @@ ${browserSyncScript}
         noticeEl.textContent = isFiltered ? '(Filters Active)' : '';
       }
 
-      if (state.viewMode === 'grouped') {
-        const grouped = getGroupedData(data);
+      const grouped = getGroupedData(data);
+      if (state.sortBy === 'views') {
+        grouped.sort((a, b) => (b.totalViews || 0) - (a.totalViews || 0));
+      } else if (state.sortBy === 'likes') {
+        grouped.sort((a, b) => (b.totalLikes || 0) - (a.totalLikes || 0));
+      } else if (state.sortBy === 'title') {
+        grouped.sort((a, b) => (a.storyTitleId || '').localeCompare(b.storyTitleId || ''));
+      } else {
+        grouped.sort((a, b) => String(b.latestPublishedAt || '').localeCompare(String(a.latestPublishedAt || '')));
+      }
+
+      if (state.viewMode === 'story') {
+        const storyHubs = getStoryHubGroups(data);
+        if (visibleEl) visibleEl.textContent = storyHubs.length + ' stories (' + data.length + ' releases)';
+        if (totalEl) totalEl.textContent = RAW_AUDIT_DATA.length + ' releases';
+
+        const storyHtml = storyHubs.map(renderStoryBookCard).join('');
+        document.getElementById('cardViewContainer').innerHTML = storyHtml || '<div style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: var(--text-dim); font-size: 0.85rem;">No stories match your filter.</div>';
+      } else if (state.viewMode === 'grouped') {
         if (visibleEl) visibleEl.textContent = grouped.length + ' format editions (' + data.length + ' releases)';
         if (totalEl) totalEl.textContent = (RAW_AUDIT_DATA.length) + ' releases';
 
@@ -3775,6 +4519,28 @@ ${browserSyncScript}
       renderTimeline();
     }
 
+    function setTimelineReadinessFilter(val, btn) {
+      timelineState.readinessFilter = val;
+      document.querySelectorAll('[data-cal-filter="readiness"]').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderTimeline();
+    }
+
+    function jumpToTodaySchedule() {
+      switchMainTab('timeline');
+      timelineState.statusFilter = 'all';
+      timelineState.readinessFilter = 'all';
+      document.querySelectorAll('[data-cal-filter="status"]').forEach(b => b.classList.toggle('active', b.getAttribute('data-value') === 'all'));
+      document.querySelectorAll('[data-cal-filter="readiness"]').forEach(b => b.classList.toggle('active', b.getAttribute('data-value') === 'all'));
+      renderTimeline();
+      setTimeout(function() {
+        const todayHeader = document.querySelector('.timeline-day-header.today') || document.getElementById('timelineFlowContainer');
+        if (todayHeader) {
+          todayHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 60);
+    }
+
     function handleTimelineSearch() {
       timelineState.searchQuery = document.getElementById('timelineSearchInput').value.trim().toLowerCase();
       renderTimeline();
@@ -3785,9 +4551,9 @@ ${browserSyncScript}
       return RAW_CALENDAR_DATA.filter(item => {
         // 1. Scope filter
         if (timelineState.scopeFilter === 'active30') {
-          if (item.date > '2026-12-31') return false;
+          if (isBudiSlot(item) || item.date > '2026-12-31') return false;
         } else if (timelineState.scopeFilter === 'budi') {
-          if (item.date < '2027-01-01') return false;
+          if (!isBudiSlot(item)) return false;
         }
 
         if (timelineState.statusFilter !== 'all') {
@@ -3798,6 +4564,12 @@ ${browserSyncScript}
 
         if (timelineState.langFilter !== 'all' && item.lang !== timelineState.langFilter) {
           return false;
+        }
+
+        if (timelineState.readinessFilter !== 'all') {
+          if (timelineState.readinessFilter === 'buffered' && !item.isBuffered) return false;
+          if (timelineState.readinessFilter === 'assets' && (!item.hasAssets || item.isBuffered)) return false;
+          if (timelineState.readinessFilter === 'queued' && (item.isCompleted || item.isBuffered || item.hasAssets)) return false;
         }
 
         if (timelineState.searchQuery) {
@@ -4095,8 +4867,8 @@ ${browserSyncScript}
 
       // Compute stats based on the active roadmap scope
       const scopeSlots = RAW_CALENDAR_DATA.filter(item => {
-        if (timelineState.scopeFilter === 'active30') return item.date <= '2026-12-31';
-        if (timelineState.scopeFilter === 'budi') return item.date >= '2027-01-01';
+        if (timelineState.scopeFilter === 'active30') return !isBudiSlot(item) && item.date <= '2026-12-31';
+        if (timelineState.scopeFilter === 'budi') return isBudiSlot(item);
         return true;
       });
 
@@ -4166,8 +4938,8 @@ ${browserSyncScript}
       if (elTabBadge) elTabBadge.textContent = completed + '/' + total + ' (' + progress + '%)';
 
       // Dynamically update scope buttons from loaded dataset
-      const active30Count = RAW_CALENDAR_DATA.filter(function(s) { return s.date <= '2026-12-31'; }).length;
-      const budiCount = RAW_CALENDAR_DATA.filter(function(s) { return s.date >= '2027-01-01'; }).length;
+      const active30Count = RAW_CALENDAR_DATA.filter(function(s) { return !isBudiSlot(s) && s.date <= '2026-12-31'; }).length;
+      const budiCount = RAW_CALENDAR_DATA.filter(function(s) { return isBudiSlot(s); }).length;
       const totalAll = RAW_CALENDAR_DATA.length;
 
       const btnActive30 = document.querySelector('[data-cal-filter="scope"][data-value="active30"]');
@@ -4200,7 +4972,7 @@ ${browserSyncScript}
 
       const noticeEl = document.getElementById('timelineFilterNotice');
       if (noticeEl) {
-        const isFiltered = timelineState.statusFilter !== 'all' || timelineState.langFilter !== 'all' || timelineState.searchQuery || timelineState.scopeFilter !== 'active30';
+        const isFiltered = timelineState.statusFilter !== 'all' || timelineState.langFilter !== 'all' || timelineState.readinessFilter !== 'all' || timelineState.searchQuery || timelineState.scopeFilter !== 'active30';
         noticeEl.textContent = isFiltered ? '(Filters Active)' : '';
       }
 
@@ -4219,12 +4991,23 @@ ${browserSyncScript}
         for (const [dateStr, slots] of groups) {
           const isToday = slots.some(s => s.date === clientTodayIso || s.status === 'today');
           const dayName = slots[0]?.dayName || '';
+          const doneCount = slots.filter(s => s.isCompleted || s.status === 'completed').length;
+          const bufferedDayCount = slots.filter(s => s.isBuffered).length;
+          const assetsDayCount = slots.filter(s => s.hasAssets).length;
+          const readinessBadge = doneCount === slots.length
+            ? \`<span class="day-readiness-pill done">✅ \${doneCount}/\${slots.length} Broadcasted</span>\`
+            : bufferedDayCount > 0
+            ? \`<span class="day-readiness-pill">🟢 \${bufferedDayCount}/\${slots.length} R2 Ready</span>\`
+            : assetsDayCount > 0
+            ? \`<span class="day-readiness-pill">🟡 \${assetsDayCount}/\${slots.length} Assets</span>\`
+            : \`<span class="day-readiness-pill">⏳ Queued</span>\`;
 
           flowHtml += \`
             <div class="timeline-day-group">
               <div class="timeline-day-header \${isToday ? 'today' : ''}">
                 <span>📅 \${dayName}, \${formatDate(dateStr)}</span>
                 \${isToday ? '<span class="day-today-tag">🔥 Hari Ini / Today</span>' : ''}
+                \${readinessBadge}
                 <span style="font-size: 0.7rem; color: var(--text-dim); margin-left: auto;">\${slots.length} Broadcast\${slots.length > 1 ? 's' : ''}</span>
               </div>
               <div class="timeline-slots-grid">
@@ -4639,6 +5422,7 @@ ${browserSyncScript}
     populateStoryDropdown();
     renderKPIs();
     render();
+    renderAnalytics();
     updateLiveTodayStatus();
     renderTimeline();
     updatePipelineMonitor();
