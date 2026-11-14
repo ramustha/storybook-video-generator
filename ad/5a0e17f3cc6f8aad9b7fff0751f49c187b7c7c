@@ -1,0 +1,25 @@
+docs/index.html
+  89b8b12d6e53291f 2292-2293,2296-2299,2301,2309,2319,2399,2487,2490,3093
+scripts/generate-docs-portal.ts
+  89b8b12d6e53291f 2806-2807,2810-2813,2815,2823,2833,2913,3336
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "ad5a0e17f3cc6f8aad9b7fff0751f49c187b7c7c",
+  "prompts": {
+    "89b8b12d6e53291f": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "804f6537-0957-426e-b395-2f565b7c4d07",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 24,
+      "total_deletions": 354,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
