@@ -386,9 +386,9 @@ function buildResponsiveStageHtml(lang: "id" | "en", timelineData: any): string 
   /* ==================== ZONE 3: KARAOKE PILL SUBTITLES ==================== */
   #zone-subs {
     position: absolute;
-    left: 60px; right: 60px;
-    top: 1380px;
-    height: 360px;
+    left: 48px; right: 144px;
+    top: 1220px;
+    height: 260px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -399,9 +399,9 @@ function buildResponsiveStageHtml(lang: "id" | "en", timelineData: any): string 
   }
   body.landscape #zone-subs {
     left: 84px; right: auto;
-    width: 700px;
-    top: 720px;
-    height: 290px;
+    width: 720px;
+    top: 700px;
+    height: 310px;
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
@@ -411,22 +411,22 @@ function buildResponsiveStageHtml(lang: "id" | "en", timelineData: any): string 
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 13px;
     background: #1E232A;
-    padding: 14px 28px;
-    border-radius: 18px;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.18);
-    border: 2px solid rgba(255,255,255,0.08);
+    padding: 16px 30px;
+    border-radius: 22px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.28);
+    border: 2.5px solid rgba(255,255,255,0.14);
   }
   .sub-word {
-    font-size: 40px;
+    font-size: 44px;
     font-weight: 800;
     color: #F8FAFC;
-    padding: 4px 12px;
-    border-radius: 10px;
+    padding: 5px 14px;
+    border-radius: 12px;
     letter-spacing: -0.01em;
   }
-  body.landscape .sub-word { font-size: 34px; }
+  body.landscape .sub-word { font-size: 40px; }
   .sub-word.active {
     background: var(--yellow);
     color: #111827;

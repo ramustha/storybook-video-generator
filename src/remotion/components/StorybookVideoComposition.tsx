@@ -180,20 +180,22 @@ export const StorybookVideoComposition: React.FC<StorybookVideoCompositionProps>
         );
       })}
 
-      {/* Subtle Persistent Channel Watermark (For cross-platform discovery & attribution) */}
+      {/* Subtle Persistent Channel Watermark (Safely below top 200px UI bar in Portrait) */}
       <div
         style={{
           position: "absolute",
-          top: isVertical ? 48 : 32,
-          right: isVertical ? 36 : 40,
+          top: isVertical ? 205 : 36,
+          left: isVertical ? "50%" : "auto",
+          right: isVertical ? "auto" : 48,
+          transform: isVertical ? "translateX(-50%)" : "none",
           zIndex: 90,
           display: "flex",
           alignItems: "center",
           gap: 6,
-          padding: isVertical ? "6px 12px" : "8px 16px",
+          padding: isVertical ? "6px 16px" : "8px 16px",
           borderRadius: 24,
-          backgroundColor: "rgba(10, 15, 30, 0.45)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          backgroundColor: "rgba(10, 15, 30, 0.65)",
+          border: "1px solid rgba(255, 255, 255, 0.22)",
           pointerEvents: "none",
         }}
       >
