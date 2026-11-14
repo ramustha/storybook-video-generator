@@ -124,11 +124,10 @@ if (isActive) {
 }
 ```
 
-### Floating Glassmorphic Capsule:
-* Background: `rgba(15, 23, 42, 0.85)` with `backdrop-filter: blur(16px)`.
-* Rounded pill borders (`rounded-3xl` or `rounded-full`).
-* Subtle golden gradient border (`p-[2.5px] bg-gradient-to-r from-amber-400/50 via-yellow-300/60 to-amber-500/50`).
-* Never use opaque rectangular blocks that hide the background artwork.
+### Large Read-Aloud Capsule & Universal Safe-Zone Placement:
+* **Landscape 16:9**: `fontSize: 46px`, `bottom: 56px`, `left: 48px`, `right: 48px`, `padding: "16px 28px"`, rounded pill corners (`borderRadius: "20px"`).
+* **Portrait 9:16 (Universal Shorts / Reels / TikTok Safe Zone)**: `fontSize: 48px`, `bottom: 420px`, `left: 36px`, `right: 148px` (stays cleanly above 0–400px bottom descriptions/nav chrome and clear of 120–132px right-rail action buttons).
+* **High-Contrast Compositor-Safe Styling**: Solid slate background (`rgba(15, 23, 42, 0.92)`) with golden gradient/stroke accent (`rgba(251, 191, 36, 0.55)`). **Omit `backdropFilter: "blur(...)"`** on `>= 0.90` opaque subtitle boxes to prevent redundant GPU framebuffer readbacks on every animated frame.
 
 ---
 

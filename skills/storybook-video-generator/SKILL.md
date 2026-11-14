@@ -214,25 +214,31 @@ Whenever ANY API quota limit, rate limit, burst velocity cap, or platform bounda
 * **Zero AI Video Hallucination**: Character limb, mouth, and eye movements are driven by deterministic GSAP timelines synced to `timeline.json` audio cue points.
 * **Procedural SFX & Soundscapes**: Procedurally mixes cartoon Foley events (`boing`, `splash`, `chime`) triggered at exact timestamp offsets. Details in [edu-motion-track.md](./references/edu-motion-track.md).
 
-* **Responsive Subtitle Positioning & Safe Zones**:
-  * **Landscape 16:9**: Positioned at `bottom: "64px"`, max-width `84%`, rounded glassmorphic card (`borderRadius: "20px"`), font size `32px`.
-  * **Vertical 9:16**: Positioned at `bottom: "260px"` (well above YouTube Shorts / TikTok bottom UI overlays of 0–220px, and comfortably below the centerpiece illustration card), font size `27px`. See [cinematography.md](./references/cinematography.md).
+* **Responsive Subtitle Positioning & Universal Safe Zones**:
+  * **Landscape 16:9**: Positioned at `bottom: "56px"`, `left: "48px"`, `right: "48px"`, `padding: "16px 28px"`, rounded high-contrast card (`borderRadius: "20px"`), font size `46px` (read-aloud child accessibility across mobile & TV).
+  * **Vertical 9:16 (Universal Shorts / Reels / TikTok Safe Zone)**: Positioned at `bottom: "420px"`, `left: "36px"`, `right: "148px"` (clearing both the 0–400px bottom caption/nav chrome and the 120–132px right-rail engagement buttons), font size `48px`.
+  * **Zero `backdrop-filter` Blur Overhead**: Use solid high-contrast dark slate (`rgba(15, 23, 42, 0.92)` with subtle golden stroke) and avoid `backdropFilter` on `>=0.90` opaque cards to eliminate Chromium per-frame compositor stalls. See [voiceover-subtitles.md](./references/voiceover-subtitles.md).
 
-### 8. Export Multi-Format MP4 Videos (Universal Dual-Track CLI)
+### 8. Export Multi-Format MP4 Videos (Universal Dual-Track & Speedup Engine)
 * The rendering CLI (`scripts/render-book.ts`) inspects `story.json.pipelineTrack` and routes automatically:
   * `pipelineTrack === "edu-motion"` $\to$ Dispatches to headless Playwright + FFmpeg (`renderEduMotionVideo()`).
-  * Otherwise $\to$ Dispatches to Remotion CLI compiler.
+  * Otherwise $\to$ Dispatches to Remotion (`bundle()` + `selectComposition()` + `renderMedia()`) tuned via `getOptimalRenderOptions()` in `scripts/lib/render-options.ts`.
+* **High-Throughput Remotion Render Defaults** (~`3.7×` faster than `concurrency: 2` + PNG):
+  * Auto-scaled multi-core Chromium tab concurrency (`Math.floor(cpus * 0.75)` capped at `8` on macOS/Linux; `4` for 4K; override with `--concurrency <n>` or `REMOTION_CONCURRENCY`).
+  * `gl: "angle"` (macOS/Windows) or `"swangle"` (Linux) + `chromiumOptions: { args: ["--disable-gpu-vsync"] }`.
+  * `imageFormat: "jpeg"`, `jpegQuality: 95` to bypass lossless PNG compression overhead before H.264 encode.
+  * **Single-Bundle Multi-Target Batching**: Use `--lang all --format all` (and sibling batching in `scripts/buffer-prerender.ts`) so ID + EN compositions share one Chromium/Webpack bundle pass. See [remotion-renderer.md](./references/remotion-renderer.md).
 * Both tracks export identical 1080p Full HD MP4 deliverables (ID 16:9, ID 9:16, EN 16:9, EN 9:16):
   ```bash
-  # Render all 4 bilingual video deliverables by default (1080p Full HD)
+  # Render all 4 bilingual video deliverables by default (1080p Full HD, auto concurrency)
   npx tsx scripts/render-book.ts --book <book-slug> --lang all --format all
 
   # Render single language only if requested
   npx tsx scripts/render-book.ts --book <book-slug> --lang id --format all
   npx tsx scripts/render-book.ts --book <book-slug> --lang en --format all
 
-  # Optional 4K UHD Master (Track 1 Remotion only)
-  npx tsx scripts/render-book.ts --book <book-slug> --format all --resolution 4k
+  # Optional 4K UHD Master or manual concurrency override (Track 1 Remotion)
+  npx tsx scripts/render-book.ts --book <book-slug> --format all --resolution 4k --concurrency 4
   ```
 * Deliverables:
   * `stories/<book-slug>/exports/id/<book-slug>-16x9.mp4` & `-9x16.mp4`
