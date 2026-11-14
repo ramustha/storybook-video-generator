@@ -1,0 +1,37 @@
+scripts/pack-edu-motion-story.ts
+  698ac31901cd73e0 389-391,402-404,414,416-419,422,425-426,429
+src/remotion/components/KineticSubtitles.tsx
+  698ac31901cd73e0 16-17,63-64,66,68-72,84,87-89,98,109-113,121-122,157-163,167,170,178-180,182,185-187,189,192,199-203,208-213,230-232,240,245,252-254,260,262-265
+src/remotion/components/MoralScene.tsx
+  698ac31901cd73e0 138,146-149,268,271-272,283-286,292,294,307-308,314-315,321-323,328,338-340,342,357
+src/remotion/components/StoryScene.tsx
+  698ac31901cd73e0 37,41,44,46,48,50,54,56-58,78,80,185,189,192,194,196,198,202,204-206,212,216,219-220
+src/remotion/components/OutroScene.tsx
+  698ac31901cd73e0 143,148-150,154,163,172,192,199,214,490
+src/remotion/components/CoverScene.tsx
+  698ac31901cd73e0 61,64-65,67-68,72-73,75-76,92-93
+src/remotion/components/ProceduralIllustration.tsx
+  698ac31901cd73e0 41-44
+src/remotion/components/StorybookVideoComposition.tsx
+  698ac31901cd73e0 183,187-190,195,197-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "3fc2413ac2c0cb9fc536cb73011648f872527db2",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 167,
+      "total_deletions": 140,
+      "accepted_lines": 166,
+      "overriden_lines": 0
+    }
+  }
+}
