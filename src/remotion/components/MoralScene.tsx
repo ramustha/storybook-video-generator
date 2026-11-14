@@ -70,13 +70,13 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
         fontFamily: "'Fredoka', 'Quicksand', system-ui, -apple-system, sans-serif",
       }}
     >
-      {/* Layer 1: Ambient Blurred Storybook Backdrop */}
+      {/* Layer 1: Ambient Blurred Storybook Backdrop (Static scale so blur caches once) */}
       {heroImgSrc ? (
         <div
           style={{
             position: "absolute",
             inset: 0,
-            transform: `scale(${bgScale})`,
+            transform: "scale(1.18)",
             filter: "blur(44px) brightness(0.35) saturate(1.4)",
             zIndex: 1,
           }}

@@ -197,7 +197,6 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({
       <div
         style={{
           background: "rgba(8, 13, 26, 0.94)",
-          backdropFilter: "blur(22px)",
           border: `2.5px solid ${activeSpeakerColor}75`,
           borderRadius: "28px",
           padding: isVertical ? "22px 32px" : "20px 42px",
