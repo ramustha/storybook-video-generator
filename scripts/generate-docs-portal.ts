@@ -2736,7 +2736,6 @@ const indexHtmlContent = `<!DOCTYPE html>
 
     @media (max-width: 768px) {
       html, body { max-width: 100%; overflow-x: hidden; }
-      body { padding-bottom: 68px; }
       .container { max-width: 100%; overflow-x: clip; padding: 0.65rem 0.75rem; }
       .brand-heading h1 { font-size: 1.08rem; }
       .nav-tab-btn { flex-shrink: 0; white-space: nowrap; }
@@ -2772,23 +2771,6 @@ const indexHtmlContent = `<!DOCTYPE html>
       .filter-chip, .filter-label, .filter-select { flex-shrink: 0; }
       .modal-window { width: 96vw; max-width: 96vw; margin: 0.5rem; }
       footer { flex-direction: column; align-items: flex-start; }
-      .mobile-bottom-nav {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.25rem;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 60;
-        background: rgba(17, 24, 39, 0.94);
-        border-top: 1px solid var(--card-border);
-        padding: 0.35rem 0.45rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
-        backdrop-filter: blur(16px);
-      }
-      [data-theme="light"] .mobile-bottom-nav {
-        background: rgba(255, 255, 255, 0.96);
-      }
     }
 
     @media (max-width: 480px) {
@@ -2810,49 +2792,27 @@ const indexHtmlContent = `<!DOCTYPE html>
           </div>
         </div>
         <div class="header-actions">
-          <span class="status-badge status-pipeline" id="pipeline-header-badge" onclick="switchMainTab('timeline'); document.getElementById('pipelineMonitorSection')?.scrollIntoView({behavior: 'smooth'});" title="Click to view Live Pipeline Monitor">
-            <span class="status-dot pulsing" style="background: #38bdf8;"></span>
-            <span id="pipelineHeaderStatusText">⚡ Next: Loading...</span>
-          </span>
           <span class="status-badge status-live" id="d1-status-pill" onclick="syncCatalog(true)" title="Click to refresh data from Cloudflare D1">
             <span class="status-dot"></span>
             <span id="d1StatusText">⚡ Cloudflare D1</span>
           </span>
           <button class="btn-action" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark mode">🌓 Theme</button>
-          <button class="btn-action" onclick="exportActiveCsv()" title="Download current view in CSV format">📥 CSV</button>
-          <button class="btn-action btn-accent" onclick="exportActiveJson()" title="Download structured JSON dataset">📋 JSON</button>
         </div>
-      </div>
-
-      <div class="channel-strip">
-        <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Official Channels:</span>
-        <a href="https://www.youtube.com/@zayn.storybook" target="_blank" rel="noopener noreferrer" class="channel-pill yt">
-          <span>📺</span> YouTube (@zayn.storybook)
-        </a>
-        <a href="https://www.facebook.com/1473240609201601" target="_blank" rel="noopener noreferrer" class="channel-pill fb">
-          <span>📘</span> Facebook Page
-        </a>
-        <a href="https://www.instagram.com/zayn.storybook" target="_blank" rel="noopener noreferrer" class="channel-pill ig">
-          <span>📸</span> Instagram (@zayn.storybook)
-        </a>
-        <a href="https://github.com/ramustha/storybook-video-generator" target="_blank" rel="noopener noreferrer" class="channel-pill gh">
-          <span>💻</span> GitHub
-        </a>
       </div>
     </header>
 
     <!-- Main Navigation View Switcher (Tabs) -->
     <nav class="main-nav-tabs">
-      <button class="nav-tab-btn active" id="tabCatalogBtn" onclick="switchMainTab('catalog')">
-        <span>📚</span> Published Video Assets
-        <span class="tab-badge" id="tabCatalogCount">${initialTotal}</span>
-      </button>
-      <button class="nav-tab-btn" id="tabTimelineBtn" onclick="switchMainTab('timeline')">
-        <span>📅</span> Release Roadmap
+      <button class="nav-tab-btn active" id="tabTimelineBtn" onclick="switchMainTab('timeline')">
+        <span>📅</span> Schedule
         <span class="tab-badge" id="tabTimelineBadge">${initialCalCompleted}/${initialCalTotal} (${initialCalProgress}%)</span>
       </button>
+      <button class="nav-tab-btn" id="tabCatalogBtn" onclick="switchMainTab('catalog')">
+        <span>📚</span> Assets
+        <span class="tab-badge" id="tabCatalogCount">${initialTotal}</span>
+      </button>
       <button class="nav-tab-btn" id="tabAnalyticsBtn" onclick="switchMainTab('analytics')">
-        <span>📊</span> Analytics & Insights
+        <span>📊</span> Analytics
         <span class="tab-badge" id="tabAnalyticsBadge">${initialTotalViews.toLocaleString()} views</span>
       </button>
     </nav>
@@ -2860,41 +2820,7 @@ const indexHtmlContent = `<!DOCTYPE html>
     <!-- =========================================================================
          SECTION 1: PUBLISHED ASSETS CATALOG
          ========================================================================= -->
-    <div id="catalogViewSection">
-      <!-- Stats KPI Section -->
-      <section class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-title">Total Publications</div>
-          <div class="stat-value" id="kpiTotal">${initialTotal}</div>
-          <div class="stat-desc">Published & verified assets</div>
-        </div>
-        <div class="stat-card" style="border-color: rgba(56, 189, 248, 0.3);">
-          <div class="stat-title">Total Live Views</div>
-          <div class="stat-value" id="kpiTotalViews" style="color: #38bdf8;">${initialTotalViews.toLocaleString()}</div>
-          <div class="stat-desc">Cross-Platform Weekly Harvest</div>
-        </div>
-        <div class="stat-card" style="border-color: rgba(236, 72, 153, 0.3);">
-          <div class="stat-title">Total Reactions</div>
-          <div class="stat-value" id="kpiTotalLikes" style="color: #f472b6;">${initialTotalLikes.toLocaleString()}</div>
-          <div class="stat-desc">Likes & Audience Reactions</div>
-        </div>
-        <div class="stat-card yt">
-          <div class="stat-title">YouTube Videos</div>
-          <div class="stat-value" id="kpiYt">${initialYt}</div>
-          <div class="stat-desc">Full HD, Shorts & Marathons</div>
-        </div>
-        <div class="stat-card fb">
-          <div class="stat-title">Facebook Videos</div>
-          <div class="stat-value" id="kpiFb">${initialFb}</div>
-          <div class="stat-desc">Watch Videos, Reels & Specials</div>
-        </div>
-        <div class="stat-card ig">
-          <div class="stat-title">Instagram Reels</div>
-          <div class="stat-value" id="kpiIg">${initialIg}</div>
-          <div class="stat-desc">Bilingual Reels (9:16)</div>
-        </div>
-      </section>
-
+    <div id="catalogViewSection" style="display: none;">
       <!-- Toolbar Filters -->
       <section class="toolbar">
         <div class="search-row">
@@ -2904,13 +2830,7 @@ const indexHtmlContent = `<!DOCTYPE html>
           </div>
           <div class="view-toggles">
             <button id="viewGroupedBtn" class="view-btn active" onclick="setViewMode('grouped')">
-              <span>📦</span> Ratio Hub
-            </button>
-            <button id="viewStoryBtn" class="view-btn" onclick="setViewMode('story')">
-              <span>📖</span> Story Hub
-            </button>
-            <button id="viewCardBtn" class="view-btn" onclick="setViewMode('card')">
-              <span>⊞</span> All Cards
+              <span>📖</span> Story Cards
             </button>
             <button id="viewTableBtn" class="view-btn" onclick="setViewMode('table')">
               <span>☰</span> Table
@@ -2990,7 +2910,7 @@ const indexHtmlContent = `<!DOCTYPE html>
     <!-- =========================================================================
          SECTION 2: 30-DAY RELEASE TIMELINE & PRODUCTION PROGRESS
          ========================================================================= -->
-    <div id="timelineViewSection" style="display: none;">
+    <div id="timelineViewSection">
       <!-- Timeline Progress Overview Banner -->
       <div class="timeline-progress-banner">
         <section class="stats-grid" style="margin-bottom: 0.6rem;">
@@ -3100,11 +3020,6 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-time-tag">Daily 07:00</span>
             </div>
             <div class="stage-name">📦 Asset Pre-render Buffer</div>
-            <div class="stage-desc">Pre-renders 1080p landscape & vertical MP4s and caches them to Cloudflare R2 bucket 48h in advance.</div>
-            <div class="stage-channels">
-              <span class="stage-channel-pill">☁️ Cloudflare R2</span>
-              <span class="stage-channel-pill">⚡ Zero Runner Delay</span>
-            </div>
             <div id="stageBufferStatus" class="stage-status-pill queued">⏳ Checking Buffer...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Daily 07:00 WIB</div>
           </div>
@@ -3116,12 +3031,6 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-time-tag">Daily 07:15 WIB</span>
             </div>
             <div class="stage-name">📣 Daily Bilingual Teaser</div>
-            <div class="stage-desc">Publishes unified morning carousel announcement ("Menu Dongeng Hari Ini") covering both EN & ID slots.</div>
-            <div class="stage-channels">
-              <span class="stage-channel-pill">📸 IG Carousel (4:5)</span>
-              <span class="stage-channel-pill">📘 FB Multi-Photo</span>
-              <span class="stage-channel-pill">🧵 Threads</span>
-            </div>
             <div id="stageAnnounceStatus" class="stage-status-pill queued">⏳ Checking Status...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageAnnounceNextText">Single Teaser per Day</div>
           </div>
@@ -3133,12 +3042,6 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-time-tag">Daily 08:30 WIB</span>
             </div>
             <div class="stage-name">🌅 Morning Edu-Story (EN)</div>
-            <div class="stage-desc">English educational story video published across global channels in vertical and landscape formats.</div>
-            <div class="stage-channels">
-              <span class="stage-channel-pill">📺 YT Shorts & 16:9</span>
-              <span class="stage-channel-pill">📘 FB Reels & Video</span>
-              <span class="stage-channel-pill">📸 IG Reels</span>
-            </div>
             <div id="stageMorningStatus" class="stage-status-pill queued">⏳ Checking Status...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageMorningNextText">Daily Morning Slot</div>
           </div>
@@ -3150,29 +3053,8 @@ const indexHtmlContent = `<!DOCTYPE html>
               <span class="stage-time-tag">Daily 19:00 WIB</span>
             </div>
             <div class="stage-name">🌙 Prime Bedtime Story (ID)</div>
-            <div class="stage-desc">Indonesian calming bedtime narration with ambient acoustic foley and bilingual subtitles.</div>
-            <div class="stage-channels">
-              <span class="stage-channel-pill">📺 YT Landscape & Shorts</span>
-              <span class="stage-channel-pill">📘 FB Watch & Reels</span>
-              <span class="stage-channel-pill">📸 IG Reels</span>
-            </div>
             <div id="stageBedtimeStatus" class="stage-status-pill queued">⏳ Checking Status...</div>
             <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBedtimeNextText">Daily Prime Slot</div>
-          </div>
-        </div>
-
-        <!-- Infrastructure & Quick CLI Helper Strip -->
-        <div class="pipeline-infra-bar">
-          <div class="infra-badges-group">
-            <span class="infra-tag">⚡ Dispatcher: <strong>Cloudflare Worker Cron</strong></span>
-            <span class="infra-tag">🗄️ Database: <strong>D1 SQLite (60s sync)</strong></span>
-            <span class="infra-tag">☁️ Video CDN: <strong>Cloudflare R2 Bucket</strong></span>
-          </div>
-          <div class="cli-cheat-group">
-            <span style="font-size: 0.66rem; color: var(--text-dim);">CLI Helpers:</span>
-            <code class="cli-pill" title="Check scheduled slots for today">npm run calendar:today</code>
-            <code class="cli-pill" title="Check R2 pre-render buffer status">npm run buffer:prerender -- --status</code>
-            <code class="cli-pill" title="Trigger daily broadcast pipeline manually">npm run broadcast:daily</code>
           </div>
         </div>
       </section>
@@ -3185,9 +3067,6 @@ const indexHtmlContent = `<!DOCTYPE html>
             <input type="text" id="timelineSearchInput" class="search-input" placeholder="Search scheduled story, date, theme, or slot type..." oninput="handleTimelineSearch()">
           </div>
           <div class="view-toggles">
-            <button class="view-btn" onclick="jumpToTodaySchedule()" title="Scroll directly to Today's broadcast slots">
-              <span>🎯</span> Today
-            </button>
             <button id="viewCalFlowBtn" class="view-btn active" onclick="setTimelineViewMode('flow')">
               <span>⊞</span> Day Cards
             </button>
@@ -3213,12 +3092,6 @@ const indexHtmlContent = `<!DOCTYPE html>
           <button class="filter-chip active" data-cal-filter="lang" data-value="all" onclick="setTimelineLangFilter('all', this)">All</button>
           <button class="filter-chip" data-cal-filter="lang" data-value="id" onclick="setTimelineLangFilter('id', this)">🇮🇩 ID</button>
           <button class="filter-chip" data-cal-filter="lang" data-value="en" onclick="setTimelineLangFilter('en', this)">🇬🇧 EN</button>
-
-          <span class="filter-label" style="margin-left: 0.5rem;">Readiness:</span>
-          <button class="filter-chip active" data-cal-filter="readiness" data-value="all" onclick="setTimelineReadinessFilter('all', this)">All</button>
-          <button class="filter-chip" data-cal-filter="readiness" data-value="buffered" onclick="setTimelineReadinessFilter('buffered', this)">🟢 R2 Ready</button>
-          <button class="filter-chip" data-cal-filter="readiness" data-value="assets" onclick="setTimelineReadinessFilter('assets', this)">🟡 Assets Ready</button>
-          <button class="filter-chip" data-cal-filter="readiness" data-value="queued" onclick="setTimelineReadinessFilter('queued', this)">⏳ Queued</button>
         </div>
       </section>
 
@@ -3369,26 +3242,6 @@ const indexHtmlContent = `<!DOCTYPE html>
     </footer>
   </div>
 
-  <!-- Sticky Mobile Bottom Navigation -->
-  <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
-    <button class="mobile-nav-item active" id="mobNavCatalog" onclick="switchMainTab('catalog')">
-      <span>📚</span>
-      <span>Assets</span>
-    </button>
-    <button class="mobile-nav-item" id="mobNavTimeline" onclick="switchMainTab('timeline')">
-      <span>📅</span>
-      <span>Schedule</span>
-    </button>
-    <button class="mobile-nav-item" id="mobNavAnalytics" onclick="switchMainTab('analytics')">
-      <span>📊</span>
-      <span>Analytics</span>
-    </button>
-    <button class="mobile-nav-item" id="mobNavToday" onclick="jumpToTodaySchedule()">
-      <span>🎯</span>
-      <span>Today</span>
-    </button>
-  </nav>
-
   <script>
     // Embedded Snapshots
     const BUILD_AUDIT_SNAPSHOT = ${JSON.stringify(auditRecords)};
@@ -3480,7 +3333,7 @@ ${browserSyncScript}
       return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    let activeTab = 'catalog'; // 'catalog' | 'timeline' | 'analytics'
+    let activeTab = 'timeline'; // 'timeline' | 'catalog' | 'analytics'
 
     let state = {
       searchQuery: '',
@@ -3508,10 +3361,6 @@ ${browserSyncScript}
       document.getElementById('tabCatalogBtn')?.classList.toggle('active', tab === 'catalog');
       document.getElementById('tabTimelineBtn')?.classList.toggle('active', tab === 'timeline');
       document.getElementById('tabAnalyticsBtn')?.classList.toggle('active', tab === 'analytics');
-
-      document.getElementById('mobNavCatalog')?.classList.toggle('active', tab === 'catalog');
-      document.getElementById('mobNavTimeline')?.classList.toggle('active', tab === 'timeline');
-      document.getElementById('mobNavAnalytics')?.classList.toggle('active', tab === 'analytics');
 
       document.getElementById('catalogViewSection').style.display = tab === 'catalog' ? 'block' : 'none';
       document.getElementById('timelineViewSection').style.display = tab === 'timeline' ? 'block' : 'none';
@@ -3792,11 +3641,6 @@ ${browserSyncScript}
 
     const savedTheme = localStorage.getItem('zayn_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
-
-    const savedTab = localStorage.getItem('zayn_main_tab');
-    if (savedTab === 'timeline' || savedTab === 'analytics') {
-      switchMainTab(savedTab);
-    }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -4080,15 +3924,6 @@ ${browserSyncScript}
                 <span>Updated:</span>
                 <span>\${formatDate(group.latestPublishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>
               </div>
-            </div>
-
-            <div class="card-actions">
-              <button class="btn-card" onclick="openPreviewModal('\${group.primaryVideoId}')" title="Play Preview">
-                ▶
-              </button>
-              <button class="btn-card primary" onclick="filterCatalogByStory('\${group.storySlug}')" title="Filter Story Releases">
-                🔍 Filter (\${group.publications.length})
-              </button>
             </div>
           </div>
         </div>
