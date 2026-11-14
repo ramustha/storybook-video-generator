@@ -135,7 +135,7 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
         );
       })}
 
-      {/* Layer 4: Main Centerpiece Moral Container */}
+      {/* Layer 4: Main Centerpiece Moral Container (Positioned inside Universal 9:16 Safe Zone) */}
       <div
         style={{
           zIndex: 10,
@@ -143,9 +143,10 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          maxWidth: isVertical ? "92%" : "1180px",
-          width: isVertical ? "92%" : "1180px",
-          padding: isVertical ? "0" : "0 24px",
+          maxWidth: isVertical ? "100%" : "1220px",
+          width: isVertical ? "100%" : "1220px",
+          padding: isVertical ? "0 104px 220px 104px" : "0 24px",
+          boxSizing: "border-box",
         }}
       >
         {/* Playful Top Pill Badge */}
@@ -264,11 +265,11 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
             {/* Big Headline Lesson */}
             <h2
               style={{
-                fontSize: isVertical ? "26px" : "34px",
+                fontSize: isVertical ? "34px" : "40px",
                 fontWeight: 900,
                 color: "#92400E",
-                margin: "0 0 14px 0",
-                lineHeight: 1.25,
+                margin: "0 0 16px 0",
+                lineHeight: 1.22,
                 letterSpacing: "-0.5px",
                 textShadow: "0 1px 2px rgba(254, 240, 138, 0.6)",
               }}
@@ -279,18 +280,18 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
             {/* Kinetic Spoken Narration (Read-Aloud Synchronized Box) */}
             <div
               style={{
-                background: "rgba(254, 252, 232, 0.9)",
-                borderRadius: "22px",
-                border: "2px dashed #F59E0B",
-                padding: isVertical ? "16px 20px" : "18px 26px",
+                background: "rgba(254, 252, 232, 0.94)",
+                borderRadius: "24px",
+                border: "2.5px dashed #F59E0B",
+                padding: isVertical ? "20px 24px" : "22px 30px",
                 width: "100%",
                 boxSizing: "border-box",
                 display: "flex",
                 flexWrap: "wrap",
                 justifyContent: isVertical ? "center" : "flex-start",
-                gap: isVertical ? "6px 8px" : "8px 10px",
+                gap: isVertical ? "8px 11px" : "10px 13px",
                 boxShadow: "inset 0 2px 4px rgba(245, 158, 11, 0.08)",
-                marginBottom: "16px",
+                marginBottom: "18px",
               }}
             >
               {words && words.length > 0 ? (
@@ -303,28 +304,28 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
                   if (isActive) {
                     const wordDuration = Math.max(0.08, item.end - item.start);
                     const progress = Math.min(1, Math.max(0, (currentTime - item.start) / wordDuration));
-                    bounceY = -Math.sin(progress * Math.PI) * 5;
-                    wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.18;
+                    bounceY = -Math.sin(progress * Math.PI) * 6;
+                    wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.16;
                   }
 
                   const wordColor = isActive
                     ? "#B45309" // Rich warm amber when spoken
                     : isPast
-                    ? "#1E293B" // Solid crisp slate when already spoken
-                    : "#64748B"; // Soft readable gray for upcoming words
+                    ? "#0F172A" // Solid crisp slate when already spoken
+                    : "#475569"; // Readable slate for upcoming words
 
                   return (
                     <span
                       key={`${item.word}-${idx}`}
                       style={{
-                        fontSize: isVertical ? "21px" : "25px",
-                        fontWeight: isActive ? 900 : isPast ? 750 : 600,
-                        lineHeight: 1.35,
+                        fontSize: isVertical ? "32px" : "34px",
+                        fontWeight: isActive ? 900 : isPast ? 800 : 700,
+                        lineHeight: 1.34,
                         color: wordColor,
                         transform: `translateY(${bounceY}px) scale(${wordScale})`,
                         display: "inline-block",
                         transition: "transform 0.05s ease-out, color 0.1s ease",
-                        textShadow: isActive ? "0 0 10px rgba(245, 158, 11, 0.4)" : "none",
+                        textShadow: isActive ? "0 0 12px rgba(245, 158, 11, 0.45)" : "none",
                       }}
                     >
                       {item.word}
@@ -334,11 +335,11 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
               ) : (
                 <p
                   style={{
-                    fontSize: isVertical ? "20px" : "24px",
-                    fontWeight: 700,
-                    color: "#1E293B",
+                    fontSize: isVertical ? "30px" : "32px",
+                    fontWeight: 800,
+                    color: "#0F172A",
                     margin: 0,
-                    lineHeight: 1.4,
+                    lineHeight: 1.38,
                   }}
                 >
                   {scene.audio?.text || "Selalu berbuat baik dan sayangi sesama!"}
@@ -353,7 +354,7 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
                 alignItems: "center",
                 gap: "8px",
                 color: "#B45309",
-                fontSize: isVertical ? "16px" : "18px",
+                fontSize: isVertical ? "20px" : "22px",
                 fontWeight: 800,
                 letterSpacing: "0.2px",
               }}

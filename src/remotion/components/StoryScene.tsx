@@ -34,25 +34,28 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
       >
         <ProceduralIllustration scene={scene} book={book} isVertical={isVertical} />
 
-        {/* Top Story & Scene Badge */}
+        {/* Top Story & Scene Badge (Positioned below 200px top platform UI bar in Portrait) */}
         <div
           style={{
             position: "absolute",
-            top: isVertical ? "50px" : "22px",
+            top: isVertical ? "265px" : "32px",
             left: "50%",
             transform: "translateX(-50%)",
-            background: "rgba(15, 23, 42, 0.85)",
+            background: "rgba(15, 23, 42, 0.9)",
             backdropFilter: "blur(14px)",
-            border: "1.5px solid rgba(251, 191, 36, 0.4)",
+            border: "2px solid rgba(251, 191, 36, 0.55)",
             borderRadius: "9999px",
-            padding: isVertical ? "6px 20px" : "5px 18px",
+            padding: isVertical ? "10px 30px" : "6px 20px",
             color: "#FEF08A",
-            fontSize: isVertical ? "18px" : "16px",
+            fontSize: isVertical ? "24px" : "18px",
             fontWeight: 800,
             letterSpacing: "0.6px",
             zIndex: 40,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.55)",
             whiteSpace: "nowrap",
+            maxWidth: "88%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {book.title} • Adegan {scene.index || 1}
@@ -72,9 +75,9 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
             left: 0,
             right: 0,
             bottom: 0,
-            height: isVertical ? "480px" : "240px",
+            height: isVertical ? "760px" : "300px",
             background:
-              "linear-gradient(to top, rgba(2, 6, 23, 0.85) 0%, rgba(2, 6, 23, 0.45) 60%, transparent 100%)",
+              "linear-gradient(to top, rgba(2, 6, 23, 0.9) 0%, rgba(2, 6, 23, 0.55) 65%, transparent 100%)",
             pointerEvents: "none",
             zIndex: 42,
           }}
@@ -179,39 +182,42 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
             }}
           />
 
-          {/* Layer 3: Top Story & Scene Badge */}
+          {/* Layer 3: Top Story & Scene Badge (Safely below 0-200px top platform UI bar) */}
           <div
             style={{
               position: "absolute",
-              top: "70px",
+              top: "265px",
               left: "50%",
               transform: "translateX(-50%)",
-              background: "rgba(15, 23, 42, 0.85)",
+              background: "rgba(15, 23, 42, 0.9)",
               backdropFilter: "blur(14px)",
-              border: "1.5px solid rgba(251, 191, 36, 0.4)",
+              border: "2px solid rgba(251, 191, 36, 0.55)",
               borderRadius: "9999px",
-              padding: "8px 24px",
+              padding: "10px 30px",
               color: "#FEF08A",
-              fontSize: "20px",
+              fontSize: "24px",
               fontWeight: 800,
               letterSpacing: "0.6px",
               zIndex: 30,
-              boxShadow: "0 8px 20px rgba(0,0,0,0.5)",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.55)",
               whiteSpace: "nowrap",
+              maxWidth: "88%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             {book.title} • Adegan {scene.index}
           </div>
 
-          {/* Layer 4: Floating Uncropped 16:9 Centerpiece Illustration (100% Visible) */}
+          {/* Layer 4: Floating Uncropped 16:9 Centerpiece Illustration (Y: 350px -> 904px, forming a cohesive unit with subtitles at Y: 945px) */}
           <div
             style={{
               position: "absolute",
-              top: "20%",
+              top: "350px",
               left: "50%",
               transform: `translateX(-50%) scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-              width: "1000px",
-              height: "562px", // Exact 16:9 ratio (1000 x 562.5)
+              width: "984px",
+              height: "554px", // Exact 16:9 ratio
               borderRadius: "20px",
               overflow: "hidden",
               border: "3px solid rgba(251, 191, 36, 0.5)",

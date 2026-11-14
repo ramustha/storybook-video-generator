@@ -140,16 +140,18 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
         </div>
       ))}
 
-      {/* Layer 4: Main Content Container */}
+      {/* Layer 4: Main Content Container (Positioned inside Universal 9:16 Safe Zone above subtitles & platform UI) */}
       <div
         style={{
           zIndex: 10,
           transform: `scale(${entrance}) translateY(${floatY}px)`,
-          width: isVertical ? "92%" : "1380px",
+          width: isVertical ? "100%" : "1380px",
+          padding: isVertical ? "0 104px 480px 104px" : "0",
+          boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: isVertical ? "28px" : "32px",
+          gap: isVertical ? "20px" : "32px",
         }}
       >
         {/* Playful Top Pill Badge */}
@@ -158,7 +160,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
             background: "linear-gradient(135deg, #38BDF8 0%, #0284C7 100%)",
             border: "3.5px solid #FFFFFF",
             borderRadius: "9999px",
-            padding: isVertical ? "12px 32px" : "14px 44px",
+            padding: isVertical ? "10px 28px" : "14px 44px",
             boxShadow: "0 10px 30px rgba(2, 132, 199, 0.5), 0 0 25px rgba(56, 189, 248, 0.4)",
             display: "flex",
             alignItems: "center",
@@ -167,7 +169,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
         >
           <span
             style={{
-              fontSize: isVertical ? "22px" : "28px",
+              fontSize: isVertical ? "20px" : "28px",
               fontWeight: 900,
               color: "#FFFFFF",
               letterSpacing: "1.5px",
@@ -187,14 +189,14 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
             flexDirection: isVertical ? "column" : "row",
             alignItems: "center",
             justifyContent: "center",
-            gap: isVertical ? "32px" : "48px",
+            gap: isVertical ? "20px" : "48px",
           }}
         >
           {/* Card 1: Next Video Preview Frame (Pixel-Matched to YouTube End Screen 16:9 Element) */}
           <div
             style={{
               width: isVertical ? "100%" : "680px",
-              height: isVertical ? "420px" : "382px",
+              height: isVertical ? "320px" : "382px",
               background: "linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 249, 255, 0.92) 100%)",
               borderRadius: "32px",
               border: "4px solid #38BDF8",
@@ -209,7 +211,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
             <div
               style={{
                 width: "100%",
-                height: isVertical ? "300px" : "270px",
+                height: isVertical ? "225px" : "270px",
                 position: "relative",
                 overflow: "hidden",
                 backgroundColor: "#0B0F19",
@@ -485,7 +487,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({ scene, book, isVertical,
 
       {/* Layer 5: Spoken Audio Subtitles (When voiceover is present) */}
       {words && words.length > 0 && (
-        <KineticSubtitles words={words} isVertical={isVertical} />
+        <KineticSubtitles words={words} isVertical={isVertical} verticalBottom="440px" />
       )}
     </div>
   );

@@ -58,22 +58,22 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
     scene.visual?.isPortrait === true ||
     (typeof book.coverAspectRatio === "number" && book.coverAspectRatio < 1.0);
 
-  // Scaled up to maximize screen presence and minimize empty space (Best practice: 65-75% screen fill)
+  // Scaled to fit inside the Universal 9:16 Safe Zone (Y: 170px -> 1480px) without touching top/bottom platform UI
   const bookWidth = isCoverPortrait
     ? isVertical
-      ? 860
-      : 560
+      ? 680
+      : 540
     : isVertical
-      ? 1000
-      : 1160;
+      ? 920
+      : 1120;
 
   const bookHeight = isCoverPortrait
     ? isVertical
-      ? 1180
-      : 760
+      ? 920
+      : 720
     : isVertical
-      ? 562
-      : 652;
+      ? 518
+      : 630;
 
   const isEn = book.language?.startsWith("en");
 
@@ -89,6 +89,8 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        padding: isVertical ? "165px 48px 390px 48px" : "0",
+        boxSizing: "border-box",
       }}
     >
       {/* Ambient Blurred Background (Zero-Crop Pillarbox Canvas) */}

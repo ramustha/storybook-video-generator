@@ -13,6 +13,8 @@ export interface WordTiming {
 interface KineticSubtitlesProps {
   words: WordTiming[];
   isVertical: boolean;
+  verticalTop?: string;
+  verticalBottom?: string;
 }
 
 const SPEAKER_ICONS: Record<string, string> = {
@@ -58,14 +60,16 @@ const SPEAKER_ICONS: Record<string, string> = {
 };
 
 /**
- * Groups words into natural, coherent sentence / thought units.
- * Never chops sentences arbitrarily into 4-5 word slices.
- * Displays all context together while maintaining word-by-word voiceover synchronization.
+ * Groups words into natural, coherent sentence / thought units sized for
+ * large, readable 2-3 line subtitle cards across Portrait (9:16) and Landscape (16:9).
  */
-function buildContextGroups(words: WordTiming[]): WordTiming[][] {
+function buildContextGroups(words: WordTiming[], isVertical: boolean): WordTiming[][] {
   if (!words || words.length === 0) return [];
-  // For standard scenes up to 18 words, show the entire sentence/clause context at once
-  if (words.length <= 18) {
+  const maxGroupWords = isVertical ? 10 : 13;
+  const minClauseSplit = isVertical ? 5 : 6;
+  const minSentenceSplit = isVertical ? 4 : 5;
+
+  if (words.length <= maxGroupWords) {
     return [words];
   }
 
@@ -77,14 +81,12 @@ function buildContextGroups(words: WordTiming[]): WordTiming[][] {
     currentGroup.push(w);
 
     const isSentenceEnd = /[.!?…]+$/.test(w.word.trim());
-    const isClauseBoundary = /[,;:]+$/.test(w.word.trim());
+    const isClauseBoundary = /[,;:—–-]+$/.test(w.word.trim());
 
-    // Prefer splitting at natural sentence ends (min 5 words) or clause boundaries (min 8 words)
-    // Avoid arbitrary splits in the middle of clauses unless group exceeds 22 words
     const shouldSplit =
-      (isSentenceEnd && currentGroup.length >= 5) ||
-      (isClauseBoundary && currentGroup.length >= 8) ||
-      currentGroup.length >= 22;
+      (isSentenceEnd && currentGroup.length >= minSentenceSplit) ||
+      (isClauseBoundary && currentGroup.length >= minClauseSplit) ||
+      currentGroup.length >= maxGroupWords;
 
     if (shouldSplit && i < words.length - 1) {
       groups.push(currentGroup);
@@ -93,7 +95,7 @@ function buildContextGroups(words: WordTiming[]): WordTiming[][] {
   }
 
   if (currentGroup.length > 0) {
-    if (groups.length > 0 && currentGroup.length <= 4) {
+    if (groups.length > 0 && currentGroup.length <= 3) {
       // Merge small tail into the preceding group to avoid orphaned single words
       groups[groups.length - 1].push(...currentGroup);
     } else {
@@ -104,15 +106,20 @@ function buildContextGroups(words: WordTiming[]): WordTiming[][] {
   return groups.length > 0 ? groups : [words];
 }
 
-export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVertical }) => {
+export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({
+  words,
+  isVertical,
+  verticalTop,
+  verticalBottom,
+}) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const currentTime = frame / fps;
 
   if (!words || words.length === 0) return null;
 
-  // Build context-preserving sentence groups
-  const groups = useMemo(() => buildContextGroups(words), [words]);
+  // Build context-preserving sentence groups sized for large typography
+  const groups = useMemo(() => buildContextGroups(words, isVertical), [words, isVertical]);
 
   // Find the active group corresponding to current voiceover playback time
   let activeGroupIdx = groups.findIndex((g) => {
@@ -147,15 +154,20 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
         position: "absolute",
         left: 0,
         right: 0,
-        // Positioned safely above YouTube Shorts bottom UI (0-220px) and comfortably in Landscape lower third
-        bottom: isVertical ? "280px" : "28px",
+        // Universal Multi-Platform Safe Zone:
+        // - Portrait (1080x1920): anchored at top 945px (41px directly below the 16:9 illustration ending at Y=904px),
+        //   so 1-3 line subtitles sit cohesively at Y=945..1360px — completely clear of bottom platform UI (Y=1480..1920px)
+        //   and right-side Like/Comment/Share buttons (symmetric 104px side margins).
+        // - Landscape (1920x1080): bottom 56px clears YouTube/FB player scrubber bar and 5% SMPTE TV title-safe margin.
+        top: isVertical ? (verticalBottom ? "auto" : (verticalTop || "945px")) : "auto",
+        bottom: isVertical ? (verticalBottom || "auto") : "56px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: isVertical ? "0 24px" : "0 40px",
+        padding: isVertical ? "0 104px" : "0 80px",
         zIndex: 50,
         pointerEvents: "none",
-        gap: "10px",
+        gap: isVertical ? "14px" : "12px",
       }}
     >
       {/* Dynamic Speaker Tag Badge */}
@@ -163,40 +175,42 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "8px",
-          background: "rgba(10, 15, 29, 0.92)",
-          border: `1.5px solid ${activeSpeakerColor}`,
+          gap: "10px",
+          background: "rgba(8, 13, 26, 0.95)",
+          border: `2.5px solid ${activeSpeakerColor}`,
           borderRadius: "9999px",
-          padding: isVertical ? "5px 18px" : "5px 20px",
+          padding: isVertical ? "8px 26px" : "7px 26px",
           color: activeSpeakerColor,
           fontFamily: "system-ui, -apple-system, sans-serif",
-          fontSize: isVertical ? "17px" : "16px",
-          fontWeight: 800,
-          boxShadow: `0 0 14px ${activeSpeakerColor}40, 0 4px 10px rgba(0,0,0,0.5)`,
+          fontSize: isVertical ? "24px" : "22px",
+          fontWeight: 900,
+          boxShadow: `0 0 18px ${activeSpeakerColor}50, 0 6px 14px rgba(0,0,0,0.65)`,
           textTransform: "uppercase",
-          letterSpacing: "0.8px",
+          letterSpacing: "1px",
         }}
       >
-        <span style={{ fontSize: isVertical ? "19px" : "18px" }}>{speakerIcon}</span>
+        <span style={{ fontSize: isVertical ? "26px" : "24px" }}>{speakerIcon}</span>
         <span>{activeSpeakerName}</span>
       </div>
 
       {/* Full-Context Subtitle Container */}
       <div
         style={{
-          background: "rgba(9, 14, 28, 0.92)",
-          backdropFilter: "blur(20px)",
-          border: `1.5px solid ${activeSpeakerColor}55`,
-          borderRadius: "22px",
-          padding: isVertical ? "14px 22px" : "14px 34px",
+          background: "rgba(8, 13, 26, 0.94)",
+          backdropFilter: "blur(22px)",
+          border: `2.5px solid ${activeSpeakerColor}75`,
+          borderRadius: "28px",
+          padding: isVertical ? "22px 32px" : "20px 42px",
           display: "flex",
           flexWrap: "wrap",
           justifyContent: "center",
           alignItems: "center",
-          rowGap: isVertical ? "8px" : "10px",
-          columnGap: isVertical ? "10px" : "12px",
-          maxWidth: isVertical ? "92%" : "82%",
-          boxShadow: `0 18px 45px rgba(0, 0, 0, 0.75), 0 0 25px ${activeSpeakerColor}15`,
+          rowGap: isVertical ? "12px" : "12px",
+          columnGap: isVertical ? "14px" : "15px",
+          width: isVertical ? "100%" : "auto",
+          maxWidth: isVertical ? "872px" : "86%",
+          boxSizing: "border-box",
+          boxShadow: `0 20px 50px rgba(0, 0, 0, 0.85), 0 0 30px ${activeSpeakerColor}22`,
           transition: "border-color 0.25s ease, box-shadow 0.25s ease",
           textAlign: "center",
         }}
@@ -213,9 +227,9 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
             const wordDuration = Math.max(0.08, item.end - item.start);
             const progress = Math.min(1, Math.max(0, (currentTime - item.start) / wordDuration));
             // Gentle playful spring bounce aligned with speech phonetics
-            bounceY = -Math.sin(progress * Math.PI) * (isVertical ? 6 : 5);
-            wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.16;
-            tiltDeg = (idx % 2 === 0 ? -1.5 : 1.5) * Math.sin(progress * Math.PI);
+            bounceY = -Math.sin(progress * Math.PI) * (isVertical ? 7 : 6);
+            wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.14;
+            tiltDeg = (idx % 2 === 0 ? -1.2 : 1.2) * Math.sin(progress * Math.PI);
           }
 
           const itemColor = item.speakerColor || activeSpeakerColor;
@@ -223,32 +237,32 @@ export const KineticSubtitles: React.FC<KineticSubtitlesProps> = ({ words, isVer
           // Color & Contrast Strategy:
           // Active word: Vibrant glowing speaker accent color
           // Past words: Solid, crisp white (full context preserved)
-          // Upcoming words: Soft translucent white (previewable context)
+          // Upcoming words: High-contrast soft white (0.78 opacity for easy read-ahead)
           const textColor = isActive
             ? itemColor
             : isPast
             ? "#FFFFFF"
-            : "rgba(255, 255, 255, 0.58)";
+            : "rgba(255, 255, 255, 0.78)";
 
           return (
             <span
               key={`${item.word}-${idx}`}
               style={{
                 fontFamily: "system-ui, -apple-system, sans-serif",
-                fontSize: isVertical ? "26px" : "30px",
-                lineHeight: 1.4,
-                fontWeight: isActive ? 900 : isPast ? 750 : 600,
+                fontSize: isVertical ? "48px" : "46px",
+                lineHeight: 1.32,
+                fontWeight: isActive ? 900 : isPast ? 800 : 700,
                 color: textColor,
                 transform: `translateY(${bounceY}px) scale(${wordScale}) rotate(${tiltDeg}deg)`,
                 transition: "transform 0.05s ease-out, color 0.1s ease",
                 display: "inline-block",
                 textShadow: isActive
-                  ? `0 0 16px ${itemColor}B0, 0 2px 6px rgba(0,0,0,0.95)`
+                  ? `0 0 20px ${itemColor}C0, 0 3px 8px rgba(0,0,0,0.98)`
                   : isPast
-                  ? "0 2px 5px rgba(0,0,0,0.9)"
-                  : "0 1px 3px rgba(0,0,0,0.6)",
-                WebkitTextStroke: isActive ? "0.8px rgba(0,0,0,0.7)" : "none",
-                letterSpacing: "0.2px",
+                  ? "0 3px 7px rgba(0,0,0,0.95)"
+                  : "0 2px 5px rgba(0,0,0,0.85)",
+                WebkitTextStroke: isActive ? "1.2px rgba(0,0,0,0.75)" : "none",
+                letterSpacing: "0.3px",
               }}
             >
               {item.word}

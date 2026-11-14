@@ -38,10 +38,10 @@ export const ProceduralIllustration: React.FC<ProceduralIllustrationProps> = ({
   const dogScale = isVertical ? 0.95 : 1.05;
 
   // Layout baseline: elevated cleanly above the lower-third subtitle & story text band
-  // In Landscape (1080p): Ground line sits at bottom 240px (Y = 840px), subtitle sits at bottom 28px - 180px
-  // In Vertical (1920p): Ground line sits at bottom 700px (Y = 1220px), subtitle sits at bottom 280px - 460px
-  const groundBaseline = isVertical ? "700px" : "240px";
-  const floorHeight = isVertical ? "58%" : "42%";
+  // In Landscape (1080p): Ground line sits at bottom 240px (Y = 840px), subtitle sits at bottom 56px - 220px
+  // In Vertical (1920p): Ground line sits at bottom 980px (Y = 940px), subtitle sits at top 945px - 1340px
+  const groundBaseline = isVertical ? "980px" : "240px";
+  const floorHeight = isVertical ? "62%" : "42%";
 
   // =========================================================================
   // SCENE 0: COVER SCENE (Grand Illustrated Storybook Cover)
