@@ -508,13 +508,15 @@ export async function notifyTelegramAnnouncement(
   const captionHtml = lines.join("\n");
 
   let photoUrl = options.photoUrl;
-  if (!photoUrl && options.morningBook) {
+  const fallbackSlug = options.morningBook || options.eveningBook;
+  if (!photoUrl && fallbackSlug) {
+    const fallbackLang = (options.morningBook ? options.morningLang : options.eveningLang)?.toLowerCase() === "en" ? "en" : "id";
     const r2ConfigPath = path.resolve("./config/r2-config.json");
     if (existsSync(r2ConfigPath)) {
       try {
         const r2 = JSON.parse(readFileSync(r2ConfigPath, "utf-8"));
         if (r2.publicDomain) {
-          photoUrl = `${r2.publicDomain}/stories/${options.morningBook}/assets/cover.png`;
+          photoUrl = `${r2.publicDomain}/stories/${fallbackSlug}/exports/${fallbackLang}/thumbnail-popular.png`;
         }
       } catch {}
     }
