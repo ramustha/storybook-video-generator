@@ -1,8 +1,13 @@
 import fs from "fs/promises";
 import { existsSync, readdirSync, readFileSync } from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { spawn } from "child_process";
-import { publishFacebookPhotoPost, publishFacebookMultiPhotoPost } from "./publish-launch-posts";
+import {
+  publishFacebookPhotoPost,
+  publishFacebookMultiPhotoPost,
+  updateFacebookPostMessage,
+} from "./publish-launch-posts";
 import { publishInstagramFeedPhoto, publishInstagramCarousel } from "./publish-instagram-post";
 import { publishThreadsPhotoPost, publishThreadsCarousel, publishThreadsLinkPost } from "./publish-threads";
 import {
@@ -12,8 +17,10 @@ import {
 import { DAILY_CALENDAR_MONTH_1, isFullMotionSlot } from "./content-calendar";
 import { db } from "./lib/db";
 import { pullStory } from "./manage-story-storage";
-import { buildStoryPortalUrl, resolveRelatedPublishedVideos } from "./lib/seo-formatter";
+import { resolveRelatedPublishedVideos } from "./lib/seo-formatter";
 import { loadJsonArraySafe } from "./lib/portal-sync";
+
+export const SOCIAL_YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@zayn.storybook";
 
 export interface AnnouncementOptions {
   bookSlug?: string;
@@ -25,6 +32,7 @@ export interface AnnouncementOptions {
   date?: string;
   dryRun?: boolean;
   force?: boolean;
+  edit?: boolean;
 }
 
 export interface PlatformPublishResult {
@@ -32,6 +40,7 @@ export interface PlatformPublishResult {
   postId?: string;
   url?: string;
   publishedAt?: string;
+  updatedAt?: string;
   sentAt?: string;
   status?: string;
 }
@@ -70,27 +79,106 @@ export function getJakartaHour(): number {
   );
 }
 
-/**
- * Extracts moral lesson with fallback across schema versions.
- */
-function extractMoral(story: any, lang: "id" | "en"): string {
-  if (lang === "id") {
-    if (story.moral?.headlineId) return story.moral.headlineId;
-    const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
-    if (moralScene?.audio?.text) {
-      const cleaned = moralScene.audio.text.replace(/^Pesan moral cerita ini:\s*/i, "").split(".")[0].trim();
-      return cleaned.endsWith("!") ? cleaned : `${cleaned}!`;
-    }
-    return "Belajar kebaikan budi pekerti, kejujuran, dan kehangatan keluarga.";
-  } else {
-    if (story.moral?.headlineEn) return story.moral.headlineEn;
-    const moralScene = story.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
-    if (moralScene?.audio?.en?.text) {
-      const cleaned = moralScene.audio.en.text.replace(/^The moral of the story:\s*/i, "").split(".")[0].trim();
-      return cleaned.endsWith("!") ? cleaned : `${cleaned}!`;
-    }
-    return "Learning kindness, empathy, and family warmth together.";
+function trimText(text: string, maxChars: number): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= maxChars) return clean;
+  const sliced = clean.slice(0, maxChars - 1);
+  const lastPeriod = Math.max(sliced.lastIndexOf(". "), sliced.lastIndexOf("! "), sliced.lastIndexOf("? "));
+  if (lastPeriod >= Math.floor(maxChars * 0.55)) {
+    return sliced.slice(0, lastPeriod + 1).trim();
   }
+  const lastSpace = sliced.lastIndexOf(" ");
+  return `${(lastSpace > 0 ? sliced.slice(0, lastSpace) : sliced).trim()}…`;
+}
+
+/**
+ * Extracts moral lesson (headline + spoken elaboration when available) across schema versions.
+ */
+export function extractMoral(story: any, lang: "id" | "en", includeDetail = true): string {
+  const moralObj = story?.moral || {};
+  const moralScene = story?.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
+  const rawSceneText = lang === "en" ? moralScene?.audio?.en?.text : moralScene?.audio?.text;
+  const cleanedSceneText = rawSceneText
+    ? rawSceneText.replace(/^(Pesan moral cerita ini|The moral of the story)\s*:\s*/i, "").trim()
+    : "";
+
+  const headline = (lang === "id" ? moralObj.headlineId : moralObj.headlineEn)?.trim();
+  const detail = (
+    lang === "id" ? moralObj.spokenId || moralObj.summaryId : moralObj.spokenEn || moralObj.summaryEn
+  )?.trim();
+
+  if (headline) {
+    if (includeDetail && detail && !detail.toLowerCase().includes(headline.toLowerCase())) {
+      const normalized = headline.endsWith("!") || headline.endsWith(".") ? headline : `${headline}!`;
+      return `${normalized} ${detail}`;
+    }
+    if (includeDetail && !detail && cleanedSceneText && !cleanedSceneText.toLowerCase().includes(headline.toLowerCase())) {
+      const normalized = headline.endsWith("!") || headline.endsWith(".") ? headline : `${headline}!`;
+      return trimText(`${normalized} ${cleanedSceneText}`, 220);
+    }
+    return headline;
+  }
+
+  if (cleanedSceneText) {
+    if (includeDetail) return trimText(cleanedSceneText, 220);
+    const first = cleanedSceneText.split(".")[0].trim();
+    return first.endsWith("!") ? first : `${first}!`;
+  }
+
+  return lang === "id"
+    ? "Belajar kebaikan budi pekerti, kejujuran, dan kehangatan keluarga."
+    : "Learning kindness, empathy, and family warmth together.";
+}
+
+/**
+ * Extracts a concise, spoiler-friendly 1-2 sentence story summary from manifest metadata or story scenes.
+ */
+export function extractStorySummary(story: any, lang: "id" | "en", maxChars = 230): string {
+  const explicitSummary = (
+    story?.summary?.[lang] ||
+    story?.synopsis?.[lang] ||
+    story?.description?.[lang]
+  )?.trim();
+  if (explicitSummary) return trimText(explicitSummary, maxChars);
+
+  const storyScenes: any[] = Array.isArray(story?.scenes)
+    ? story.scenes.filter((s: any) => {
+        const sid = String(s?.sceneId || "").toLowerCase();
+        return s?.type !== "cover" && s?.type !== "moral" && s?.type !== "outro" && sid !== "cover" && sid !== "intro" && sid !== "moral" && sid !== "outro";
+      })
+    : [];
+
+  const sceneTexts = storyScenes
+    .map((s) => (lang === "en" ? s?.audio?.en?.text : s?.audio?.text))
+    .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    .map((t) => t.replace(/\s+/g, " ").trim());
+
+  if (sceneTexts.length > 0) {
+    const sampleIndices = Array.from(
+      new Set([
+        0,
+        Math.min(sceneTexts.length - 1, 1),
+        Math.min(sceneTexts.length - 1, Math.max(2, Math.floor(sceneTexts.length * 0.45))),
+      ])
+    );
+    const sentences: string[] = [];
+    for (const idx of sampleIndices) {
+      const firstSentence = sceneTexts[idx].match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim() || sceneTexts[idx];
+      if (firstSentence && !sentences.includes(firstSentence)) {
+        sentences.push(firstSentence);
+      }
+      if (sentences.join(" ").length >= Math.floor(maxChars * 0.72)) break;
+    }
+    if (sentences.length > 0) return trimText(sentences.join(" "), maxChars);
+  }
+
+  const thumbConf = lang === "id" ? story?.thumbnailConfig?.id : story?.thumbnailConfig?.en;
+  const fallbackHook = thumbConf?.bedtimeHook || thumbConf?.hook;
+  if (fallbackHook) return trimText(String(fallbackHook), maxChars);
+
+  return lang === "id"
+    ? "Kisah petualangan hangat penuh imajinasi dan keteladanan untuk menemani waktu santai keluarga."
+    : "A warm, imaginative bilingual adventure crafted to inspire young minds and cozy family storytime.";
 }
 
 /**
@@ -123,152 +211,114 @@ export function generateTeaserCopy(
   const rawTitle = isId ? story.title : (story.originalTitle || story.title);
   const cleanTitle = rawTitle.replace(/[!]+$/, "").trim();
 
-  // Extract thumbnail typography details corresponding directly to the cover image
+  // Extract story summary & moral lesson directly from narrative scenes and manifest
   const thumbConf = isId ? story.thumbnailConfig?.id : story.thumbnailConfig?.en;
   const headlineTop = thumbConf?.headlineTop;
   const headlineBottom = thumbConf?.headlineBottom;
-  const hook = thumbConf?.hook || (isId ? "Petualangan seru dan penuh tawa untuk si kecil!" : "A joyful, heartwarming tale children will adore!");
-  const badge = thumbConf?.badge;
-  const sticker = thumbConf?.sticker;
-  const moral = extractMoral(story, lang);
+  const storySummary = extractStorySummary(story, lang, 220);
+  const moral = extractMoral(story, lang, true);
+  const moralShort = extractMoral(story, lang, false);
 
-  // 1. INSTAGRAM FEED CAPTION (Optimized for Saves & Meaningful Comments)
+  // 1. INSTAGRAM FEED CAPTION (Story Summary + Moral Focus, Social Platforms Only)
   const captionInstagram = isId
-    ? `⏰ SEBENTAR LAGI TAYANG! (1 JAM LAGI) 🌟✨
-${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 🌙💤
+    ? `⏰ TAYANG 1 JAM LAGI (${slotTime}) 🌟✨
+📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}
 
-Halo Ayah Bunda dan adik-adik tersayang! 🥰👋
-Tepat pukul ${slotTime} nanti, cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana di kanal YouTube @zayn.storybook!
+Halo Ayah, Bunda & adik-adik tersayang! 🥰
+Tepat pukul ${slotTime} nanti, dongeng animasi "${cleanTitle}" akan tayang perdana di YouTube @zayn.storybook!
 
-🎨 Sorotan Cerita:
-👉 ${hook}
-${sticker ? `✨ Catatan Seru: ${sticker}\n` : ""}
-💡 Nilai Kebaikan untuk Si Kecil:
+📖 Ringkasan Cerita:
+${storySummary}
+
+💡 Pesan Moral untuk Si Kecil:
 ${moral}
 
-📌 TIPS RUTINITAS SEBELUM TIDUR:
-Jadikan dongeng 15 menit ini sebagai momen transisi tenang sebelum si kecil terlelap. Redupkan lampu, siapkan selimut hangat, dan nikmati petualangan bersama.
+🔔 Nyalakan lonceng pengingat di YouTube & ikuti Instagram Reels, Facebook Page, serta Threads @zayn.storybook agar tidak ketinggalan kisah penuh keteladanan ini!
+💬 Pelajaran baik apa nih yang ingin Ayah Bunda ajarkan lewat cerita hari ini? 👇❤️
 
-🔔 Nyalakan lonceng pengingat di YouTube @zayn.storybook sekarang agar tidak terlewat saat tayang perdana!
-👉 Tautan tontonan resmi akan langsung aktif di bio profil @zayn.storybook tepat pukul ${slotTime}.
+#ZaynStorybook #DongengSebelumTidur #CeritaAnakBergambar #PesanMoralAnak #ParentingIndonesia`
+    : `⏰ PREMIERING IN 1 HOUR (${slotTime}) 🌟✨
+📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}
 
-💬 Siapa yang sudah siap menemani si kecil mendongeng malam ini? Tulis di kolom komentar ya! 👇❤️
+Hello parents and curious little readers! 🥰
+At ${slotTime}, our animated storybook "${cleanTitle}" premieres on YouTube @zayn.storybook!
 
-#ZaynStorybook #DongengSebelumTidur #ParentingIndonesia #CeritaAnakBergambar #BukuAnakBermutu #DongengAnak #MembacaSejakDini #BedtimeRoutine #FamilyStorytime`
-    : `⏰ PREMIERING IN 1 HOUR! 🌟✨
-${badge ? `🏷️ ${badge}\n` : ""}📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 📖🎈
+📖 Story Summary:
+${storySummary}
 
-Hello wonderful parents and curious little ones! 🥰👋
-In just 1 hour (at ${slotTime}), our brand-new animated read-aloud storybook "${cleanTitle}" is premiering on YouTube @zayn.storybook!
-
-🎨 Tonight's Story Highlight:
-👉 ${hook}
-${sticker ? `✨ Fun Highlight: ${sticker}\n` : ""}
-💡 Life Lesson for Young Minds:
+💡 Moral of the Story:
 ${moral}
 
-📌 BEDTIME ROUTINE TIP:
-Use this calming 15-minute story as a peaceful wind-down ritual before sleep. Dim the room lights, snuggle under a warm blanket, and share the journey together.
+🔔 Set your reminder on YouTube and follow @zayn.storybook across Instagram, Facebook & Threads so your family never misses a story!
+💬 What lesson are you excited to talk about with your child after watching? 👇❤️
 
-🔔 Tap the notification bell on YouTube @zayn.storybook right now so you don't miss the premiere!
-👉 The official watch link goes live in our bio @zayn.storybook at ${slotTime}.
+#ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #MoralStories`;
 
-💬 Ready for tonight's storytime adventure? Let us know in the comments below! 👇❤️
-
-#ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #AnimatedStorybook #ChildrenBooks #KidsAnimation #FamilyStorytime #MindfulParenting`;
-
-  // 2. FACEBOOK PAGE CAPTION (Optimized for Parents Community & Family Discussion)
+  // 2. FACEBOOK PAGE CAPTION (Story Summary + Moral Focus, Social Platforms Only)
   const captionFacebook = isId
-    ? `⏰ PENGINGAT TAYANG: 1 JAM LAGI! (Pukul ${slotTime}) 🌟✨
-📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}
+    ? `⏰ PENGINGAT TAYANG: 1 JAM LAGI (${slotTime}) 🌟✨
+📖 "${cleanTitle}"
 
-Ayah Bunda, rutinitas mendongeng 15 menit sebelum tidur terbukti mempererat ikatan batin keluarga dan menenangkan pikiran anak setelah seharian aktif bermain. 🌙💤
+📖 Ringkasan Cerita:
+${storySummary}
 
-Malam ini di kanal YouTube Zayn Storybook, kita akan menyaksikan petualangan baru:
-"${cleanTitle}"
-
-✨ Sekilas Kisah:
-${hook}
-
-💡 Pesan Karakter:
+💡 Pesan Moral:
 ${moral}
 
-Mari ciptakan kenangan masa kecil yang hangat dan bermakna. Kumpulkan keluarga, siapkan suasana kamar yang nyaman, dan nikmati dongeng animasi penuh warna bersama kami.
+📺 Tayang perdana pukul ${slotTime} di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}) serta hadir versi ringkas di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
 
-🔔 Kunjungi kanal YouTube kami @Zayn.Storybook dan nyalakan lonceng pengingat premiere.
-Tautan tontonan resmi akan dibagikan di halaman ini tepat pukul ${slotTime}!
+💬 Setelah menonton nanti, ajak si kecil ngobrol tentang pesan moralnya ya Ayah & Bunda. Tulis pendapat si kecil di komentar! 👇❤️`
+    : `⏰ PREMIERE REMINDER: 1 HOUR TO GO (${slotTime}) 🌟✨
+📖 "${cleanTitle}"
 
-Ayah Bunda biasanya mendongeng jam berapa bersama si kecil? Yuk berbagi cerita di kolom komentar! 👇❤️`
-    : `⏰ PREMIERE REMINDER: 1 HOUR TO GO! (At ${slotTime}) 🌟✨
-📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle}
+📖 Story Summary:
+${storySummary}
 
-Dear parents, a 15-minute bedtime story ritual is one of the most effective ways to nurture emotional connection and help children unwind peacefully after an active day. 🌙💤
-
-Tonight on Zayn Storybook YouTube, we are premiering a wonderful new animated journey:
-"${cleanTitle}"
-
-✨ Story Glimpse:
-${hook}
-
-💡 Moral Lesson:
+💡 Moral of the Story:
 ${moral}
 
-Let's create warm, cherished childhood memories together. Gather the family, get cozy, and enjoy this beautifully illustrated adventure.
+📺 Premiering at ${slotTime} on YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), with highlights on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
 
-🔔 Visit our YouTube channel @Zayn.Storybook and set your premiere reminder!
-The official watch link will be shared right here at ${slotTime}!
+💬 Share your little one's favorite part in the comments below! 👇❤️`;
 
-What is your favorite bedtime routine with your little ones? Share with our parent community below! 👇❤️`;
+  // 3. META THREADS CAPTION (< 500 chars)
+  const captionThreadsRaw = isId
+    ? `⏰ 1 jam lagi (${slotTime}) tayang di YouTube @zayn.storybook: "${cleanTitle}"!
 
-  // 3. META THREADS CAPTION (Optimized for Conversational Micro-Storytelling)
-  const captionThreads = isId
-    ? `Pernahkah si kecil merasa takut atau ragu mencoba hal baru? 🐒🌳
+📖 Ringkasan: ${extractStorySummary(story, lang, 150)}
+💡 Pesan Moral: ${moralShort}
 
-Tepat 1 jam lagi (pukul ${slotTime}), cerita animasi bergambar terbaru kita "${cleanTitle}" akan tayang perdana di YouTube @zayn.storybook!
+Tonton bareng di YouTube, Instagram, Facebook & Threads @zayn.storybook 🌙✨`
+    : `⏰ In 1 hour (${slotTime}) on YouTube @zayn.storybook: "${cleanTitle}"!
 
-👉 ${hook}
-💡 ${moral}
+📖 Story: ${extractStorySummary(story, lang, 150)}
+💡 Moral: ${moralShort}
 
-Nyalakan pengingat di YouTube @zayn.storybook yuk, siapkan selimut hangat untuk dongeng pengantar tidur nanti malam! 🌙💤`
-    : `Has your child ever felt hesitant or scared of trying something new? 🐒🌳
+Watch with us on YouTube, Instagram, Facebook & Threads @zayn.storybook 🌙✨`;
+  const captionThreads = trimText(captionThreadsRaw, 480);
 
-In just 1 hour (at ${slotTime}), our new animated read-aloud storybook "${cleanTitle}" premieres on YouTube @zayn.storybook!
-
-👉 ${hook}
-💡 ${moral}
-
-Set your premiere reminder on YouTube @zayn.storybook and snuggle up for bedtime storytime tonight! 🌙💤`;
-
-  // 4. YOUTUBE COMMUNITY TAB CAPTION (Optimized for YouTube Premiere Reminder)
+  // 4. YOUTUBE COMMUNITY TAB CAPTION
   const captionYoutubeCommunity = isId
-    ? `⏰ TAYANG PERDANA 1 JAM LAGI! (Pukul ${slotTime}) 🌟✨
-📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 🌙💤
+    ? `⏰ TAYANG PERDANA 1 JAM LAGI (${slotTime}) 🌟✨
+📖 "${cleanTitle}"
 
-Halo teman-teman dan keluarga tersayang! 🥰👋
-Cerita animasi buku bergambar terbaru kita "${cleanTitle}" akan tayang perdana tepat pukul ${slotTime} nanti!
+📖 Ringkasan Cerita:
+${storySummary}
 
-🎨 Sorotan Cerita:
-👉 ${hook}
-
-💡 Nilai Kebaikan:
+💡 Pesan Moral:
 ${moral}
 
-🔔 Klik tombol "Set Reminder" / "Ingatkan Saya" pada video premiere agar adik-adik tidak terlewatkan momen seru ini!
-Sampai jumpa di kolom live chat nanti ya! ❤️👇`
-    : `⏰ PREMIERING IN 1 HOUR! (At ${slotTime}) 🌟✨
-📖 ${headlineTop ? `${headlineTop} — ${headlineBottom || ""}` : cleanTitle} 📖🎈
+🔔 Klik "Ingatkan Saya" di YouTube @zayn.storybook & follow Instagram / Facebook / Threads @zayn.storybook! Sampai jumpa di live chat! ❤️👇`
+    : `⏰ PREMIERING IN 1 HOUR (${slotTime}) 🌟✨
+📖 "${cleanTitle}"
 
-Hello wonderful families and little readers! 🥰👋
-Our brand-new animated read-aloud storybook "${cleanTitle}" premieres at ${slotTime}!
+📖 Story Summary:
+${storySummary}
 
-🎨 Tonight's Story Highlight:
-👉 ${hook}
-
-💡 Life Lesson:
+💡 Moral of the Story:
 ${moral}
 
-🔔 Hit "Set Reminder" on the premiere video so you don't miss the adventure!
-See you in the live chat! ❤️👇`;
+🔔 Tap "Set Reminder" on YouTube @zayn.storybook and follow us on Instagram, Facebook & Threads! See you in live chat! ❤️👇`;
 
   return {
     captionSocial: captionInstagram,
@@ -342,87 +392,70 @@ export function generateDailyLineupCopy(
       ? morningStory.title || morningStory.originalTitle || "Cerita Pagi Ceria"
       : morningStory.originalTitle || morningStory.title || "Morning English Story";
   const morningCleanTitle = morningRawTitle.replace(/[!]+$/, "").trim();
-  const morningThumb = morningLang === "id" ? morningStory.thumbnailConfig?.id : morningStory.thumbnailConfig?.en;
-  const morningHook =
-    morningThumb?.hook ||
-    (morningLang === "id"
-      ? "Cerita pagi ceria penuh semangat untuk mengawali hari si kecil!"
-      : "A joyful, cheerful English read-aloud journey for young learners!");
-  const morningHeaderLabel = morningLang === "id" ? "Cerita Pagi Ceria" : "English Read-Aloud";
-  const morningEditionLabel = morningLang === "id" ? "Edisi Bahasa Indonesia" : "English Edition";
-  const morningDescLine =
-    morningLang === "id"
-      ? "🎈 Mengawali pagi penuh semangat & menumbuhkan kecintaan membaca si kecil!"
-      : "🎈 Melatih kepekaan mendengar & kosakata bahasa Inggris si kecil lewat cerita riang saat sarapan pagi!";
+  const morningSummary = extractStorySummary(morningStory, morningLang, 155);
+  const morningMoral = extractMoral(morningStory, morningLang, false);
+  const morningHeaderLabel = morningLang === "id" ? "Cerita Pagi" : "English Read-Aloud";
 
-  const eveningRawTitle = eveningStory.title || eveningStory.originalTitle || "Dongeng Pengantar Tidur";
+  const eveningLang: "id" | "en" = (eveningSlot.lang || "id") === "en" ? "en" : "id";
+  const eveningRawTitle =
+    eveningLang === "id"
+      ? eveningStory.title || eveningStory.originalTitle || "Dongeng Pengantar Tidur"
+      : eveningStory.originalTitle || eveningStory.title || "Bedtime Story";
   const eveningCleanTitle = eveningRawTitle.replace(/[!]+$/, "").trim();
-  const eveningThumb = eveningStory.thumbnailConfig?.id;
-  const eveningHook = eveningThumb?.hook || "Petualangan seru dan penuh tawa untuk si kecil!";
-  const eveningMoral = extractMoral(eveningStory, "id");
+  const eveningSummary = extractStorySummary(eveningStory, eveningLang, 155);
+  const eveningMoral = extractMoral(eveningStory, eveningLang, true);
 
   const morningTime = morningSlot.time_slot || morningSlot.timeSlot || "08:30 WIB";
   const eveningTime = eveningSlot.time_slot || eveningSlot.timeSlot || "19:00 WIB";
 
   // 1. INSTAGRAM FEED CAROUSEL CAPTION
-  const captionInstagram = `🌟 JADWAL DONGENG ZAYN HARI INI 🌟
-Selamat pagi Ayah, Bunda & Adik-adik tersayang! 🥰👋
-Hari ini ada 2 cerita bergambar istimewa siap menemani hari ceria si kecil di @zayn.storybook:
+  const captionInstagram = `🌟 MENU DONGENG ZAYN HARI INI 🌟
+Selamat pagi Ayah, Bunda & Adik-adik tersayang! 🥰
 
-🌅 [PAGI · ${morningTime}] ${morningHeaderLabel}:
-📖 "${morningCleanTitle}" (${morningEditionLabel})
-✨ ${morningHook}
-${morningDescLine}
+🌅 [PAGI · ${morningTime}] ${morningHeaderLabel}: "${morningCleanTitle}"
+📖 Ringkasan: ${morningSummary}
+💡 Pesan Moral: ${morningMoral}
 
-🌙 [MALAM · ${eveningTime}] Prime Bedtime Story:
-📖 "${eveningCleanTitle}" (Edisi Bahasa Indonesia)
-✨ ${eveningHook}
-💖 Pesan Budi Pekerti:
-${eveningMoral}
+🌙 [MALAM · ${eveningTime}] Bedtime Story: "${eveningCleanTitle}"
+📖 Ringkasan: ${eveningSummary}
+💖 Pesan Moral: ${eveningMoral}
 
-👉 Geser ke kiri (swipe ⬅️) untuk melihat preview cerita malam!
-🔔 Nyalakan lonceng notifikasi di YouTube @zayn.storybook agar tidak terlewat saat masing-masing cerita tayang perdana ya!
+👉 Geser ke kiri untuk preview kedua cerita!
+📺 Tonton tayangan lengkapnya di YouTube @zayn.storybook, dan ikuti cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+💬 Pesan moral cerita mana yang paling cocok dibahas bareng si kecil hari ini? 👇❤️
 
-💬 Cerita mana yang paling ditunggu si kecil hari ini? Sapa kami di kolom komentar ya! 👇❤️
-
-#ZaynStorybook #JadwalDongeng #DongengAnak #CeritaAnakBergambar #BilingualStorybook #EnglishReadAloud #BedtimeStories #ParentingIndonesia #BukuAnakBergambar`;
+#ZaynStorybook #MenuDongengHariIni #DongengAnak #PesanMoralAnak #BilingualKids`;
 
   // 2. FACEBOOK PAGE MULTI-PHOTO CAPTION
-  const captionFacebook = `🌟 JADWAL DONGENG ZAYN HARI INI (${dateStr}) 🌟
-Selamat pagi Ayah & Bunda! Awali hari si kecil dengan keceriaan dan tutup malamnya dengan mimpi indah bersama 2 dongeng animasi bergambar pilihan hari ini di kanal YouTube Zayn Storybook:
+  const captionFacebook = `🌟 MENU DONGENG ZAYN HARI INI (${dateStr}) 🌟
+Selamat pagi Ayah & Bunda! Dua kisah bermakna siap menemani pagi dan waktu tidur si kecil hari ini:
 
-🌅 [PAGI · Pukul ${morningTime}] ${morningHeaderLabel}:
-📖 "${morningCleanTitle}" (${morningEditionLabel})
-👉 ${morningHook}
-${morningLang === "id" ? "Cerita ringan penuh keceriaan untuk menemani sarapan pagi atau bersiap berangkat beraktivitas." : "Momen pas saat sarapan atau bersiap sekolah untuk melatih kecakapan mendengar bahasa Inggris dengan intonasi ceria dan ramah anak."}
+🌅 [PAGI · ${morningTime}] ${morningHeaderLabel}: "${morningCleanTitle}"
+📖 Ringkasan Cerita:
+${morningSummary}
+💡 Pesan Moral:
+${morningMoral}
 
-🌙 [MALAM · Pukul ${eveningTime}] Prime Bedtime Story:
-📖 "${eveningCleanTitle}" (Edisi Bahasa Indonesia)
-👉 ${eveningHook}
-💖 Nilai Kebaikan Budi Pekerti:
+🌙 [MALAM · ${eveningTime}] Prime Bedtime Story: "${eveningCleanTitle}"
+📖 Ringkasan Cerita:
+${eveningSummary}
+💖 Pesan Moral:
 ${eveningMoral}
-Dongeng penenang sebelum tidur untuk transisi tidur lelap tanpa layar berisik.
 
-🔔 Pasang alarm atau aktifkan lonceng pengingat di YouTube Zayn Storybook sekarang! Tautan tontonan lengkap akan langsung aktif di beranda saat tayang perdana.
+📺 Subscribe & nyalakan lonceng di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), serta ikuti kami di Instagram, Facebook Page & Threads @zayn.storybook!
+💬 Cerita mana nih yang paling dinanti si kecil hari ini? 👇❤️
 
-💬 OBROLAN KELUARGA:
-Dari kedua cerita hari ini, mana nih yang paling membuat si kecil penasaran? Yuk ceritakan di kolom komentar! 👇❤️
+#ZaynStorybook #DongengAnak #CeritaAnakBergambar #PesanMoral #KeluargaBahagia`;
 
-#ZaynStorybook #JadwalDongeng #DongengSebelumTidur #ParentingCeria #BukuAnakBergambar #KeluargaBahagia #DongengEdukasi`;
+  // 3. THREADS CAPTION (< 500 chars)
+  const captionThreads = trimText(
+    `Menu Dongeng @zayn.storybook hari ini 🌟
+🌅 ${morningTime}: "${morningCleanTitle}" — ${extractStorySummary(morningStory, morningLang, 95)} (💡 ${morningMoral})
+🌙 ${eveningTime}: "${eveningCleanTitle}" — ${extractStorySummary(eveningStory, eveningLang, 95)} (💖 ${extractMoral(eveningStory, eveningLang, false)})
 
-  // 3. THREADS CAPTION (Guaranteed < 500 chars)
-  const captionThreads = `Selamat pagi Ayah & Bunda! 🌟
-Berikut Menu Dongeng Zayn Storybook hari ini:
-
-🌅 ${morningTime} [${morningLang.toUpperCase()}]: "${morningCleanTitle}" 📖🎈
-👉 ${morningLang === "id" ? "Cerita pagi ceria saat sarapan!" : "English Read-Aloud ceria saat sarapan!"}
-
-🌙 ${eveningTime} [ID]: "${eveningCleanTitle}" 🌙✨
-👉 Dongeng pengantar tidur nyenyak & pesan budi pekerti.
-
-Geser ke kiri untuk lihat preview kedua bukunya ya! Cerita mana yang paling ditunggu si kecil hari ini? 👇🥰
-
-#ZaynStorybook #DongengAnak #BilingualKids`;
+Tonton lengkapnya di YouTube, Instagram & Facebook @zayn.storybook! 👇`,
+    480
+  );
 
   return {
     captionSocial: captionInstagram,
@@ -431,6 +464,207 @@ Geser ke kiri untuk lihat preview kedua bukunya ya! Cerita mana yang paling ditu
     captionThreads,
     captionYoutubeCommunity: captionFacebook,
   };
+}
+
+export interface SocialPlatformClients {
+  publishFacebookPhotoPost: typeof publishFacebookPhotoPost;
+  publishFacebookMultiPhotoPost: typeof publishFacebookMultiPhotoPost;
+  updateFacebookPostMessage: typeof updateFacebookPostMessage;
+  publishInstagramFeedPhoto: typeof publishInstagramFeedPhoto;
+  publishInstagramCarousel: typeof publishInstagramCarousel;
+  publishThreadsPhotoPost: typeof publishThreadsPhotoPost;
+  publishThreadsCarousel: typeof publishThreadsCarousel;
+  publishThreadsLinkPost: typeof publishThreadsLinkPost;
+}
+
+const DEFAULT_SOCIAL_CLIENTS: SocialPlatformClients = {
+  publishFacebookPhotoPost,
+  publishFacebookMultiPhotoPost,
+  updateFacebookPostMessage,
+  publishInstagramFeedPhoto,
+  publishInstagramCarousel,
+  publishThreadsPhotoPost,
+  publishThreadsCarousel,
+  publishThreadsLinkPost,
+};
+
+/**
+ * Publishes pending announcement platforms and edits existing posts in-place where supported
+ * (Facebook supports in-place caption edits; Instagram & Threads skip republish to avoid duplicates).
+ */
+export async function syncAnnouncementPlatforms(params: {
+  label: string;
+  imagePaths: string[];
+  facebookCaption: string;
+  facebookFirstComment?: string;
+  facebookFallbackCaption?: string;
+  instagramCaption: string;
+  threadsText: string;
+  threadsLinkUrl?: string;
+  existing?: {
+    facebook?: PlatformPublishResult;
+    instagram?: PlatformPublishResult;
+    threads?: PlatformPublishResult;
+  };
+  allowEdit?: boolean;
+  dryRun?: boolean;
+  clients?: SocialPlatformClients;
+}): Promise<{
+  facebook?: PlatformPublishResult;
+  instagram?: PlatformPublishResult;
+  threads?: PlatformPublishResult;
+  errors: string[];
+}> {
+  const {
+    label,
+    imagePaths,
+    facebookCaption,
+    facebookFirstComment,
+    facebookFallbackCaption,
+    instagramCaption,
+    threadsText,
+    threadsLinkUrl,
+    existing = {},
+    allowEdit = false,
+    dryRun = false,
+    clients = DEFAULT_SOCIAL_CLIENTS,
+  } = params;
+
+  const errors: string[] = [];
+  let fbResult = existing.facebook;
+  let igResult = existing.instagram;
+  let thResult = existing.threads;
+
+  const existingFbId = existing.facebook?.postId || existing.facebook?.id;
+  if (existingFbId) {
+    if (allowEdit) {
+      const nextMessage = facebookFallbackCaption || facebookCaption;
+      if (dryRun) {
+        console.log(`\n🧪 [DRY RUN] Would edit existing Facebook post in-place (${existingFbId}).`);
+      } else {
+        try {
+          console.log(`\n✏️ [1/3] Editing existing Facebook post caption in-place (${existingFbId})...`);
+          const ok = await clients.updateFacebookPostMessage(existingFbId, nextMessage);
+          if (ok) {
+            fbResult = {
+              ...existing.facebook,
+              updatedAt: new Date().toISOString(),
+              status: "updated",
+            };
+          } else {
+            console.warn(`⚠️ [${label}] Facebook edit did not succeed for ${existingFbId}; keeping existing post instead of republishing.`);
+          }
+        } catch (fbErr: any) {
+          console.error(`⚠️ Facebook edit warning (${label}):`, fbErr.message);
+          errors.push(`Facebook (${label} edit): ${fbErr.message}`);
+        }
+      }
+    } else {
+      console.log(`\n⏩ [1/3] Skipping Facebook Page: Already published (${existingFbId}).`);
+    }
+  } else {
+    try {
+      console.log(`\n📘 [1/3] Publishing ${label} to Facebook Page...`);
+      if (imagePaths.length > 1) {
+        const fbRes = await clients.publishFacebookMultiPhotoPost({
+          photoPaths: imagePaths,
+          caption: facebookCaption,
+          firstComment: facebookFirstComment,
+          fallbackCaption: facebookFallbackCaption,
+          dryRun,
+        });
+        if (!dryRun && fbRes.success) {
+          fbResult = {
+            postId: fbRes.postId,
+            url: fbRes.permalink,
+            publishedAt: new Date().toISOString(),
+            status: "published",
+          };
+        }
+      } else {
+        const fbRes = await clients.publishFacebookPhotoPost({
+          photoPath: imagePaths[0],
+          caption: facebookCaption,
+          firstComment: facebookFirstComment,
+          fallbackCaption: facebookFallbackCaption,
+          dryRun,
+        });
+        if (!dryRun && fbRes.success) {
+          fbResult = {
+            id: fbRes.photoId || fbRes.postId,
+            postId: fbRes.postId,
+            url: fbRes.permalink,
+            publishedAt: new Date().toISOString(),
+            status: "published",
+          };
+        }
+      }
+    } catch (fbErr: any) {
+      console.error(`⚠️ Facebook ${label} warning:`, fbErr.message);
+      errors.push(`Facebook (${label}): ${fbErr.message}`);
+    }
+  }
+
+  const existingIgId = existing.instagram?.id;
+  if (existingIgId) {
+    if (allowEdit) {
+      console.log(`\n⏭️ [2/3] Instagram post already live (${existingIgId}) — caption edit not supported by Instagram Graph API; skipping republish.`);
+    } else {
+      console.log(`\n⏩ [2/3] Skipping Instagram Feed: Already published (${existingIgId}).`);
+    }
+  } else {
+    try {
+      console.log(`\n📸 [2/3] Publishing ${label} to Instagram Feed...`);
+      const igRes =
+        imagePaths.length > 1
+          ? await clients.publishInstagramCarousel({ imagePaths, caption: instagramCaption, dryRun })
+          : await clients.publishInstagramFeedPhoto({ imagePath: imagePaths[0], caption: instagramCaption, dryRun });
+      if (!dryRun && igRes.success) {
+        igResult = {
+          id: igRes.mediaId || (igRes as any).id,
+          url: igRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (igErr: any) {
+      console.error(`⚠️ Instagram ${label} warning:`, igErr.message);
+      errors.push(`Instagram (${label}): ${igErr.message}`);
+    }
+  }
+
+  const existingThId = existing.threads?.postId || existing.threads?.id;
+  if (existingThId) {
+    if (allowEdit) {
+      console.log(`\n⏭️ [3/3] Threads post already live (${existingThId}) — in-place edit not supported by Threads API; skipping republish.`);
+    } else {
+      console.log(`\n⏩ [3/3] Skipping Meta Threads: Already published (${existingThId}).`);
+    }
+  } else {
+    try {
+      console.log(`\n🧵 [3/3] Publishing ${label} to Meta Threads...`);
+      const thRes =
+        imagePaths.length > 1
+          ? await clients.publishThreadsCarousel({ imagePaths, text: threadsText, dryRun })
+          : threadsLinkUrl
+            ? await clients.publishThreadsLinkPost({ text: threadsText, linkUrl: threadsLinkUrl, dryRun })
+            : await clients.publishThreadsPhotoPost({ imagePath: imagePaths[0], text: threadsText, dryRun });
+      if (!dryRun && thRes.success) {
+        thResult = {
+          id: thRes.postId,
+          postId: thRes.postId,
+          url: thRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (thErr: any) {
+      console.error(`⚠️ Threads ${label} warning:`, thErr.message);
+      errors.push(`Threads (${label}): ${thErr.message}`);
+    }
+  }
+
+  return { facebook: fbResult, instagram: igResult, threads: thResult, errors };
 }
 
 async function resolveDailyLineupSlots(targetDate: string): Promise<{
@@ -580,9 +814,10 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   console.log(`   - Instagram Feed : ${hasIg ? `✔ LIVE (${existingLineup.instagram?.id})` : "⏳ PENDING"}`);
   console.log(`   - Meta Threads   : ${hasThreads ? `✔ LIVE (${existingLineup.threads?.id || existingLineup.threads?.postId})` : "⏳ PENDING"}`);
 
-  if (hasFb && hasIg && hasThreads && !options.force) {
+  const allowUpdate = Boolean(options.force || options.edit);
+  if (hasFb && hasIg && hasThreads && !allowUpdate) {
     console.log(`\n🛡️ [ZERO DUPLICATE GATE] Daily lineup announcement for ${targetDate} has ALREADY been published across ALL public social platforms!`);
-    console.log(`   ⏩ Skipping to guarantee ZERO duplicate posts. Pass --force to re-post.\n`);
+    console.log(`   ⏩ Skipping to guarantee ZERO duplicate posts. Pass --edit to update supported platforms in-place.\n`);
     return { success: true, skipped: true, morningBook, eveningBook };
   }
 
@@ -608,83 +843,20 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   // 5. Generate Tailored Captions
   const captions = generateDailyLineupCopy(morningStory, morningSlot, eveningStory, eveningSlot, targetDate);
 
-  const errors: string[] = [];
-  let fbResult = existingLineup.facebook;
-  let igResult = existingLineup.instagram;
-  let thResult = existingLineup.threads;
-
-  // 6A. Facebook Multi-Photo Post
-  if (!hasFb || options.force) {
-    try {
-      console.log(`\n📘 [1/3] Publishing Daily Lineup Multi-Photo Post to Facebook Page...`);
-      const fbRes = await publishFacebookMultiPhotoPost({
-        photoPaths: imagePaths,
-        caption: captions.captionFacebook,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && fbRes.success) {
-        fbResult = {
-          postId: fbRes.postId,
-          url: fbRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-        console.log(`✔ Facebook multi-photo post live: ${fbRes.permalink}`);
-      }
-    } catch (fbErr: any) {
-      console.error(`⚠️ Facebook announcement warning:`, fbErr.message);
-      errors.push(`Facebook: ${fbErr.message}`);
-    }
-  }
-
-  // 6B. Instagram Carousel Post
-  if (!hasIg || options.force) {
-    try {
-      console.log(`\n📸 [2/3] Publishing Daily Lineup Carousel to Instagram Feed...`);
-      const igRes = await publishInstagramCarousel({
-        imagePaths,
-        caption: captions.captionInstagram,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && igRes.success) {
-        igResult = {
-          id: igRes.mediaId || (igRes as any).id,
-          url: igRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-        console.log(`✔ Instagram carousel live: ${igRes.permalink}`);
-      }
-    } catch (igErr: any) {
-      console.error(`⚠️ Instagram announcement warning:`, igErr.message);
-      errors.push(`Instagram: ${igErr.message}`);
-    }
-  }
-
-  // 6C. Threads Multi-Image Carousel Post
-  if (!hasThreads || options.force) {
-    try {
-      console.log(`\n🧵 [3/3] Publishing Daily Lineup Carousel to Meta Threads...`);
-      const thRes = await publishThreadsCarousel({
-        imagePaths,
-        text: captions.captionThreads,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && thRes.success) {
-        thResult = {
-          id: thRes.postId,
-          postId: thRes.postId,
-          url: thRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-        console.log(`✔ Threads carousel live: ${thRes.permalink}`);
-      }
-    } catch (thErr: any) {
-      console.error(`⚠️ Threads announcement warning:`, thErr.message);
-      errors.push(`Threads: ${thErr.message}`);
-    }
-  }
+  const synced = await syncAnnouncementPlatforms({
+    label: "Daily Lineup",
+    imagePaths,
+    facebookCaption: captions.captionFacebook,
+    instagramCaption: captions.captionInstagram,
+    threadsText: captions.captionThreads,
+    existing: existingLineup,
+    allowEdit: allowUpdate,
+    dryRun: options.dryRun,
+  });
+  const errors = synced.errors;
+  const fbResult = synced.facebook;
+  const igResult = synced.instagram;
+  const thResult = synced.threads;
 
   // 7. Save publication metadata to story.json and Cloudflare R2
   if (!options.dryRun) {
@@ -877,151 +1049,191 @@ interface WaveCopyPayload {
   facebookFirstComment: string;
   instagramCaption: string;
   threadsText: string;
-  portalUrlThreads: string;
-  portalUrlFb: string;
+  threadsLinkUrl?: string;
 }
 
-function generatePostPublishWaveCopy(params: {
+export function generatePostPublishWaveCopy(params: {
   wave: 2 | 3;
   bookSlug: string;
   cleanTitle: string;
   lang: "id" | "en";
-  hook: string;
+  summary: string;
   moral: string;
+  moralShort?: string;
   youtubeUrl?: string;
   related: Array<{ title: string; url: string }>;
 }): WaveCopyPayload {
-  const { wave, bookSlug, cleanTitle, lang, hook, moral, youtubeUrl, related } = params;
-  const waveTag = wave === 2 ? "wave2" : "wave3";
-  const portalUrlFb = buildStoryPortalUrl(bookSlug, { source: "facebook", medium: waveTag });
-  const portalUrlThreads = buildStoryPortalUrl(bookSlug, { source: "threads", medium: waveTag });
-
-  const primaryWatchUrl = youtubeUrl || portalUrlFb;
+  const { wave, cleanTitle, lang, summary, moral, moralShort, youtubeUrl, related } = params;
+  const watchUrl = youtubeUrl || SOCIAL_YOUTUBE_CHANNEL_URL;
   const rel1 = related[0];
   const rel2 = related[1];
 
   if (wave === 2) {
     // Midday Watch-Now & Catch-Up (12:30 WIB)
     const facebookFirstComment = [
-      `▶️ Tonton "${cleanTitle}" di YouTube: ${primaryWatchUrl}`,
-      `🌐 Halaman Cerita & Player (ID/EN): ${portalUrlFb}`,
-      rel1 ? `📚 Rekomendasi Cerita Sebelumnya — "${rel1.title}": ${rel1.url}` : "",
-      rel2 ? `✨ Tonton Juga — "${rel2.title}": ${rel2.url}` : "",
+      `▶️ YouTube "${cleanTitle}": ${watchUrl}`,
+      rel1 ? `📚 Cerita Sebelumnya di YouTube — "${rel1.title}": ${rel1.url}` : "",
+      rel2 ? `✨ Tonton Juga di YouTube — "${rel2.title}": ${rel2.url}` : "",
     ]
       .filter(Boolean)
       .join("\n");
 
     const buildFbBody = (commentCta: string) =>
       lang === "en"
-        ? `☀️ MIDDAY STORY BREAK — NOW STREAMING! 🎬✨
-Have the kids finished lunch or resting this afternoon? Let's cozy up for 5 minutes of screen-positive bilingual storytelling:
+        ? `☀️ MIDDAY STORYTIME — NOW STREAMING! 🎬✨
+📖 "${cleanTitle}" (English Edition)
 
-📖 "${cleanTitle}" (English Read-Aloud Edition)
-✨ ${hook}
+📖 Story Summary:
+${summary}
 
-💖 Story Moral:
+💖 Moral of the Story:
 ${moral}
 
 ${commentCta}
 
-💬 Question for parents: What's your little one's favorite bedtime/afternoon routine story so far? Share below! ❤️
+📺 Also catch clips and updates on YouTube, Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+💬 What lesson stood out most for your little one? Share in the comments! ❤️
 
-#ZaynStorybook #BilingualKids #EnglishReadAloud #DongengAnak #ParentingTips`
+#ZaynStorybook #MoralStories #EnglishReadAloud #KidsStories #Parenting`
         : `☀️ ISTIRAHAT SIANG BERSAMA SI KECIL — SUDAH TAYANG! 🎬✨
-Sudah selesai makan siang atau bersiap tidur siang? Yuk temani si kecil menonton dongeng animasi bergambar terbaru hari ini:
-
 📖 "${cleanTitle}"
-✨ ${hook}
 
-💖 Pesan Budi Pekerti:
-${moral}
-
-${commentCta}
-
-💬 Cerita mana lagi yang paling sering diminta putar ulang oleh si kecil? Tulis di komentar ya Ayah & Bunda! ❤️
-
-#ZaynStorybook #DongengAnak #CeritaAnakBergambar #WaktuSiangAnak #ParentingIndonesia`;
-
-    const facebookCaption = buildFbBody(
-      lang === "en"
-        ? `🎯 WANT TO WATCH NOW?\nI've pinned the direct YouTube Watch Link + Full Story Portal (no searching needed!) right in the FIRST COMMENT below! 👇💬`
-        : `🎯 INGIN NONTON LANGSUNG TANPA REPOT CARI?\nTautan YouTube + Halaman Portal lengkap sudah kami sematkan di KOMENTAR PERTAMA di bawah ya! 👇💬`
-    );
-    const facebookFallbackCaption = buildFbBody(
-      lang === "en"
-        ? `🎯 WATCH NOW & EXPLORE MORE STORIES:\n${facebookFirstComment}`
-        : `🎯 NONTON SEKARANG & PILIHAN CERITA LAINNYA:\n${facebookFirstComment}`
-    );
-
-    const instagramCaption = `☀️ SUDAH TAYANG HARI INI! 🎬🌟
-Lagi istirahat siang atau santai bersama si kecil? Dongeng "${cleanTitle}" sudah siap ditonton penuh di YouTube Zayn Storybook!
-
-✨ Highlight Cerita:
-👉 ${hook}
-
-💖 Pesan Baik:
-${moral}
-
-🔗 Klik link di Bio (storybook-catalog.pages.dev) untuk memutar video langsung + lihat koleksi cerita pilihan lainnya!
-🔖 Simpan postingan ini biar gampang dicari nanti malam ya Ayah & Bunda! ❤️
-
-#ZaynStorybook #DongengAnak #BilingualKids #CeritaAnakBergambar #BukuAnakBergambar #ParentingIndonesia`;
-
-    const threadsBase = `☀️ Sudah tayang! Temani istirahat siang si kecil dengan "${cleanTitle}" 📖✨\n👉 ${hook}\n\nPutar langsung + jelajahi dongeng pilihan lainnya di portal kami 👇 #ZaynStorybook`;
-    const threadsText = threadsBase.length > 480 ? `${threadsBase.slice(0, 477)}...` : threadsBase;
-
-    return { facebookCaption, facebookFallbackCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
-  }
-
-  // Wave 3: Bedtime Highlight & Watch-Next Back-Catalog Funnel (20:30 WIB)
-  const facebookFirstComment = [
-    `🌙 Putar "${cleanTitle}" Sekarang: ${primaryWatchUrl}`,
-    `🌐 Buka Halaman Cerita & Koleksi Malam: ${portalUrlFb}`,
-    rel1 ? `📖 Dongeng Pengantar Tidur Berikutnya — "${rel1.title}": ${rel1.url}` : "",
-    rel2 ? `🌟 Favorit Keluarga — "${rel2.title}": ${rel2.url}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const buildBedtimeFbBody = (linkBlock: string) => `🌙 WAKTUNYA DONGENG PENGANTAR TIDUR! ✨🛌
-Sudah waktunya redupkan lampu kamar dan nikmati momen hangat sebelum si kecil terlelap dengan cerita malam ini:
-
-📖 "${cleanTitle}"
-🌟 ${hook}
-
-💖 Nilai Kebaikan Malam Ini:
-${moral}
-
-${rel1 ? `✨ Belum siap tidur? Lanjutkan dengan dongeng hangat "${rel1.title}" untuk maraton cerita tenang tanpa layar berisik!\n` : ""}
-${linkBlock}
-
-💬 Setelah menonton, nilai baik apa yang paling diingat si kecil malam ini? Ceritakan yuk! ❤️
-
-#ZaynStorybook #DongengSebelumTidur #BedtimeStories #ParentingIndonesia #KeluargaBahagia`;
-
-  const facebookCaption = buildBedtimeFbBody(`👇 Tautan YouTube + Playlist Sebelum Tidur sudah terpasang rapi di KOMENTAR PERTAMA!`);
-  const facebookFallbackCaption = buildBedtimeFbBody(`👇 Tautan Tayangan & Dongeng Malam Ini:\n${facebookFirstComment}`);
-
-  const instagramCaption = `🌙 WAKTUNYA KELAMBU & DONGENG MALAM! ✨🛌
-Redupkan lampu dan tutup hari si kecil dengan kehangatan cerita "${cleanTitle}"!
-
-✨ Ringkasan Malam Ini:
-👉 ${hook}
+📖 Ringkasan Cerita:
+${summary}
 
 💖 Pesan Moral:
 ${moral}
 
-🔖 SAVE postingan ini untuk ritual dongeng sebelum tidur!
-🔗 Tap Link di Bio (storybook-catalog.pages.dev) untuk langsung memutar video penuh + rekomendasi cerita berikutnya!
+${commentCta}
 
-💬 Biasanya si kecil butuh berapa cerita sebelum terlelap? 😂❤️
+📺 Saksikan cerita lengkapnya di YouTube Zayn Storybook, serta cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+💬 Nilai baik apa yang paling diingat si kecil dari kisah ini? Tulis di komentar ya Ayah & Bunda! ❤️
 
-#ZaynStorybook #DongengSebelumTidur #BedtimeStory #CeritaAnak #ParentingCeria #TidurNyenyak`;
+#ZaynStorybook #DongengAnak #PesanMoralAnak #CeritaAnakBergambar #ParentingIndonesia`;
 
-  const threadsBase = `🌙 Waktunya dongeng pengantar tidur! Putar "${cleanTitle}" untuk momen tenang sebelum lelap ✨📖\n💖 ${moral}\n\nTonton + lanjut ke dongeng favorit berikutnya 👇 #ZaynStorybook`;
-  const threadsText = threadsBase.length > 480 ? `${threadsBase.slice(0, 477)}...` : threadsBase;
+    const facebookCaption = buildFbBody(
+      lang === "en"
+        ? `▶️ Direct YouTube watch links are pinned in the FIRST COMMENT below! 👇💬`
+        : `▶️ Tautan langsung YouTube sudah kami sematkan di KOMENTAR PERTAMA di bawah ya! 👇💬`
+    );
+    const facebookFallbackCaption = buildFbBody(
+      lang === "en"
+        ? `▶️ Watch on YouTube:\n${facebookFirstComment}`
+        : `▶️ Tonton di YouTube:\n${facebookFirstComment}`
+    );
 
-  return { facebookCaption, facebookFallbackCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
+    const instagramCaption =
+      lang === "en"
+        ? `☀️ NOW STREAMING ON YOUTUBE! 🎬🌟
+📖 "${cleanTitle}"
+
+📖 Story Summary:
+${summary}
+
+💖 Moral of the Story:
+${moral}
+
+📺 Watch full episode on YouTube @zayn.storybook, and catch moments on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+🔖 Save this post so it's easy to find for storytime tonight! ❤️
+
+#ZaynStorybook #KidsStories #ReadAloud #MoralOfTheStory #FamilyStorytime`
+        : `☀️ SUDAH TAYANG DI YOUTUBE! 🎬🌟
+📖 "${cleanTitle}"
+
+📖 Ringkasan Cerita:
+${summary}
+
+💖 Pesan Moral:
+${moral}
+
+📺 Tonton versi penuhnya di YouTube @zayn.storybook, serta hadir di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+🔖 Simpan postingan ini biar gampang diputar ulang bersama si kecil! ❤️
+
+#ZaynStorybook #DongengAnak #PesanMoral #CeritaAnakBergambar #ParentingIndonesia`;
+
+    const threadsText = trimText(
+      lang === "en"
+        ? `☀️ Now live on YouTube @zayn.storybook: "${cleanTitle}" 📖✨
+📖 Story: ${trimText(summary, 150)}
+💖 Moral: ${moralShort || moral}
+${youtubeUrl ? `▶️ ${youtubeUrl}` : "Watch & follow @zayn.storybook on YouTube, IG & FB!"} #ZaynStorybook`
+        : `☀️ Sudah tayang di YouTube @zayn.storybook: "${cleanTitle}" 📖✨
+📖 Ringkasan: ${trimText(summary, 150)}
+💖 Pesan Moral: ${moralShort || moral}
+${youtubeUrl ? `▶️ ${youtubeUrl}` : "Tonton & ikuti @zayn.storybook di YouTube, IG & FB!"} #ZaynStorybook`,
+      480
+    );
+
+    return {
+      facebookCaption,
+      facebookFallbackCaption,
+      facebookFirstComment,
+      instagramCaption,
+      threadsText,
+      threadsLinkUrl: youtubeUrl,
+    };
+  }
+
+  // Wave 3: Bedtime Highlight & Watch-Next (20:30 WIB)
+  const facebookFirstComment = [
+    `🌙 Putar "${cleanTitle}" di YouTube: ${watchUrl}`,
+    rel1 ? `📖 Dongeng Pengantar Tidur Berikutnya di YouTube — "${rel1.title}": ${rel1.url}` : "",
+    rel2 ? `🌟 Favorit Keluarga di YouTube — "${rel2.title}": ${rel2.url}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const buildBedtimeFbBody = (linkBlock: string) => `🌙 DONGENG PENGANTAR TIDUR MALAM INI! ✨🛌
+📖 "${cleanTitle}"
+
+📖 Ringkasan Cerita:
+${summary}
+
+💖 Pesan Moral Malam Ini:
+${moral}
+
+${rel1 ? `✨ Mau lanjut nonton sebelum bobo? Putar juga "${rel1.title}" di YouTube Zayn Storybook!\n` : ""}${linkBlock}
+
+📺 Hadir di YouTube, Instagram Reels, Facebook Watch & Threads @zayn.storybook.
+💬 Setelah menonton, nilai baik apa yang paling diingat si kecil malam ini? Ceritakan yuk! ❤️
+
+#ZaynStorybook #DongengSebelumTidur #PesanMoral #ParentingIndonesia #KeluargaBahagia`;
+
+  const facebookCaption = buildBedtimeFbBody(`▶️ Tautan YouTube sudah terpasang di KOMENTAR PERTAMA di bawah!`);
+  const facebookFallbackCaption = buildBedtimeFbBody(`▶️ Tonton di YouTube:\n${facebookFirstComment}`);
+
+  const instagramCaption = `🌙 DONGENG PENGANTAR TIDUR MALAM INI! ✨🛌
+📖 "${cleanTitle}"
+
+📖 Ringkasan Cerita:
+${summary}
+
+💖 Pesan Moral:
+${moral}
+
+🔖 SAVE postingan ini untuk menemani rutinitas tidur si kecil!
+📺 Tonton tayangan lengkapnya di YouTube @zayn.storybook serta ikuti cuplikan hangatnya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+
+💬 Nilai baik apa yang ingin Ayah Bunda bahas bersama si kecil malam ini? ❤️
+
+#ZaynStorybook #DongengSebelumTidur #PesanMoralAnak #CeritaAnak #TidurNyenyak`;
+
+  const threadsText = trimText(
+    `🌙 Waktunya dongeng sebelum tidur: "${cleanTitle}" ✨📖
+📖 Ringkasan: ${trimText(summary, 150)}
+💖 Pesan Moral: ${moralShort || moral}
+${youtubeUrl ? `▶️ ${youtubeUrl}` : "Tonton di YouTube, IG & FB @zayn.storybook!"} #ZaynStorybook`,
+    480
+  );
+
+  return {
+    facebookCaption,
+    facebookFallbackCaption,
+    facebookFirstComment,
+    instagramCaption,
+    threadsText,
+    threadsLinkUrl: youtubeUrl,
+  };
 }
 
 /**
@@ -1108,16 +1320,17 @@ export async function publishPostPublishWaveAnnouncement(
   console.log(`   - Instagram Feed  : ${hasIg ? `✔ LIVE (${existingWave.instagram?.id})` : "⏳ PENDING"}`);
   console.log(`   - Meta Threads    : ${hasThreads ? `✔ LIVE (${existingWave.threads?.postId || existingWave.threads?.id})` : "⏳ PENDING"}`);
 
-  if (hasFb && hasIg && hasThreads && !options.force) {
+  const allowUpdate = Boolean(options.force || options.edit);
+  if (hasFb && hasIg && hasThreads && !allowUpdate) {
     console.log(`\n🛡️ [ZERO DUPLICATE GATE] Wave ${wave} for ${targetBook} (${targetDate}) already live across all channels. Skipping.`);
     return { success: true, skipped: true, targetBook, lang: targetLang };
   }
 
   const rawTitle = targetLang === "id" ? story.title || story.originalTitle : story.originalTitle || story.title || targetBook;
   const cleanTitle = String(rawTitle || targetBook).replace(/[!]+$/, "").trim();
-  const thumbCfg = story.thumbnailConfig?.[targetLang] || story.thumbnailConfig?.id || story.thumbnailConfig?.en || {};
-  const hook = thumbCfg.hook || (targetLang === "id" ? "Petualangan hangat penuh pesan baik untuk keluarga." : "A gentle illustrated bilingual adventure for families.");
-  const moral = extractMoral(story, targetLang);
+  const summary = extractStorySummary(story, targetLang, 220);
+  const moral = extractMoral(story, targetLang, true);
+  const moralShort = extractMoral(story, targetLang, false);
 
   const { youtubeUrl, ytThumbnailUrl } = await resolveLiveYoutubeInfo(story, targetBook, targetLang);
   const related = resolveRelatedPublishedVideos(targetBook, targetLang, 2);
@@ -1127,102 +1340,42 @@ export async function publishPostPublishWaveAnnouncement(
     bookSlug: targetBook,
     cleanTitle,
     lang: targetLang,
-    hook,
+    summary,
     moral,
+    moralShort,
     youtubeUrl,
     related,
   });
 
   console.log(`🖼️ Selected Visual   : ${path.basename(wavePhoto)}`);
-  console.log(`▶️ YouTube Link      : ${youtubeUrl || "(Not yet indexed — falling back to Portal URL)"}`);
-  console.log(`🌐 Portal Deep Link  : ${copy.portalUrlThreads}`);
+  console.log(`▶️ YouTube Link      : ${youtubeUrl || "(Not yet indexed — referencing channel handle)"}`);
   if (related.length > 0) {
     console.log(`📚 Watch Next        : ${related.map((r) => r.title).join(" | ")}`);
   }
 
-  const errors: string[] = [];
-  let fbResult = existingWave.facebook;
-  let igResult = existingWave.instagram;
-  let thResult = existingWave.threads;
-
-  // 1. Facebook Photo Post + Clickable Links in First Comment (auto-patches caption if comment permission missing)
-  if (!hasFb || options.force) {
-    try {
-      console.log(`\n📘 [1/3] Publishing Wave ${wave} Facebook Photo Post (+ First Comment links)...`);
-      const fbRes = await publishFacebookPhotoPost({
-        photoPath: wavePhoto,
-        caption: copy.facebookCaption,
-        firstComment: copy.facebookFirstComment,
-        fallbackCaption: copy.facebookFallbackCaption,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && fbRes.success) {
-        fbResult = {
-          postId: fbRes.postId,
-          url: fbRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-      }
-    } catch (fbErr: any) {
-      console.error(`⚠️ Facebook Wave ${wave} warning:`, fbErr.message);
-      errors.push(`Facebook: ${fbErr.message}`);
-    }
-  }
-
-  // 2. Instagram Feed Photo ("Save for bedtime" + Link in Bio)
-  if (!hasIg || options.force) {
-    try {
-      console.log(`\n📸 [2/3] Publishing Wave ${wave} Instagram Feed Photo...`);
-      const igRes = await publishInstagramFeedPhoto({
-        imagePath: wavePhoto,
-        caption: copy.instagramCaption,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && igRes.success) {
-        igResult = {
-          id: igRes.mediaId,
-          url: igRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-      }
-    } catch (igErr: any) {
-      console.error(`⚠️ Instagram Wave ${wave} warning:`, igErr.message);
-      errors.push(`Instagram: ${igErr.message}`);
-    }
-  }
-
-  // 3. Meta Threads Rich Link Preview Card
-  if (!hasThreads || options.force) {
-    try {
-      console.log(`\n🧵 [3/3] Publishing Wave ${wave} Threads Link Card -> ${copy.portalUrlThreads}...`);
-      const thRes = await publishThreadsLinkPost({
-        text: copy.threadsText,
-        linkUrl: copy.portalUrlThreads,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && thRes.success) {
-        thResult = {
-          id: thRes.postId,
-          postId: thRes.postId,
-          url: thRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-      }
-    } catch (thErr: any) {
-      console.error(`⚠️ Threads Wave ${wave} warning:`, thErr.message);
-      errors.push(`Threads: ${thErr.message}`);
-    }
-  }
+  const synced = await syncAnnouncementPlatforms({
+    label: `Wave ${wave}`,
+    imagePaths: [wavePhoto],
+    facebookCaption: copy.facebookCaption,
+    facebookFirstComment: copy.facebookFirstComment,
+    facebookFallbackCaption: copy.facebookFallbackCaption,
+    instagramCaption: copy.instagramCaption,
+    threadsText: copy.threadsText,
+    threadsLinkUrl: copy.threadsLinkUrl,
+    existing: existingWave,
+    allowEdit: allowUpdate,
+    dryRun: options.dryRun,
+  });
+  const errors = synced.errors;
+  const fbResult = synced.facebook;
+  const igResult = synced.instagram;
+  const thResult = synced.threads;
 
   if (!options.dryRun) {
     story.publications.announcements[targetDate][waveKey] = {
       announcedAt: new Date().toISOString(),
       wave,
       lang: targetLang,
-      portalUrl: copy.portalUrlThreads,
       youtubeUrl,
       facebook: fbResult,
       instagram: igResult,
@@ -1256,12 +1409,11 @@ export async function publishPostPublishWaveAnnouncement(
         morningBook: wave === 2 ? targetBook : undefined,
         morningTitle: wave === 2 ? cleanTitle : undefined,
         morningLang: wave === 2 ? targetLang : undefined,
-        morningHook: wave === 2 ? hook : undefined,
+        morningHook: wave === 2 ? summary : undefined,
         eveningBook: wave === 3 ? targetBook : undefined,
         eveningTitle: wave === 3 ? cleanTitle : undefined,
         eveningLang: wave === 3 ? targetLang : undefined,
-        eveningHook: wave === 3 ? hook : undefined,
-        portalUrl: copy.portalUrlThreads,
+        eveningHook: wave === 3 ? summary : undefined,
         youtubeUrl,
         relatedTitle: related[0]?.title,
         relatedUrl: related[0]?.url,
@@ -1312,6 +1464,198 @@ async function resolveFullMotionSlots(targetDate: string, bookSlug?: string, lan
   return all;
 }
 
+export interface FullMotionCopyPayload {
+  displayTitle: string;
+  afterLangBanner: string;
+  captionIg: string;
+  captionFb: string;
+  captionTh: string;
+  facebookFirstComment?: string;
+}
+
+export function generateFullMotionCopy(params: {
+  story: any;
+  targetBook: string;
+  phase: "before" | "after";
+  slotTime: string;
+  slotLang: "id" | "en";
+  dayHeadingEn: "SUNDAY" | "WEDNESDAY";
+  dayLabelId: "Minggu" | "Rabu";
+  ytIdUrl?: string;
+  ytEnUrl?: string;
+  hasEnLive?: boolean;
+  hasIdLive?: boolean;
+}): FullMotionCopyPayload {
+  const {
+    story,
+    targetBook,
+    phase,
+    slotTime,
+    slotLang,
+    dayHeadingEn,
+    dayLabelId,
+    ytIdUrl,
+    ytEnUrl,
+    hasEnLive = Boolean(ytEnUrl),
+    hasIdLive = Boolean(ytIdUrl),
+  } = params;
+
+  const isEn = slotLang === "en";
+  const slotLangBanner = isEn ? "English Edition 🇬🇧" : "Bahasa Indonesia 🇮🇩";
+  const cleanTitleId = (story?.title || targetBook).replace(/[!]+$/, "").trim();
+  const cleanTitleEn = (story?.originalTitle || cleanTitleId).replace(/[!]+$/, "").trim();
+  const displayTitle = isEn ? cleanTitleEn : cleanTitleId;
+  const storySummary = extractStorySummary(story, slotLang, 220);
+  const moral = extractMoral(story, slotLang, true);
+  const moralShort = extractMoral(story, slotLang, false);
+
+  const afterLangBanner =
+    hasEnLive && hasIdLive
+      ? "Bahasa Indonesia & English 🇮🇩🇬🇧"
+      : hasEnLive
+        ? "English Edition 🇬🇧"
+        : hasIdLive
+          ? "Bahasa Indonesia 🇮🇩"
+          : slotLangBanner;
+
+  const primaryYtUrl = (isEn ? ytEnUrl || ytIdUrl : ytIdUrl || ytEnUrl) || SOCIAL_YOUTUBE_CHANNEL_URL;
+  const youtubeWatchLines = [
+    ytEnUrl ? `🇬🇧 YouTube Full-Motion (EN): ${ytEnUrl}` : "",
+    ytIdUrl ? `🇮🇩 YouTube Full-Motion (ID): ${ytIdUrl}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const captionIg =
+    phase === "before"
+      ? isEn
+        ? `🎬✨ SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}) — 1 HOUR TO GO (${slotTime})!
+
+📖 "${displayTitle}"
+
+📖 Story Summary:
+${storySummary}
+
+💡 Moral of the Story:
+${moral}
+
+🎭 Featuring Full-Motion character animation + expressive child voice acting!
+📺 Watch the premiere on YouTube @zayn.storybook and follow Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+
+#ZaynStorybook #FullMotionKids #KidsStories #MoralOfTheStory #${dayHeadingEn === "WEDNESDAY" ? "WednesdayPremiere" : "SundayPremiere"}`
+        : `🎬✨ SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}) — 1 JAM LAGI (${slotTime})!
+
+📖 "${displayTitle}"
+
+📖 Ringkasan Cerita:
+${storySummary}
+
+💡 Pesan Moral:
+${moral}
+
+🎭 Edisi spesial Full-Motion Animasi dengan karakter bergerak & sulih suara anak ekspresif!
+📺 Saksikan tayang perdananya di YouTube @zayn.storybook dan ikuti Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+
+#ZaynStorybook #FullMotionKids #DongengAnak #PesanMoralAnak #${dayHeadingEn === "WEDNESDAY" ? "WednesdayPremiere" : "SundayPremiere"}`
+      : isEn
+        ? `🎬🌟 FULL-MOTION EDITION (${afterLangBanner}) — NOW STREAMING!
+
+📖 "${cleanTitleEn}"
+
+📖 Story Summary:
+${storySummary}
+
+💡 Moral of the Story:
+${moral}
+
+▶️ Watch Full HD (16:9) on YouTube @zayn.storybook, and catch Shorts/Reels on Instagram, Facebook Watch & Threads @zayn.storybook!
+💬 What part of "${cleanTitleEn}" did your child talk about most? Share below! ❤️
+
+#ZaynStorybook #FullMotionKids #KidsStories #MoralStories #FamilyStorytime`
+        : `🎬🌟 FULL-MOTION EDITION (${afterLangBanner}) — SUDAH TAYANG!
+
+📖 "${cleanTitleId}" / "${cleanTitleEn}"
+
+📖 Ringkasan Cerita:
+${storySummary}
+
+💡 Pesan Moral:
+${moral}
+
+▶️ Tonton Full HD (16:9) di YouTube @zayn.storybook serta Shorts/Reels di Instagram, Facebook Watch & Threads @zayn.storybook!
+💬 Pelajaran baik apa nih yang paling diingat si kecil setelah menonton? Tulis di komentar! ❤️
+
+#ZaynStorybook #FullMotionKids #Dongeng${dayLabelId} #PesanMoral #CeritaAnak`;
+
+  const captionFb =
+    phase === "before"
+      ? isEn
+        ? `🎬 SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}, ${slotTime}) — 1 Hour to Go!
+
+📖 "${displayTitle}"
+
+📖 Story Summary:
+${storySummary}
+
+💡 Moral of the Story:
+${moral}
+
+🎭 Enjoy lively character animation, playful sound design & expressive child narration!
+📺 Tune in on YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}) plus Instagram Reels, Facebook Watch & Threads @zayn.storybook!`
+        : `🎬 SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}, ${slotTime}) — 1 Jam Lagi!
+
+📖 "${displayTitle}"
+
+📖 Ringkasan Cerita:
+${storySummary}
+
+💡 Pesan Moral:
+${moral}
+
+🎭 Nikmati animasi karakter bergerak, efek suara ceria & sulih suara anak yang ekspresif!
+📺 Tonton di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), serta ikuti Instagram Reels, Facebook Watch & Threads @zayn.storybook!`
+      : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${displayTitle} — ${afterLangBanner})
+
+📖 Ringkasan Cerita:
+${storySummary}
+
+💡 Pesan Moral:
+${moral}
+
+${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Tonton di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}📱 Ikuti juga cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+💬 Pesan moral apa yang paling berkesan untuk si kecil dari cerita ini? Yuk bagikan di komentar! ❤️`;
+
+  const captionTh = trimText(
+    phase === "before"
+      ? isEn
+        ? `🎬 In 1 hour (${slotTime}): Full-Motion "${displayTitle}" (${slotLangBanner}) on YouTube @zayn.storybook!
+📖 ${trimText(storySummary, 150)}
+💡 Moral: ${moralShort}
+Watch & follow on YouTube, Instagram & Facebook @zayn.storybook ✨`
+        : `🎬 1 jam lagi (${slotTime}): Full-Motion "${displayTitle}" (${slotLangBanner}) di YouTube @zayn.storybook!
+📖 ${trimText(storySummary, 150)}
+💡 Moral: ${moralShort}
+Tonton & ikuti di YouTube, Instagram & Facebook @zayn.storybook ✨`
+      : isEn
+        ? `✨ Full-Motion "${displayTitle}" (${afterLangBanner}) IS LIVE!
+📖 ${trimText(storySummary, 140)}
+💡 Moral: ${moralShort}
+▶️ ${primaryYtUrl} (also on IG, FB & Threads @zayn.storybook)`
+        : `✨ Full-Motion "${displayTitle}" (${afterLangBanner}) SUDAH TAYANG!
+📖 ${trimText(storySummary, 140)}
+💡 Moral: ${moralShort}
+▶️ ${primaryYtUrl} (juga di IG, FB & Threads @zayn.storybook)`,
+    480
+  );
+
+  const facebookFirstComment =
+    phase === "after"
+      ? youtubeWatchLines || `▶️ Tonton di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}`
+      : undefined;
+
+  return { displayTitle, afterLangBanner, captionIg, captionFb, captionTh, facebookFirstComment };
+}
+
 /**
  * Publishes dedicated BEFORE (14:00 WIB teaser) or AFTER (17:00 WIB watch-now recap) announcements
  * for Sunday (EN) and Wednesday (ID) Full-Motion Premieres, separate from illustration schedules.
@@ -1323,8 +1667,8 @@ export async function publishFullMotionAnnouncement(
   const targetDate = options.date || getJakartaDateString();
   const phaseKey = phase === "before" ? "fullMotionBefore" : "fullMotionAfter";
   const isWed = new Date(`${targetDate}T12:00:00Z`).getUTCDay() === 3;
-  const dayHeadingEn = isWed ? "WEDNESDAY" : "SUNDAY";
-  const dayLabelId = isWed ? "Rabu" : "Minggu";
+  const dayHeadingEn: "SUNDAY" | "WEDNESDAY" = isWed ? "WEDNESDAY" : "SUNDAY";
+  const dayLabelId: "Minggu" | "Rabu" = isWed ? "Rabu" : "Minggu";
 
   console.log("\n==================================================================");
   console.log(`🎬 ${dayHeadingEn} FULL-MOTION ANNOUNCEMENT (${phase.toUpperCase()})`);
@@ -1349,7 +1693,6 @@ export async function publishFullMotionAnnouncement(
         : isWed
           ? "id"
           : "en";
-  const slotLangBanner = slotLang === "en" ? "English Edition 🇬🇧" : "Bahasa Indonesia 🇮🇩";
   const storyDir = path.resolve("./stories", targetBook);
   const storyJsonPath = path.join(storyDir, "story.json");
 
@@ -1370,19 +1713,14 @@ export async function publishFullMotionAnnouncement(
   const hasFb = Boolean(existing.facebook?.id || existing.facebook?.postId);
   const hasIg = Boolean(existing.instagram?.id);
   const hasThreads = Boolean(existing.threads?.id || existing.threads?.postId);
+  const allowUpdate = Boolean(options.force || options.edit);
 
-  if (hasFb && hasIg && hasThreads && !options.force) {
+  if (hasFb && hasIg && hasThreads && !allowUpdate) {
     console.log(`🛡️ [ZERO DUPLICATE GATE] Full-Motion ${phase.toUpperCase()} for [${targetBook}] (${targetDate}) already posted.`);
-    return { success: true, skipped: true, targetBook, lang: "bilingual" };
+    return { success: true, skipped: true, targetBook, lang: slotLang };
   }
 
   const visualPath = resolveBestPhoto(storyDir, slotLang);
-  const cleanTitleId = (story.title || targetBook).replace(/[!]+$/, "").trim();
-  const cleanTitleEn = (story.originalTitle || cleanTitleId).replace(/[!]+$/, "").trim();
-  const displayTitle = slotLang === "en" ? cleanTitleEn : cleanTitleId;
-  const moralId = extractMoral(story, slotLang);
-  const portalUrlFb = buildStoryPortalUrl(targetBook, { source: "facebook", medium: `motion-${phase}` });
-  const portalUrlTh = buildStoryPortalUrl(targetBook, { source: "threads", medium: `motion-${phase}` });
   const pickYtUrl = (entry: any): string | undefined =>
     typeof entry === "string" ? entry : entry?.url || (entry?.id ? `https://youtu.be/${entry.id}` : undefined);
   const ytIdUrl =
@@ -1394,29 +1732,20 @@ export async function publishFullMotionAnnouncement(
 
   const hasEnLive = Boolean(ytEnUrl || story.publications?.instagram?.en?.id || story.publications?.facebook?.en?.landscape?.id);
   const hasIdLive = Boolean(ytIdUrl || story.publications?.instagram?.id?.id || story.publications?.facebook?.id?.landscape?.id);
-  const afterLangBanner =
-    hasEnLive && hasIdLive
-      ? "Bahasa Indonesia & English 🇮🇩🇬🇧"
-      : hasEnLive
-        ? "English Edition 🇬🇧"
-        : hasIdLive
-          ? "Bahasa Indonesia 🇮🇩"
-          : slotLangBanner;
 
-  const captionIg =
-    phase === "before"
-      ? `🎬✨ SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}) — 1 JAM LAGI (${slotTime})!\n\nBukan sekadar buku bergambar — ${dayLabelId} ini Zayn Storybook hadir dalam edisi Full-Motion Animasi (${slotLangBanner}) + Voice Actor Anak Ekspresif & Efek Suara!\n\n📖 "${displayTitle}"\n💡 Nilai Utama: ${moralId}\n\n💾 Simpan (Save) pengingat ini & tonton bareng si kecil tepat pukul ${slotTime}!\n👉 Katalog resmi di Bio (storybook-catalog.pages.dev)\n\n#ZaynStorybook #FullMotionKids #DongengAnak #${dayHeadingEn === "WEDNESDAY" ? "WednesdayPremiere" : "SundayPremiere"} #BilingualKids`
-      : `🎬🌟 FULL-MOTION EDITION (${afterLangBanner}) — SUDAH TAYANG!\n\nEdisi spesial Full-Motion Animasi "${cleanTitleId}" / "${cleanTitleEn}" (${afterLangBanner}) kini resmi mengudara!\n\n💡 Pesan Moral: ${moralId}\n▶️ Tonton Full HD (16:9) & Shorts/Reels (9:16) sekarang di YouTube & Portal Zayn Storybook!\n\n💬 Gimana pendapat si kecil tentang animasi kali ini? Tulis di komentar!\n\n#ZaynStorybook #FullMotionKids #Dongeng${dayLabelId} #BilingualKids #CeritaAnak`;
-
-  const captionFb =
-    phase === "before"
-      ? `🎬 SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}, ${slotTime}) — 1 Jam Lagi!\n\nBerbeda dari jadwal buku ilustrasi harian, di slot ${slotTime} kami merilis episode khusus Full-Motion Animasi (${slotLangBanner}) dengan karakter bergerak & sulih suara anak!\n\n📖 Judul: "${displayTitle}"\n💡 Pesan Moral: ${moralId}\n\n🔗 Jadwal & episode lengkap:\n${portalUrlFb}`
-      : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${cleanTitleId} — ${afterLangBanner})\n\nEpisode spesial Full-Motion (${afterLangBanner}) sudah live!\n${ytEnUrl ? `🇬🇧 Watch English Full-Motion: ${ytEnUrl}\n` : ""}${ytIdUrl ? `🇮🇩 Tonton Bahasa Indonesia Full-Motion: ${ytIdUrl}\n` : ""}🌐 Katalog Lengkap: ${portalUrlFb}`;
-
-  const captionTh =
-    phase === "before"
-      ? `🎬 Edisi spesial Full-Motion (${slotLangBanner})! 1 jam lagi (${slotTime}) tayang episode Full-Motion Animasi "${displayTitle}" — karakter hidup + audio cerita anak! Ingatkan si kecil ya 👇\n${portalUrlTh}`
-      : `✨ Full-Motion "${displayTitle}" (${afterLangBanner}) SUDAH TAYANG! Animasi bergerak + sulih suara ceria buat menemani keluarga 💛\n${(slotLang === "en" ? ytEnUrl || ytIdUrl : ytIdUrl || ytEnUrl) || portalUrlTh}`;
+  const { displayTitle, captionIg, captionFb, captionTh, facebookFirstComment } = generateFullMotionCopy({
+    story,
+    targetBook,
+    phase,
+    slotTime,
+    slotLang,
+    dayHeadingEn,
+    dayLabelId,
+    ytIdUrl,
+    ytEnUrl,
+    hasEnLive,
+    hasIdLive,
+  });
 
   console.log(`📖 Story  : ${displayTitle} (${targetBook}, ${slotLang.toUpperCase()})`);
   console.log(`🖼️ Visual : ${path.basename(visualPath)}`);
@@ -1424,78 +1753,33 @@ export async function publishFullMotionAnnouncement(
   if (options.dryRun) {
     console.log(`\n🧪 [DRY RUN] Preview Full-Motion ${phase.toUpperCase()} Captions:`);
     console.log(`--- INSTAGRAM ---\n${captionIg}\n--- FACEBOOK ---\n${captionFb}\n--- THREADS ---\n${captionTh}\n`);
+    if (facebookFirstComment) {
+      console.log(`--- FACEBOOK FIRST COMMENT ---\n${facebookFirstComment}\n`);
+    }
     return { success: true, targetBook, lang: slotLang };
   }
 
-  const errors: string[] = [];
-  let fbResult = existing.facebook;
-  let igResult = existing.instagram;
-  let thResult = existing.threads;
-
-  if (!hasFb || options.force) {
-    try {
-      const fbRes = await publishFacebookPhotoPost({
-        photoPath: visualPath,
-        caption: captionFb,
-        firstComment: portalUrlFb,
-        fallbackCaption: captionFb,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && fbRes.success) {
-        fbResult = {
-          postId: fbRes.postId,
-          url: fbRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-      }
-    } catch (err: any) {
-      errors.push(`Facebook (${phase}): ${err.message}`);
-    }
-  }
-  if (!hasIg || options.force) {
-    try {
-      const igRes = await publishInstagramFeedPhoto({
-        imagePath: visualPath,
-        caption: captionIg,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && igRes.success) {
-        igResult = {
-          id: igRes.mediaId,
-          url: igRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-      }
-    } catch (err: any) {
-      errors.push(`Instagram (${phase}): ${err.message}`);
-    }
-  }
-  if (!hasThreads || options.force) {
-    try {
-      const thRes = await publishThreadsPhotoPost({
-        imagePath: visualPath,
-        text: captionTh,
-        dryRun: options.dryRun,
-      });
-      if (!options.dryRun && thRes.success) {
-        thResult = {
-          id: thRes.postId,
-          postId: thRes.postId,
-          url: thRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-      }
-    } catch (err: any) {
-      errors.push(`Threads (${phase}): ${err.message}`);
-    }
-  }
+  const synced = await syncAnnouncementPlatforms({
+    label: `Full-Motion ${phase.toUpperCase()}`,
+    imagePaths: [visualPath],
+    facebookCaption: captionFb,
+    facebookFirstComment,
+    facebookFallbackCaption: captionFb,
+    instagramCaption: captionIg,
+    threadsText: captionTh,
+    existing,
+    allowEdit: allowUpdate,
+    dryRun: options.dryRun,
+  });
+  const errors = synced.errors;
+  const fbResult = synced.facebook;
+  const igResult = synced.instagram;
+  const thResult = synced.threads;
 
   story.publications.announcements[targetDate][phaseKey] = {
     scheduledSlot: slotTime,
-    announcedAt: new Date().toISOString(),
+    announcedAt: existing.announcedAt || new Date().toISOString(),
+    ...(allowUpdate ? { updatedAt: new Date().toISOString() } : {}),
     phase,
     facebook: fbResult,
     instagram: igResult,
@@ -1659,20 +1943,21 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
 
   // 3. Strict Deduplication Gate (Public Platforms: Facebook, Instagram, Threads)
   // Note: Telegram is strictly reserved for internal creator notifications/alerts and skipped from public feeds.
-  const hasFb = Boolean(existingAnn.facebook?.id);
+  const hasFb = Boolean(existingAnn.facebook?.id || existingAnn.facebook?.postId);
   const hasIg = Boolean(existingAnn.instagram?.id);
-  const hasThreads = Boolean(existingAnn.threads?.id);
+  const hasThreads = Boolean(existingAnn.threads?.id || existingAnn.threads?.postId);
 
   console.log("🔍 ANNOUNCEMENT DEDUPLICATION STATUS (PUBLIC SOCIAL FEEDS):");
-  console.log(`   - Facebook Page Feed : ${hasFb ? `✔ LIVE (${existingAnn.facebook?.id})` : "⏳ PENDING"}`);
+  console.log(`   - Facebook Page Feed : ${hasFb ? `✔ LIVE (${existingAnn.facebook?.postId || existingAnn.facebook?.id})` : "⏳ PENDING"}`);
   console.log(`   - Instagram Feed     : ${hasIg ? `✔ LIVE (${existingAnn.instagram?.id})` : "⏳ PENDING"}`);
   console.log(`   - Meta Threads       : ${hasThreads ? `✔ LIVE (${existingAnn.threads?.id})` : "⏳ PENDING"}`);
 
+  const allowUpdate = Boolean(options.force || options.edit);
   const isAllPublished = hasFb && hasIg && hasThreads;
-  if (isAllPublished && !options.force) {
+  if (isAllPublished && !allowUpdate) {
     console.log(`\n🛡️ [ZERO DUPLICATE GATE] Announcement for "${story.title}" [${lang.toUpperCase()}] on ${todayDate} has ALREADY been published across ALL public social platforms!`);
     console.log(`   ⏩ Skipping announcement feed to guarantee ZERO duplicate posts.`);
-    console.log(`   💡 Tip: Pass --force to replace or re-post anyway.\n`);
+    console.log(`   💡 Tip: Pass --edit to update supported platforms in-place.\n`);
     return { success: true, skipped: true, targetBook, lang };
   }
 
@@ -1687,90 +1972,20 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     captionYoutubeCommunity,
   } = generateTeaserCopy(story, lang, slotTime);
 
-  const errors: string[] = [];
-
-  // 5. Granular Publishing to Pending Public Platforms
-  // 5A. Facebook Page Feed Photo (Tailored for Parenting Community)
-  if (!hasFb || options.force) {
-    try {
-      console.log(`\n📘 [1/3] Publishing Announcement to Facebook Page...`);
-      const fbRes = await publishFacebookPhotoPost({
-        photoPath,
-        caption: captionFacebook,
-        dryRun: options.dryRun,
-      });
-
-      if (!options.dryRun && fbRes.success) {
-        existingAnn.facebook = {
-          id: fbRes.photoId || fbRes.postId,
-          postId: fbRes.postId,
-          url: fbRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-        console.log(`✔ Facebook announcement live: ${fbRes.permalink}`);
-      }
-    } catch (fbErr: any) {
-      console.error(`⚠️ Facebook announcement warning:`, fbErr.message);
-      errors.push(`[Facebook] ${fbErr.message}`);
-    }
-  } else {
-    console.log(`\n⏩ [1/3] Skipping Facebook Page: Already published today (${existingAnn.facebook?.id}).`);
-  }
-
-  // 5B. Instagram Feed Photo (Tailored for Saves & Engagement)
-  if (!hasIg || options.force) {
-    try {
-      console.log(`\n📸 [2/3] Publishing Announcement to Instagram Feed...`);
-      const igRes = await publishInstagramFeedPhoto({
-        imagePath: photoPath,
-        caption: captionInstagram,
-        dryRun: options.dryRun,
-      });
-
-      if (!options.dryRun && igRes.success) {
-        existingAnn.instagram = {
-          id: igRes.mediaId,
-          url: igRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-        console.log(`✔ Instagram announcement live: ${igRes.permalink}`);
-      }
-    } catch (igErr: any) {
-      console.error(`⚠️ Instagram announcement warning:`, igErr.message);
-      errors.push(`[Instagram] ${igErr.message}`);
-    }
-  } else {
-    console.log(`\n⏩ [2/3] Skipping Instagram Feed: Already published today (${existingAnn.instagram?.id}).`);
-  }
-
-  // 5C. Meta Threads Image Post (Tailored for Conversational Micro-Storytelling)
-  if (!hasThreads || options.force) {
-    try {
-      console.log(`\n🧵 [3/3] Publishing Announcement to Meta Threads...`);
-      const thRes = await publishThreadsPhotoPost({
-        imagePath: photoPath,
-        text: captionThreads,
-        dryRun: options.dryRun,
-      });
-
-      if (!options.dryRun && thRes.success) {
-        existingAnn.threads = {
-          id: thRes.postId,
-          url: thRes.permalink,
-          publishedAt: new Date().toISOString(),
-          status: "published",
-        };
-        console.log(`✔ Threads announcement live: ${thRes.permalink}`);
-      }
-    } catch (thErr: any) {
-      console.error(`⚠️ Threads announcement warning:`, thErr.message);
-      errors.push(`[Threads] ${thErr.message}`);
-    }
-  } else {
-    console.log(`\n⏩ [3/3] Skipping Meta Threads: Already published today (${existingAnn.threads?.id}).`);
-  }
+  const synced = await syncAnnouncementPlatforms({
+    label: `Single Slot ${slotTime}`,
+    imagePaths: [photoPath],
+    facebookCaption: captionFacebook,
+    instagramCaption: captionInstagram,
+    threadsText: captionThreads,
+    existing: existingAnn,
+    allowEdit: allowUpdate,
+    dryRun: options.dryRun,
+  });
+  const errors = synced.errors;
+  existingAnn.facebook = synced.facebook;
+  existingAnn.instagram = synced.instagram;
+  existingAnn.threads = synced.threads;
 
   if (options.dryRun) {
     console.log("\n[DRY RUN] YouTube Community Announcement Preview:\n", captionYoutubeCommunity);
@@ -1835,6 +2050,7 @@ async function main() {
 
   const dryRun = args.includes("--dry-run");
   const force = args.includes("--force");
+  const edit = args.includes("--edit");
   const dailyLineup = args.includes("--daily-lineup");
   const waveArg = getArg("--wave");
   const wave: 1 | 2 | 3 | undefined = waveArg === "2" ? 2 : waveArg === "3" ? 3 : waveArg === "1" ? 1 : undefined;
@@ -1856,10 +2072,11 @@ async function main() {
     date: dateArg,
     dryRun,
     force,
+    edit,
   });
 }
 
-if (process.argv[1]?.includes("publish-announcement")) {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   main().catch((err) => {
     console.error("❌ Fatal error in Announcement Publisher:", err);
     process.exit(1);
