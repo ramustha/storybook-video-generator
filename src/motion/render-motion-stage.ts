@@ -1,5 +1,6 @@
 import { chromium } from "playwright";
 import path from "path";
+import os from "os";
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import { execSync } from "child_process";
@@ -81,6 +82,7 @@ export interface RenderMotionVideoOptions {
   format: "vertical" | "landscape";
   outputLocation: string;
   fps?: number;
+  concurrency?: number;
 }
 
 /**
@@ -111,12 +113,14 @@ export async function renderEduMotionVideo(options: RenderMotionVideoOptions): P
 
   const width = format === "vertical" ? 1080 : 1920;
   const height = format === "vertical" ? 1920 : 1080;
+  const workerCount =
+    options.concurrency ?? Math.max(2, Math.min(8, Math.floor((os.cpus()?.length || 4) * 0.75)));
 
   const executablePath = resolveChromiumExecutable();
   const browser = await chromium.launch({
     headless: true,
     ...(executablePath ? { executablePath } : {}),
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu-vsync"],
   });
 
   const tempFramesDir = path.join(storyDir, "cache", `frames_${lang}_${format}`);
@@ -124,43 +128,57 @@ export async function renderEduMotionVideo(options: RenderMotionVideoOptions): P
   await fs.mkdir(tempFramesDir, { recursive: true });
 
   try {
-    const page = await browser.newPage({
-      viewport: { width, height },
-      deviceScaleFactor: 1,
-    });
-
     const fileUrl = `file://${htmlPath}?clean=1&format=${format}`;
-    await page.goto(fileUrl, { waitUntil: "networkidle" });
-    await page.evaluate(() => document.fonts.ready);
+    const pages = await Promise.all(
+      Array.from({ length: workerCount }, async () => {
+        const page = await browser.newPage({
+          viewport: { width, height },
+          deviceScaleFactor: 1,
+        });
+        await page.goto(fileUrl, { waitUntil: "networkidle" });
+        await page.evaluate(() => document.fonts.ready);
+        return page;
+      })
+    );
 
-    const durationSeconds: number = await page.evaluate(() => (window as any).OPENER?.DURATION || 45);
+    const durationSeconds: number = await pages[0].evaluate(() => (window as any).OPENER?.DURATION || 45);
     const totalFrames = Math.ceil(durationSeconds * fps);
 
     console.log(
-      `🎬 [Edu-Motion Renderer] Rendering ${lang.toUpperCase()} ${format.toUpperCase()} (${width}x${height}, ${totalFrames} frames @ ${fps}fps, ${durationSeconds}s)...`
+      `🎬 [Edu-Motion Renderer] Rendering ${lang.toUpperCase()} ${format.toUpperCase()} (${width}x${height}, ${totalFrames} frames @ ${fps}fps, ${durationSeconds}s, ${workerCount} workers)...`
     );
 
     const startTime = Date.now();
-    for (let f = 0; f < totalFrames; f++) {
-      const t = f / fps;
-      await page.evaluate((time) => {
-        (window as any).OPENER.seek(time);
-      }, t);
+    let completedFrames = 0;
 
-      const framePath = path.join(tempFramesDir, `f${String(f).padStart(5, "0")}.jpg`);
-      await page.screenshot({
-        path: framePath,
-        type: "jpeg",
-        quality: 92,
-      });
+    await Promise.all(
+      pages.map(async (page, workerIndex) => {
+        for (let f = workerIndex; f < totalFrames; f += workerCount) {
+          const t = f / fps;
+          await page.evaluate((time) => {
+            (window as any).OPENER.seek(time);
+          }, t);
 
-      if (f % 150 === 0 || f === totalFrames - 1) {
-        const pct = Math.round(((f + 1) / totalFrames) * 100);
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-        console.log(`   ⏳ [${lang.toUpperCase()}-${format}] ${pct}% (${f + 1}/${totalFrames} frames, ${elapsed}s)`);
-      }
-    }
+          const framePath = path.join(tempFramesDir, `f${String(f).padStart(5, "0")}.jpg`);
+          await page.screenshot({
+            path: framePath,
+            type: "jpeg",
+            quality: 95,
+          });
 
+          completedFrames += 1;
+          if (completedFrames % 150 === 0 || completedFrames === totalFrames) {
+            const pct = Math.round((completedFrames / totalFrames) * 100);
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            console.log(
+              `   ⏳ [${lang.toUpperCase()}-${format}] ${pct}% (${completedFrames}/${totalFrames} frames, ${elapsed}s)`
+            );
+          }
+        }
+      })
+    );
+
+    await Promise.all(pages.map((p) => p.close().catch(() => {})));
     await browser.close();
 
     await fs.mkdir(path.dirname(outputLocation), { recursive: true });

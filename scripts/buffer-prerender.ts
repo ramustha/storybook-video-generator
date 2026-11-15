@@ -179,12 +179,18 @@ async function main() {
         console.log(`     1. npx tsx scripts/render-compilation.ts --theme "${compTheme}" --lang ${slot.lang} --format ${req.renderFormatArg}`);
         console.log(`     2. pushCompilationBuffer("${slot.bookSlug}", "${slot.lang}")`);
       } else {
-        const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
-        console.log(`   [DRY RUN] R2 Manifest: ${hasManifest ? "PRESENT" : "MISSING (would auto-ingest first)"}`);
-        if (!hasManifest) {
-          console.log(`     0. npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`);
+        const localMotionSpec = path.join(process.cwd(), "stories", slot.bookSlug, "motion-spec.json");
+        if (existsSync(localMotionSpec)) {
+          console.log(`   [DRY RUN] Edu-Motion Spec detected locally: ${localMotionSpec}`);
+          console.log(`     0. npx tsx scripts/pack-edu-motion.ts --book "${slot.bookSlug}"`);
+        } else {
+          const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
+          console.log(`   [DRY RUN] R2 Manifest: ${hasManifest ? "PRESENT" : "MISSING (would auto-ingest first)"}`);
+          if (!hasManifest) {
+            console.log(`     0. npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`);
+          }
+          console.log(`     1. npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`);
         }
-        console.log(`     1. npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`);
         console.log(`     2. npx tsx scripts/render-book.ts --book "${slot.bookSlug}" --lang ${langArg} --format ${req.renderFormatArg} --resolution 1080p`);
         console.log(`     3. npx tsx scripts/manage-story-storage.ts push ${slot.bookSlug} --include-videos`);
       }
@@ -201,15 +207,21 @@ async function main() {
         console.log(`   ☁️ Uploading compilation buffer to Cloudflare R2...`);
         await pushCompilationBuffer(slot.bookSlug, slot.lang);
       } else {
-        const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
-        if (!hasManifest) {
-          console.log(`   📥 Story [${slot.bookSlug}] not yet in R2. Running auto-ingestion before pre-render...`);
-          execSync(`npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
-        }
+        const localMotionSpec = path.join(process.cwd(), "stories", slot.bookSlug, "motion-spec.json");
+        if (existsSync(localMotionSpec)) {
+          console.log(`   🎨 Packaging deterministic Edu-Motion assets from motion-spec.json for [${slot.bookSlug}]...`);
+          execSync(`npx tsx scripts/pack-edu-motion.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
+        } else {
+          const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
+          if (!hasManifest) {
+            console.log(`   📥 Story [${slot.bookSlug}] not yet in R2. Running auto-ingestion before pre-render...`);
+            execSync(`npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
+          }
 
-        // Step 1: Ensure assets are present
-        console.log(`   ⬇️ Pulling story assets from Cloudflare R2...`);
-        execSync(`npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`, { stdio: "inherit" });
+          // Step 1: Ensure assets are present
+          console.log(`   ⬇️ Pulling story assets from Cloudflare R2...`);
+          execSync(`npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`, { stdio: "inherit" });
+        }
 
         // Step 2: Render required orientation(s) in a single bundle pass
         console.log(`   🎬 Rendering Remotion videos (${req.renderFormatArg}) for [${langLabel}]...`);

@@ -28,6 +28,8 @@ export interface SceneSynthesisInput {
   lines: DialogueLine[];
   outputMp3Path: string;
   outputWordsPath: string;
+  /** Optional Edge TTS speaking rate override (e.g. "+0%" or "-6%") for gentler child-friendly pacing. */
+  rateOverride?: string;
 }
 
 export interface SynthesisResult {
@@ -66,7 +68,8 @@ async function synthesizeLine(
   line: DialogueLine,
   lang: "id" | "en",
   tempDir: string,
-  lineIndex: number
+  lineIndex: number,
+  rateOverride?: string
 ): Promise<{
   audioPath: string;
   durationSec: number;
@@ -96,7 +99,7 @@ async function synthesizeLine(
 
       const { audioFilePath, metadataFilePath } = await tts.toFile(lineTempDir, cleanText, {
         pitch: voiceConfig.pitch,
-        rate: voiceConfig.rate,
+        rate: rateOverride ?? voiceConfig.rate,
       });
 
       const words: WordTimingItem[] = [];
@@ -200,7 +203,7 @@ export async function synthesizeSceneVoice(input: SceneSynthesisInput): Promise<
   try {
     const segmentResults = [];
     for (let i = 0; i < input.lines.length; i++) {
-      const lineRes = await synthesizeLine(input.lines[i], input.lang, tempDir, i);
+      const lineRes = await synthesizeLine(input.lines[i], input.lang, tempDir, i, input.rateOverride);
       segmentResults.push(lineRes);
     }
 
