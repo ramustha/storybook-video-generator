@@ -1,0 +1,27 @@
+scripts/refresh-youtube-seo.ts
+  698ac31901cd73e0 10-11,54,61,123,180-198,200,205,213-221,223-229
+scripts/lib/seo-formatter.ts
+  698ac31901cd73e0 409-457
+scripts/upload-youtube.ts
+  698ac31901cd73e0 15-16,303-304,333-347,352-353,520-521,526-541,544-545,905,1140-1168,1223-1224,1286-1287,1303-1304,1439-1440,1515-1516,1532-1533
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "6728fc0b99d92d14c32ff42d4b23fbf60e6c188f",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 174,
+      "total_deletions": 35,
+      "accepted_lines": 174,
+      "overriden_lines": 0
+    }
+  }
+}
