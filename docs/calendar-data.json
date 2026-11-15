@@ -338,8 +338,8 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: The Birthday Party (Family Empathy & Surprise)",
-    "status": "today",
-    "isCompleted": false,
+    "status": "completed",
+    "isCompleted": true,
     "hasPublishedAsset": false,
     "isBuffered": true,
     "hasAssets": true
@@ -361,8 +361,8 @@
       "Instagram Reels"
     ],
     "theme": "Prime Bedtime Story: Pesta Ulang Tahun! (Kejutan Kamera & Kasih Ibu)",
-    "status": "today",
-    "isCompleted": false,
+    "status": "completed",
+    "isCompleted": true,
     "hasPublishedAsset": false,
     "isBuffered": true,
     "hasAssets": true
@@ -384,7 +384,7 @@
       "Instagram Reels"
     ],
     "theme": "English Read-Aloud: Swing High, Momo! Joyful Playground Adventure",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": true,
@@ -408,7 +408,7 @@
       "YouTube Shorts"
     ],
     "theme": "Prime Bedtime Story: Ayo, Berayun, Momo! Petualangan Ceria di Taman Bermain",
-    "status": "upcoming",
+    "status": "today",
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": true,
@@ -2110,8 +2110,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning English Feature & Read-Aloud",
     "bookSlug": "adik-kecil-dan-kucing",
-    "storyTitleId": "Adik Kecil dan Kucing",
-    "storyTitleEn": "Adik Kecil dan Kucing",
+    "storyTitleId": "Adik Kecil Dan Kucing",
+    "storyTitleEn": "Adik Kecil Dan Kucing",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -2134,8 +2134,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "adik-kecil-dan-kucing",
-    "storyTitleId": "Adik Kecil dan Kucing",
-    "storyTitleEn": "Adik Kecil dan Kucing",
+    "storyTitleId": "Adik Kecil Dan Kucing",
+    "storyTitleEn": "Adik Kecil Dan Kucing",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -2350,8 +2350,8 @@
     "timeSlot": "08:30 WIB",
     "slotType": "Morning Energy & English Read-Aloud",
     "bookSlug": "arian-dan-naya",
-    "storyTitleId": "Arian dan Naya",
-    "storyTitleEn": "Arian dan Naya",
+    "storyTitleId": "Arian Dan Naya",
+    "storyTitleEn": "Arian Dan Naya",
     "lang": "en",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [
@@ -2374,8 +2374,8 @@
     "timeSlot": "19:00 WIB",
     "slotType": "Prime Bedtime Story",
     "bookSlug": "arian-dan-naya",
-    "storyTitleId": "Arian dan Naya",
-    "storyTitleEn": "Arian dan Naya",
+    "storyTitleId": "Arian Dan Naya",
+    "storyTitleEn": "Arian Dan Naya",
     "lang": "id",
     "format": "Landscape (16:9) & Shorts (9:16)",
     "targetPlatforms": [

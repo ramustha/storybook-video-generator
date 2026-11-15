@@ -44,10 +44,11 @@ async function dispatchWorkflow(env, workflowFile, inputs = null) {
 export default {
   async scheduled(event, env, ctx) {
     const cron = event.cron;
-    const now = new Date();
-    console.log(`⏰ Triggered by Cloudflare Cron: "${cron}" at ${now.toISOString()}`);
+    const scheduledDate = new Date(event.scheduledTime || Date.now());
+    const utcHour = scheduledDate.getUTCHours();
+    console.log(`⏰ Triggered by Cloudflare Cron: "${cron}" at ${scheduledDate.toISOString()} (UTC Hour: ${utcHour})`);
 
-    // 1. Single Daily Unified Bilingual Announcement (00:15 UTC = 07:15 WIB)
+    // 1. Wave 1 Daily Unified Bilingual Announcement (00:15 UTC = 07:15 WIB)
     if (cron === "15 0 * * *" || cron === "30 0 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {
@@ -71,7 +72,62 @@ export default {
         })
       );
     }
-    // 3. Daily Prime Bedtime Story Broadcast (12:00 UTC = 19:00 WIB)
+    // 3. Wave 2 (05:30 UTC = 12:30 WIB) & Wave 3 (13:30 UTC = 20:30 WIB) Post-Publish Funnel
+    else if (cron === "30 5,13 * * *") {
+      const isWave2 = utcHour < 10;
+      ctx.waitUntil(
+        dispatchWorkflow(env, "daily-broadcast.yml", {
+          action: isWave2 ? "wave2" : "wave3",
+          slot: isWave2 ? "morning" : "evening",
+          book: "auto",
+          lang: isWave2 ? "en" : "id",
+          dry_run: false,
+        })
+      );
+    }
+    // 4. Consolidated 00:00 / 12:00 / 19:00 UTC trigger
+    else if (cron === "0 0,12,19 * * *") {
+      if (utcHour === 0) {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "daily-story-ingest.yml", {
+            book: "auto",
+            batch_size: "1",
+            force: false,
+            dry_run: false,
+            skip_qc: false,
+          })
+        );
+        if (scheduledDate.getUTCDay() === 1) {
+          ctx.waitUntil(dispatchWorkflow(env, "weekly-analytics.yml"));
+          ctx.waitUntil(
+            dispatchWorkflow(env, "storage-cleanup.yml", {
+              dry_run: false,
+              keep_latest: "1",
+              min_age_hours: "48",
+            })
+          );
+        }
+      } else if (utcHour === 12) {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "daily-broadcast.yml", {
+            action: "broadcast",
+            slot: "evening",
+            book: "auto",
+            lang: "id",
+            dry_run: false,
+          })
+        );
+      } else {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "buffer-prerender.yml", {
+            days: "3",
+            force: false,
+            dry_run: false,
+          })
+        );
+      }
+    }
+    // Legacy individual cron fallbacks (kept for manual Cloudflare Dashboard tests)
     else if (cron === "0 12 * * *" || cron === "30 11 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {
@@ -83,9 +139,7 @@ export default {
         })
       );
     }
-    // 3. Daily Ingestion & Monday Analytics (00:00 UTC = 07:00 WIB Daily)
     else if (cron === "0 0 * * *" || cron === "0 0 * * 1,4") {
-      // Ingest next upcoming story daily
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-story-ingest.yml", {
           book: "auto",
@@ -96,8 +150,7 @@ export default {
         })
       );
 
-      // Weekly analytics & R2 remote storage cleanup on Monday only (UTC Day 1)
-      if (now.getUTCDay() === 1) {
+      if (scheduledDate.getUTCDay() === 1) {
         ctx.waitUntil(dispatchWorkflow(env, "weekly-analytics.yml"));
         ctx.waitUntil(
           dispatchWorkflow(env, "storage-cleanup.yml", {
@@ -108,7 +161,6 @@ export default {
         );
       }
     }
-    // 4. Nightly Pre-Render Buffer (19:00 UTC = 02:00 WIB Daily)
     else if (cron === "0 19 * * *") {
       ctx.waitUntil(
         dispatchWorkflow(env, "buffer-prerender.yml", {
@@ -119,8 +171,6 @@ export default {
       );
     }
     else {
-      // Fallback based on hour if invoked by manual cron testing
-      const utcHour = now.getUTCHours();
       const slot = utcHour < 6 ? "morning" : "evening";
       ctx.waitUntil(
         dispatchWorkflow(env, "daily-broadcast.yml", {

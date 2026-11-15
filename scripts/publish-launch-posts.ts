@@ -76,15 +76,45 @@ Jangan lupa klik LIKE, SHARE ke grup keluarga atau sesama orang tua, dan IKUTI h
 
 #ZaynStorybook #DongengAnak #CeritaAnakBergambar #DongengLucu #ParentingCeria #PendidikanKarakterAnak #BukuCeritaBergambar #DongengSebelumTidur`;
 
+/**
+ * Posts a first comment under a Facebook Page post (used to drop clickable YouTube & Catalog links without throttling organic reach).
+ */
+export async function postFacebookComment(
+  postId: string,
+  message: string,
+  pageAccessToken?: string
+): Promise<string | null> {
+  if (!postId || !message.trim()) return null;
+  const token = pageAccessToken || (await loadMetaConfig()).pageAccessToken;
+  const params = new URLSearchParams();
+  params.append("message", message);
+  params.append("access_token", token);
+
+  const res = await fetch(`https://graph.facebook.com/v21.0/${postId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+  const data = (await res.json()) as any;
+  if (data.error) {
+    console.warn(`⚠️ Facebook first-comment warning for ${postId}:`, JSON.stringify(data.error));
+    return null;
+  }
+  console.log(`💬 Facebook first comment posted on ${postId}: ${data.id || "ok"}`);
+  return data.id || null;
+}
+
 export async function publishFacebookPhotoPost(options: {
   photoPath: string;
   caption: string;
+  firstComment?: string;
   dryRun?: boolean;
 }): Promise<{
   success: boolean;
   photoId?: string;
   postId?: string;
   permalink?: string;
+  commentId?: string | null;
   dryRun?: boolean;
 }> {
   const config = await loadMetaConfig();
@@ -98,6 +128,9 @@ export async function publishFacebookPhotoPost(options: {
 
   if (options.dryRun) {
     console.log("\n[DRY RUN] Caption Preview:\n", options.caption);
+    if (options.firstComment) {
+      console.log("\n[DRY RUN] First Comment Preview:\n", options.firstComment);
+    }
     return { success: true, dryRun: true };
   }
 
@@ -151,7 +184,11 @@ export async function publishFacebookPhotoPost(options: {
   console.log(`📌 Post ID  : ${postId}`);
   console.log(`🔗 Link     : ${permalink}\n`);
 
-  return { success: true, photoId, postId, permalink };
+  const commentId = options.firstComment
+    ? await postFacebookComment(postId, options.firstComment, config.pageAccessToken)
+    : null;
+
+  return { success: true, photoId, postId, permalink, commentId };
 }
 
 /**
@@ -160,12 +197,14 @@ export async function publishFacebookPhotoPost(options: {
 export async function publishFacebookMultiPhotoPost(options: {
   photoPaths: string[];
   caption: string;
+  firstComment?: string;
   dryRun?: boolean;
 }): Promise<{
   success: boolean;
   postId?: string;
   permalink?: string;
   photoIds?: string[];
+  commentId?: string | null;
   dryRun?: boolean;
 }> {
   const config = await loadMetaConfig();
@@ -180,6 +219,9 @@ export async function publishFacebookMultiPhotoPost(options: {
   if (options.dryRun) {
     console.log("\n[DRY RUN] Caption Preview:\n", options.caption);
     console.log("[DRY RUN] Photos List:", options.photoPaths);
+    if (options.firstComment) {
+      console.log("\n[DRY RUN] First Comment Preview:\n", options.firstComment);
+    }
     return { success: true, dryRun: true };
   }
 
@@ -187,6 +229,7 @@ export async function publishFacebookMultiPhotoPost(options: {
     const singleRes = await publishFacebookPhotoPost({
       photoPath: options.photoPaths?.[0] || "",
       caption: options.caption,
+      firstComment: options.firstComment,
       dryRun: options.dryRun,
     });
     return {
@@ -194,6 +237,7 @@ export async function publishFacebookMultiPhotoPost(options: {
       postId: singleRes.postId,
       permalink: singleRes.permalink,
       photoIds: singleRes.photoId ? [singleRes.photoId] : [],
+      commentId: singleRes.commentId,
     };
   }
 
@@ -276,7 +320,10 @@ export async function publishFacebookMultiPhotoPost(options: {
   }
 
   console.log(`\n🎉 SUCCESS! FACEBOOK MULTI-PHOTO POST IS LIVE: ${permalink}\n`);
-  return { success: true, postId, permalink, photoIds };
+  const commentId = options.firstComment
+    ? await postFacebookComment(postId, options.firstComment, config.pageAccessToken)
+    : null;
+  return { success: true, postId, permalink, photoIds, commentId };
 }
 
 async function main() {

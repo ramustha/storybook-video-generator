@@ -1569,7 +1569,8 @@ async function publishToday(
   targetBook?: string,
   targetLang?: "id" | "en",
   slotFilter?: "morning" | "evening" | "auto" | "all",
-  force: boolean = false
+  force: boolean = false,
+  skipPromo: boolean = false
 ) {
   printHeader();
   let slots = getTodaySlot();
@@ -1768,6 +1769,7 @@ async function publishToday(
       const publishArgs = ["scripts/publish-all.ts", "--book", slot.bookSlug, "--lang", slot.lang];
       if (dryRun) publishArgs.push("--dry-run");
       if (force) publishArgs.push("--force");
+      if (skipPromo) publishArgs.push("--skip-promo");
 
       await runChildCommand("npx", ["tsx", ...publishArgs]);
 
@@ -1837,13 +1839,14 @@ async function main() {
   } else if (args.includes("--publish-today") || args.includes("--run-today")) {
     const dryRun = args.includes("--dry-run");
     const force = args.includes("--force");
+    const skipPromo = args.includes("--skip-promo");
     const bookIdx = args.indexOf("--book");
     const book = bookIdx !== -1 && args[bookIdx + 1] !== "auto" ? args[bookIdx + 1] : undefined;
     const langIdx = args.indexOf("--lang");
     const lang = langIdx !== -1 && (args[langIdx + 1] === "id" || args[langIdx + 1] === "en") ? args[langIdx + 1] as "id" | "en" : undefined;
     const slotIdx = args.indexOf("--slot");
     const slot = slotIdx !== -1 ? (args[slotIdx + 1] as "morning" | "evening" | "auto" | "all") : "auto";
-    await publishToday(dryRun, book, lang, slot, force);
+    await publishToday(dryRun, book, lang, slot, force, skipPromo);
   } else {
     await showToday();
   }
