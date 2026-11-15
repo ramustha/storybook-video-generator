@@ -7,6 +7,8 @@ import {
   generateStoryChapters,
   extractStoryMoral,
   extractStoryMoralDescription,
+  resolveYoutubeLanguageConfig,
+  buildYoutubeLocalizations,
 } from "./lib/seo-formatter";
 import { db } from "./lib/db";
 
@@ -49,12 +51,14 @@ async function main() {
   const args = process.argv.slice(2);
   const isDryRun = args.includes("--dry-run");
   const targetSlug = args.find((a) => a.startsWith("--book="))?.split("=")[1];
+  const targetLang = args.find((a) => a.startsWith("--lang="))?.split("=")[1] as "id" | "en" | undefined;
 
   console.log("\n=======================================================");
   console.log("🚀 YOUTUBE SEO METADATA BATCH REFRESH ENGINE");
   console.log("=======================================================");
   console.log(`🧪 Execution Mode: ${isDryRun ? "DRY RUN (Preview Only)" : "LIVE EXECUTION (Updating YouTube)"}`);
   if (targetSlug) console.log(`📖 Filter Book   : ${targetSlug}`);
+  if (targetLang) console.log(`🌐 Filter Lang   : ${targetLang.toUpperCase()}`);
   console.log("=======================================================\n");
 
   const youtube = await getYouTubeClient();
@@ -116,6 +120,7 @@ async function main() {
 
     const videoId = pub.videoId;
     const lang: "id" | "en" = pub.language === "en" ? "en" : "id";
+    if (targetLang && lang !== targetLang) continue;
     const isVertical =
       pub.format?.toLowerCase().includes("short") ||
       pub.format?.toLowerCase().includes("9:16") ||
@@ -172,12 +177,32 @@ async function main() {
       }
     }
 
+    const langConfig = resolveYoutubeLanguageConfig(lang);
+    const altLang: "id" | "en" = lang === "en" ? "id" : "en";
+    const localizations = !isCompilation
+      ? buildYoutubeLocalizations({
+          bookSlug: slug,
+          title,
+          originalTitle: storyJson?.originalTitle,
+          lang,
+          format,
+          author,
+          illustrator,
+          alternateMoralHeadline: extractStoryMoral(storyJson, altLang),
+          alternateMoralDescription: extractStoryMoralDescription(storyJson, altLang),
+          alternateChapters: generateStoryChapters(storyJson?.scenes || [], altLang),
+          license,
+          publisher,
+        })
+      : undefined;
+
     console.log(`   ✨ Optimized Title: "${seo.title}"`);
+    console.log(`   🌐 Locale / Audio : ${langConfig.defaultLanguage} / ${langConfig.defaultAudioLanguage}`);
     console.log(`   🏷️  Tags Count     : ${seo.tags.length} tags`);
     console.log(`   📝 Description    : ${seo.description.split("\n")[0]}`);
 
     if (isDryRun) {
-      console.log(`   ℹ️ [DRY RUN] Would update snippet on YouTube via API.`);
+      console.log(`   ℹ️ [DRY RUN] Would update snippet & localizations on YouTube via API.`);
       updatedCount++;
       continue;
     }
@@ -185,18 +210,23 @@ async function main() {
     // Call YouTube API update
     try {
       console.log(`   📡 Calling YouTube API videos.update for ${videoId}...`);
-      await youtube.videos.update({
-        part: ["snippet"],
-        requestBody: {
-          id: videoId,
-          snippet: {
-            title: seo.title,
-            description: seo.description,
-            tags: seo.tags,
-            categoryId: "27", // Education
-            defaultLanguage: lang,
-          },
+      const requestBody: any = {
+        id: videoId,
+        snippet: {
+          title: seo.title,
+          description: seo.description,
+          tags: seo.tags,
+          categoryId: "27", // Education
+          defaultLanguage: langConfig.defaultLanguage,
+          defaultAudioLanguage: langConfig.defaultAudioLanguage,
         },
+      };
+      if (localizations) {
+        requestBody.localizations = localizations;
+      }
+      await youtube.videos.update({
+        part: localizations ? ["snippet", "localizations"] : ["snippet"],
+        requestBody,
       });
 
       // Update local record

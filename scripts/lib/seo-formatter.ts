@@ -406,3 +406,52 @@ export function generateStoryChapters(
   return lines.join("\n");
 }
 
+/**
+ * Resolves YouTube snippet language metadata so English uploads target US/global English
+ * (`defaultLanguage: "en"`, `defaultAudioLanguage: "en-US"`) instead of hardcoding `"id"`.
+ */
+export function resolveYoutubeLanguageConfig(lang: "id" | "en" = "en"): {
+  defaultLanguage: "id" | "en";
+  defaultAudioLanguage: "id" | "en-US";
+} {
+  if (lang === "en") {
+    return { defaultLanguage: "en", defaultAudioLanguage: "en-US" };
+  }
+  return { defaultLanguage: "id", defaultAudioLanguage: "id" };
+}
+
+/**
+ * Builds YouTube `localizations` map for the alternate language (`id` on EN videos, `en` on ID videos)
+ * so global viewers see localized titles & descriptions matching their YouTube app locale.
+ */
+export function buildYoutubeLocalizations(
+  options: SeoMetadataOptions & {
+    alternateMoralHeadline?: string;
+    alternateMoralDescription?: string;
+    alternateChapters?: string;
+  }
+): Record<string, { title: string; description: string }> {
+  const altLang: "id" | "en" = options.lang === "en" ? "id" : "en";
+  const altSeo = generateSeoMetadata({
+    bookSlug: options.bookSlug,
+    title: options.title,
+    originalTitle: options.originalTitle,
+    lang: altLang,
+    format: options.format,
+    author: options.author,
+    illustrator: options.illustrator,
+    moralHeadline: options.alternateMoralHeadline,
+    moralDescription: options.alternateMoralDescription,
+    chapters: options.alternateChapters,
+    license: options.license,
+    publisher: options.publisher,
+  });
+
+  return {
+    [altLang]: {
+      title: altSeo.title,
+      description: altSeo.description,
+    },
+  };
+}
+
