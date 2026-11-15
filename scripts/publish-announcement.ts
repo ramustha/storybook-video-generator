@@ -79,12 +79,26 @@ export function getJakartaHour(): number {
   );
 }
 
+function cleanNarrativeText(text: string): string {
+  return text
+    .replace(/\s+/g, " ")
+    .replace(/([!?])\.+/g, "$1")
+    .replace(/\.{2,}/g, ".")
+    .trim();
+}
+
+function ensureTerminalPunctuation(text: string, fallback: "." | "!" = "."): string {
+  const cleaned = cleanNarrativeText(text);
+  if (!cleaned) return "";
+  return /[.!?]$/.test(cleaned) ? cleaned : `${cleaned}${fallback}`;
+}
+
 function trimText(text: string, maxChars: number): string {
-  const clean = text.replace(/\s+/g, " ").trim();
+  const clean = cleanNarrativeText(text);
   if (clean.length <= maxChars) return clean;
   const sliced = clean.slice(0, maxChars - 1);
   const lastPeriod = Math.max(sliced.lastIndexOf(". "), sliced.lastIndexOf("! "), sliced.lastIndexOf("? "));
-  if (lastPeriod >= Math.floor(maxChars * 0.55)) {
+  if (lastPeriod >= Math.floor(maxChars * 0.5)) {
     return sliced.slice(0, lastPeriod + 1).trim();
   }
   const lastSpace = sliced.lastIndexOf(" ");
@@ -99,30 +113,30 @@ export function extractMoral(story: any, lang: "id" | "en", includeDetail = true
   const moralScene = story?.scenes?.find((s: any) => s.type === "moral" || s.sceneId === "moral");
   const rawSceneText = lang === "en" ? moralScene?.audio?.en?.text : moralScene?.audio?.text;
   const cleanedSceneText = rawSceneText
-    ? rawSceneText.replace(/^(Pesan moral cerita ini|The moral of the story)\s*:\s*/i, "").trim()
+    ? cleanNarrativeText(rawSceneText.replace(/^(Pesan moral cerita ini|The moral of the story)\s*:\s*/i, ""))
     : "";
 
-  const headline = (lang === "id" ? moralObj.headlineId : moralObj.headlineEn)?.trim();
-  const detail = (
+  const rawHeadline = (lang === "id" ? moralObj.headlineId : moralObj.headlineEn)?.trim();
+  const headline = rawHeadline ? cleanNarrativeText(rawHeadline) : "";
+  const rawDetail = (
     lang === "id" ? moralObj.spokenId || moralObj.summaryId : moralObj.spokenEn || moralObj.summaryEn
   )?.trim();
+  const detail = rawDetail ? cleanNarrativeText(rawDetail) : "";
 
   if (headline) {
     if (includeDetail && detail && !detail.toLowerCase().includes(headline.toLowerCase())) {
-      const normalized = headline.endsWith("!") || headline.endsWith(".") ? headline : `${headline}!`;
-      return `${normalized} ${detail}`;
+      return `${ensureTerminalPunctuation(headline, "!")} ${ensureTerminalPunctuation(detail)}`;
     }
     if (includeDetail && !detail && cleanedSceneText && !cleanedSceneText.toLowerCase().includes(headline.toLowerCase())) {
-      const normalized = headline.endsWith("!") || headline.endsWith(".") ? headline : `${headline}!`;
-      return trimText(`${normalized} ${cleanedSceneText}`, 220);
+      return trimText(`${ensureTerminalPunctuation(headline, "!")} ${cleanedSceneText}`, 230);
     }
-    return headline;
+    return ensureTerminalPunctuation(headline, "!");
   }
 
   if (cleanedSceneText) {
-    if (includeDetail) return trimText(cleanedSceneText, 220);
-    const first = cleanedSceneText.split(".")[0].trim();
-    return first.endsWith("!") ? first : `${first}!`;
+    if (includeDetail) return trimText(cleanedSceneText, 230);
+    const first = cleanNarrativeText(cleanedSceneText.split(/[.!?](?:\s|$)/)[0] || cleanedSceneText);
+    return ensureTerminalPunctuation(first, "!");
   }
 
   return lang === "id"
@@ -130,10 +144,39 @@ export function extractMoral(story: any, lang: "id" | "en", includeDetail = true
     : "Learning kindness, empathy, and family warmth together.";
 }
 
+function splitCleanSentences(text: string): string[] {
+  const cleaned = cleanNarrativeText(text);
+  if (!cleaned) return [];
+  return (cleaned.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [cleaned])
+    .map((s) => cleanNarrativeText(s))
+    .filter(Boolean);
+}
+
+const SKIP_HOOK_SENTENCE_RE =
+  /^(?:cuit|chirp|hap|uh+|eh+|oh+|whoa|yay|hore+|swussh|whoosh|wing|see this|lihat(?:lah)? |what should|apa yang|why (?:do|are|did)|mengapa |don't worry|jangan (?:sedih|takut|khawatir)|suara apa|what could that sound|ya,?\s*ampun|alas|sayangnya|come on|ayo,? )/i;
+
+function pickSceneDigest(sceneText: string, mode: "setup" | "conflict" | "ending"): string {
+  const sentences = splitCleanSentences(sceneText);
+  if (sentences.length === 0) return "";
+  const minChars = 22;
+  const substantive = sentences.filter((s) => {
+    if (s.length < minChars) return false;
+    if (SKIP_HOOK_SENTENCE_RE.test(s) && s.length < 62) return false;
+    if (/\?$/.test(s) && s.length < 65) return false;
+    return true;
+  });
+  const pool = substantive.length > 0 ? substantive : sentences;
+  if (mode === "ending") {
+    return pool.slice(-2).join(" ");
+  }
+  return pool.slice(0, 2).join(" ");
+}
+
 /**
- * Extracts a concise, spoiler-friendly 1-2 sentence story summary from manifest metadata or story scenes.
+ * Extracts a concise 2-3 sentence story arc summary (setup + conflict + resolution)
+ * from manifest metadata or story scenes, filtering sound effects and narrator camera cues.
  */
-export function extractStorySummary(story: any, lang: "id" | "en", maxChars = 230): string {
+export function extractStorySummary(story: any, lang: "id" | "en", maxChars = 280): string {
   const explicitSummary = (
     story?.summary?.[lang] ||
     story?.synopsis?.[lang] ||
@@ -144,32 +187,80 @@ export function extractStorySummary(story: any, lang: "id" | "en", maxChars = 23
   const storyScenes: any[] = Array.isArray(story?.scenes)
     ? story.scenes.filter((s: any) => {
         const sid = String(s?.sceneId || "").toLowerCase();
-        return s?.type !== "cover" && s?.type !== "moral" && s?.type !== "outro" && sid !== "cover" && sid !== "intro" && sid !== "moral" && sid !== "outro";
+        return (
+          s?.type !== "cover" &&
+          s?.type !== "moral" &&
+          s?.type !== "outro" &&
+          sid !== "cover" &&
+          sid !== "intro" &&
+          sid !== "moral" &&
+          sid !== "outro"
+        );
       })
     : [];
 
   const sceneTexts = storyScenes
     .map((s) => (lang === "en" ? s?.audio?.en?.text : s?.audio?.text))
     .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
-    .map((t) => t.replace(/\s+/g, " ").trim());
+    .map((t) => cleanNarrativeText(t));
 
   if (sceneTexts.length > 0) {
-    const sampleIndices = Array.from(
-      new Set([
-        0,
-        Math.min(sceneTexts.length - 1, 1),
-        Math.min(sceneTexts.length - 1, Math.max(2, Math.floor(sceneTexts.length * 0.45))),
-      ])
-    );
-    const sentences: string[] = [];
-    for (const idx of sampleIndices) {
-      const firstSentence = sceneTexts[idx].match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim() || sceneTexts[idx];
-      if (firstSentence && !sentences.includes(firstSentence)) {
-        sentences.push(firstSentence);
+    const pickBestInRange = (
+      indices: number[],
+      mode: "setup" | "conflict" | "ending"
+    ): string => {
+      for (const idx of indices) {
+        if (idx < 0 || idx >= sceneTexts.length) continue;
+        const digest = pickSceneDigest(sceneTexts[idx], mode);
+        const minAccept = mode === "conflict" ? 36 : 26;
+        if (digest && digest.length >= minAccept && !SKIP_HOOK_SENTENCE_RE.test(digest)) {
+          return digest;
+        }
       }
-      if (sentences.join(" ").length >= Math.floor(maxChars * 0.72)) break;
+      const fallbackIdx = indices.find((idx) => idx >= 0 && idx < sceneTexts.length);
+      return fallbackIdx !== undefined ? cleanNarrativeText(sceneTexts[fallbackIdx]) : "";
+    };
+
+    const n = sceneTexts.length;
+    const setupIndices = [0, 1];
+    const conflictTarget = Math.min(n - 1, Math.max(1, n <= 6 ? 1 : Math.floor(n * 0.45)));
+    const conflictIndices = [conflictTarget, conflictTarget + 1, conflictTarget - 1, Math.floor(n * 0.35)];
+    const endingIndices = [n - 1, n - 2];
+
+    const rawParts = [
+      pickBestInRange(setupIndices, "setup"),
+      pickBestInRange(conflictIndices, "conflict"),
+      pickBestInRange(endingIndices, "ending"),
+    ].filter(Boolean);
+
+    const parts: string[] = [];
+    for (const part of rawParts) {
+      if (!parts.some((existing) => existing === part || existing.includes(part))) {
+        parts.push(part);
+      }
     }
-    if (sentences.length > 0) return trimText(sentences.join(" "), maxChars);
+
+    if (parts.length > 0) {
+      // Fit Setup + Conflict + Resolution sequentially, shrinking each beat cleanly if over budget
+      const combined = parts.join(" ");
+      if (combined.length <= maxChars) return cleanNarrativeText(combined);
+
+      const firstSentences = parts.map((p) => {
+        const sents = splitCleanSentences(p);
+        if (parts.indexOf(p) === 2 && sents.length > 1) return sents[sents.length - 1];
+        return sents[0] || p;
+      });
+      const compactAll = cleanNarrativeText(firstSentences.join(" "));
+      if (compactAll.length <= maxChars) return compactAll;
+
+      // Preserve ending alongside opening when 3 full parts don't fit maxChars (e.g. Threads)
+      const setupAndEnd = cleanNarrativeText(
+        [firstSentences[0], firstSentences[firstSentences.length - 1]].filter(Boolean).join(" ")
+      );
+      if (setupAndEnd.length <= maxChars) return setupAndEnd;
+
+      return trimText(compactAll, maxChars);
+    }
   }
 
   const thumbConf = lang === "id" ? story?.thumbnailConfig?.id : story?.thumbnailConfig?.en;
@@ -215,7 +306,7 @@ export function generateTeaserCopy(
   const thumbConf = isId ? story.thumbnailConfig?.id : story.thumbnailConfig?.en;
   const headlineTop = thumbConf?.headlineTop;
   const headlineBottom = thumbConf?.headlineBottom;
-  const storySummary = extractStorySummary(story, lang, 220);
+  const storySummary = extractStorySummary(story, lang, 280);
   const moral = extractMoral(story, lang, true);
   const moralShort = extractMoral(story, lang, false);
 
@@ -392,7 +483,7 @@ export function generateDailyLineupCopy(
       ? morningStory.title || morningStory.originalTitle || "Cerita Pagi Ceria"
       : morningStory.originalTitle || morningStory.title || "Morning English Story";
   const morningCleanTitle = morningRawTitle.replace(/[!]+$/, "").trim();
-  const morningSummary = extractStorySummary(morningStory, morningLang, 155);
+  const morningSummary = extractStorySummary(morningStory, morningLang, 210);
   const morningMoral = extractMoral(morningStory, morningLang, false);
   const morningHeaderLabel = morningLang === "id" ? "Cerita Pagi" : "English Read-Aloud";
 
@@ -402,7 +493,7 @@ export function generateDailyLineupCopy(
       ? eveningStory.title || eveningStory.originalTitle || "Dongeng Pengantar Tidur"
       : eveningStory.originalTitle || eveningStory.title || "Bedtime Story";
   const eveningCleanTitle = eveningRawTitle.replace(/[!]+$/, "").trim();
-  const eveningSummary = extractStorySummary(eveningStory, eveningLang, 155);
+  const eveningSummary = extractStorySummary(eveningStory, eveningLang, 210);
   const eveningMoral = extractMoral(eveningStory, eveningLang, true);
 
   const morningTime = morningSlot.time_slot || morningSlot.timeSlot || "08:30 WIB";
@@ -1058,12 +1149,13 @@ export function generatePostPublishWaveCopy(params: {
   cleanTitle: string;
   lang: "id" | "en";
   summary: string;
+  summaryShort?: string;
   moral: string;
   moralShort?: string;
   youtubeUrl?: string;
   related: Array<{ title: string; url: string }>;
 }): WaveCopyPayload {
-  const { wave, cleanTitle, lang, summary, moral, moralShort, youtubeUrl, related } = params;
+  const { wave, cleanTitle, lang, summary, summaryShort, moral, moralShort, youtubeUrl, related } = params;
   const watchUrl = youtubeUrl || SOCIAL_YOUTUBE_CHANNEL_URL;
   const rel1 = related[0];
   const rel2 = related[1];
@@ -1071,9 +1163,19 @@ export function generatePostPublishWaveCopy(params: {
   if (wave === 2) {
     // Midday Watch-Now & Catch-Up (12:30 WIB)
     const facebookFirstComment = [
-      `▶️ YouTube "${cleanTitle}": ${watchUrl}`,
-      rel1 ? `📚 Cerita Sebelumnya di YouTube — "${rel1.title}": ${rel1.url}` : "",
-      rel2 ? `✨ Tonton Juga di YouTube — "${rel2.title}": ${rel2.url}` : "",
+      lang === "en"
+        ? `▶️ Watch "${cleanTitle}" on YouTube: ${watchUrl}`
+        : `▶️ Tonton "${cleanTitle}" di YouTube: ${watchUrl}`,
+      rel1
+        ? lang === "en"
+          ? `📚 Previous Story on YouTube — "${rel1.title}": ${rel1.url}`
+          : `📚 Cerita Sebelumnya di YouTube — "${rel1.title}": ${rel1.url}`
+        : "",
+      rel2
+        ? lang === "en"
+          ? `✨ Watch Next on YouTube — "${rel2.title}": ${rel2.url}`
+          : `✨ Tonton Juga di YouTube — "${rel2.title}": ${rel2.url}`
+        : "",
     ]
       .filter(Boolean)
       .join("\n");
@@ -1091,7 +1193,7 @@ ${moral}
 
 ${commentCta}
 
-📺 Also catch clips and updates on YouTube, Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+📺 Catch the full episode on YouTube @zayn.storybook and follow highlights on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
 💬 What lesson stood out most for your little one? Share in the comments! ❤️
 
 #ZaynStorybook #MoralStories #EnglishReadAloud #KidsStories #Parenting`
@@ -1116,11 +1218,7 @@ ${commentCta}
         ? `▶️ Direct YouTube watch links are pinned in the FIRST COMMENT below! 👇💬`
         : `▶️ Tautan langsung YouTube sudah kami sematkan di KOMENTAR PERTAMA di bawah ya! 👇💬`
     );
-    const facebookFallbackCaption = buildFbBody(
-      lang === "en"
-        ? `▶️ Watch on YouTube:\n${facebookFirstComment}`
-        : `▶️ Tonton di YouTube:\n${facebookFirstComment}`
-    );
+    const facebookFallbackCaption = buildFbBody(facebookFirstComment);
 
     const instagramCaption =
       lang === "en"
@@ -1154,11 +1252,11 @@ ${moral}
     const threadsText = trimText(
       lang === "en"
         ? `☀️ Now live on YouTube @zayn.storybook: "${cleanTitle}" 📖✨
-📖 Story: ${trimText(summary, 150)}
+📖 Story: ${summaryShort || trimText(summary, 150)}
 💖 Moral: ${moralShort || moral}
 ${youtubeUrl ? `▶️ ${youtubeUrl}` : "Watch & follow @zayn.storybook on YouTube, IG & FB!"} #ZaynStorybook`
         : `☀️ Sudah tayang di YouTube @zayn.storybook: "${cleanTitle}" 📖✨
-📖 Ringkasan: ${trimText(summary, 150)}
+📖 Ringkasan: ${summaryShort || trimText(summary, 150)}
 💖 Pesan Moral: ${moralShort || moral}
 ${youtubeUrl ? `▶️ ${youtubeUrl}` : "Tonton & ikuti @zayn.storybook di YouTube, IG & FB!"} #ZaynStorybook`,
       480
@@ -1200,7 +1298,7 @@ ${rel1 ? `✨ Mau lanjut nonton sebelum bobo? Putar juga "${rel1.title}" di YouT
 #ZaynStorybook #DongengSebelumTidur #PesanMoral #ParentingIndonesia #KeluargaBahagia`;
 
   const facebookCaption = buildBedtimeFbBody(`▶️ Tautan YouTube sudah terpasang di KOMENTAR PERTAMA di bawah!`);
-  const facebookFallbackCaption = buildBedtimeFbBody(`▶️ Tonton di YouTube:\n${facebookFirstComment}`);
+  const facebookFallbackCaption = buildBedtimeFbBody(facebookFirstComment);
 
   const instagramCaption = `🌙 DONGENG PENGANTAR TIDUR MALAM INI! ✨🛌
 📖 "${cleanTitle}"
@@ -1220,7 +1318,7 @@ ${moral}
 
   const threadsText = trimText(
     `🌙 Waktunya dongeng sebelum tidur: "${cleanTitle}" ✨📖
-📖 Ringkasan: ${trimText(summary, 150)}
+📖 Ringkasan: ${summaryShort || trimText(summary, 150)}
 💖 Pesan Moral: ${moralShort || moral}
 ${youtubeUrl ? `▶️ ${youtubeUrl}` : "Tonton di YouTube, IG & FB @zayn.storybook!"} #ZaynStorybook`,
     480
@@ -1328,7 +1426,8 @@ export async function publishPostPublishWaveAnnouncement(
 
   const rawTitle = targetLang === "id" ? story.title || story.originalTitle : story.originalTitle || story.title || targetBook;
   const cleanTitle = String(rawTitle || targetBook).replace(/[!]+$/, "").trim();
-  const summary = extractStorySummary(story, targetLang, 220);
+  const summary = extractStorySummary(story, targetLang, 280);
+  const summaryShort = extractStorySummary(story, targetLang, 150);
   const moral = extractMoral(story, targetLang, true);
   const moralShort = extractMoral(story, targetLang, false);
 
@@ -1341,6 +1440,7 @@ export async function publishPostPublishWaveAnnouncement(
     cleanTitle,
     lang: targetLang,
     summary,
+    summaryShort,
     moral,
     moralShort,
     youtubeUrl,
@@ -1505,7 +1605,7 @@ export function generateFullMotionCopy(params: {
   const cleanTitleId = (story?.title || targetBook).replace(/[!]+$/, "").trim();
   const cleanTitleEn = (story?.originalTitle || cleanTitleId).replace(/[!]+$/, "").trim();
   const displayTitle = isEn ? cleanTitleEn : cleanTitleId;
-  const storySummary = extractStorySummary(story, slotLang, 220);
+  const storySummary = extractStorySummary(story, slotLang, 280);
   const moral = extractMoral(story, slotLang, true);
   const moralShort = extractMoral(story, slotLang, false);
 
@@ -1614,7 +1714,20 @@ ${moral}
 
 🎭 Nikmati animasi karakter bergerak, efek suara ceria & sulih suara anak yang ekspresif!
 📺 Tonton di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), serta ikuti Instagram Reels, Facebook Watch & Threads @zayn.storybook!`
-      : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${displayTitle} — ${afterLangBanner})
+      : isEn
+        ? `🎬✨ FULL-MOTION EDITION — NOW STREAMING! (${cleanTitleEn} — ${afterLangBanner})
+
+📖 Story Summary:
+${storySummary}
+
+💡 Moral of the Story:
+${moral}
+
+${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Watch Full HD on YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}📱 Also catch Shorts/Reels and updates on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+💬 What lesson stood out most for your child in this story? Share in the comments! ❤️
+
+#ZaynStorybook #FullMotionKids #KidsStories #MoralOfTheStory #FamilyStorytime`
+        : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${displayTitle} — ${afterLangBanner})
 
 📖 Ringkasan Cerita:
 ${storySummary}
@@ -1622,8 +1735,10 @@ ${storySummary}
 💡 Pesan Moral:
 ${moral}
 
-${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Tonton di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}📱 Ikuti juga cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-💬 Pesan moral apa yang paling berkesan untuk si kecil dari cerita ini? Yuk bagikan di komentar! ❤️`;
+${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Tonton Full HD di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}📱 Ikuti juga cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+💬 Pesan moral apa yang paling berkesan untuk si kecil dari cerita ini? Yuk bagikan di komentar! ❤️
+
+#ZaynStorybook #FullMotionKids #Dongeng${dayLabelId} #PesanMoral #CeritaAnak`;
 
   const captionTh = trimText(
     phase === "before"
@@ -1650,7 +1765,10 @@ Tonton & ikuti di YouTube, Instagram & Facebook @zayn.storybook ✨`
 
   const facebookFirstComment =
     phase === "after"
-      ? youtubeWatchLines || `▶️ Tonton di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}`
+      ? youtubeWatchLines ||
+        (isEn
+          ? `▶️ Watch on YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}`
+          : `▶️ Tonton di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}`)
       : undefined;
 
   return { displayTitle, afterLangBanner, captionIg, captionFb, captionTh, facebookFirstComment };
@@ -1803,6 +1921,8 @@ export async function publishFullMotionAnnouncement(
       morningTitle: `${displayTitle} [Full-Motion ${phase.toUpperCase()}]`,
       morningLang: slotLang,
       morningSlotTime: slotTime,
+      morningHook: extractStorySummary(story, slotLang, 160),
+      youtubeUrl: slotLang === "en" ? ytEnUrl || ytIdUrl : ytIdUrl || ytEnUrl,
       facebookUrl: fbResult?.url,
       instagramUrl: igResult?.url,
       threadsUrl: thResult?.url,
