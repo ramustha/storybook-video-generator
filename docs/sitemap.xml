@@ -6,6 +6,11 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://storybook-catalog.pages.dev/s/edu-budi-papang-teripang</loc>
+    <lastmod>2026-11-15</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://storybook-catalog.pages.dev/s/tersenyumlah</loc>
     <lastmod>2026-11-13</lastmod>
     <priority>0.8</priority>
@@ -117,11 +122,6 @@
   </url>
   <url>
     <loc>https://storybook-catalog.pages.dev/s/edu-budi-fermentasi-nusantara</loc>
-    <lastmod>2026-11-15</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://storybook-catalog.pages.dev/s/edu-budi-papang-teripang</loc>
     <lastmod>2026-11-15</lastmod>
     <priority>0.8</priority>
   </url>

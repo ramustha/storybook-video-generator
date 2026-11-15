@@ -67,20 +67,36 @@ const SUNDAY_FULL_MOTION_PLAN_2026: Array<{
   },
 ];
 
-export const SUNDAY_FULL_MOTION_2026: ScheduledSlot[] = SUNDAY_FULL_MOTION_PLAN_2026.flatMap(
-  (entry) =>
-    (["en", "id"] as const).map((lang) => ({
-      date: entry.date,
-      dayName: "Minggu" as const,
-      timeSlot: "15:00 WIB",
-      slotType: "Sunday Full-Motion Premiere",
-      bookSlug: entry.bookSlug,
-      lang,
-      format: "both" as const,
-      targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
-      theme: entry.theme,
-    }))
-);
+function addUtcDays(dateStr: string, days: number): string {
+  const dt = new Date(`${dateStr}T00:00:00Z`);
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
+export const SUNDAY_FULL_MOTION_2026: ScheduledSlot[] = SUNDAY_FULL_MOTION_PLAN_2026.flatMap((entry) => [
+  {
+    date: entry.date,
+    dayName: "Minggu" as const,
+    timeSlot: "15:00 WIB",
+    slotType: "Sunday Full-Motion Premiere (EN)",
+    bookSlug: entry.bookSlug,
+    lang: "en" as const,
+    format: "both" as const,
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: entry.theme,
+  },
+  {
+    date: addUtcDays(entry.date, 3),
+    dayName: "Rabu" as const,
+    timeSlot: "15:00 WIB",
+    slotType: "Wednesday Full-Motion Premiere (ID)",
+    bookSlug: entry.bookSlug,
+    lang: "id" as const,
+    format: "both" as const,
+    targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+    theme: entry.theme,
+  },
+]);
 
 export function isFullMotionSlot(slot: {
   slotType?: string;
@@ -1760,6 +1776,15 @@ async function publishToday(
         }
       }
     }
+  }
+
+  if (!targetBook && targetLang) {
+    const langFiltered = slots.filter((s) => s.lang === targetLang);
+    if (langFiltered.length === 0) {
+      console.log(`🌴 Tidak ada jadwal [${targetLang.toUpperCase()}] untuk filter slot saat ini. Lewati.`);
+      return;
+    }
+    slots = langFiltered;
   }
 
   for (const slot of slots) {

@@ -63,8 +63,8 @@ interface StoryManifest {
 export function generateBilingualSocialKit(manifest: StoryManifest): string {
   const titleId = manifest.title;
   const titleEn = manifest.originalTitle || manifest.title;
-  const author = manifest.source?.originalAuthor || "Cerita Rakyat / Folklore";
-  const illustrator = manifest.source?.originalIllustrator || "Illustrator";
+  const author = manifest.source?.originalAuthor || (manifest as any).author || "Cerita Rakyat / Folklore";
+  const illustrator = manifest.source?.originalIllustrator || (manifest as any).illustrator || "Illustrator";
 
   // Extract moral scene text if available
   const moralScene = manifest.scenes?.find((s) => s.type === "moral");

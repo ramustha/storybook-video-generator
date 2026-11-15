@@ -452,27 +452,38 @@ async function checkRemoteVideoStatus(
 /**
  * Searches channel videos to detect untracked duplicates by title/keyword.
  */
+function stripGenericTitlePrefix(title: string): string {
+  return title
+    .replace(/^(?:dongeng\s+anak\s+sebelum\s+tidur|bedtime\s+story|cerita\s+anak)\s*:\s*/i, "")
+    .split("|")[0]
+    .replace(/#shorts|#kidsstories/gi, "")
+    .trim();
+}
+
 async function searchChannelForDuplicate(
   youtube: any,
-  searchTitle: string
+  searchTitle: string,
+  expectedStoryTitle?: string
 ): Promise<{ videoId: string; title: string } | null> {
+  const coreQuery = stripGenericTitlePrefix(expectedStoryTitle || searchTitle);
+  const cleanCore = coreQuery.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (cleanCore.length < 6) return null;
+
   try {
     const res = await youtube.search.list({
       part: ["snippet"],
       forMine: true,
       type: ["video"],
-      q: searchTitle.slice(0, 32),
+      q: coreQuery.slice(0, 48),
       maxResults: 5,
     });
     if (res.data.items && res.data.items.length > 0) {
       for (const item of res.data.items) {
         if (item.id?.videoId && item.snippet?.title) {
-          const cleanItem = item.snippet.title.toLowerCase().replace(/[^a-z0-9]/g, "");
-          const cleanSearch = searchTitle.toLowerCase().replace(/[^a-z0-9]/g, "");
-          if (
-            cleanItem.includes(cleanSearch.slice(0, 16)) ||
-            cleanSearch.includes(cleanItem.slice(0, 16))
-          ) {
+          const cleanItem = stripGenericTitlePrefix(item.snippet.title)
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+          if (cleanItem.includes(cleanCore) || (cleanItem.length >= 8 && cleanCore.includes(cleanItem))) {
             return {
               videoId: item.id.videoId,
               title: item.snippet.title,
@@ -1066,6 +1077,12 @@ async function main() {
     const displayTitle = isEn ? (manifest.originalTitle || manifest.title) : manifest.title;
     const chapters: string = generateChapters(manifest.scenes, lang);
 
+    const mAny = manifest as any;
+    const seoAuthor = manifest.source?.originalAuthor || mAny.author || "Zayn Storybook";
+    const seoIllustrator = manifest.source?.originalIllustrator || mAny.illustrator || "Zayn Edu-Motion Studio";
+    const seoLicense = manifest.source?.license || mAny.license;
+    const seoPublisher = manifest.source?.repository || mAny.publisher;
+
     // High-CTR, High-Intent SEO Metadata
     const seoLandscape = generateSeoMetadata({
       bookSlug,
@@ -1073,13 +1090,13 @@ async function main() {
       originalTitle: manifest.originalTitle,
       lang,
       format: "landscape",
-      author: manifest.source.originalAuthor,
-      illustrator: manifest.source.originalIllustrator,
+      author: seoAuthor,
+      illustrator: seoIllustrator,
       moralHeadline: extractStoryMoral(manifest, lang),
       moralDescription: extractStoryMoralDescription(manifest, lang),
       chapters,
-      license: manifest.source.license,
-      publisher: manifest.source.repository,
+      license: seoLicense,
+      publisher: seoPublisher,
     });
 
     const seoVertical = generateSeoMetadata({
@@ -1088,12 +1105,12 @@ async function main() {
       originalTitle: manifest.originalTitle,
       lang,
       format: "vertical",
-      author: manifest.source.originalAuthor,
-      illustrator: manifest.source.originalIllustrator,
+      author: seoAuthor,
+      illustrator: seoIllustrator,
       moralHeadline: extractStoryMoral(manifest, lang),
       moralDescription: extractStoryMoralDescription(manifest, lang),
-      license: manifest.source.license,
-      publisher: manifest.source.repository,
+      license: seoLicense,
+      publisher: seoPublisher,
     });
 
     let coreTags: string[] = (kitMeta as any)?.tags || seoLandscape.tags;
@@ -1126,7 +1143,7 @@ async function main() {
 
         // Fallback search across channel to detect unindexed remote duplicate
         if (!remoteCheck.exists) {
-          const duplicateOnChannel = await searchChannelForDuplicate(youtube, landscapeTitle);
+          const duplicateOnChannel = await searchChannelForDuplicate(youtube, landscapeTitle, displayTitle);
           if (duplicateOnChannel) {
             const verifyStatus = await checkRemoteVideoStatus(youtube, duplicateOnChannel.videoId);
             if (verifyStatus.exists) {
@@ -1143,7 +1160,9 @@ async function main() {
           console.log(`   • Live URL: https://youtu.be/${targetVideoId}`);
           console.log(`   • Status: ${remoteCheck.status} (${remoteCheck.privacy})`);
 
-          if (isForceReplace) {
+          if (isDryRun) {
+            console.log(`🧪 [DRY RUN] Duplicate check complete — skipping remote mutations.`);
+          } else if (isForceReplace) {
             console.log(`⚠️ --force / --replace flag active! Deleting remote video ${targetVideoId} first...`);
             await deleteRemoteVideo(youtube, targetVideoId);
             targetVideoId = undefined; // Proceed to upload fresh video
@@ -1165,8 +1184,14 @@ async function main() {
 
         // Upload if no remote video exists or if old one was deleted via --force
         if (!remoteCheck.exists || (isForceReplace && !targetVideoId)) {
-          let videoId: string | undefined;
-          let videoUrl: string | undefined;
+          if (isDryRun) {
+            console.log(`\n🧪 [DRY RUN] Would upload Landscape 16:9 to YouTube:`);
+            console.log(`   • File : ${landscapeVideo}`);
+            console.log(`   • Title: "${landscapeTitle}"`);
+            console.log(`   • Thumb: ${thumbnailPath}`);
+          } else {
+            let videoId: string | undefined;
+            let videoUrl: string | undefined;
 
           // Strategy 1: Attempt Zero-Quota Playwright Browser Upload
           if (engine === "playwright" || engine === "auto") {
@@ -1237,11 +1262,12 @@ async function main() {
             throw new Error(`Failed to upload landscape video via both Playwright and YouTube API v3.`);
           }
 
-          targetVideoId = videoId;
-          currentLandscapeId = targetVideoId;
+            targetVideoId = videoId;
+            currentLandscapeId = targetVideoId;
+          }
         }
 
-        if (targetVideoId) {
+        if (targetVideoId && !isDryRun) {
           if (!manifest.exports) manifest.exports = {};
           if ((manifest.exports as any)[lang]) {
             if (!(manifest.exports as any)[lang].landscape) (manifest.exports as any)[lang].landscape = {};
@@ -1326,7 +1352,7 @@ async function main() {
         : { exists: false };
 
       if (!remoteShortsCheck.exists) {
-        const duplicateShorts = await searchChannelForDuplicate(youtube, shortsTitle);
+        const duplicateShorts = await searchChannelForDuplicate(youtube, shortsTitle, displayTitle);
         // Ensure the duplicate detected is NOT the landscape video that was just uploaded
         if (duplicateShorts && duplicateShorts.videoId !== currentLandscapeId) {
           const verifyStatus = await checkRemoteVideoStatus(youtube, duplicateShorts.videoId);
@@ -1344,7 +1370,9 @@ async function main() {
         console.log(`   • Live URL: https://youtube.com/shorts/${targetShortsId}`);
         console.log(`   • Status: ${remoteShortsCheck.status} (${remoteShortsCheck.privacy})`);
 
-        if (isForceReplace) {
+        if (isDryRun) {
+          console.log(`🧪 [DRY RUN] Duplicate check complete — skipping remote mutations.`);
+        } else if (isForceReplace) {
           console.log(`⚠️ --force / --replace flag active! Deleting remote shorts ${targetShortsId} first...`);
           await deleteRemoteVideo(youtube, targetShortsId);
           targetShortsId = undefined; // Proceed to upload fresh video
@@ -1368,10 +1396,15 @@ async function main() {
       }
 
       if (!remoteShortsCheck.exists || (isForceReplace && !targetShortsId)) {
-        let shortsVideoId: string | undefined;
-        let shortsUrl: string | undefined;
-        const langVerticalThumb = path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
-        const verticalThumbnailPath = existsSync(langVerticalThumb) ? langVerticalThumb : thumbnailPath;
+        if (isDryRun) {
+          console.log(`\n🧪 [DRY RUN] Would upload Shorts 9:16 to YouTube:`);
+          console.log(`   • File : ${verticalVideo}`);
+          console.log(`   • Title: "${shortsTitle}"`);
+        } else {
+          let shortsVideoId: string | undefined;
+          let shortsUrl: string | undefined;
+          const langVerticalThumb = path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
+          const verticalThumbnailPath = existsSync(langVerticalThumb) ? langVerticalThumb : thumbnailPath;
 
         // Strategy 1: Attempt Zero-Quota Playwright Browser Upload
         if (engine === "playwright" || engine === "auto") {
@@ -1452,10 +1485,11 @@ async function main() {
           throw new Error(`Failed to upload Shorts video via both Playwright and YouTube API v3.`);
         }
 
-        targetShortsId = shortsVideoId;
+          targetShortsId = shortsVideoId;
+        }
       }
 
-      if (targetShortsId) {
+      if (targetShortsId && !isDryRun) {
         if (!manifest.exports) manifest.exports = {};
         if ((manifest.exports as any)[lang]) {
           if (!(manifest.exports as any)[lang].vertical) (manifest.exports as any)[lang].vertical = {};

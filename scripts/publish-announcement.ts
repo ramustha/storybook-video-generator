@@ -1235,7 +1235,7 @@ export async function publishPostPublishWaveAnnouncement(
 /**
  * Resolves dedicated Sunday Full-Motion slots for a given date without mixing regular book slots.
  */
-async function resolveFullMotionSlots(targetDate: string, bookSlug?: string): Promise<any[]> {
+async function resolveFullMotionSlots(targetDate: string, bookSlug?: string, lang?: string): Promise<any[]> {
   const merged = new Map<string, any>();
   for (const s of DAILY_CALENDAR_MONTH_1) {
     if (s.date !== targetDate || !isFullMotionSlot(s)) continue;
@@ -1252,17 +1252,21 @@ async function resolveFullMotionSlots(targetDate: string, bookSlug?: string): Pr
     console.warn("ℹ️ D1 Full-Motion lookup warning:", e.message);
   }
 
-  const all = Array.from(merged.values());
+  let all = Array.from(merged.values());
+  if (lang === "id" || lang === "en") {
+    const langFiltered = all.filter((s) => s.lang === lang);
+    if (langFiltered.length > 0) all = langFiltered;
+  }
   if (bookSlug) {
     const filtered = all.filter((s) => (s.book_slug || s.bookSlug) === bookSlug);
-    return filtered.length > 0 ? filtered : [{ bookSlug, timeSlot: "15:00 WIB", lang: "id" }];
+    return filtered.length > 0 ? filtered : [{ bookSlug, timeSlot: "15:00 WIB", lang: lang || "id" }];
   }
   return all;
 }
 
 /**
  * Publishes dedicated BEFORE (14:00 WIB teaser) or AFTER (17:00 WIB watch-now recap) announcements
- * for Sunday Full-Motion Premieres, completely separate from illustration book schedules.
+ * for Sunday (EN) and Wednesday (ID) Full-Motion Premieres, separate from illustration schedules.
  */
 export async function publishFullMotionAnnouncement(
   options: AnnouncementOptions & { motionPhase: "before" | "after" }
@@ -1270,22 +1274,34 @@ export async function publishFullMotionAnnouncement(
   const phase = options.motionPhase;
   const targetDate = options.date || getJakartaDateString();
   const phaseKey = phase === "before" ? "fullMotionBefore" : "fullMotionAfter";
+  const isWed = new Date(`${targetDate}T12:00:00Z`).getUTCDay() === 3;
+  const dayHeadingEn = isWed ? "WEDNESDAY" : "SUNDAY";
+  const dayLabelId = isWed ? "Rabu" : "Minggu";
 
   console.log("\n==================================================================");
-  console.log(`🎬 SUNDAY FULL-MOTION ANNOUNCEMENT (${phase.toUpperCase()})`);
+  console.log(`🎬 ${dayHeadingEn} FULL-MOTION ANNOUNCEMENT (${phase.toUpperCase()})`);
   console.log("==================================================================");
   console.log(`📅 Target Date (WIB) : ${targetDate}`);
   console.log(`🧪 Dry Run Mode      : ${options.dryRun ? "YES (Preview Only)" : "NO (Live Post)"}`);
 
-  const motionSlots = await resolveFullMotionSlots(targetDate, options.bookSlug);
+  const motionSlots = await resolveFullMotionSlots(targetDate, options.bookSlug, options.lang);
   if (motionSlots.length === 0) {
-    console.log(`🌴 Tidak ada jadwal Sunday Full-Motion Premiere pada ${targetDate}. Lewati.`);
+    console.log(`🌴 Tidak ada jadwal Full-Motion Premiere pada ${targetDate}. Lewati.`);
     return { success: true, skipped: true };
   }
 
   const primarySlot = motionSlots[0];
   const targetBook = primarySlot.book_slug || primarySlot.bookSlug;
   const slotTime = primarySlot.time_slot || primarySlot.timeSlot || "15:00 WIB";
+  const slotLang: "id" | "en" =
+    primarySlot.lang === "id" || primarySlot.lang === "en"
+      ? primarySlot.lang
+      : options.lang === "id" || options.lang === "en"
+        ? options.lang
+        : isWed
+          ? "id"
+          : "en";
+  const slotLangBanner = slotLang === "en" ? "English Edition 🇬🇧" : "Bahasa Indonesia 🇮🇩";
   const storyDir = path.resolve("./stories", targetBook);
   const storyJsonPath = path.join(storyDir, "story.json");
 
@@ -1312,37 +1328,55 @@ export async function publishFullMotionAnnouncement(
     return { success: true, skipped: true, targetBook, lang: "bilingual" };
   }
 
-  const visualPath = resolveBestPhoto(storyDir, "id");
+  const visualPath = resolveBestPhoto(storyDir, slotLang);
   const cleanTitleId = (story.title || targetBook).replace(/[!]+$/, "").trim();
   const cleanTitleEn = (story.originalTitle || cleanTitleId).replace(/[!]+$/, "").trim();
-  const moralId = extractMoral(story, "id");
+  const displayTitle = slotLang === "en" ? cleanTitleEn : cleanTitleId;
+  const moralId = extractMoral(story, slotLang);
   const portalUrlFb = buildStoryPortalUrl(targetBook, { source: "facebook", medium: `motion-${phase}` });
   const portalUrlTh = buildStoryPortalUrl(targetBook, { source: "threads", medium: `motion-${phase}` });
-  const ytIdUrl = story.publications?.youtube?.id?.landscape || story.publications?.youtube?.id?.vertical;
-  const ytEnUrl = story.publications?.youtube?.en?.landscape || story.publications?.youtube?.en?.vertical;
+  const pickYtUrl = (entry: any): string | undefined =>
+    typeof entry === "string" ? entry : entry?.url || (entry?.id ? `https://youtu.be/${entry.id}` : undefined);
+  const ytIdUrl =
+    pickYtUrl(story.publications?.youtube?.id?.landscape) ||
+    pickYtUrl(story.publications?.youtube?.id?.vertical);
+  const ytEnUrl =
+    pickYtUrl(story.publications?.youtube?.en?.landscape) ||
+    pickYtUrl(story.publications?.youtube?.en?.vertical);
+
+  const hasEnLive = Boolean(ytEnUrl || story.publications?.instagram?.en?.id || story.publications?.facebook?.en?.landscape?.id);
+  const hasIdLive = Boolean(ytIdUrl || story.publications?.instagram?.id?.id || story.publications?.facebook?.id?.landscape?.id);
+  const afterLangBanner =
+    hasEnLive && hasIdLive
+      ? "Bahasa Indonesia & English 🇮🇩🇬🇧"
+      : hasEnLive
+        ? "English Edition 🇬🇧"
+        : hasIdLive
+          ? "Bahasa Indonesia 🇮🇩"
+          : slotLangBanner;
 
   const captionIg =
     phase === "before"
-      ? `🎬✨ SPECIAL SUNDAY FULL-MOTION PREMIERE — 1 JAM LAGI (${slotTime})!\n\nBukan sekadar buku bergambar — Minggu ini Zayn Storybook hadir dalam edisi Full-Motion Animasi + Voice Actor Anak Ekspresif & Efek Suara (Bilingual EN & ID)!\n\n📖 "${cleanTitleId}" / "${cleanTitleEn}"\n💡 Nilai Utama: ${moralId}\n\n💾 Simpan (Save) pengingat ini & tonton bareng si kecil tepat pukul ${slotTime}!\n👉 Katalog resmi di Bio (storybook-catalog.pages.dev)\n\n#ZaynStorybook #FullMotionKids #DongengAnak #SundayPremiere #BilingualKids`
-      : `🎬🌟 SUNDAY FULL-MOTION EDITION — SUDAH TAYANG!\n\nEdisi spesial Full-Motion Animasi "${cleanTitleId}" / "${cleanTitleEn}" kini resmi mengudara dalam Bahasa Indonesia & English!\n\n💡 Pesan Moral: ${moralId}\n▶️ Tonton Full HD (16:9) & Shorts/Reels (9:16) sekarang di YouTube & Portal Zayn Storybook!\n\n💬 Gimana pendapat si kecil tentang animasi Minggu ini? Tulis di komentar!\n\n#ZaynStorybook #FullMotionKids #DongengMinggu #BilingualKids #CeritaAnak`;
+      ? `🎬✨ SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}) — 1 JAM LAGI (${slotTime})!\n\nBukan sekadar buku bergambar — ${dayLabelId} ini Zayn Storybook hadir dalam edisi Full-Motion Animasi (${slotLangBanner}) + Voice Actor Anak Ekspresif & Efek Suara!\n\n📖 "${displayTitle}"\n💡 Nilai Utama: ${moralId}\n\n💾 Simpan (Save) pengingat ini & tonton bareng si kecil tepat pukul ${slotTime}!\n👉 Katalog resmi di Bio (storybook-catalog.pages.dev)\n\n#ZaynStorybook #FullMotionKids #DongengAnak #${dayHeadingEn === "WEDNESDAY" ? "WednesdayPremiere" : "SundayPremiere"} #BilingualKids`
+      : `🎬🌟 FULL-MOTION EDITION (${afterLangBanner}) — SUDAH TAYANG!\n\nEdisi spesial Full-Motion Animasi "${cleanTitleId}" / "${cleanTitleEn}" (${afterLangBanner}) kini resmi mengudara!\n\n💡 Pesan Moral: ${moralId}\n▶️ Tonton Full HD (16:9) & Shorts/Reels (9:16) sekarang di YouTube & Portal Zayn Storybook!\n\n💬 Gimana pendapat si kecil tentang animasi kali ini? Tulis di komentar!\n\n#ZaynStorybook #FullMotionKids #Dongeng${dayLabelId} #BilingualKids #CeritaAnak`;
 
   const captionFb =
     phase === "before"
-      ? `🎬 SPECIAL SUNDAY FULL-MOTION PREMIERE (${slotTime}) — 1 Jam Lagi!\n\nBerbeda dari jadwal buku ilustrasi harian, setiap hari Minggu pukul ${slotTime} kami merilis episode khusus Full-Motion Animasi dengan karakter bergerak & sulih suara anak (EN + ID)!\n\n📖 Judul: "${cleanTitleId}" / "${cleanTitleEn}"\n💡 Pesan Moral: ${moralId}\n\n🔗 Jadwal & episode lengkap:\n${portalUrlFb}`
-      : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${cleanTitleId})\n\nEpisode spesial Full-Motion hari Minggu ini sudah live di semua kanal!\n${ytEnUrl ? `🇬🇧 Watch English Full-Motion: ${ytEnUrl}\n` : ""}${ytIdUrl ? `🇮🇩 Tonton Bahasa Indonesia Full-Motion: ${ytIdUrl}\n` : ""}🌐 Katalog Lengkap: ${portalUrlFb}`;
+      ? `🎬 SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}, ${slotTime}) — 1 Jam Lagi!\n\nBerbeda dari jadwal buku ilustrasi harian, di slot ${slotTime} kami merilis episode khusus Full-Motion Animasi (${slotLangBanner}) dengan karakter bergerak & sulih suara anak!\n\n📖 Judul: "${displayTitle}"\n💡 Pesan Moral: ${moralId}\n\n🔗 Jadwal & episode lengkap:\n${portalUrlFb}`
+      : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${cleanTitleId} — ${afterLangBanner})\n\nEpisode spesial Full-Motion (${afterLangBanner}) sudah live!\n${ytEnUrl ? `🇬🇧 Watch English Full-Motion: ${ytEnUrl}\n` : ""}${ytIdUrl ? `🇮🇩 Tonton Bahasa Indonesia Full-Motion: ${ytIdUrl}\n` : ""}🌐 Katalog Lengkap: ${portalUrlFb}`;
 
   const captionTh =
     phase === "before"
-      ? `🎬 Edisi spesial Minggu! 1 jam lagi (${slotTime}) tayang episode Full-Motion Animasi "${cleanTitleId}" (EN & ID) — karakter hidup + audio cerita anak! Ingatkan si kecil ya 👇\n${portalUrlTh}`
-      : `✨ Sunday Full-Motion "${cleanTitleId}" (EN & ID) SUDAH TAYANG! Animasi bergerak + sulih suara ceria buat menemani sore keluarga 💛\n${ytIdUrl || ytEnUrl || portalUrlTh}`;
+      ? `🎬 Edisi spesial Full-Motion (${slotLangBanner})! 1 jam lagi (${slotTime}) tayang episode Full-Motion Animasi "${displayTitle}" — karakter hidup + audio cerita anak! Ingatkan si kecil ya 👇\n${portalUrlTh}`
+      : `✨ Full-Motion "${displayTitle}" (${afterLangBanner}) SUDAH TAYANG! Animasi bergerak + sulih suara ceria buat menemani keluarga 💛\n${(slotLang === "en" ? ytEnUrl || ytIdUrl : ytIdUrl || ytEnUrl) || portalUrlTh}`;
 
-  console.log(`📖 Story  : ${cleanTitleId} (${targetBook})`);
+  console.log(`📖 Story  : ${displayTitle} (${targetBook}, ${slotLang.toUpperCase()})`);
   console.log(`🖼️ Visual : ${path.basename(visualPath)}`);
 
   if (options.dryRun) {
     console.log(`\n🧪 [DRY RUN] Preview Full-Motion ${phase.toUpperCase()} Captions:`);
     console.log(`--- INSTAGRAM ---\n${captionIg}\n--- FACEBOOK ---\n${captionFb}\n--- THREADS ---\n${captionTh}\n`);
-    return { success: true, targetBook, lang: "bilingual" };
+    return { success: true, targetBook, lang: slotLang };
   }
 
   const errors: string[] = [];
@@ -1424,8 +1458,8 @@ export async function publishFullMotionAnnouncement(
   if (errors.length > 0) {
     await notifyTelegramFailure({
       bookSlug: targetBook,
-      lang: "id",
-      slot: `Sunday Full-Motion ${phase.toUpperCase()} (${slotTime})`,
+      lang: slotLang,
+      slot: `${dayLabelId} Full-Motion ${phase.toUpperCase()} (${slotTime})`,
       platform: "Full-Motion Announcement Dispatcher",
       error: errors.join("\n"),
     }).catch(() => {});
@@ -1433,8 +1467,8 @@ export async function publishFullMotionAnnouncement(
     await notifyTelegramAnnouncement({
       dateStr: targetDate,
       morningBook: targetBook,
-      morningTitle: `${cleanTitleId} [Full-Motion ${phase.toUpperCase()}]`,
-      morningLang: "id",
+      morningTitle: `${displayTitle} [Full-Motion ${phase.toUpperCase()}]`,
+      morningLang: slotLang,
       morningSlotTime: slotTime,
       facebookUrl: fbResult?.url,
       instagramUrl: igResult?.url,
@@ -1442,7 +1476,7 @@ export async function publishFullMotionAnnouncement(
     }).catch(() => {});
   }
 
-  return { success: errors.length === 0, targetBook, lang: "bilingual" };
+  return { success: errors.length === 0, targetBook, lang: slotLang };
 }
 
 /**
