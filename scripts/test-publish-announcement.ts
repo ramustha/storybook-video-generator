@@ -29,16 +29,38 @@ async function runTests(): Promise<void> {
   );
 
   const papangSummaryId = extractStorySummary(papang, "id");
+  const papangSummaryEn = extractStorySummary(papang, "en");
   const papangMoralId = extractMoral(papang, "id");
-  assert.ok(papangSummaryId.includes("Jakang"), "Papang summary should draw from story scenes");
+  assert.ok(
+    papangSummaryId.includes("Jakang") && papangSummaryId.includes("Papang") && !papangSummaryId.includes("Jangan sedih!"),
+    "Papang ID summary should span setup and resolution without stopping at hook"
+  );
+  assert.ok(
+    papangSummaryEn.includes("Jakang") && papangSummaryEn.includes("Papang") && !papangSummaryEn.includes("Don't worry!"),
+    "Papang EN summary should span setup and resolution without stopping at hook"
+  );
   assert.ok(
     papangMoralId.includes("Kecil Tapi Penjaga Samudera") && papangMoralId.includes("terumbu karang"),
     "Papang moral should combine headline and spoken lesson"
   );
 
   const momoSummaryEn = extractStorySummary(momo, "en");
+  const momoSummaryId = extractStorySummary(momo, "id");
   const momoMoralEn = extractMoral(momo, "en");
-  assert.ok(momoSummaryEn.includes("Momo"), "Momo EN summary should draw from EN story scenes");
+  const momoMoralId = extractMoral(momo, "id");
+  assert.ok(
+    momoSummaryEn.includes("Momo") &&
+      momoSummaryEn.includes("courage to swing") &&
+      !/chirp,\s*chirp/i.test(momoSummaryEn),
+    "Momo EN summary should include resolution without sound-effect chatter"
+  );
+  assert.ok(
+    momoSummaryId.includes("Momo") &&
+      momoSummaryId.includes("berani berayun") &&
+      !/cuit,\s*cuit/i.test(momoSummaryId),
+    "Momo ID summary should include resolution without sound-effect chatter"
+  );
+  assert.ok(!/[!?]\./.test(momoMoralEn) && !/[!?]\./.test(momoMoralId), "Moral must not contain double punctuation (!.)");
   assert.ok(momoMoralEn.length > 20, "Momo EN moral should be non-trivial");
 
   // 2. Teaser copy checks
@@ -100,6 +122,13 @@ async function runTests(): Promise<void> {
         waveCopy.facebookCaption.includes(papangSummaryId) && waveCopy.facebookCaption.includes(papangMoralId),
         `wave${wave} should highlight summary & moral`
       );
+      if (wave === 2) {
+        assert.ok(
+          waveCopy.facebookFirstComment.includes("Previous Story on YouTube") &&
+            !waveCopy.facebookFirstComment.includes("Cerita Sebelumnya"),
+          "Wave 2 EN should localize related video labels in English"
+        );
+      }
     }
   }
 
@@ -128,6 +157,16 @@ async function runTests(): Promise<void> {
         /instagram/i.test(fm.captionIg) && /facebook/i.test(fm.captionIg) && /youtube/i.test(fm.captionIg),
         `fullMotion:${phase}:${slotLang} IG should mention social platforms`
       );
+      if (phase === "after" && slotLang === "en") {
+        assert.ok(
+          fm.captionFb.includes("NOW STREAMING") &&
+            fm.captionFb.includes("Story Summary") &&
+            fm.captionFb.includes("Moral of the Story") &&
+            !fm.captionFb.includes("Ringkasan Cerita") &&
+            !fm.captionFb.includes("SUDAH TAYANG"),
+          "Full-Motion EN after Facebook caption should stay consistently in English"
+        );
+      }
     }
   }
 
