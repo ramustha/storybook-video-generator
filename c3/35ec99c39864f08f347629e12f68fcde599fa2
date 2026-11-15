@@ -1,0 +1,45 @@
+scripts/pack-edu-motion.ts
+  698ac31901cd73e0 1-57
+scripts/pack-edu-budi-papang.ts
+  698ac31901cd73e0 1-7
+scripts/test-edu-motion-engine.ts
+  698ac31901cd73e0 1-94
+src/motion/overlay-scenes.ts
+  698ac31901cd73e0 1-289
+scripts/buffer-prerender.ts
+  698ac31901cd73e0 182-192,210-219,221-223
+src/motion/edu-motion-spec.ts
+  698ac31901cd73e0 1-278
+src/motion/character-registry.ts
+  698ac31901cd73e0 1-251
+src/motion/render-motion-stage.ts
+  698ac31901cd73e0 3,85,116-117,123,132-142,144,148,152-179,181
+scripts/pack-edu-budi-fermentasi.ts
+  698ac31901cd73e0 1-7
+src/motion/compile-edu-motion.ts
+  698ac31901cd73e0 1-1187
+src/motion/actor-prefabs.ts
+  698ac31901cd73e0 1-286
+src/audio/tts-engine.ts
+  698ac31901cd73e0 31-32,71-72,102,206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "c335ec99c39864f08f347629e12f68fcde599fa2",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 2534,
+      "total_deletions": 45,
+      "accepted_lines": 2534,
+      "overriden_lines": 0
+    }
+  }
+}
