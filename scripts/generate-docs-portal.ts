@@ -83,8 +83,24 @@ const calendarJsonPath = path.join(docsDir, "calendar-data.json");
 const existingAuditRecords = loadJsonArraySafe<AuditRecord>(auditJsonPath);
 const existingCalendarSlots = loadJsonArraySafe<EnrichedCalendarSlot>(calendarJsonPath);
 
-// 1. Build Story Titles Map
+// 1. Build Story Titles & Bilingual Content Map
 const storyTitlesMap = new Map<string, { id: string; en: string }>();
+const storyMetaMap: Record<string, { id: string; en: string; summaryId?: string; summaryEn?: string }> = {};
+
+function extractPortalSummary(data: any, lang: "id" | "en"): string | undefined {
+  const explicit = (data?.summary?.[lang] || data?.synopsis?.[lang] || data?.description?.[lang])?.trim();
+  if (explicit) return explicit;
+  const thumb = lang === "id" ? data?.thumbnailConfig?.id : data?.thumbnailConfig?.en;
+  const hook = (thumb?.bedtimeHook || thumb?.hook)?.trim();
+  if (hook) return hook;
+  const storyScenes: any[] = Array.isArray(data?.scenes)
+    ? data.scenes.filter((sc: any) => !["cover", "intro", "moral", "outro"].includes(sc?.type) && !["cover", "intro", "moral", "outro"].includes(sc?.sceneId))
+    : [];
+  const firstLine = storyScenes
+    .map((sc) => (lang === "en" ? sc?.audio?.en?.text : sc?.audio?.text))
+    .find((t) => typeof t === "string" && t.trim().length > 15);
+  return typeof firstLine === "string" ? firstLine.replace(/\s+/g, " ").trim().slice(0, 140) : undefined;
+}
 
 const stories = fs.existsSync(storiesDir)
   ? fs.readdirSync(storiesDir).filter((f) => {
@@ -105,6 +121,12 @@ for (const s of stories) {
     const id = typeof data.title === "object" ? data.title.id : data.title;
     const en = data.originalTitle || (typeof data.title === "object" ? data.title.en : id);
     storyTitlesMap.set(s, { id, en });
+    storyMetaMap[s] = {
+      id,
+      en,
+      summaryId: extractPortalSummary(data, "id"),
+      summaryEn: extractPortalSummary(data, "en"),
+    };
   } catch {
     // Ignore parse error
   }
@@ -2432,19 +2454,36 @@ const indexHtmlContent = `<!DOCTYPE html>
     }
 
     .modal-player-container {
-      position: relative;
       width: 100%;
-      padding-top: 56.25%; /* 16:9 */
       background: #000000;
     }
 
-    .modal-player-container iframe {
+    .modal-player-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+    }
+
+    .modal-player-stage iframe {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       border: none;
+    }
+
+    .modal-player-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 0.85rem 1.1rem;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--card-border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
     }
 
     /* Toast Notification */
@@ -2788,8 +2827,8 @@ const indexHtmlContent = `<!DOCTYPE html>
         <div class="brand-title">
           <div class="brand-logo">📚</div>
           <div class="brand-heading">
-            <h1>Zayn Storybook Catalog & Release Hub</h1>
-            <p>Official Multi-Platform Publication Registry & 30-Day Bedtime Broadcast Timeline</p>
+            <h1 id="headerMainTitle">Zayn Storybook Catalog & Release Hub</h1>
+            <p id="headerSubtitle">Official Multi-Platform Publication Registry & 30-Day Bedtime Broadcast Timeline</p>
           </div>
         </div>
         <div class="header-actions">
@@ -2797,6 +2836,7 @@ const indexHtmlContent = `<!DOCTYPE html>
             <span class="status-dot"></span>
             <span id="d1StatusText">⚡ Cloudflare D1</span>
           </span>
+          <button class="btn-action" id="langToggleBtn" onclick="toggleUiLang()" title="Switch Page Language (EN / ID)">🌐 EN</button>
           <button class="btn-action" id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark mode">🌓 Theme</button>
         </div>
       </div>
@@ -2805,15 +2845,15 @@ const indexHtmlContent = `<!DOCTYPE html>
     <!-- Main Navigation View Switcher (Tabs) -->
     <nav class="main-nav-tabs">
       <button class="nav-tab-btn active" id="tabTimelineBtn" onclick="switchMainTab('timeline')">
-        <span>📅</span> Schedule
+        <span>📅</span> <span id="tabTimelineLabel">Schedule</span>
         <span class="tab-badge" id="tabTimelineBadge">${initialCalCompleted}/${initialCalTotal} (${initialCalProgress}%)</span>
       </button>
       <button class="nav-tab-btn" id="tabCatalogBtn" onclick="switchMainTab('catalog')">
-        <span>📚</span> Assets
+        <span>📚</span> <span id="tabCatalogLabel">Assets</span>
         <span class="tab-badge" id="tabCatalogCount">${initialTotal}</span>
       </button>
       <button class="nav-tab-btn" id="tabAnalyticsBtn" onclick="switchMainTab('analytics')">
-        <span>📊</span> Analytics
+        <span>📊</span> <span id="tabAnalyticsLabel">Analytics</span>
         <span class="tab-badge" id="tabAnalyticsBadge">${initialTotalViews.toLocaleString()} views</span>
       </button>
     </nav>
@@ -2999,10 +3039,10 @@ const indexHtmlContent = `<!DOCTYPE html>
         <div style="background: rgba(0, 0, 0, 0.25); border: 1px solid var(--card-border); border-radius: var(--radius-xs); padding: 0.45rem 0.65rem; margin-bottom: 0.65rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
           <div style="min-width: 0;">
             <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main);" id="pipelineSpotlightTitle">
-              ${nextUpSlot ? `${nextUpSlot.storyTitleId} (${nextUpSlot.lang.toUpperCase()})` : "Active Story Slot"}
+              ${nextUpSlot ? `${(nextUpSlot.lang === "en" ? nextUpSlot.storyTitleEn || nextUpSlot.storyTitleId : nextUpSlot.storyTitleId || nextUpSlot.storyTitleEn)} (${nextUpSlot.lang.toUpperCase()})` : "Active Story Slot"}
             </div>
             <div style="font-size: 0.7rem; color: var(--text-muted); font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 650px;" id="pipelineSpotlightDesc">
-              "${nextUpSlot ? nextUpSlot.theme : 'Pendidikan Karakter Anak'}"
+              "${nextUpSlot ? ((nextUpSlot.lang === "en" ? storyMetaMap[nextUpSlot.bookSlug]?.summaryEn : storyMetaMap[nextUpSlot.bookSlug]?.summaryId) || nextUpSlot.theme) : "Children's Character Education"}"
             </div>
           </div>
           <div style="display: flex; gap: 0.3rem; align-items: center; flex-shrink: 0;">
@@ -3248,12 +3288,120 @@ const indexHtmlContent = `<!DOCTYPE html>
     const BUILD_AUDIT_SNAPSHOT = ${JSON.stringify(auditRecords)};
     const KNOWN_STORY_ASSETS = ${JSON.stringify(allAssetSlugs)};
     const KNOWN_BUFFERED_STORIES = ${JSON.stringify(bufferedStories)};
+    const STORY_META = ${JSON.stringify(storyMetaMap)};
     function cloneRecordList(list) {
       return (list || []).map(function(item) { return Object.assign({}, item); });
     }
     let RAW_AUDIT_DATA = cloneRecordList(BUILD_AUDIT_SNAPSHOT);
     let lastRenderedWibDate = '';
     let activeCatalogSource = 'embedded';
+    let uiLang = (() => {
+      try {
+        const param = new URLSearchParams(window.location.search).get('lang');
+        if (param === 'id' || param === 'en') return param;
+        const saved = localStorage.getItem('zayn_ui_lang');
+        if (saved === 'id' || saved === 'en') return saved;
+      } catch {}
+      return 'en';
+    })();
+
+    const UI_I18N = {
+      en: {
+        docTitle: 'Zayn Storybook — Multi-Platform Publication Registry & Release Timeline',
+        headerTitle: 'Zayn Storybook Catalog & Release Hub',
+        headerSub: 'Official Multi-Platform Publication Registry & 30-Day Bedtime Broadcast Timeline',
+        tabSchedule: 'Schedule',
+        tabAssets: 'Assets',
+        tabAnalytics: 'Analytics',
+        searchPlaceholder: 'Search by story, video title, ID, author, or keyword...',
+        storyCards: 'Story Cards',
+        table: 'Table',
+        credits: 'Credits:',
+        reach: 'Audience Reach:',
+        updated: 'Updated:',
+        published: 'Published:',
+        preview: 'Play Preview',
+        mirrorNotice: 'Playing YouTube mirror ({meta}) — {platform} does not support direct embedded playback.',
+        noEmbedNotice: '{platform} does not support embedded playback here. Open the post directly or copy the link below.',
+        openOn: 'Open on {platform} ↗',
+        copyLink: '📋 Copy Link'
+      },
+      id: {
+        docTitle: 'Zayn Storybook — Katalog Cerita & Jadwal Tayang Multi-Platform',
+        headerTitle: 'Katalog & Pusat Rilis Zayn Storybook',
+        headerSub: 'Registri Publikasi Multi-Platform & Jadwal Dongeng Harian 30 Hari',
+        tabSchedule: 'Jadwal',
+        tabAssets: 'Aset',
+        tabAnalytics: 'Analitik',
+        searchPlaceholder: 'Cari judul cerita, judul video, ID, penulis, atau kata kunci...',
+        storyCards: 'Kartu Cerita',
+        table: 'Tabel',
+        credits: 'Kredit:',
+        reach: 'Jangkauan:',
+        updated: 'Diperbarui:',
+        published: 'Tayang:',
+        preview: 'Putar Pratinjau',
+        mirrorNotice: 'Memutar pratinjau YouTube ({meta}) — {platform} tidak mendukung pemutar sematan langsung.',
+        noEmbedNotice: '{platform} tidak mendukung pemutaran video langsung di halaman ini. Buka tautan asli atau salin tautan di bawah.',
+        openOn: 'Buka di {platform} ↗',
+        copyLink: '📋 Salin Tautan'
+      }
+    };
+
+    function tUi(key, vars) {
+      const dict = UI_I18N[uiLang] || UI_I18N.en;
+      let s = dict[key] || UI_I18N.en[key] || key;
+      if (vars) {
+        Object.keys(vars).forEach(k => { s = s.replace(new RegExp('\\\\{' + k + '\\\\}', 'g'), vars[k]); });
+      }
+      return s;
+    }
+
+    function applyPageLanguage() {
+      document.documentElement.lang = uiLang;
+      document.title = tUi('docTitle');
+      const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+      setText('headerMainTitle', tUi('headerTitle'));
+      setText('headerSubtitle', tUi('headerSub'));
+      setText('tabTimelineLabel', tUi('tabSchedule'));
+      setText('tabCatalogLabel', tUi('tabAssets'));
+      setText('tabAnalyticsLabel', tUi('tabAnalytics'));
+      const langBtn = document.getElementById('langToggleBtn');
+      if (langBtn) langBtn.textContent = uiLang === 'id' ? '🇮🇩 ID' : '🇬🇧 EN';
+      const searchEl = document.getElementById('searchInput');
+      if (searchEl) searchEl.placeholder = tUi('searchPlaceholder');
+      const groupedBtn = document.getElementById('viewGroupedBtn');
+      if (groupedBtn) groupedBtn.innerHTML = '<span>📖</span> ' + tUi('storyCards');
+      const tableBtn = document.getElementById('viewTableBtn');
+      if (tableBtn) tableBtn.innerHTML = '<span>☰</span> ' + tUi('table');
+    }
+
+    function toggleUiLang() {
+      uiLang = uiLang === 'en' ? 'id' : 'en';
+      try { localStorage.setItem('zayn_ui_lang', uiLang); } catch {}
+      applyPageLanguage();
+      if (typeof render === 'function') render();
+      if (typeof renderTimeline === 'function') renderTimeline();
+      if (typeof updatePipelineMonitor === 'function') updatePipelineMonitor();
+    }
+
+    function getLocalizedStoryPair(obj, baseLangHint) {
+      const idTitle = obj.storyTitleId || obj.storySlug || 'Dongeng Anak';
+      const enTitle = obj.storyTitleEn || idTitle;
+      const lang = (baseLangHint || obj.language || obj.lang || uiLang || 'en').toLowerCase();
+      const primary = lang === 'en' ? enTitle : idTitle;
+      const secondary = lang === 'en' ? idTitle : enTitle;
+      return { primary, secondary: secondary !== primary ? secondary : '', lang };
+    }
+
+    function getLocalizedSlotContent(slot) {
+      const slotLang = (slot.lang || 'id').toLowerCase();
+      const meta = STORY_META[slot.bookSlug] || {};
+      if (slotLang === 'en') {
+        return meta.summaryEn || slot.summaryEn || slot.theme || meta.summaryId || "Children's Character Education";
+      }
+      return meta.summaryId || slot.summaryId || slot.theme || meta.summaryEn || 'Pendidikan Karakter Anak';
+    }
 
 ${browserSyncScript}
 
@@ -3890,10 +4038,19 @@ ${browserSyncScript}
         \`;
       }).join('');
 
+      const groupLangHint = state.langFilter !== 'all'
+        ? state.langFilter
+        : group.languages.size === 1
+          ? Array.from(group.languages)[0].toLowerCase()
+          : uiLang;
+      const groupTitles = getLocalizedStoryPair(group, groupLangHint);
+      const groupMeta = STORY_META[group.storySlug] || {};
+      const groupSummary = groupLangHint === 'en' ? (groupMeta.summaryEn || groupMeta.summaryId || '') : (groupMeta.summaryId || groupMeta.summaryEn || '');
+
       return \`
         <div class="video-card grouped-card">
           <div class="card-thumb-wrapper \${isVertical ? 'ratio-vertical' : ''}">
-            <img src="\${thumbSrc}" alt="\${group.storyTitleId}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='\${defaultThumb}'}">
+            <img src="\${thumbSrc}" alt="\${escapeAttr(groupTitles.primary)}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='\${defaultThumb}'}">
             <div class="thumb-overlay-badge">
               <span class="format-badge \${badgeClass}" title="\${isVertical ? 'Portrait (9:16)' : 'Landscape (16:9)'}" style="font-weight: 800; padding: 0.12rem 0.45rem;">\${isVertical ? 'P' : 'L'}</span>
               \${langBadges}
@@ -3902,8 +4059,9 @@ ${browserSyncScript}
           </div>
 
           <div class="card-content">
-            <div class="card-story-title" title="\${group.storyTitleId}">\${group.storyTitleId}</div>
-            \${group.storyTitleEn && group.storyTitleEn !== group.storyTitleId ? \`<div class="card-subtitle-en">\${group.storyTitleEn}</div>\` : ''}
+            <div class="card-story-title" title="\${escapeAttr(groupTitles.primary)}">\${groupTitles.primary}</div>
+            \${groupTitles.secondary ? \`<div class="card-subtitle-en">\${groupTitles.secondary}</div>\` : ''}
+            \${groupSummary ? \`<div style="font-size: 0.72rem; color: var(--text-dim); margin: 0.2rem 0 0.45rem; line-height: 1.35;">\${groupSummary}</div>\` : ''}
 
             <!-- Multiplatform Hub Breakdown -->
             <div class="platform-hub-list">
@@ -3912,17 +4070,17 @@ ${browserSyncScript}
 
             <div class="card-meta-list">
               <div class="card-meta-row">
-                <span>Credits:</span>
+                <span>\${tUi('credits')}</span>
                 <span>\${group.author} · \${group.illustrator}</span>
               </div>
               \${group.totalViews > 0 ? \`
               <div class="card-meta-row">
-                <span>Audience Reach:</span>
+                <span>\${tUi('reach')}</span>
                 <span style="color: #38bdf8; font-weight: 700;">👀 \${group.totalViews.toLocaleString()} views · ❤️ \${group.totalLikes.toLocaleString()} likes</span>
               </div>
               \` : ''}
               <div class="card-meta-row">
-                <span>Updated:</span>
+                <span>\${tUi('updated')}</span>
                 <span>\${formatDate(group.latestPublishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>
               </div>
             </div>
@@ -3941,11 +4099,12 @@ ${browserSyncScript}
       const isVertical = item.aspectRatio === '9:16';
 
       const thumbSrc = item.thumbnailUrl || (isVertical ? 'branding/cover-instagram-1080x1080.png' : 'branding/cover-facebook-1640x924.png');
+      const itemTitles = getLocalizedStoryPair(item, item.language);
 
       return \`
         <div class="video-card">
           <div class="card-thumb-wrapper \${isVertical ? 'ratio-vertical' : ''}">
-            <img src="\${thumbSrc}" alt="\${item.videoTitle}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='branding/cover-facebook-1640x924.png'}">
+            <img src="\${thumbSrc}" alt="\${escapeAttr(itemTitles.primary)}" class="card-thumb-img" loading="lazy" onerror="if(this.src.indexOf('branding')===-1){this.src='branding/cover-facebook-1640x924.png'}">
             <div class="thumb-overlay-badge">
               <span class="platform-badge \${platClass}" title="\${item.platform}">\${platIcon}</span>
               <span class="lang-badge">\${item.language.toUpperCase()}</span>
@@ -3955,8 +4114,8 @@ ${browserSyncScript}
           </div>
 
           <div class="card-content">
-            <div class="card-story-title" title="\${item.storyTitleId}">\${item.storyTitleId}</div>
-            <h3 class="card-video-title" title="\${item.videoTitle}">\${item.videoTitle}</h3>
+            <div class="card-story-title" title="\${escapeAttr(itemTitles.primary)}">\${itemTitles.primary}</div>
+            <h3 class="card-video-title" title="\${escapeAttr(item.videoTitle)}">\${item.videoTitle}</h3>
 
             <div class="card-meta-list">
               <div class="card-meta-row">
@@ -3967,13 +4126,13 @@ ${browserSyncScript}
                 </span>
               </div>
               <div class="card-meta-row">
-                <span>Published:</span>
+                <span>\${tUi('published')}</span>
                 <span>\${formatDate(item.publishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>
               </div>
             </div>
 
             <div class="card-actions">
-              <button class="btn-card" onclick="openPreviewModal('\${item.id}')" title="Play Preview">
+              <button class="btn-card" onclick="openPreviewModal('\${item.id}')" title="\${tUi('preview')}">
                 ▶
               </button>
               <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary" title="Open on \${item.platform}">
@@ -3988,13 +4147,14 @@ ${browserSyncScript}
     function renderTableRow(item) {
       const platClass = item.platform === 'YouTube' ? 'yt' : item.platform === 'Facebook' ? 'fb' : 'ig';
       const isVertical = item.aspectRatio === '9:16';
+      const itemTitles = getLocalizedStoryPair(item, item.language);
       return \`
         <tr>
           <td><span class="meta-id-tag" onclick="copyToClipboard('\${item.id}', 'Audit ID')">\${item.id}</span></td>
           <td><span class="platform-badge \${platClass}">\${item.platform}</span></td>
           <td><span class="lang-badge">\${item.language.toUpperCase()}</span></td>
           <td><span class="format-badge \${isVertical ? 'badge-vertical' : 'badge-landscape'}" style="font-weight: 800;">\${isVertical ? 'P' : 'L'}</span></td>
-          <td><strong>\${item.storyTitleId}</strong></td>
+          <td><strong>\${itemTitles.primary}</strong></td>
           <td class="table-cell-title">
             \${item.videoTitle}
             <small>By \${item.author}</small>
@@ -4663,7 +4823,8 @@ ${browserSyncScript}
 
         const titleEl = document.getElementById('pipelineSpotlightTitle');
         if (titleEl && spotlightSlot) {
-          titleEl.textContent = \`\${spotlightSlot.storyTitleId} (\${(spotlightSlot.lang || 'id').toUpperCase()})\`;
+          const spTitles = getLocalizedStoryPair(spotlightSlot, spotlightSlot.lang);
+          titleEl.textContent = \`\${spTitles.primary} (\${(spotlightSlot.lang || 'id').toUpperCase()})\`;
         }
 
         const metaEl = document.getElementById('pipelineSpotlightMeta');
@@ -4673,7 +4834,7 @@ ${browserSyncScript}
 
         const descEl = document.getElementById('pipelineSpotlightDesc');
         if (descEl) {
-          descEl.textContent = spotlightSlot ? \`"\${spotlightSlot.theme}" — \${spotlightSub}\` : spotlightSub;
+          descEl.textContent = spotlightSlot ? \`"\${getLocalizedSlotContent(spotlightSlot)}" — \${spotlightSub}\` : spotlightSub;
         }
 
         // Update Top Header Pipeline Pill
@@ -4933,9 +5094,9 @@ ${browserSyncScript}
       const timeText = slot.timeSlot || '08:30 WIB';
       const timeShort = timeText.replace(' WIB', '');
       const isMorning = timeText.includes('08:') || (slot.slotType && slot.slotType.toLowerCase().includes('morning'));
-      const titleId = slot.storyTitleId || 'Dongeng Anak';
+      const slotTitles = getLocalizedStoryPair(slot, slot.lang);
       const slotType = slot.slotType || 'Daily Broadcast';
-      const theme = slot.theme || 'Pendidikan Karakter Anak';
+      const theme = getLocalizedSlotContent(slot);
       const langUpper = (slot.lang || 'id').toUpperCase();
       const langClass = (slot.lang || 'id').toLowerCase();
 
@@ -4984,8 +5145,8 @@ ${browserSyncScript}
 
           <!-- Story Title & Subtitle with Ellipsis & Full Tooltip -->
           <div class="slot-main-info">
-            <div class="slot-title" title="\${escapeAttr(titleId)}">\${titleId}</div>
-            \${slot.storyTitleEn && slot.storyTitleEn !== titleId ? \`<div class="slot-subtitle" title="\${escapeAttr(slot.storyTitleEn)}">\${slot.storyTitleEn}</div>\` : ''}
+            <div class="slot-title" title="\${escapeAttr(slotTitles.primary)}">\${slotTitles.primary}</div>
+            \${slotTitles.secondary ? \`<div class="slot-subtitle" title="\${escapeAttr(slotTitles.secondary)}">\${slotTitles.secondary}</div>\` : ''}
             <div class="slot-type-label" title="\${escapeAttr(slotType)}">\${slotType}</div>
           </div>
 
@@ -5053,9 +5214,9 @@ ${browserSyncScript}
       const dayName = slot.dayName || 'Hari';
       const dateFormatted = slot.date && slot.date !== 'undefined' ? formatDate(slot.date) : 'Scheduled';
       const timeText = slot.timeSlot || '08:30 WIB';
-      const titleId = slot.storyTitleId || 'Dongeng Anak';
+      const slotTitles = getLocalizedStoryPair(slot, slot.lang);
       const slotType = slot.slotType || 'Daily Broadcast';
-      const theme = slot.theme || 'Pendidikan Karakter Anak';
+      const theme = getLocalizedSlotContent(slot);
 
       return \`
         <tr class="\${isTodayRow ? 'today-row' : ''}">
@@ -5064,8 +5225,8 @@ ${browserSyncScript}
           <td>\${dayName}</td>
           <td><span class="slot-status-pill \${statusClass}">\${statusText}</span></td>
           <td>
-            <strong>\${titleId}</strong>
-            \${slot.storyTitleEn && slot.storyTitleEn !== titleId ? \`<div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic;">\${slot.storyTitleEn}</div>\` : ''}
+            <strong>\${slotTitles.primary}</strong>
+            \${slotTitles.secondary ? \`<div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic;">\${slotTitles.secondary}</div>\` : ''}
           </td>
           <td><span class="lang-badge">\${(slot.lang || 'id').toUpperCase()}</span></td>
           <td><span class="format-badge">\${(slot.format || 'Landscape').split(' ')[0]}</span></td>
@@ -5076,7 +5237,25 @@ ${browserSyncScript}
       \`;
     }
 
-    // Universal Video Modal Preview (Supports YouTube, Facebook, and Instagram)
+    function findPlayableYouTubeMirror(item) {
+      if (!item || !item.storySlug) return null;
+      const itemLang = (item.language || 'id').toLowerCase();
+      const itemRatio = item.aspectRatio || '16:9';
+      return (
+        RAW_AUDIT_DATA.find(
+          r => r.platform === 'YouTube' && r.videoId && r.storySlug === item.storySlug && (r.language || '').toLowerCase() === itemLang && r.aspectRatio === itemRatio
+        ) ||
+        RAW_AUDIT_DATA.find(
+          r => r.platform === 'YouTube' && r.videoId && r.storySlug === item.storySlug && (r.language || '').toLowerCase() === itemLang
+        ) ||
+        RAW_AUDIT_DATA.find(
+          r => r.platform === 'YouTube' && r.videoId && r.storySlug === item.storySlug
+        ) ||
+        null
+      );
+    }
+
+    // Universal Video Modal Preview (YouTube direct embed + YouTube mirror fallback for platforms blocking embeds)
     function openPreviewModal(id) {
       const item = RAW_AUDIT_DATA.find(r => r.id === id);
       if (!item) return;
@@ -5084,49 +5263,55 @@ ${browserSyncScript}
       const modal = document.getElementById('videoModal');
       const frame = document.getElementById('modalPlayerFrame');
       const titleEl = document.getElementById('modalVideoTitle');
-      if (titleEl) titleEl.textContent = item.videoTitle;
+      const titles = getLocalizedStoryPair(item, item.language);
+      if (titleEl) {
+        titleEl.textContent = \`\${titles.primary} · \${item.platform} (\${(item.language || 'id').toUpperCase()} · \${item.aspectRatio || '16:9'})\`;
+      }
 
-      if (item.platform === 'YouTube' && item.videoId) {
-        frame.innerHTML = \`<iframe src="https://www.youtube-nocookie.com/embed/\${item.videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
-      } else if (item.platform === 'Facebook' && item.videoUrl) {
-        const encodedUrl = encodeURIComponent(item.videoUrl);
-        frame.innerHTML = \`
-          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 380px; background: #000; padding: 1.5rem; text-align: center;">
-            <iframe src="https://www.facebook.com/plugins/video.php?href=\${encodedUrl}&show_text=0&width=560" width="100%" height="315" style="border:none;overflow:hidden;max-width:560px;border-radius:8px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
-                Open on Facebook Watch ↗
-              </a>
-              <button class="btn-card" onclick="copyToClipboard('\${item.videoUrl}', 'Facebook Link')" style="padding: 0.5rem 1rem; font-size: 0.8rem;">
-                📋 Copy Link
-              </button>
-            </div>
+      const ytMirror = item.platform === 'YouTube' && item.videoId ? item : findPlayableYouTubeMirror(item);
+      const isMirror = Boolean(ytMirror && item.platform !== 'YouTube');
+      const actionBarHtml = \`
+        <div class="modal-player-footer">
+          <span>\${
+            isMirror
+              ? tUi('mirrorNotice', {
+                  meta: \`\${(ytMirror.language || 'id').toUpperCase()} · \${ytMirror.aspectRatio || '16:9'}\`,
+                  platform: item.platform
+                })
+              : item.platform === 'YouTube'
+                ? \`YouTube (\${(item.language || 'id').toUpperCase()} · \${item.aspectRatio || '16:9'})\`
+                : tUi('noEmbedNotice', { platform: item.platform })
+          }</span>
+          <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+            <a href="\${escapeAttr(item.videoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-card primary" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+              \${tUi('openOn', { platform: item.platform })}
+            </a>
+            <button type="button" class="btn-card" onclick="copyToClipboard('\${escapeAttr(item.videoUrl)}', '\${escapeAttr(item.platform)} Link')" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+              \${tUi('copyLink')}
+            </button>
           </div>
-        \`;
-      } else if (item.platform === 'Instagram' && item.videoUrl) {
+        </div>
+      \`;
+
+      if (ytMirror && ytMirror.videoId) {
         frame.innerHTML = \`
-          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 380px; background: #111827; padding: 2rem; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 0.75rem;">📸</div>
-            <h3 style="color: #fff; margin-bottom: 0.5rem; font-size: 1.15rem; max-width: 480px;">\${item.videoTitle}</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Official Instagram Reel by @zayn.storybook</p>
-            <div style="display: flex; gap: 0.5rem;">
-              <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">
-                Open Instagram Reel ↗
-              </a>
-              <button class="btn-card" onclick="copyToClipboard('\${item.videoUrl}', 'Instagram Link')" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
-                📋 Copy Link
-              </button>
-            </div>
+          <div class="modal-player-stage">
+            <iframe src="https://www.youtube-nocookie.com/embed/\${encodeURIComponent(ytMirror.videoId)}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
+          \${actionBarHtml}
         \`;
       } else {
+        const posterThumb = item.thumbnailUrl || (item.aspectRatio === '9:16' ? 'branding/cover-instagram-1080x1080.png' : 'branding/cover-facebook-1640x924.png');
         frame.innerHTML = \`
-          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 300px; background: #111827; padding: 2rem; text-align: center;">
-            <h3 style="color: #fff; margin-bottom: 1rem;">\${item.videoTitle}</h3>
-            <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary">
-              Open Video Asset ↗
-            </a>
+          <div class="modal-player-stage" style="display: flex; align-items: center; justify-content: center; overflow: hidden; background: #0f172a;">
+            <img src="\${escapeAttr(posterThumb)}" alt="\${escapeAttr(titles.primary)}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.38;" onerror="this.style.display='none'">
+            <div style="position: relative; z-index: 1; padding: 1.5rem; text-align: center; max-width: 520px;">
+              <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">\${item.platform === 'Facebook' ? '📘' : item.platform === 'Instagram' ? '📸' : '🎬'}</div>
+              <h3 style="color: #fff; margin-bottom: 0.45rem; font-size: 1.1rem;">\${titles.primary}</h3>
+              <p style="color: #cbd5e1; font-size: 0.82rem; margin: 0;">\${tUi('noEmbedNotice', { platform: item.platform })}</p>
+            </div>
           </div>
+          \${actionBarHtml}
         \`;
       }
       modal.classList.add('open');
@@ -5137,7 +5322,7 @@ ${browserSyncScript}
       const modal = document.getElementById('videoModal');
       const frame = document.getElementById('modalPlayerFrame');
       document.getElementById('modalVideoTitle').textContent = title;
-      frame.innerHTML = \`<iframe src="https://www.youtube-nocookie.com/embed/\${videoId}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
+      frame.innerHTML = \`<div class="modal-player-stage"><iframe src="https://www.youtube-nocookie.com/embed/\${encodeURIComponent(videoId)}?autoplay=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>\`;
       modal.classList.add('open');
     }
 
@@ -5255,6 +5440,7 @@ ${browserSyncScript}
     }
 
     // Initial render
+    applyPageLanguage();
     populateStoryDropdown();
     renderKPIs();
     render();
