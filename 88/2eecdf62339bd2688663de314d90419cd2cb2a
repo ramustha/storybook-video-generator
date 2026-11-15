@@ -1,0 +1,77 @@
+docs/s/sringeri-srinivas-belajar-tertawa/index.html
+  698ac31901cd73e0 25,95
+docs/s/ayo-berayun-momo/index.html
+  698ac31901cd73e0 25
+docs/s/edu-fabel-kancil-buaya/index.html
+  698ac31901cd73e0 25
+docs/s/sona-pintar-membantu-ibu/index.html
+  698ac31901cd73e0 25
+docs/s/edu-curiosity-awan-jatuh/index.html
+  698ac31901cd73e0 25
+docs/s/katak-ingin-terbang/index.html
+  698ac31901cd73e0 25
+docs/s/kheer-bulan-purnama/index.html
+  698ac31901cd73e0 25
+docs/s/lalat-di-langit/index.html
+  698ac31901cd73e0 25
+docs/s/poc-kancil/index.html
+  698ac31901cd73e0 25
+docs/s/uluran-tangan/index.html
+  698ac31901cd73e0 25
+docs/s/edu-budi-fermentasi-nusantara/index.html
+  698ac31901cd73e0 25
+docs/index.html
+  698ac31901cd73e0 1920-1924,1927,1931,1933,1939-1949,2293-2294,2302,2311,2315,2319,2508,2752,2754,2761-2867,3775-3782,3787,3796-3798,3807,3812,3817,3836,3841,3851-3852,3863,3869,3884,3891,4560-4561,4571,4831,4833,4882-4883,4951,4953,4962-4963,4974-4989,4992,5000-5003,5005-5025,5027-5030,5032-5033,5035,5038,5040-5046,5048,5059,5177
+docs/s/test-no-image/index.html
+  698ac31901cd73e0 25
+docs/s/tersesat-di-malam-hari/index.html
+  698ac31901cd73e0 25
+docs/s/vayu-sang-angin/index.html
+  698ac31901cd73e0 25
+docs/s/buaya-dan-kupu-kupu/index.html
+  698ac31901cd73e0 25
+docs/s/payung-merah/index.html
+  698ac31901cd73e0 25
+docs/s/bima-tukang-tidur/index.html
+  698ac31901cd73e0 25
+docs/s/pesta-ulang-tahun/index.html
+  698ac31901cd73e0 25
+scripts/generate-docs-portal.ts
+  698ac31901cd73e0 86,88-103,124-129,2457-2461,2464,2468,2470,2476-2486,2830-2831,2839,2848,2852,2856,3042,3045,3291,3298-3404,4041-4049,4053,4062-4064,4073,4078,4083,4102,4107,4117-4118,4129,4135,4150,4157,4826-4827,4837,5097,5099,5148-5149,5217,5219,5228-5229,5240-5255,5258,5266-5269,5271-5291,5293-5296,5298-5299,5301,5304,5306-5312,5314,5325,5443
+docs/s/pipit-dan-buah/index.html
+  698ac31901cd73e0 25
+docs/s/burung-gagak-cerdik/index.html
+  698ac31901cd73e0 25
+docs/s/bagaimana-jika/index.html
+  698ac31901cd73e0 25
+docs/s/edu-hybrid-test-no-image/index.html
+  698ac31901cd73e0 25
+docs/s/burung-gajah/index.html
+  698ac31901cd73e0 25
+docs/s/pakai-baju-apa-hari-ini/index.html
+  698ac31901cd73e0 25
+docs/s/hari-hujan-ikan/index.html
+  698ac31901cd73e0 25
+docs/s/pohon-ajaib/index.html
+  698ac31901cd73e0 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "882eecdf62339bd2688663de314d90419cd2cb2a",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 520,
+      "total_deletions": 170,
+      "accepted_lines": 520,
+      "overriden_lines": 0
+    }
+  }
+}
