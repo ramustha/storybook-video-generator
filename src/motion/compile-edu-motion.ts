@@ -1136,7 +1136,7 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
     title: spec.book.title,
     originalTitle: spec.book.originalTitle,
     author: spec.book.author,
-    illustrator: spec.book.illustrator || "Zayn Edu-Motion Studio (Cover-Only BUDI Adaptation)",
+    illustrator: spec.book.illustrator || "Zayn Edu-Motion Studio (Cover-Only Kemendikdasmen Adaptation)",
     publisher: spec.book.publisher || "Badan Pengembangan dan Pembinaan Bahasa, Kemendikdasmen RI",
     license: spec.book.license || "Lisensi Terbuka Kemendikdasmen RI",
     readingLevel: spec.book.readingLevel ?? 2,

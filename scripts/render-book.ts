@@ -268,14 +268,20 @@ async function main() {
     }
   }
 
+  const skipD1 = args.includes("--skip-d1") || process.env.SKIP_D1_SYNC === "1";
+
   try {
     await fs.writeFile(manifestPath, JSON.stringify(rawManifest, null, 2));
   } catch {}
-  try {
-    await db.saveStory(rawManifest);
-    console.log(`☁️ Cloudflare D1 story manifest synchronized.`);
-  } catch (d1Err: any) {
-    console.warn("⚠️ Cloudflare D1 sync warning:", d1Err.message);
+  if (!skipD1) {
+    try {
+      await db.saveStory(rawManifest);
+      console.log(`☁️ Cloudflare D1 story manifest synchronized.`);
+    } catch (d1Err: any) {
+      console.warn("⚠️ Cloudflare D1 sync warning:", d1Err.message);
+    }
+  } else {
+    console.log(`⏭️ Skipping Cloudflare D1 sync (preview mode).`);
   }
   console.log(`\n🎉 All renders completed successfully for "${rawManifest.title}"!`);
 }

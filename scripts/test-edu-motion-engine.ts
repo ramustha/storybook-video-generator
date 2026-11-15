@@ -4,6 +4,7 @@ import path from "path";
 import { splitIntoSentences, solveDurationBudget } from "../src/motion/compile-edu-motion";
 import { buildHostCircularBadgeSvg } from "../src/motion/character-registry";
 import { validateStoryMotionSpec } from "../src/motion/edu-motion-spec";
+import { buildOverlayScenesHtml } from "../src/motion/overlay-scenes";
 
 async function runTests() {
   // 1. Sentence splitter preserves child-friendly pauses and decimal numbers
@@ -66,26 +67,59 @@ async function runTests() {
     }
   }
 
-  // 6. Both BUDI story specs pass structural & full-content validation
+  // 6. Validate deterministic inline fixture spec (works in clean CI without gitignored stories/*)
+  const fixtureSpec = validateStoryMotionSpec({
+    schemaVersion: 1,
+    book: {
+      slug: "ci-fixture-story",
+      title: "Petualangan Air Bersih",
+      originalTitle: "Clean Water Adventure",
+      author: "Penulis Uji",
+    },
+    narrator: { characterId: "luna" },
+    backdrop: { preset: "sunny-meadow", portraitBg: "#021024", landscapeBg: "#021024" },
+    actors: [{ id: "pakasam-rig", prefab: "pakasam-crock", x: 500, y: 620 }],
+    chapters: [
+      { id: "intro", section: "cover", pose: "wave", text: { id: "Halo.", en: "Hello." } },
+      { id: "ch1", section: "story", pose: "point", text: { id: "Isi cerita.", en: "Story beat." } },
+      { id: "moral", section: "moral", pose: "eureka", text: { id: "Pesan baik.", en: "Good lesson." } },
+      { id: "outro", section: "outro", pose: "wave", text: { id: "Sampai jumpa.", en: "See you." } },
+    ],
+    moral: { headlineId: "Jaga Air", spokenId: "Hemat air!", headlineEn: "Save Water", spokenEn: "Save water!" },
+  });
+  assert.strictEqual(fixtureSpec.narrator.characterId, "luna");
+
+  // Also validate any local stories/*/motion-spec.json present outside Git (.gitignore)
   for (const slug of ["edu-budi-papang-teripang", "edu-budi-fermentasi-nusantara"]) {
-    const specRaw = JSON.parse(await fs.readFile(path.resolve("stories", slug, "motion-spec.json"), "utf-8"));
-    const spec = validateStoryMotionSpec(specRaw);
-    assert(spec.chapters.some((c) => c.section === "cover"));
-    assert(spec.chapters.some((c) => c.section === "moral"));
-    assert(spec.chapters.some((c) => c.section === "outro"));
+    const specFile = path.resolve("stories", slug, "motion-spec.json");
+    try {
+      const specRaw = JSON.parse(await fs.readFile(specFile, "utf-8"));
+      const spec = validateStoryMotionSpec(specRaw);
+      assert(spec.chapters.some((c) => c.section === "cover"));
+      assert(spec.chapters.some((c) => c.section === "moral"));
+      assert(spec.chapters.some((c) => c.section === "outro"));
+      if (slug === "edu-budi-fermentasi-nusantara") {
+        const textAll = spec.chapters.map((c) => `${c.text.id} ${c.text.en}`).join(" ").toLowerCase();
+        for (const food of ["tempe", "dadih", "mandai", "pakasam"]) {
+          assert(textAll.includes(food), `Fermentasi narration missing food: ${food}`);
+        }
+        assert(spec.actors.some((a) => a.id === "pakasam-rig" && a.prefab === "pakasam-crock"));
+      }
+    } catch (err: any) {
+      if (err?.code !== "ENOENT") throw err;
+    }
   }
 
-  // Verify Pakasam is explicitly included in Fermentasi narration & actors
-  const fermRaw = JSON.parse(
-    await fs.readFile(path.resolve("stories/edu-budi-fermentasi-nusantara/motion-spec.json"), "utf-8")
-  );
-  const fermTextAll = fermRaw.chapters.map((c: any) => `${c.text.id} ${c.text.en}`).join(" ").toLowerCase();
-  for (const food of ["tempe", "dadih", "mandai", "pakasam"]) {
-    assert(fermTextAll.includes(food), `Fermentasi narration missing food: ${food}`);
-  }
-  assert(fermRaw.actors.some((a: any) => a.id === "pakasam-rig" && a.prefab === "pakasam-crock"));
+  // 7. Overlay uses clean KEMENDIKDASMEN branding without BUDI prefix
+  const overlayHtml = buildOverlayScenesHtml({
+    lang: "id",
+    book: { slug: "test", title: "Cerita Uji", originalTitle: "Test Story", author: "Penulis" },
+    moral: { headlineId: "Pesan", spokenId: "Isi", headlineEn: "Moral", spokenEn: "Body" },
+  });
+  assert(overlayHtml.includes("KEMENDIKDASMEN •"));
+  assert(!/\bBUDI\b/i.test(overlayHtml), "Overlay HTML should not expose BUDI prefix");
 
-  console.log("✅ All 6 Universal Edu-Motion unit checks passed!");
+  console.log("✅ All 7 Universal Edu-Motion unit checks passed!");
 }
 
 runTests().catch((err) => {

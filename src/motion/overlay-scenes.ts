@@ -231,7 +231,7 @@ export function buildOverlayScenesHtml(options: {
       ? `Illustrator: ${illustratorText}`
       : `Ilustrator: ${illustratorText}`
     : null;
-  const licenseLabel = book.license || "Kemendikdasmen RI • BUDI Open License";
+  const licenseLabel = book.license || (isEn ? "Kemendikdasmen RI Open License" : "Lisensi Terbuka Kemendikdasmen RI");
 
   const moralBadge = isEn ? "✨ MORAL OF THE STORY ✨" : "✨ PESAN MORAL CERITA ✨";
   const moralHeadline = isEn ? moral.headlineEn : moral.headlineId;
@@ -253,7 +253,7 @@ export function buildOverlayScenesHtml(options: {
           : ""
       }
       <div style="display:flex;flex-direction:column;gap:16px;align-items:inherit;">
-        <div><span class="overlay-kicker">📚 BUDI KEMENDIKDASMEN • ${escapeHtml(themeLabel)}</span></div>
+        <div><span class="overlay-kicker">📚 KEMENDIKDASMEN • ${escapeHtml(themeLabel)}</span></div>
         <h1 class="overlay-title">${escapeHtml(displayTitle)}</h1>
         <div class="overlay-credits">
           <span class="credit-pill">✍️ ${escapeHtml(authorLabel)}</span>
