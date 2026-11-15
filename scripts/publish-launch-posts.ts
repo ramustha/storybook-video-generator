@@ -104,10 +104,39 @@ export async function postFacebookComment(
   return data.id || null;
 }
 
+/**
+ * Updates an existing Facebook Page post message (fallback when commenting fails or for in-place patching).
+ */
+export async function updateFacebookPostMessage(
+  postId: string,
+  message: string,
+  pageAccessToken?: string
+): Promise<boolean> {
+  if (!postId || !message.trim()) return false;
+  const token = pageAccessToken || (await loadMetaConfig()).pageAccessToken;
+  const params = new URLSearchParams();
+  params.append("message", message);
+  params.append("access_token", token);
+
+  const res = await fetch(`https://graph.facebook.com/v21.0/${postId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+  const data = (await res.json()) as any;
+  if (data.error || data.success === false) {
+    console.warn(`⚠️ Facebook post caption update warning for ${postId}:`, JSON.stringify(data.error || data));
+    return false;
+  }
+  console.log(`✏️ Facebook post caption patched in-place on ${postId}`);
+  return true;
+}
+
 export async function publishFacebookPhotoPost(options: {
   photoPath: string;
   caption: string;
   firstComment?: string;
+  fallbackCaption?: string;
   dryRun?: boolean;
 }): Promise<{
   success: boolean;
@@ -184,9 +213,14 @@ export async function publishFacebookPhotoPost(options: {
   console.log(`📌 Post ID  : ${postId}`);
   console.log(`🔗 Link     : ${permalink}\n`);
 
-  const commentId = options.firstComment
-    ? await postFacebookComment(postId, options.firstComment, config.pageAccessToken)
-    : null;
+  let commentId: string | null = null;
+  if (options.firstComment) {
+    commentId = await postFacebookComment(postId, options.firstComment, config.pageAccessToken);
+    if (!commentId) {
+      const patchedMessage = options.fallbackCaption || `${options.caption}\n\n${options.firstComment}`;
+      await updateFacebookPostMessage(postId, patchedMessage, config.pageAccessToken);
+    }
+  }
 
   return { success: true, photoId, postId, permalink, commentId };
 }
@@ -198,6 +232,7 @@ export async function publishFacebookMultiPhotoPost(options: {
   photoPaths: string[];
   caption: string;
   firstComment?: string;
+  fallbackCaption?: string;
   dryRun?: boolean;
 }): Promise<{
   success: boolean;
@@ -230,6 +265,7 @@ export async function publishFacebookMultiPhotoPost(options: {
       photoPath: options.photoPaths?.[0] || "",
       caption: options.caption,
       firstComment: options.firstComment,
+      fallbackCaption: options.fallbackCaption,
       dryRun: options.dryRun,
     });
     return {
@@ -320,9 +356,14 @@ export async function publishFacebookMultiPhotoPost(options: {
   }
 
   console.log(`\n🎉 SUCCESS! FACEBOOK MULTI-PHOTO POST IS LIVE: ${permalink}\n`);
-  const commentId = options.firstComment
-    ? await postFacebookComment(postId, options.firstComment, config.pageAccessToken)
-    : null;
+  let commentId: string | null = null;
+  if (options.firstComment) {
+    commentId = await postFacebookComment(postId, options.firstComment, config.pageAccessToken);
+    if (!commentId) {
+      const patchedMessage = options.fallbackCaption || `${options.caption}\n\n${options.firstComment}`;
+      await updateFacebookPostMessage(postId, patchedMessage, config.pageAccessToken);
+    }
+  }
   return { success: true, postId, permalink, photoIds, commentId };
 }
 

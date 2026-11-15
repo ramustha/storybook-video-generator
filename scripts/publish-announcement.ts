@@ -11,6 +11,7 @@ import {
 } from "./notify-telegram";
 import { DAILY_CALENDAR_MONTH_1, isFullMotionSlot } from "./content-calendar";
 import { db } from "./lib/db";
+import { pullStory } from "./manage-story-storage";
 import { buildStoryPortalUrl, resolveRelatedPublishedVideos } from "./lib/seo-formatter";
 import { loadJsonArraySafe } from "./lib/portal-sync";
 
@@ -531,6 +532,13 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   for (const slug of storiesToEnsure) {
     const sDir = path.resolve("./stories", slug);
     const sJson = path.join(sDir, "story.json");
+    if (!options.dryRun) {
+      try {
+        await pullStory(slug, { manifestOnly: true, force: true });
+      } catch {
+        // Offline or manifest not yet in R2
+      }
+    }
     if (!existsSync(sJson)) {
       console.log(`📥 Story assets not found locally for [${slug}]. Pulling from Cloudflare R2...`);
       await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slug]);
@@ -799,13 +807,13 @@ function resolveWavePhoto(storyDir: string, lang: "id" | "en", wave: 2 | 3): str
 }
 
 /**
- * Resolves the live YouTube watch URL and thumbnail URL from local story.json or docs/audit-data.json.
+ * Resolves the live YouTube watch URL and thumbnail URL from story.json, Cloudflare D1, or docs/audit-data.json.
  */
-function resolveLiveYoutubeInfo(
+async function resolveLiveYoutubeInfo(
   story: any,
   bookSlug: string,
   lang: "id" | "en"
-): { youtubeUrl?: string; youtubeId?: string; ytThumbnailUrl?: string } {
+): Promise<{ youtubeUrl?: string; youtubeId?: string; ytThumbnailUrl?: string }> {
   const altLang: "id" | "en" = lang === "id" ? "en" : "id";
   const yt = story?.publications?.youtube || {};
 
@@ -823,6 +831,25 @@ function resolveLiveYoutubeInfo(
         youtubeId: id,
         ytThumbnailUrl: id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : undefined,
       };
+    }
+  }
+
+  for (const queryLang of [lang, altLang]) {
+    try {
+      const d1Rows = await db.getPublishedPublicationsForSlot(bookSlug, queryLang);
+      const ytRow =
+        d1Rows.find((r) => r.platform === "youtube" && r.format === "landscape" && (r.video_url || r.external_id)) ||
+        d1Rows.find((r) => r.platform === "youtube" && (r.video_url || r.external_id));
+      if (ytRow) {
+        const id = ytRow.external_id || (typeof ytRow.video_url === "string" ? ytRow.video_url.split("/").pop() : undefined);
+        return {
+          youtubeUrl: ytRow.video_url || (id ? `https://youtu.be/${id}` : undefined),
+          youtubeId: id,
+          ytThumbnailUrl: ytRow.thumbnail_url || (id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : undefined),
+        };
+      }
+    } catch {
+      // Offline or D1 unavailable; continue to audit-data fallback
     }
   }
 
@@ -846,6 +873,7 @@ function resolveLiveYoutubeInfo(
 
 interface WaveCopyPayload {
   facebookCaption: string;
+  facebookFallbackCaption: string;
   facebookFirstComment: string;
   instagramCaption: string;
   threadsText: string;
@@ -874,7 +902,16 @@ function generatePostPublishWaveCopy(params: {
 
   if (wave === 2) {
     // Midday Watch-Now & Catch-Up (12:30 WIB)
-    const facebookCaption =
+    const facebookFirstComment = [
+      `▶️ Tonton "${cleanTitle}" di YouTube: ${primaryWatchUrl}`,
+      `🌐 Halaman Cerita & Player (ID/EN): ${portalUrlFb}`,
+      rel1 ? `📚 Rekomendasi Cerita Sebelumnya — "${rel1.title}": ${rel1.url}` : "",
+      rel2 ? `✨ Tonton Juga — "${rel2.title}": ${rel2.url}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const buildFbBody = (commentCta: string) =>
       lang === "en"
         ? `☀️ MIDDAY STORY BREAK — NOW STREAMING! 🎬✨
 Have the kids finished lunch or resting this afternoon? Let's cozy up for 5 minutes of screen-positive bilingual storytelling:
@@ -885,8 +922,7 @@ Have the kids finished lunch or resting this afternoon? Let's cozy up for 5 minu
 💖 Story Moral:
 ${moral}
 
-🎯 WANT TO WATCH NOW?
-I've pinned the direct YouTube Watch Link + Full Story Portal (no searching needed!) right in the FIRST COMMENT below! 👇💬
+${commentCta}
 
 💬 Question for parents: What's your little one's favorite bedtime/afternoon routine story so far? Share below! ❤️
 
@@ -900,21 +936,22 @@ Sudah selesai makan siang atau bersiap tidur siang? Yuk temani si kecil menonton
 💖 Pesan Budi Pekerti:
 ${moral}
 
-🎯 INGIN NONTON LANGSUNG TANPA REPOT CARI?
-Tautan YouTube + Halaman Portal lengkap sudah kami sematkan di KOMENTAR PERTAMA di bawah ya! 👇💬
+${commentCta}
 
 💬 Cerita mana lagi yang paling sering diminta putar ulang oleh si kecil? Tulis di komentar ya Ayah & Bunda! ❤️
 
 #ZaynStorybook #DongengAnak #CeritaAnakBergambar #WaktuSiangAnak #ParentingIndonesia`;
 
-    const facebookFirstComment = [
-      `▶️ Tonton "${cleanTitle}" di YouTube: ${primaryWatchUrl}`,
-      `🌐 Halaman Cerita & Player (ID/EN): ${portalUrlFb}`,
-      rel1 ? `📚 Rekomendasi Cerita Sebelumnya — "${rel1.title}": ${rel1.url}` : "",
-      rel2 ? `✨ Tonton Juga — "${rel2.title}": ${rel2.url}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
+    const facebookCaption = buildFbBody(
+      lang === "en"
+        ? `🎯 WANT TO WATCH NOW?\nI've pinned the direct YouTube Watch Link + Full Story Portal (no searching needed!) right in the FIRST COMMENT below! 👇💬`
+        : `🎯 INGIN NONTON LANGSUNG TANPA REPOT CARI?\nTautan YouTube + Halaman Portal lengkap sudah kami sematkan di KOMENTAR PERTAMA di bawah ya! 👇💬`
+    );
+    const facebookFallbackCaption = buildFbBody(
+      lang === "en"
+        ? `🎯 WATCH NOW & EXPLORE MORE STORIES:\n${facebookFirstComment}`
+        : `🎯 NONTON SEKARANG & PILIHAN CERITA LAINNYA:\n${facebookFirstComment}`
+    );
 
     const instagramCaption = `☀️ SUDAH TAYANG HARI INI! 🎬🌟
 Lagi istirahat siang atau santai bersama si kecil? Dongeng "${cleanTitle}" sudah siap ditonton penuh di YouTube Zayn Storybook!
@@ -933,11 +970,20 @@ ${moral}
     const threadsBase = `☀️ Sudah tayang! Temani istirahat siang si kecil dengan "${cleanTitle}" 📖✨\n👉 ${hook}\n\nPutar langsung + jelajahi dongeng pilihan lainnya di portal kami 👇 #ZaynStorybook`;
     const threadsText = threadsBase.length > 480 ? `${threadsBase.slice(0, 477)}...` : threadsBase;
 
-    return { facebookCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
+    return { facebookCaption, facebookFallbackCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
   }
 
   // Wave 3: Bedtime Highlight & Watch-Next Back-Catalog Funnel (20:30 WIB)
-  const facebookCaption = `🌙 WAKTUNYA DONGENG PENGANTAR TIDUR! ✨🛌
+  const facebookFirstComment = [
+    `🌙 Putar "${cleanTitle}" Sekarang: ${primaryWatchUrl}`,
+    `🌐 Buka Halaman Cerita & Koleksi Malam: ${portalUrlFb}`,
+    rel1 ? `📖 Dongeng Pengantar Tidur Berikutnya — "${rel1.title}": ${rel1.url}` : "",
+    rel2 ? `🌟 Favorit Keluarga — "${rel2.title}": ${rel2.url}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const buildBedtimeFbBody = (linkBlock: string) => `🌙 WAKTUNYA DONGENG PENGANTAR TIDUR! ✨🛌
 Sudah waktunya redupkan lampu kamar dan nikmati momen hangat sebelum si kecil terlelap dengan cerita malam ini:
 
 📖 "${cleanTitle}"
@@ -947,20 +993,14 @@ Sudah waktunya redupkan lampu kamar dan nikmati momen hangat sebelum si kecil te
 ${moral}
 
 ${rel1 ? `✨ Belum siap tidur? Lanjutkan dengan dongeng hangat "${rel1.title}" untuk maraton cerita tenang tanpa layar berisik!\n` : ""}
-👇 Tautan YouTube + Playlist Sebelum Tidur sudah terpasang rapi di KOMENTAR PERTAMA!
+${linkBlock}
 
 💬 Setelah menonton, nilai baik apa yang paling diingat si kecil malam ini? Ceritakan yuk! ❤️
 
 #ZaynStorybook #DongengSebelumTidur #BedtimeStories #ParentingIndonesia #KeluargaBahagia`;
 
-  const facebookFirstComment = [
-    `🌙 Putar "${cleanTitle}" Sekarang: ${primaryWatchUrl}`,
-    `🌐 Buka Halaman Cerita & Koleksi Malam: ${portalUrlFb}`,
-    rel1 ? `📖 Dongeng Pengantar Tidur Berikutnya — "${rel1.title}": ${rel1.url}` : "",
-    rel2 ? `🌟 Favorit Keluarga — "${rel2.title}": ${rel2.url}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const facebookCaption = buildBedtimeFbBody(`👇 Tautan YouTube + Playlist Sebelum Tidur sudah terpasang rapi di KOMENTAR PERTAMA!`);
+  const facebookFallbackCaption = buildBedtimeFbBody(`👇 Tautan Tayangan & Dongeng Malam Ini:\n${facebookFirstComment}`);
 
   const instagramCaption = `🌙 WAKTUNYA KELAMBU & DONGENG MALAM! ✨🛌
 Redupkan lampu dan tutup hari si kecil dengan kehangatan cerita "${cleanTitle}"!
@@ -981,7 +1021,7 @@ ${moral}
   const threadsBase = `🌙 Waktunya dongeng pengantar tidur! Putar "${cleanTitle}" untuk momen tenang sebelum lelap ✨📖\n💖 ${moral}\n\nTonton + lanjut ke dongeng favorit berikutnya 👇 #ZaynStorybook`;
   const threadsText = threadsBase.length > 480 ? `${threadsBase.slice(0, 477)}...` : threadsBase;
 
-  return { facebookCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
+  return { facebookCaption, facebookFallbackCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
 }
 
 /**
@@ -1038,6 +1078,13 @@ export async function publishPostPublishWaveAnnouncement(
 
   const storyDir = path.resolve("./stories", targetBook);
   const storyJsonPath = path.join(storyDir, "story.json");
+  if (!options.dryRun) {
+    try {
+      await pullStory(targetBook, { manifestOnly: true, force: true });
+    } catch {
+      // Offline or manifest not yet in R2
+    }
+  }
   if (!existsSync(storyJsonPath)) {
     console.log(`📥 Story assets not found locally for [${targetBook}]. Pulling from Cloudflare R2...`);
     await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", targetBook]);
@@ -1072,7 +1119,7 @@ export async function publishPostPublishWaveAnnouncement(
   const hook = thumbCfg.hook || (targetLang === "id" ? "Petualangan hangat penuh pesan baik untuk keluarga." : "A gentle illustrated bilingual adventure for families.");
   const moral = extractMoral(story, targetLang);
 
-  const { youtubeUrl, ytThumbnailUrl } = resolveLiveYoutubeInfo(story, targetBook, targetLang);
+  const { youtubeUrl, ytThumbnailUrl } = await resolveLiveYoutubeInfo(story, targetBook, targetLang);
   const related = resolveRelatedPublishedVideos(targetBook, targetLang, 2);
   const wavePhoto = resolveWavePhoto(storyDir, targetLang, wave);
   const copy = generatePostPublishWaveCopy({
@@ -1098,7 +1145,7 @@ export async function publishPostPublishWaveAnnouncement(
   let igResult = existingWave.instagram;
   let thResult = existingWave.threads;
 
-  // 1. Facebook Photo Post + Clickable Links in First Comment
+  // 1. Facebook Photo Post + Clickable Links in First Comment (auto-patches caption if comment permission missing)
   if (!hasFb || options.force) {
     try {
       console.log(`\n📘 [1/3] Publishing Wave ${wave} Facebook Photo Post (+ First Comment links)...`);
@@ -1106,6 +1153,7 @@ export async function publishPostPublishWaveAnnouncement(
         photoPath: wavePhoto,
         caption: copy.facebookCaption,
         firstComment: copy.facebookFirstComment,
+        fallbackCaption: copy.facebookFallbackCaption,
         dryRun: options.dryRun,
       });
       if (!options.dryRun && fbRes.success) {
@@ -1390,6 +1438,7 @@ export async function publishFullMotionAnnouncement(
         photoPath: visualPath,
         caption: captionFb,
         firstComment: portalUrlFb,
+        fallbackCaption: captionFb,
         dryRun: options.dryRun,
       });
       if (!options.dryRun && fbRes.success) {
