@@ -1,0 +1,27 @@
+scripts/notify-telegram.ts
+  698ac31901cd73e0 511-513,519
+scripts/publish-announcement.ts
+  698ac31901cd73e0 14,535-541,810,812,816,837-852,876,905-914,925,939,945-954,973,977-986,996,1002-1003,1024,1081-1087,1122,1148,1156,1441
+scripts/publish-launch-posts.ts
+  698ac31901cd73e0 107-134,139,216-223,235,268,359-366
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "618052ec34048f7e128256005b5b2aabddee684e",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 130,
+      "total_deletions": 38,
+      "accepted_lines": 130,
+      "overriden_lines": 0
+    }
+  }
+}
