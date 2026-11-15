@@ -134,7 +134,17 @@ export async function publishFacebookPhotoPost(options: {
 
   const photoId = res.data.id;
   const postId = res.data.post_id || photoId;
-  const permalink = `https://www.facebook.com/${config.facebookPageId}/posts/${postId}`;
+  let permalink = `https://www.facebook.com/${config.facebookPageId}/posts/${postId}`;
+
+  try {
+    const detailRes = await fetch(
+      `https://graph.facebook.com/v21.0/${postId}?fields=permalink_url&access_token=${config.pageAccessToken}`
+    );
+    const detailData = (await detailRes.json()) as any;
+    if (detailData.permalink_url) {
+      permalink = detailData.permalink_url;
+    }
+  } catch {}
 
   console.log(`\n🎉 SUCCESS! PHOTO POST PUBLISHED TO FACEBOOK PAGE!`);
   console.log(`📸 Photo ID : ${photoId}`);
@@ -245,7 +255,26 @@ export async function publishFacebookMultiPhotoPost(options: {
   }
 
   const postId = feedData.id;
-  const permalink = `https://www.facebook.com/${postId}`;
+  let permalink = `https://www.facebook.com/${postId}`;
+
+  try {
+    const detailRes = await fetch(
+      `https://graph.facebook.com/v21.0/${postId}?fields=permalink_url&access_token=${config.pageAccessToken}`
+    );
+    const detailData = (await detailRes.json()) as any;
+    if (detailData.permalink_url) {
+      permalink = detailData.permalink_url;
+    } else if (postId.includes("_")) {
+      const parts = postId.split("_");
+      permalink = `https://www.facebook.com/${parts[0]}/posts/${parts[1]}`;
+    }
+  } catch {
+    if (postId.includes("_")) {
+      const parts = postId.split("_");
+      permalink = `https://www.facebook.com/${parts[0]}/posts/${parts[1]}`;
+    }
+  }
+
   console.log(`\n🎉 SUCCESS! FACEBOOK MULTI-PHOTO POST IS LIVE: ${permalink}\n`);
   return { success: true, postId, permalink, photoIds };
 }

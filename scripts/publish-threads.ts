@@ -602,7 +602,6 @@ export async function publishThreadsCarousel(options: {
         mediaType: "IMAGE",
         imageUrl: publicUrl,
         isCarouselItem: true,
-        isMadeWithAi: true,
       });
       console.log(`   ✔ Threads Carousel Item ${i + 1} ID: ${itemId}`);
       itemIds.push(itemId);
@@ -619,6 +618,7 @@ export async function publishThreadsCarousel(options: {
       mediaType: "CAROUSEL",
       text: options.text,
       children: itemIds,
+      isMadeWithAi: true,
     });
 
     await waitForThreadsContainer(containerId, config.threadsAccessToken);

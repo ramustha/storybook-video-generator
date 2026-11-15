@@ -25,6 +25,25 @@ export interface TelegramFailureOptions {
   dryRun?: boolean;
 }
 
+export interface TelegramAnnouncementOptions {
+  dateStr?: string;
+  morningBook?: string;
+  morningTitle?: string;
+  morningLang?: string;
+  morningSlotTime?: string;
+  morningHook?: string;
+  eveningBook?: string;
+  eveningTitle?: string;
+  eveningLang?: string;
+  eveningSlotTime?: string;
+  eveningHook?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  threadsUrl?: string;
+  photoUrl?: string;
+  dryRun?: boolean;
+}
+
 export interface PlatformStatsSummary {
   views: number;
   likes: number;
@@ -399,6 +418,94 @@ export async function notifyTelegramFailure(options: TelegramFailureOptions): Pr
 }
 
 /**
+ * Dispatches a success notification to Telegram when daily social teaser announcement is published.
+ */
+export async function notifyTelegramAnnouncement(
+  options: TelegramAnnouncementOptions
+): Promise<boolean> {
+  const config = getTelegramConfig();
+  if (!config) {
+    console.warn("⚠️ Cannot send Telegram announcement notification: Credentials not configured.");
+    return false;
+  }
+
+  const wibTime = formatWibTimestamp(new Date(), "id");
+  const targetDate =
+    options.dateStr ||
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jakarta",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+
+  const lines: string[] = [
+    `📣 <b>Zayn Storybook: Menu Dongeng Hari Ini Mengudara!</b> 🌟\n`,
+    `Teaser & jadwal tayang harian telah berhasil dipublikasikan ke seluruh media sosial!`,
+    `\n📅 <b>Jadwal Tayang:</b> ${targetDate}`,
+    `⏰ <b>Waktu Terbit:</b> ${wibTime}`,
+  ];
+
+  if (options.morningBook && options.morningTitle) {
+    lines.push(
+      `\n🌅 <b>[Pagi · ${options.morningSlotTime || "08:30 WIB"}]</b> <i>${options.morningTitle}</i> [${(options.morningLang || "EN").toUpperCase()}]`
+    );
+    if (options.morningHook) {
+      lines.push(`✨ <i>${options.morningHook}</i>`);
+    }
+  }
+
+  if (options.eveningBook && options.eveningTitle) {
+    lines.push(
+      `\n🌙 <b>[Malam · ${options.eveningSlotTime || "19:00 WIB"}]</b> <i>${options.eveningTitle}</i> [${(options.eveningLang || "ID").toUpperCase()}]`
+    );
+    if (options.eveningHook) {
+      lines.push(`✨ <i>${options.eveningHook}</i>`);
+    }
+  }
+
+  lines.push(`\n🔗 <b>Lihat Feed Media Sosial:</b>`);
+  if (options.instagramUrl) {
+    lines.push(`📸 <a href="${options.instagramUrl}">Instagram Feed Carousel</a>`);
+  }
+  if (options.facebookUrl) {
+    lines.push(`📘 <a href="${options.facebookUrl}">Facebook Page Multi-Photo</a>`);
+  }
+  if (options.threadsUrl) {
+    lines.push(`🧵 <a href="${options.threadsUrl}">Meta Threads Carousel</a>`);
+  }
+
+  lines.push(`\n✨ <i>Nyalakan lonceng notifikasi di YouTube @zayn.storybook!</i> 🌙`);
+  const captionHtml = lines.join("\n");
+
+  let photoUrl = options.photoUrl;
+  if (!photoUrl && options.morningBook) {
+    const r2ConfigPath = path.resolve("./config/r2-config.json");
+    if (existsSync(r2ConfigPath)) {
+      try {
+        const r2 = JSON.parse(readFileSync(r2ConfigPath, "utf-8"));
+        if (r2.publicDomain) {
+          photoUrl = `${r2.publicDomain}/stories/${options.morningBook}/assets/cover.png`;
+        }
+      } catch {}
+    }
+  }
+
+  if (options.dryRun) {
+    console.log("\n=======================================================");
+    console.log("✈️  [DRY RUN] TELEGRAM ANNOUNCEMENT NOTIFICATION PREVIEW");
+    console.log("=======================================================");
+    console.log(`Chat ID   : ${config.chatId}`);
+    console.log(`Photo URL : ${photoUrl || "(No photo)"}`);
+    console.log("Message   :\n" + captionHtml);
+    console.log("=======================================================\n");
+    return true;
+  }
+
+  return await sendTelegramMessage(config, captionHtml, photoUrl);
+}
+
+/**
  * Dispatches an executive multi-platform weekly/daily performance report to Telegram.
  */
 export async function notifyTelegramAnalytics(options: AnalyticsReportOptions): Promise<boolean> {
@@ -675,6 +782,28 @@ async function main() {
       platform,
       error: errorMsg,
       runId,
+      dryRun,
+    });
+    if (!ok && !dryRun) process.exit(1);
+    return;
+  }
+
+  if (args.includes("--announcement") || args.includes("--teaser")) {
+    const morningBook = (args.indexOf("--morning-book") !== -1 ? args[args.indexOf("--morning-book") + 1] : undefined) || "ayo-berayun-momo";
+    const eveningBook = (args.indexOf("--evening-book") !== -1 ? args[args.indexOf("--evening-book") + 1] : undefined) || "ayo-berayun-momo";
+    const morningTitle = (args.indexOf("--morning-title") !== -1 ? args[args.indexOf("--morning-title") + 1] : undefined) || "Swing High, Momo";
+    const eveningTitle = (args.indexOf("--evening-title") !== -1 ? args[args.indexOf("--evening-title") + 1] : undefined) || "Ayo, Berayun, Momo";
+    const dryRun = args.includes("--dry-run");
+
+    const ok = await notifyTelegramAnnouncement({
+      morningBook,
+      morningTitle,
+      morningLang: "en",
+      morningSlotTime: "08:30 WIB",
+      eveningBook,
+      eveningTitle,
+      eveningLang: "id",
+      eveningSlotTime: "19:00 WIB",
       dryRun,
     });
     if (!ok && !dryRun) process.exit(1);
