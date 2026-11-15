@@ -52,9 +52,9 @@ export const VOICE_ACTOR_REGISTRY: Record<VoiceActorRole, VoiceActorProfile> = {
     voice: {
       id: {
         voiceName: "id-ID-GadisNeural",
-        pitch: "+10%",
-        rate: "+8%",
-        formantScale: 1.17,
+        pitch: "+11%",
+        rate: "+5%",
+        formantScale: 1.18,
       },
       en: {
         voiceName: "en-US-AnaNeural",

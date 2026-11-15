@@ -395,7 +395,7 @@
     "date": "2026-11-15",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-papang-teripang",
     "storyTitleId": "Papang Teripang dan Terumbu Karang",
     "storyTitleEn": "Papang the Sea Cucumber and the Coral Reef",
@@ -407,9 +407,9 @@
       "Instagram Reels"
     ],
     "theme": "Full-Motion Edu-Story: Papang Teripang & Terumbu Karang (BUDI Ecosystem)",
-    "status": "today",
-    "isCompleted": false,
-    "hasPublishedAsset": false,
+    "status": "completed",
+    "isCompleted": true,
+    "hasPublishedAsset": true,
     "isBuffered": false,
     "hasAssets": true
   },
@@ -432,7 +432,7 @@
     "theme": "Full-Motion Edu-Story: Papang Teripang & Terumbu Karang (BUDI Ecosystem)",
     "status": "today",
     "isCompleted": false,
-    "hasPublishedAsset": false,
+    "hasPublishedAsset": true,
     "isBuffered": false,
     "hasAssets": true
   },
@@ -573,6 +573,29 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": true,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-112",
+    "date": "2026-11-18",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-papang-teripang",
+    "storyTitleId": "Papang Teripang dan Terumbu Karang",
+    "storyTitleEn": "Papang the Sea Cucumber and the Coral Reef",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Papang Teripang & Terumbu Karang (BUDI Ecosystem)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": true,
+    "isBuffered": false,
     "hasAssets": true
   },
   {
@@ -764,7 +787,7 @@
     "date": "2026-11-22",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-fermentasi-nusantara",
     "storyTitleId": "Yuk, Mengenal Makanan Hasil Fermentasi Khas Indonesia",
     "storyTitleEn": "Traditional Fermented Foods of Indonesia",
@@ -942,6 +965,29 @@
     "isCompleted": false,
     "hasPublishedAsset": false,
     "isBuffered": false,
+    "hasAssets": true
+  },
+  {
+    "id": "SLOT-114",
+    "date": "2026-11-25",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-fermentasi-nusantara",
+    "storyTitleId": "Yuk, Mengenal Makanan Hasil Fermentasi Khas Indonesia",
+    "storyTitleEn": "Traditional Fermented Foods of Indonesia",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Rahasia Fermentasi Nusantara (Tempe, Tape & Oncom)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": true,
     "hasAssets": true
   },
   {
@@ -1133,7 +1179,7 @@
     "date": "2026-11-29",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-dudung-suka-balap-karung",
     "storyTitleId": "Edu Budi Dudung Suka Balap Karung",
     "storyTitleEn": "Edu Budi Dudung Suka Balap Karung",
@@ -1312,6 +1358,29 @@
     "hasPublishedAsset": false,
     "isBuffered": false,
     "hasAssets": true
+  },
+  {
+    "id": "SLOT-116",
+    "date": "2026-12-02",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-dudung-suka-balap-karung",
+    "storyTitleId": "Edu Budi Dudung Suka Balap Karung",
+    "storyTitleEn": "Edu Budi Dudung Suka Balap Karung",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Dudung Suka Balap Karung (Permainan Tradisional)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": false
   },
   {
     "id": "SLOT-052",
@@ -1502,7 +1571,7 @@
     "date": "2026-12-06",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-petualang-antariksa",
     "storyTitleId": "Edu Budi Petualang Antariksa",
     "storyTitleEn": "Edu Budi Petualang Antariksa",
@@ -1686,6 +1755,29 @@
     "hasPublishedAsset": false,
     "isBuffered": false,
     "hasAssets": true
+  },
+  {
+    "id": "SLOT-118",
+    "date": "2026-12-09",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-petualang-antariksa",
+    "storyTitleId": "Edu Budi Petualang Antariksa",
+    "storyTitleEn": "Edu Budi Petualang Antariksa",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Petualang Antariksa (Sains & Luar Angkasa)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": false
   },
   {
     "id": "SLOT-066",
@@ -1884,7 +1976,7 @@
     "date": "2026-12-13",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-keajaiban-di-langit",
     "storyTitleId": "Edu Budi Keajaiban Di Langit",
     "storyTitleEn": "Edu Budi Keajaiban Di Langit",
@@ -2068,6 +2160,29 @@
     "hasPublishedAsset": false,
     "isBuffered": false,
     "hasAssets": true
+  },
+  {
+    "id": "SLOT-120",
+    "date": "2026-12-16",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-keajaiban-di-langit",
+    "storyTitleId": "Edu Budi Keajaiban Di Langit",
+    "storyTitleEn": "Edu Budi Keajaiban Di Langit",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Keajaiban di Langit (Olahraga & Fenomena Udara)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": false
   },
   {
     "id": "SLOT-080",
@@ -2266,7 +2381,7 @@
     "date": "2026-12-20",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-petualangan-di-gedung-aneh",
     "storyTitleId": "Edu Budi Petualangan Di Gedung Aneh",
     "storyTitleEn": "Edu Budi Petualangan Di Gedung Aneh",
@@ -2450,6 +2565,29 @@
     "hasPublishedAsset": false,
     "isBuffered": false,
     "hasAssets": true
+  },
+  {
+    "id": "SLOT-122",
+    "date": "2026-12-23",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-petualangan-di-gedung-aneh",
+    "storyTitleId": "Edu Budi Petualangan Di Gedung Aneh",
+    "storyTitleEn": "Edu Budi Petualangan Di Gedung Aneh",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Petualangan di Gedung Aneh (Eksplorasi Sains)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": false
   },
   {
     "id": "SLOT-094",
@@ -2648,7 +2786,7 @@
     "date": "2026-12-27",
     "dayName": "Minggu",
     "timeSlot": "15:00 WIB",
-    "slotType": "Sunday Full-Motion Premiere",
+    "slotType": "Sunday Full-Motion Premiere (EN)",
     "bookSlug": "edu-budi-dengar-laut-mengalun",
     "storyTitleId": "Edu Budi Dengar Laut Mengalun",
     "storyTitleEn": "Edu Budi Dengar Laut Mengalun",
@@ -2832,6 +2970,29 @@
     "hasPublishedAsset": false,
     "isBuffered": false,
     "hasAssets": true
+  },
+  {
+    "id": "SLOT-124",
+    "date": "2026-12-30",
+    "dayName": "Rabu",
+    "timeSlot": "15:00 WIB",
+    "slotType": "Wednesday Full-Motion Premiere (ID)",
+    "bookSlug": "edu-budi-dengar-laut-mengalun",
+    "storyTitleId": "Edu Budi Dengar Laut Mengalun",
+    "storyTitleEn": "Edu Budi Dengar Laut Mengalun",
+    "lang": "id",
+    "format": "Landscape (16:9) & Shorts (9:16)",
+    "targetPlatforms": [
+      "YouTube (16:9 & Shorts)",
+      "Facebook (Watch & Reels)",
+      "Instagram Reels"
+    ],
+    "theme": "Full-Motion Edu-Story: Dengar Laut Mengalun (Tokoh Indonesia & Samudera)",
+    "status": "upcoming",
+    "isCompleted": false,
+    "hasPublishedAsset": false,
+    "isBuffered": false,
+    "hasAssets": false
   },
   {
     "id": "SLOT-108",

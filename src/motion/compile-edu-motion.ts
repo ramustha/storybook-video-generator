@@ -73,7 +73,7 @@ export const DEFAULT_PACING: Required<PacingConfig> = {
   chapterPauseSec: 0.78,
   introPauseSec: 0.75,
   outroPauseSec: 0.65,
-  maxVerticalDurationSec: 88.0,
+  maxVerticalDurationSec: 89.5,
 };
 
 export function resolvePacingConfig(pacing?: PacingConfig): Required<PacingConfig> {
@@ -231,23 +231,43 @@ function mixVoiceAmbientAndSfx(options: {
   const dur = totalDuration.toFixed(2);
 
   const extraInputs: string[] = [];
-  const filterChains: string[] = [
-    `[0:a]volume=1.0[v]`,
-    `sine=f=130.81:sample_rate=24000:duration=${dur},volume=0.024[p1]`,
-    `sine=f=196.00:sample_rate=24000:duration=${dur},volume=0.016[p2]`,
-  ];
-  const mixLabels: string[] = ["[v]", "[p1]", "[p2]"];
+  const filterChains: string[] = [`[0:a]volume=1.0[v]`];
+  const mixLabels: string[] = ["[v]"];
 
-  // Layer either authentic chapter SFX (.m4a) OR subtle sine transition chime
+  const bgmFile = path.resolve("templates/audio/bgm_whimsical_story.m4a");
+  if (existsSync(bgmFile)) {
+    const bgmIdx = 1 + extraInputs.length;
+    extraInputs.push(`-stream_loop -1 -i "${bgmFile}"`);
+    filterChains.push(
+      `[${bgmIdx}:a]atrim=0:${dur},asetpts=PTS-STARTPTS,volume=0.06[bgm]`
+    );
+    mixLabels.push("[bgm]");
+  } else {
+    filterChains.push(
+      `sine=f=130.81:sample_rate=24000:duration=${dur},volume=0.024[p1]`,
+      `sine=f=196.00:sample_rate=24000:duration=${dur},volume=0.016[p2]`
+    );
+    mixLabels.push("[p1]", "[p2]");
+  }
+
+  // Layer authentic chapter SFX (.m4a), falling back to gentle structural defaults or subtle chime
   compiledChapters.forEach((ch, idx) => {
     const specCh = specChapters[idx];
-    const sfxFile = resolveSfxPath(storyDir, specCh?.sfx);
+    const defaultSfx =
+      ch.section === "cover" || idx === 0
+        ? "sfx_00_opener.m4a"
+        : ch.section === "moral"
+          ? "sfx_12_moral_sparkle.m4a"
+          : ch.section === "outro"
+            ? "sfx_13_outro_pop.m4a"
+            : undefined;
+    const sfxFile = resolveSfxPath(storyDir, specCh?.sfx || defaultSfx);
     const delayMs = Math.max(0, Math.round(ch.start * 1000));
 
     if (sfxFile) {
       const inputIdx = 1 + extraInputs.length;
       extraInputs.push(`-i "${sfxFile}"`);
-      const vol = specCh.sfxVolume ?? 0.42;
+      const vol = specCh?.sfxVolume ?? (specCh?.sfx ? 0.42 : 0.22);
       const lbl = `[sfx${idx}]`;
       filterChains.push(`[${inputIdx}:a]volume=${vol},adelay=${delayMs}|${delayMs}${lbl}`);
       mixLabels.push(lbl);
@@ -635,10 +655,11 @@ function buildAlt1StageCss(options: {
     display: inline-block; padding: 2px 6px; border-radius: 9px;
     font-family: "Plus Jakarta Sans", system-ui, sans-serif;
     font-size: 34px; font-weight: 800; line-height: 1.24; color: #F8FAFC;
+    transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
   }
   body.landscape .sub-word { font-size: 38px; padding: 2px 8px; }
   .sub-word.active {
-    background: var(--yellow); color: #03045E; transform: scale(1.05);
+    background: var(--yellow); color: #03045E; transform: scale(1.06);
   }
   ${buildOverlayScenesCss()}`;
 }
@@ -821,13 +842,15 @@ const FOCUS_WORLD_Y = 632;
 const FOCUS_SCREEN_X = IS_LANDSCAPE ? 960 : 465;
 const FOCUS_SCREEN_Y = IS_LANDSCAPE ? 735 : 975;
 
-function applyCam() {
+function applyCam(tNow = 0) {
+  const floatX = !q.has("clean") ? Math.sin(tNow * 0.65) * 3.5 : 0;
+  const floatY = !q.has("clean") ? Math.cos(tNow * 0.45) * 2.2 : 0;
   const s = BASE_SCALE * cam.ds;
-  const tx = FOCUS_SCREEN_X - FOCUS_WORLD_X * s + cam.dx;
-  const ty = FOCUS_SCREEN_Y - FOCUS_WORLD_Y * s + cam.dy;
+  const tx = FOCUS_SCREEN_X - FOCUS_WORLD_X * s + cam.dx + floatX;
+  const ty = FOCUS_SCREEN_Y - FOCUS_WORLD_Y * s + cam.dy + floatY;
   camRig.setAttribute("transform", "translate(" + tx.toFixed(2) + "," + ty.toFixed(2) + ") scale(" + s.toFixed(4) + ")");
 }
-applyCam();
+applyCam(0);
 
 // On-Demand Contextual Callout Pin Updater
 const cPinRing = document.getElementById("callout-pin-ring");
@@ -902,14 +925,14 @@ function updateHostAndBubble(t) {
     if (hostPoses[key]) hostPoses[key].setAttribute("opacity", key === targetPose ? "1" : "0");
   }
 
-  const nodY = (Math.sin(t * 2.8) * 2.5).toFixed(2);
-  const nodR = (Math.sin(t * 1.9) * 2.2).toFixed(2);
+  const speaking = ALL_WORDS.some((w) => t >= w.start - 0.03 && t <= w.end + 0.04);
+  const nodY = (speaking ? Math.sin(t * 5.2) * 3.2 : Math.sin(t * 2.1) * 1.4).toFixed(2);
+  const nodR = (speaking ? Math.sin(t * 2.4) * 2.6 : Math.sin(t * 1.4) * 1.1).toFixed(2);
   hostHead.setAttribute("transform", "translate(0," + nodY + ") rotate(" + nodR + ")");
   const blink = (t % 3.2) > 3.04;
   hostEyesOpen.setAttribute("opacity", blink ? "0" : "1");
   hostEyesBlink.setAttribute("opacity", blink ? "1" : "0");
 
-  const speaking = ALL_WORDS.some((w) => t >= w.start - 0.03 && t <= w.end + 0.04);
   if (targetPose === "shock") {
     hostMouthIdle.setAttribute("opacity", "0");
     hostMouthTalk.setAttribute("opacity", "0");
@@ -947,7 +970,7 @@ window.OPENER = {
   W, H, DURATION: DUR, tl, ready: true,
   seek(t) {
     tl.pause(t, false);
-    applyCam();
+    applyCam(t);
     updateHostAndBubble(t);
     updateProceduralMotion(t);
   }
@@ -956,7 +979,7 @@ window.OPENER = {
 if (!q.has("clean")) {
   gsap.ticker.add(() => {
     const t = tl.time();
-    applyCam();
+    applyCam(t);
     updateHostAndBubble(t);
     updateProceduralMotion(t);
   });
@@ -1128,6 +1151,16 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
   const seekThumbSec = Math.max(1.5, firstHeroBeat.start + 1.8);
   await captureUniversalThumbnails(storyDir, seekThumbSec);
 
+  const storyJsonPath = path.join(storyDir, "story.json");
+  let existingStory: any = {};
+  if (existsSync(storyJsonPath)) {
+    try {
+      existingStory = JSON.parse(await fs.readFile(storyJsonPath, "utf-8"));
+    } catch {
+      existingStory = {};
+    }
+  }
+
   const manifest = {
     slug: spec.book.slug,
     budiBookId: spec.book.budiBookId,
@@ -1175,10 +1208,11 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
           : undefined,
       },
     })),
-    exports: {},
+    exports: existingStory.exports || {},
+    ...(existingStory.publications ? { publications: existingStory.publications } : {}),
   };
 
-  await fs.writeFile(path.join(storyDir, "story.json"), JSON.stringify(manifest, null, 2), "utf-8");
+  await fs.writeFile(storyJsonPath, JSON.stringify(manifest, null, 2), "utf-8");
   console.log(`\n✅ Compiled Edu-Motion [${spec.book.slug}] (ID=${idTimeline.totalDuration}s, EN=${enTimeline.totalDuration}s)`);
 
   return {

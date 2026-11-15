@@ -200,14 +200,20 @@ async function main() {
 
     // Ensure MP4 video files are rendered on disk before attempting to upload
     const storyDir = path.resolve("./stories", options.bookSlug);
+    const enOriginalSlug =
+      currentLang === "en" && story.originalTitle
+        ? story.originalTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+        : null;
     const candidateLand = [
       story.exports?.[currentLang]?.landscape?.path ? path.join(storyDir, story.exports[currentLang].landscape.path) : null,
+      enOriginalSlug ? path.join(storyDir, `exports/${currentLang}/${enOriginalSlug}-16x9.mp4`) : null,
       path.join(storyDir, `exports/${currentLang}/${options.bookSlug}-16x9.mp4`),
       path.join(storyDir, `exports/${currentLang}/topsy-turvy-16x9.mp4`),
     ].find((p) => p && existsSync(p));
 
     const candidateVert = [
       story.exports?.[currentLang]?.vertical?.path ? path.join(storyDir, story.exports[currentLang].vertical.path) : null,
+      enOriginalSlug ? path.join(storyDir, `exports/${currentLang}/${enOriginalSlug}-9x16.mp4`) : null,
       path.join(storyDir, `exports/${currentLang}/${options.bookSlug}-9x16.mp4`),
       path.join(storyDir, `exports/${currentLang}/topsy-turvy-9x16.mp4`),
     ].find((p) => p && existsSync(p));

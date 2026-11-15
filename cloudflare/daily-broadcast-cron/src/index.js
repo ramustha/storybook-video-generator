@@ -94,23 +94,25 @@ export default {
         })
       );
     }
-    // 3B. Daily 17:00 WIB H-2 Evening Check + Dedicated Sunday Full-Motion Schedule (13:00 H-2 Check / 14:00 Before / 15:00 Broadcast / 17:00 After WIB)
+    // 3B. Daily 17:00 WIB H-2 Evening Check + Dedicated Full-Motion Schedule (Sun EN / Wed ID: 13:00 H-2 / 14:00 Before / 15:00 Broadcast / 17:00 After WIB)
     else if (cron === "0 6,7,8,10 * * *" || cron === "0 7,8,10 * * 0") {
-      const isSunday = scheduledDate.getUTCDay() === 0;
-      if (utcHour === 6 && isSunday) {
+      const utcDay = scheduledDate.getUTCDay();
+      const isMotionDay = utcDay === 0 || utcDay === 3; // Sunday = EN, Wednesday = ID
+      const motionLang = utcDay === 0 ? "en" : "id";
+      if (utcHour === 6 && isMotionDay) {
         ctx.waitUntil(
           dispatchWorkflow(env, "readiness-check.yml", {
             slot: "motion",
             dry_run: false,
           })
         );
-      } else if ((utcHour === 7 || utcHour === 8) && isSunday) {
+      } else if ((utcHour === 7 || utcHour === 8) && isMotionDay) {
         ctx.waitUntil(
           dispatchWorkflow(env, "daily-broadcast.yml", {
             action: utcHour === 7 ? "motion-before" : "broadcast",
             slot: "motion",
             book: "auto",
-            lang: "auto",
+            lang: motionLang,
             dry_run: false,
           })
         );
@@ -121,13 +123,13 @@ export default {
             dry_run: false,
           })
         );
-        if (isSunday) {
+        if (isMotionDay) {
           ctx.waitUntil(
             dispatchWorkflow(env, "daily-broadcast.yml", {
               action: "motion-after",
               slot: "motion",
               book: "auto",
-              lang: "auto",
+              lang: motionLang,
               dry_run: false,
             })
           );

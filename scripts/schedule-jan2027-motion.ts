@@ -165,6 +165,12 @@ async function upsertBudiBook(
   );
 }
 
+function addUtcDays(dateStr: string, days: number): string {
+  const dt = new Date(`${dateStr}T00:00:00Z`);
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
 async function runRollback() {
   await fs.mkdir(LOG_DIR, { recursive: true });
   await db.execute(
@@ -172,7 +178,7 @@ async function runRollback() {
     [JAN_2027_START, JAN_2027_END]
   );
   await db.execute(
-    `DELETE FROM content_calendar WHERE scheduled_date >= '2026-11-15' AND scheduled_date <= '2026-12-31' AND time_slot = '15:00 WIB';`,
+    `DELETE FROM content_calendar WHERE scheduled_date >= '2026-11-15' AND scheduled_date <= '2027-02-05' AND time_slot = '15:00 WIB';`,
     []
   );
   await db.execute(
@@ -262,15 +268,14 @@ async function main() {
     "utf-8"
   );
 
-  console.log(`\n🎬 SUNDAY FULL-MOTION ROADMAP (2026: ${SUNDAY_FULL_MOTION_2026.length / 2} Sundays + Jan 2027: ${janSundayMotion.length} Sundays @ 15:00 WIB):`);
-  const seen2026Dates = new Set<string>();
+  console.log(`\n🎬 FULL-MOTION ROADMAP (Sun 15:00 WIB EN | Wed 15:00 WIB ID — ${SUNDAY_FULL_MOTION_2026.length / 2} stories 2026 + ${janSundayMotion.length} stories Jan 2027):`);
   for (const s of SUNDAY_FULL_MOTION_2026) {
-    if (!s.date || seen2026Dates.has(s.date)) continue;
-    seen2026Dates.add(s.date);
-    console.log(`   ${s.date} (Minggu 15:00 WIB) ${s.bookSlug} — ${s.theme}`);
+    if (!s.date) continue;
+    console.log(`   ${s.date} (${s.dayName.padEnd(6)} 15:00 WIB) [${s.lang.toUpperCase()}] ${s.bookSlug} — ${s.theme}`);
   }
   for (const j of janSundayMotion) {
-    console.log(`   ${j.date} (Minggu 15:00 WIB) ${j.motionSlug} — "${j.book.title}" (${j.book.theme})`);
+    console.log(`   ${j.date} (Minggu 15:00 WIB) [EN] ${j.motionSlug} — "${j.book.title}" (${j.book.theme})`);
+    console.log(`   ${addUtcDays(j.date, 3)} (Rabu   15:00 WIB) [ID] ${j.motionSlug} — "${j.book.title}" (${j.book.theme})`);
   }
 
   console.log(`\n📅 JANUARY 2027 FULL-MONTH EASY → HARD PLAN (${plan.length} daily books / ${plan.length * 2} slots):`);
@@ -317,22 +322,31 @@ async function main() {
   }
 
   for (const j of janSundayMotion) {
-    await upsertBudiBook(j.book, j.motionSlug, `Sunday Full-Motion · ${j.book.theme}`);
+    await upsertBudiBook(j.book, j.motionSlug, `Full-Motion · ${j.book.theme}`);
     writtenBooks++;
-    for (const lang of ["en", "id"] as const) {
-      await db.saveCalendarSlot({
-        scheduled_date: j.date,
-        day_name: "Minggu",
-        time_slot: "15:00 WIB",
-        slot_type: "Sunday Full-Motion Premiere",
-        book_slug: j.motionSlug,
-        lang,
-        format: "both",
-        theme: `Sunday Full-Motion · ${j.book.theme}`,
-        is_completed: false,
-      });
-      writtenSlots++;
-    }
+    await db.saveCalendarSlot({
+      scheduled_date: j.date,
+      day_name: "Minggu",
+      time_slot: "15:00 WIB",
+      slot_type: "Sunday Full-Motion Premiere (EN)",
+      book_slug: j.motionSlug,
+      lang: "en",
+      format: "both",
+      theme: `Sunday Full-Motion · ${j.book.theme}`,
+      is_completed: false,
+    });
+    await db.saveCalendarSlot({
+      scheduled_date: addUtcDays(j.date, 3),
+      day_name: "Rabu",
+      time_slot: "15:00 WIB",
+      slot_type: "Wednesday Full-Motion Premiere (ID)",
+      book_slug: j.motionSlug,
+      lang: "id",
+      format: "both",
+      theme: `Wednesday Full-Motion · ${j.book.theme}`,
+      is_completed: false,
+    });
+    writtenSlots += 2;
   }
 
   for (const item of plan) {
