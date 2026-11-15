@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { existsSync, createReadStream, createWriteStream } from "fs";
 import path from "path";
 import { pipeline } from "stream/promises";
+import { validateStoryMotionSpec } from "../src/motion/edu-motion-spec";
 import {
   S3Client,
   PutObjectCommand,
@@ -217,6 +218,7 @@ async function collectLocalStoryFiles(
       if (entry.name.startsWith(".")) continue;
       if (entry.name === "raw" && entry.isDirectory()) continue;
       if (entry.name === "cache" && entry.isDirectory()) continue;
+      if (entry.name === "_preview_frames" && entry.isDirectory()) continue;
       if (entry.name.endsWith(".mp4") && !includeVideos) continue;
 
       if (entry.isDirectory()) {
@@ -730,6 +732,128 @@ export async function listStories() {
 }
 
 /**
+ * Validates and uploads ONLY `stories/<slug>/motion-spec.json` to R2 staging prefix
+ * (`drafts/edu-motion/<slug>/motion-spec.json`), keeping Git and prod videos untouched.
+ */
+export async function pushDraftMotionSpec(
+  bookSlug: string,
+  options: { dryRun?: boolean } = {}
+): Promise<string> {
+  const localSpecPath = path.resolve("./stories", bookSlug, "motion-spec.json");
+  if (!existsSync(localSpecPath)) {
+    throw new Error(`Draft motion-spec.json not found at ${localSpecPath}`);
+  }
+  const rawContent = await fs.readFile(localSpecPath, "utf-8");
+  validateStoryMotionSpec(JSON.parse(rawContent));
+
+  const r2 = await loadR2Config();
+  const s3 = getS3Client(r2);
+  const draftKey = `drafts/edu-motion/${bookSlug}/motion-spec.json`;
+
+  if (options.dryRun) {
+    console.log(`[DRY-RUN] Would upload validated draft spec to r2://${r2.bucketName}/${draftKey}`);
+    return draftKey;
+  }
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: r2.bucketName,
+      Key: draftKey,
+      Body: Buffer.from(rawContent, "utf-8"),
+      ContentType: "application/json",
+    })
+  );
+  console.log(`✅ Uploaded draft Edu-Motion spec: r2://${r2.bucketName}/${draftKey}`);
+  return draftKey;
+}
+
+/**
+ * Pulls a story's `motion-spec.json` from `drafts/edu-motion/<slug>/motion-spec.json`
+ * (or falls back to promoted `stories/<slug>/motion-spec.json`) onto local disk for CI preview.
+ */
+export async function pullDraftMotionSpec(
+  bookSlug: string,
+  options: { dryRun?: boolean } = {}
+): Promise<string> {
+  const r2 = await loadR2Config();
+  const s3 = getS3Client(r2);
+  const candidates = [
+    `drafts/edu-motion/${bookSlug}/motion-spec.json`,
+    `stories/${bookSlug}/motion-spec.json`,
+  ];
+
+  let foundKey: string | null = null;
+  for (const key of candidates) {
+    try {
+      await s3.send(new HeadObjectCommand({ Bucket: r2.bucketName, Key: key }));
+      foundKey = key;
+      break;
+    } catch {
+      // Check next candidate
+    }
+  }
+
+  if (!foundKey) {
+    throw new Error(
+      `motion-spec.json not found in R2 for [${bookSlug}]. Checked: ${candidates.join(", ")}. Run "npx tsx scripts/manage-story-storage.ts draft-push ${bookSlug}" first.`
+    );
+  }
+
+  const localSpecPath = path.resolve("./stories", bookSlug, "motion-spec.json");
+  if (options.dryRun) {
+    console.log(`[DRY-RUN] Would download r2://${r2.bucketName}/${foundKey} -> ${localSpecPath}`);
+    return localSpecPath;
+  }
+
+  await fs.mkdir(path.dirname(localSpecPath), { recursive: true });
+  const res = await s3.send(new GetObjectCommand({ Bucket: r2.bucketName, Key: foundKey }));
+  if (!res.Body) {
+    throw new Error(`Empty response downloading r2://${r2.bucketName}/${foundKey}`);
+  }
+  const fileStream = createWriteStream(localSpecPath);
+  await pipeline(res.Body as any, fileStream);
+
+  validateStoryMotionSpec(JSON.parse(await fs.readFile(localSpecPath, "utf-8")));
+  console.log(`✅ Downloaded & validated draft spec: ${foundKey} -> ${localSpecPath}`);
+  return localSpecPath;
+}
+
+/**
+ * Lists all staged draft Edu-Motion specs currently sitting in R2 (`drafts/edu-motion/`).
+ */
+export async function listDraftMotionSpecs(): Promise<string[]> {
+  const r2 = await loadR2Config();
+  const s3 = getS3Client(r2);
+  const drafts: string[] = [];
+  let continuationToken: string | undefined;
+
+  do {
+    const res = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: r2.bucketName,
+        Prefix: "drafts/edu-motion/",
+        ContinuationToken: continuationToken,
+      })
+    );
+    for (const obj of res.Contents || []) {
+      if (obj.Key?.endsWith("/motion-spec.json")) {
+        const parts = obj.Key.split("/");
+        if (parts[2]) drafts.push(parts[2]);
+      }
+    }
+    continuationToken = res.NextContinuationToken;
+  } while (continuationToken);
+
+  if (drafts.length === 0) {
+    console.log("⚠️ No draft Edu-Motion specs in R2 under drafts/edu-motion/.");
+  } else {
+    console.log(`📋 Found ${drafts.length} R2 draft Edu-Motion specs:`);
+    drafts.forEach((s, i) => console.log(`   ${i + 1}. ${s}`));
+  }
+  return drafts;
+}
+
+/**
  * Pushes all local stories to R2.
  */
 async function pushAll(options: { force?: boolean; dryRun?: boolean }) {
@@ -848,6 +972,28 @@ async function main() {
     }
     case "list": {
       await listStories();
+      break;
+    }
+    case "draft-push": {
+      const bookSlug = args[1]?.startsWith("--") ? undefined : args[1] || getArg("--book");
+      if (!bookSlug) {
+        console.error("Usage: npx tsx scripts/manage-story-storage.ts draft-push <book-slug> [--dry-run]");
+        process.exit(1);
+      }
+      await pushDraftMotionSpec(bookSlug.replace(/^stories\//, "").replace(/\/$/, ""), { dryRun });
+      break;
+    }
+    case "draft-pull": {
+      const bookSlug = args[1]?.startsWith("--") ? undefined : args[1] || getArg("--book");
+      if (!bookSlug) {
+        console.error("Usage: npx tsx scripts/manage-story-storage.ts draft-pull <book-slug> [--dry-run]");
+        process.exit(1);
+      }
+      await pullDraftMotionSpec(bookSlug.replace(/^stories\//, "").replace(/\/$/, ""), { dryRun });
+      break;
+    }
+    case "draft-list": {
+      await listDraftMotionSpecs();
       break;
     }
     default: {

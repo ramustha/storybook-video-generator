@@ -208,19 +208,21 @@ async function main() {
         await pushCompilationBuffer(slot.bookSlug, slot.lang);
       } else {
         const localMotionSpec = path.join(process.cwd(), "stories", slot.bookSlug, "motion-spec.json");
-        if (existsSync(localMotionSpec)) {
-          console.log(`   🎨 Packaging deterministic Edu-Motion assets from motion-spec.json for [${slot.bookSlug}]...`);
-          execSync(`npx tsx scripts/pack-edu-motion.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
-        } else {
+        if (!existsSync(localMotionSpec)) {
           const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
           if (!hasManifest) {
             console.log(`   📥 Story [${slot.bookSlug}] not yet in R2. Running auto-ingestion before pre-render...`);
             execSync(`npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
           }
 
-          // Step 1: Ensure assets are present
+          // Step 1: Ensure assets (or promoted motion-spec.json in R2) are pulled locally
           console.log(`   ⬇️ Pulling story assets from Cloudflare R2...`);
           execSync(`npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`, { stdio: "inherit" });
+        }
+
+        if (existsSync(localMotionSpec)) {
+          console.log(`   🎨 Packaging deterministic Edu-Motion assets from motion-spec.json for [${slot.bookSlug}]...`);
+          execSync(`npx tsx scripts/pack-edu-motion.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
         }
 
         // Step 2: Render required orientation(s) in a single bundle pass
