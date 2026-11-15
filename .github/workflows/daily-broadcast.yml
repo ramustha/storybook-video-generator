@@ -14,12 +14,14 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action (auto, announcement, broadcast)'
+        description: 'Action (auto, announcement, wave2, wave3, broadcast)'
         required: true
         type: choice
         options:
           - 'auto'
           - 'announcement'
+          - 'wave2'
+          - 'wave3'
           - 'broadcast'
         default: 'auto'
       book:
@@ -247,19 +249,41 @@ jobs:
           UTC_HOUR=$(date -u +%H)
           UTC_MIN=$(date -u +%M)
 
+          WAVE_NUM="1"
           IS_ANNOUNCEMENT="false"
           if [ "${INPUT_ACTION}" = "announcement" ]; then
             IS_ANNOUNCEMENT="true"
+            WAVE_NUM="1"
+          elif [ "${INPUT_ACTION}" = "wave2" ]; then
+            IS_ANNOUNCEMENT="true"
+            WAVE_NUM="2"
+          elif [ "${INPUT_ACTION}" = "wave3" ]; then
+            IS_ANNOUNCEMENT="true"
+            WAVE_NUM="3"
           elif [ "${INPUT_ACTION}" = "broadcast" ]; then
             IS_ANNOUNCEMENT="false"
           elif [ "${UTC_HOUR}" = "00" ] && [ "${UTC_MIN}" -ge "10" ] && [ "${UTC_MIN}" -le "45" ]; then
-            # 00:15 UTC = 07:15 WIB (Single Daily Unified Announcement - Morning & Evening Schedule)
+            # 00:15 UTC = 07:15 WIB (Wave 1 Single Daily Unified Announcement)
             IS_ANNOUNCEMENT="true"
+            WAVE_NUM="1"
+          elif [ "${UTC_HOUR}" = "05" ] && [ "${UTC_MIN}" -ge "15" ]; then
+            # 05:30 UTC = 12:30 WIB (Wave 2 Midday Watch-Now)
+            IS_ANNOUNCEMENT="true"
+            WAVE_NUM="2"
+          elif [ "${UTC_HOUR}" = "13" ] && [ "${UTC_MIN}" -ge "15" ]; then
+            # 13:30 UTC = 20:30 WIB (Wave 3 Bedtime Highlight & Watch-Next)
+            IS_ANNOUNCEMENT="true"
+            WAVE_NUM="3"
           fi
 
           if [ "${IS_ANNOUNCEMENT}" = "true" ]; then
-            echo "📢 Running Single Daily Unified Bilingual Announcement Feed (Menu Dongeng Hari Ini)..."
-            ARGS="--daily-lineup"
+            if [ "${WAVE_NUM}" = "2" ] || [ "${WAVE_NUM}" = "3" ]; then
+              echo "🌊 Running Post-Publish Social Funnel Wave ${WAVE_NUM}..."
+              ARGS="--wave ${WAVE_NUM}"
+            else
+              echo "📢 Running Single Daily Unified Bilingual Announcement Feed (Menu Dongeng Hari Ini)..."
+              ARGS="--daily-lineup"
+            fi
             if [ "${INPUT_DRY_RUN}" = "true" ]; then ARGS="${ARGS} --dry-run"; fi
             if [ "${INPUT_BOOK}" != "auto" ]; then ARGS="${ARGS} --book ${INPUT_BOOK}"; fi
             if [ "${INPUT_LANG}" != "auto" ]; then ARGS="${ARGS} --lang ${INPUT_LANG}"; fi
@@ -268,8 +292,8 @@ jobs:
             echo "Running: npx tsx scripts/publish-announcement.ts ${ARGS}"
             npx tsx scripts/publish-announcement.ts ${ARGS}
           else
-            echo "🎬 Running Full Video Broadcast Premiere..."
-            ARGS="--publish-today"
+            echo "🎬 Running Full Video Broadcast Premiere (Wave 2/3 will handle social distribution)..."
+            ARGS="--publish-today --skip-promo"
             if [ "${INPUT_DRY_RUN}" = "true" ]; then ARGS="${ARGS} --dry-run"; fi
             if [ "${INPUT_BOOK}" != "auto" ]; then ARGS="${ARGS} --book ${INPUT_BOOK}"; fi
             if [ "${INPUT_LANG}" != "auto" ]; then ARGS="${ARGS} --lang ${INPUT_LANG}"; fi

@@ -27,6 +27,8 @@ export interface TelegramFailureOptions {
 
 export interface TelegramAnnouncementOptions {
   dateStr?: string;
+  wave?: 1 | 2 | 3;
+  waveLabel?: string;
   morningBook?: string;
   morningTitle?: string;
   morningLang?: string;
@@ -37,6 +39,10 @@ export interface TelegramAnnouncementOptions {
   eveningLang?: string;
   eveningSlotTime?: string;
   eveningHook?: string;
+  portalUrl?: string;
+  youtubeUrl?: string;
+  relatedTitle?: string;
+  relatedUrl?: string;
   facebookUrl?: string;
   instagramUrl?: string;
   threadsUrl?: string;
@@ -439,9 +445,19 @@ export async function notifyTelegramAnnouncement(
       day: "2-digit",
     }).format(new Date());
 
+  const wave = options.wave || 1;
+  const headerText =
+    wave === 1
+      ? `📣 <b>Zayn Storybook: Menu Dongeng Hari Ini Mengudara!</b> 🌟\n`
+      : `📣 <b>Zayn Storybook: Gelombang ${wave} (${options.waveLabel || (wave === 2 ? "Midday Watch-Now" : "Bedtime Highlight")}) Mengudara!</b> 🌟\n`;
+  const introText =
+    wave === 1
+      ? `Teaser & jadwal tayang harian telah berhasil dipublikasikan ke seluruh media sosial!`
+      : `Post-publish distribusi & ajakan menonton cerita terbaru + katalog telah berhasil diterbitkan!`;
+
   const lines: string[] = [
-    `📣 <b>Zayn Storybook: Menu Dongeng Hari Ini Mengudara!</b> 🌟\n`,
-    `Teaser & jadwal tayang harian telah berhasil dipublikasikan ke seluruh media sosial!`,
+    headerText,
+    introText,
     `\n📅 <b>Jadwal Tayang:</b> ${targetDate}`,
     `⏰ <b>Waktu Terbit:</b> ${wibTime}`,
   ];
@@ -464,15 +480,28 @@ export async function notifyTelegramAnnouncement(
     }
   }
 
-  lines.push(`\n🔗 <b>Lihat Feed Media Sosial:</b>`);
-  if (options.instagramUrl) {
-    lines.push(`📸 <a href="${options.instagramUrl}">Instagram Feed Carousel</a>`);
+  if (options.youtubeUrl || options.portalUrl || options.relatedUrl) {
+    lines.push(`\n🎯 <b>Tautan Tayangan & Funnel:</b>`);
+    if (options.youtubeUrl) {
+      lines.push(`▶️ <a href="${options.youtubeUrl}">Tonton di YouTube</a>`);
+    }
+    if (options.portalUrl) {
+      lines.push(`🌐 <a href="${options.portalUrl}">Halaman Portal Cerita</a>`);
+    }
+    if (options.relatedUrl && options.relatedTitle) {
+      lines.push(`🌙 <b>Watch Next:</b> <a href="${options.relatedUrl}">${options.relatedTitle}</a>`);
+    }
   }
+
+  lines.push(`\n🔗 <b>Lihat Feed Media Sosial:</b>`);
   if (options.facebookUrl) {
-    lines.push(`📘 <a href="${options.facebookUrl}">Facebook Page Multi-Photo</a>`);
+    lines.push(`📘 <a href="${options.facebookUrl}">Facebook Page Post</a>`);
+  }
+  if (options.instagramUrl) {
+    lines.push(`📸 <a href="${options.instagramUrl}">Instagram Feed</a>`);
   }
   if (options.threadsUrl) {
-    lines.push(`🧵 <a href="${options.threadsUrl}">Meta Threads Carousel</a>`);
+    lines.push(`🧵 <a href="${options.threadsUrl}">Meta Threads</a>`);
   }
 
   lines.push(`\n✨ <i>Nyalakan lonceng notifikasi di YouTube @zayn.storybook!</i> 🌙`);
@@ -789,6 +818,9 @@ async function main() {
   }
 
   if (args.includes("--announcement") || args.includes("--teaser")) {
+    const waveIdx = args.indexOf("--wave");
+    const parsedWave = waveIdx !== -1 ? Number(args[waveIdx + 1]) : 1;
+    const wave: 1 | 2 | 3 = parsedWave === 2 ? 2 : parsedWave === 3 ? 3 : 1;
     const morningBook = (args.indexOf("--morning-book") !== -1 ? args[args.indexOf("--morning-book") + 1] : undefined) || "ayo-berayun-momo";
     const eveningBook = (args.indexOf("--evening-book") !== -1 ? args[args.indexOf("--evening-book") + 1] : undefined) || "ayo-berayun-momo";
     const morningTitle = (args.indexOf("--morning-title") !== -1 ? args[args.indexOf("--morning-title") + 1] : undefined) || "Swing High, Momo";
@@ -796,6 +828,7 @@ async function main() {
     const dryRun = args.includes("--dry-run");
 
     const ok = await notifyTelegramAnnouncement({
+      wave,
       morningBook,
       morningTitle,
       morningLang: "en",

@@ -1,22 +1,25 @@
 import fs from "fs/promises";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import path from "path";
 import { spawn } from "child_process";
 import { publishFacebookPhotoPost, publishFacebookMultiPhotoPost } from "./publish-launch-posts";
 import { publishInstagramFeedPhoto, publishInstagramCarousel } from "./publish-instagram-post";
-import { publishThreadsPhotoPost, publishThreadsCarousel } from "./publish-threads";
+import { publishThreadsPhotoPost, publishThreadsCarousel, publishThreadsLinkPost } from "./publish-threads";
 import {
   notifyTelegramFailure,
   notifyTelegramAnnouncement,
 } from "./notify-telegram";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { db } from "./lib/db";
+import { buildStoryPortalUrl, resolveRelatedPublishedVideos } from "./lib/seo-formatter";
+import { loadJsonArraySafe } from "./lib/portal-sync";
 
 export interface AnnouncementOptions {
   bookSlug?: string;
   lang?: "id" | "en";
   slot?: "morning" | "evening" | "auto" | "all" | "daily";
   dailyLineup?: boolean;
+  wave?: 1 | 2 | 3;
   date?: string;
   dryRun?: boolean;
   force?: boolean;
@@ -420,6 +423,61 @@ Geser ke kiri untuk lihat preview kedua bukunya ya! Cerita mana yang paling ditu
   };
 }
 
+async function resolveDailyLineupSlots(targetDate: string): Promise<{
+  slots: any[];
+  morningSlot: any;
+  eveningSlot: any;
+  morningBook: string;
+  eveningBook: string;
+} | null> {
+  let slots: any[] = [];
+  try {
+    slots = await db.getCalendar(targetDate);
+  } catch (e: any) {
+    console.warn("ℹ️ Could not query D1 calendar, falling back to local calendar:", e.message);
+  }
+
+  if (!slots || slots.length === 0) {
+    const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
+    const nowJakarta = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+    const dayName = dayNames[nowJakarta.getDay()];
+
+    slots = DAILY_CALENDAR_MONTH_1.filter((s) => {
+      if (s.date && s.date === targetDate) return true;
+      if (!s.date && s.dayName === dayName) return true;
+      return false;
+    });
+  }
+
+  if (!slots || slots.length === 0) {
+    return null;
+  }
+
+  const morningSlot =
+    slots.find((s) => {
+      const time = (s.time_slot || s.timeSlot || "").toLowerCase();
+      const type = (s.slot_type || s.slotType || "").toLowerCase();
+      const lang = s.lang || "";
+      return time.includes("08:") || time.includes("07:") || type.includes("morning") || lang === "en";
+    }) || slots[0];
+
+  const eveningSlot =
+    slots.find((s) => {
+      const time = (s.time_slot || s.timeSlot || "").toLowerCase();
+      const type = (s.slot_type || s.slotType || "").toLowerCase();
+      const lang = s.lang || "";
+      return time.includes("19:") || time.includes("18:") || type.includes("prime") || type.includes("bedtime") || (lang === "id" && s !== morningSlot);
+    }) || (slots.length > 1 ? slots[1] : slots[0]);
+
+  return {
+    slots,
+    morningSlot,
+    eveningSlot,
+    morningBook: morningSlot.book_slug || morningSlot.bookSlug,
+    eveningBook: eveningSlot.book_slug || eveningSlot.bookSlug,
+  };
+}
+
 /**
  * Publishes a single unified daily bilingual announcement ("Menu Dongeng Hari Ini")
  * featuring both the morning English story and the evening Indonesian story.
@@ -442,46 +500,13 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   console.log(`⚡ Force Re-post     : ${options.force ? "YES" : "NO (Strict Deduplication Active)"}`);
 
   // 1. Resolve today's morning and evening slots
-  let slots: any[] = [];
-  try {
-    slots = await db.getCalendar(targetDate);
-  } catch (e: any) {
-    console.warn("ℹ️ Could not query D1 calendar, falling back to local calendar:", e.message);
-  }
-
-  if (!slots || slots.length === 0) {
-    const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
-    const nowJakarta = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
-    const dayName = dayNames[nowJakarta.getDay()];
-
-    slots = DAILY_CALENDAR_MONTH_1.filter((s) => {
-      if (s.date && s.date === targetDate) return true;
-      if (!s.date && s.dayName === dayName) return true;
-      return false;
-    });
-  }
-
-  if (!slots || slots.length === 0) {
+  const resolved = await resolveDailyLineupSlots(targetDate);
+  if (!resolved) {
     console.log(`🌴 Tidak ada jadwal tayang aktif untuk tanggal (${targetDate}). Lewati pengumuman.`);
     return { success: true, skipped: true };
   }
 
-  const morningSlot = slots.find((s) => {
-    const time = (s.time_slot || s.timeSlot || "").toLowerCase();
-    const type = (s.slot_type || s.slotType || "").toLowerCase();
-    const lang = s.lang || "";
-    return time.includes("08:") || time.includes("07:") || type.includes("morning") || lang === "en";
-  }) || slots[0];
-
-  const eveningSlot = slots.find((s) => {
-    const time = (s.time_slot || s.timeSlot || "").toLowerCase();
-    const type = (s.slot_type || s.slotType || "").toLowerCase();
-    const lang = s.lang || "";
-    return time.includes("19:") || time.includes("18:") || type.includes("prime") || type.includes("bedtime") || (lang === "id" && s !== morningSlot);
-  }) || (slots.length > 1 ? slots[1] : slots[0]);
-
-  const morningBook = morningSlot.book_slug || morningSlot.bookSlug;
-  const eveningBook = eveningSlot.book_slug || eveningSlot.bookSlug;
+  const { morningSlot, eveningSlot, morningBook, eveningBook } = resolved;
 
   console.log(`🌅 Morning Slot  : [${morningBook}] [${morningSlot.lang || "en"}] @ ${morningSlot.time_slot || morningSlot.timeSlot || "08:30 WIB"}`);
   console.log(`🌙 Evening Slot  : [${eveningBook}] [${eveningSlot.lang || "id"}] @ ${eveningSlot.time_slot || eveningSlot.timeSlot || "19:00 WIB"}`);
@@ -722,6 +747,482 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
 }
 
 /**
+ * Resolves a fresh visual still for Wave 2 (Midday) & Wave 3 (Bedtime) so post-publish posts
+ * avoid repeating Wave 1's portrait thumbnail verbatim.
+ */
+function resolveWavePhoto(storyDir: string, lang: "id" | "en", wave: 2 | 3): string {
+  const assetsDir = path.join(storyDir, "assets");
+  let sceneImages: string[] = [];
+  if (existsSync(assetsDir)) {
+    sceneImages = readdirSync(assetsDir)
+      .filter((f) => /^(scene|page)[_-]?\d+\.(png|jpg|jpeg|webp)$/i.test(f))
+      .sort()
+      .map((f) => path.join(assetsDir, f));
+  }
+
+  const preferredScene =
+    wave === 2
+      ? sceneImages[1] || sceneImages[0]
+      : sceneImages[Math.min(2, Math.max(0, sceneImages.length - 1))] || sceneImages[0];
+
+  const candidates =
+    wave === 2
+      ? [
+          path.join(storyDir, "exports", lang, "thumbnail-popular.png"),
+          path.join(storyDir, "exports", lang, "thumbnail.png"),
+          preferredScene,
+          path.join(storyDir, "exports", lang, "thumbnail-portrait.png"),
+          path.join(storyDir, "assets", "cover.png"),
+        ]
+      : [
+          path.join(storyDir, "exports", lang, "thumbnail-bedtime.png"),
+          preferredScene,
+          path.join(storyDir, "exports", lang, "thumbnail-popular.png"),
+          path.join(storyDir, "exports", lang, "thumbnail.png"),
+          path.join(storyDir, "assets", "cover.png"),
+        ];
+
+  for (const p of candidates) {
+    if (p && existsSync(p)) return p;
+  }
+  return resolveBestPhoto(storyDir, lang);
+}
+
+/**
+ * Resolves the live YouTube watch URL and thumbnail URL from local story.json or docs/audit-data.json.
+ */
+function resolveLiveYoutubeInfo(
+  story: any,
+  bookSlug: string,
+  lang: "id" | "en"
+): { youtubeUrl?: string; youtubeId?: string; ytThumbnailUrl?: string } {
+  const altLang: "id" | "en" = lang === "id" ? "en" : "id";
+  const yt = story?.publications?.youtube || {};
+
+  const candidates = [
+    yt[lang]?.landscape,
+    yt[lang]?.shorts,
+    yt[altLang]?.landscape,
+    yt[altLang]?.shorts,
+  ];
+  for (const c of candidates) {
+    if (c?.url || c?.id) {
+      const id = c.id || (typeof c.url === "string" ? c.url.split("/").pop() : undefined);
+      return {
+        youtubeUrl: c.url || (id ? `https://youtu.be/${id}` : undefined),
+        youtubeId: id,
+        ytThumbnailUrl: id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : undefined,
+      };
+    }
+  }
+
+  const auditRecords = loadJsonArraySafe<any>(path.resolve("./docs/audit-data.json"));
+  const matchingYt =
+    auditRecords.find((r) => r.storySlug === bookSlug && r.platform === "YouTube" && r.language === lang && r.aspectRatio === "16:9") ||
+    auditRecords.find((r) => r.storySlug === bookSlug && r.platform === "YouTube" && r.language === lang) ||
+    auditRecords.find((r) => r.storySlug === bookSlug && r.platform === "YouTube");
+
+  if (matchingYt?.videoId || matchingYt?.videoUrl) {
+    const id = matchingYt.videoId;
+    return {
+      youtubeUrl: matchingYt.videoUrl || (id ? `https://youtu.be/${id}` : undefined),
+      youtubeId: id,
+      ytThumbnailUrl: matchingYt.thumbnailUrl || (id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : undefined),
+    };
+  }
+
+  return {};
+}
+
+interface WaveCopyPayload {
+  facebookCaption: string;
+  facebookFirstComment: string;
+  instagramCaption: string;
+  threadsText: string;
+  portalUrlThreads: string;
+  portalUrlFb: string;
+}
+
+function generatePostPublishWaveCopy(params: {
+  wave: 2 | 3;
+  bookSlug: string;
+  cleanTitle: string;
+  lang: "id" | "en";
+  hook: string;
+  moral: string;
+  youtubeUrl?: string;
+  related: Array<{ title: string; url: string }>;
+}): WaveCopyPayload {
+  const { wave, bookSlug, cleanTitle, lang, hook, moral, youtubeUrl, related } = params;
+  const waveTag = wave === 2 ? "wave2" : "wave3";
+  const portalUrlFb = buildStoryPortalUrl(bookSlug, { source: "facebook", medium: waveTag });
+  const portalUrlThreads = buildStoryPortalUrl(bookSlug, { source: "threads", medium: waveTag });
+
+  const primaryWatchUrl = youtubeUrl || portalUrlFb;
+  const rel1 = related[0];
+  const rel2 = related[1];
+
+  if (wave === 2) {
+    // Midday Watch-Now & Catch-Up (12:30 WIB)
+    const facebookCaption =
+      lang === "en"
+        ? `☀️ MIDDAY STORY BREAK — NOW STREAMING! 🎬✨
+Have the kids finished lunch or resting this afternoon? Let's cozy up for 5 minutes of screen-positive bilingual storytelling:
+
+📖 "${cleanTitle}" (English Read-Aloud Edition)
+✨ ${hook}
+
+💖 Story Moral:
+${moral}
+
+🎯 WANT TO WATCH NOW?
+I've pinned the direct YouTube Watch Link + Full Story Portal (no searching needed!) right in the FIRST COMMENT below! 👇💬
+
+💬 Question for parents: What's your little one's favorite bedtime/afternoon routine story so far? Share below! ❤️
+
+#ZaynStorybook #BilingualKids #EnglishReadAloud #DongengAnak #ParentingTips`
+        : `☀️ ISTIRAHAT SIANG BERSAMA SI KECIL — SUDAH TAYANG! 🎬✨
+Sudah selesai makan siang atau bersiap tidur siang? Yuk temani si kecil menonton dongeng animasi bergambar terbaru hari ini:
+
+📖 "${cleanTitle}"
+✨ ${hook}
+
+💖 Pesan Budi Pekerti:
+${moral}
+
+🎯 INGIN NONTON LANGSUNG TANPA REPOT CARI?
+Tautan YouTube + Halaman Portal lengkap sudah kami sematkan di KOMENTAR PERTAMA di bawah ya! 👇💬
+
+💬 Cerita mana lagi yang paling sering diminta putar ulang oleh si kecil? Tulis di komentar ya Ayah & Bunda! ❤️
+
+#ZaynStorybook #DongengAnak #CeritaAnakBergambar #WaktuSiangAnak #ParentingIndonesia`;
+
+    const facebookFirstComment = [
+      `▶️ Tonton "${cleanTitle}" di YouTube: ${primaryWatchUrl}`,
+      `🌐 Halaman Cerita & Player (ID/EN): ${portalUrlFb}`,
+      rel1 ? `📚 Rekomendasi Cerita Sebelumnya — "${rel1.title}": ${rel1.url}` : "",
+      rel2 ? `✨ Tonton Juga — "${rel2.title}": ${rel2.url}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const instagramCaption = `☀️ SUDAH TAYANG HARI INI! 🎬🌟
+Lagi istirahat siang atau santai bersama si kecil? Dongeng "${cleanTitle}" sudah siap ditonton penuh di YouTube Zayn Storybook!
+
+✨ Highlight Cerita:
+👉 ${hook}
+
+💖 Pesan Baik:
+${moral}
+
+🔗 Klik link di Bio (storybook-catalog.pages.dev) untuk memutar video langsung + lihat koleksi cerita pilihan lainnya!
+🔖 Simpan postingan ini biar gampang dicari nanti malam ya Ayah & Bunda! ❤️
+
+#ZaynStorybook #DongengAnak #BilingualKids #CeritaAnakBergambar #BukuAnakBergambar #ParentingIndonesia`;
+
+    const threadsBase = `☀️ Sudah tayang! Temani istirahat siang si kecil dengan "${cleanTitle}" 📖✨\n👉 ${hook}\n\nPutar langsung + jelajahi dongeng pilihan lainnya di portal kami 👇 #ZaynStorybook`;
+    const threadsText = threadsBase.length > 480 ? `${threadsBase.slice(0, 477)}...` : threadsBase;
+
+    return { facebookCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
+  }
+
+  // Wave 3: Bedtime Highlight & Watch-Next Back-Catalog Funnel (20:30 WIB)
+  const facebookCaption = `🌙 WAKTUNYA DONGENG PENGANTAR TIDUR! ✨🛌
+Sudah waktunya redupkan lampu kamar dan nikmati momen hangat sebelum si kecil terlelap dengan cerita malam ini:
+
+📖 "${cleanTitle}"
+🌟 ${hook}
+
+💖 Nilai Kebaikan Malam Ini:
+${moral}
+
+${rel1 ? `✨ Belum siap tidur? Lanjutkan dengan dongeng hangat "${rel1.title}" untuk maraton cerita tenang tanpa layar berisik!\n` : ""}
+👇 Tautan YouTube + Playlist Sebelum Tidur sudah terpasang rapi di KOMENTAR PERTAMA!
+
+💬 Setelah menonton, nilai baik apa yang paling diingat si kecil malam ini? Ceritakan yuk! ❤️
+
+#ZaynStorybook #DongengSebelumTidur #BedtimeStories #ParentingIndonesia #KeluargaBahagia`;
+
+  const facebookFirstComment = [
+    `🌙 Putar "${cleanTitle}" Sekarang: ${primaryWatchUrl}`,
+    `🌐 Buka Halaman Cerita & Koleksi Malam: ${portalUrlFb}`,
+    rel1 ? `📖 Dongeng Pengantar Tidur Berikutnya — "${rel1.title}": ${rel1.url}` : "",
+    rel2 ? `🌟 Favorit Keluarga — "${rel2.title}": ${rel2.url}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const instagramCaption = `🌙 WAKTUNYA KELAMBU & DONGENG MALAM! ✨🛌
+Redupkan lampu dan tutup hari si kecil dengan kehangatan cerita "${cleanTitle}"!
+
+✨ Ringkasan Malam Ini:
+👉 ${hook}
+
+💖 Pesan Moral:
+${moral}
+
+🔖 SAVE postingan ini untuk ritual dongeng sebelum tidur!
+🔗 Tap Link di Bio (storybook-catalog.pages.dev) untuk langsung memutar video penuh + rekomendasi cerita berikutnya!
+
+💬 Biasanya si kecil butuh berapa cerita sebelum terlelap? 😂❤️
+
+#ZaynStorybook #DongengSebelumTidur #BedtimeStory #CeritaAnak #ParentingCeria #TidurNyenyak`;
+
+  const threadsBase = `🌙 Waktunya dongeng pengantar tidur! Putar "${cleanTitle}" untuk momen tenang sebelum lelap ✨📖\n💖 ${moral}\n\nTonton + lanjut ke dongeng favorit berikutnya 👇 #ZaynStorybook`;
+  const threadsText = threadsBase.length > 480 ? `${threadsBase.slice(0, 477)}...` : threadsBase;
+
+  return { facebookCaption, facebookFirstComment, instagramCaption, threadsText, portalUrlThreads, portalUrlFb };
+}
+
+/**
+ * Publishes Wave 2 (12:30 WIB Midday Watch-Now) or Wave 3 (20:30 WIB Bedtime Highlight)
+ * post-publish social & SEO distribution announcements.
+ */
+export async function publishPostPublishWaveAnnouncement(
+  options: AnnouncementOptions & { wave: 2 | 3 }
+): Promise<{ success: boolean; skipped?: boolean; targetBook?: string; lang?: string }> {
+  const wave = options.wave;
+  const waveKey = `wave${wave}` as "wave2" | "wave3";
+  const waveLabel = wave === 2 ? "Midday Watch-Now & Catch-Up" : "Bedtime Highlight & Watch-Next";
+  const targetDate = options.date || getJakartaDateString();
+
+  console.log("\n==================================================================");
+  console.log(`🌊 POST-PUBLISH SOCIAL WAVE ${wave} DISPATCHER (${waveLabel.toUpperCase()})`);
+  console.log("==================================================================");
+  console.log(`📅 Target Date (WIB) : ${targetDate}`);
+  console.log(`🧪 Dry Run Mode      : ${options.dryRun ? "YES (Preview Only)" : "NO (Live Post)"}`);
+  console.log(`⚡ Force Re-post     : ${options.force ? "YES" : "NO (Strict Deduplication Active)"}`);
+
+  const resolved = await resolveDailyLineupSlots(targetDate);
+  let targetBook = options.bookSlug;
+  let targetLang: "id" | "en" = options.lang || (wave === 2 ? "en" : "id");
+
+  if (!targetBook && resolved) {
+    const primarySlot = wave === 2 ? resolved.morningSlot : resolved.eveningSlot;
+    const secondarySlot = wave === 2 ? resolved.eveningSlot : resolved.morningSlot;
+    const primarySlug = primarySlot?.book_slug || primarySlot?.bookSlug;
+    const secondarySlug = secondarySlot?.book_slug || secondarySlot?.bookSlug;
+
+    if (primarySlug && !primarySlug.startsWith("kompilasi-")) {
+      targetBook = primarySlug;
+      targetLang = options.lang || ((primarySlot.lang === "id" || primarySlot.lang === "en") ? primarySlot.lang : targetLang);
+    } else if (secondarySlug && !secondarySlug.startsWith("kompilasi-")) {
+      targetBook = secondarySlug;
+      targetLang = options.lang || ((secondarySlot.lang === "id" || secondarySlot.lang === "en") ? secondarySlot.lang : targetLang);
+    }
+  }
+
+  if (!targetBook) {
+    const auditRecords = loadJsonArraySafe<any>(path.resolve("./docs/audit-data.json"));
+    const latestPublished = auditRecords.find((r) => r.storySlug && !r.storySlug.startsWith("kompilasi-") && r.platform === "YouTube");
+    if (latestPublished) {
+      targetBook = latestPublished.storySlug;
+      targetLang = options.lang || (latestPublished.language === "en" ? "en" : "id");
+    }
+  }
+
+  if (!targetBook) {
+    console.log(`🌴 Tidak ada buku standalone untuk Wave ${wave} pada tanggal ${targetDate}. Lewati.`);
+    return { success: true, skipped: true };
+  }
+
+  const storyDir = path.resolve("./stories", targetBook);
+  const storyJsonPath = path.join(storyDir, "story.json");
+  if (!existsSync(storyJsonPath)) {
+    console.log(`📥 Story assets not found locally for [${targetBook}]. Pulling from Cloudflare R2...`);
+    await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", targetBook]);
+  }
+  if (!existsSync(storyJsonPath)) {
+    throw new Error(`story.json not found for book '${targetBook}' at ${storyJsonPath}`);
+  }
+
+  const story: any = JSON.parse(await fs.readFile(storyJsonPath, "utf-8"));
+  if (!story.publications) story.publications = {};
+  if (!story.publications.announcements) story.publications.announcements = {};
+  if (!story.publications.announcements[targetDate]) story.publications.announcements[targetDate] = {};
+
+  const existingWave = story.publications.announcements[targetDate][waveKey] || {};
+  const hasFb = Boolean(existingWave.facebook?.id || existingWave.facebook?.postId);
+  const hasIg = Boolean(existingWave.instagram?.id);
+  const hasThreads = Boolean(existingWave.threads?.id || existingWave.threads?.postId);
+
+  console.log(`🎯 Featured Story    : [${targetBook}] [${targetLang.toUpperCase()}]`);
+  console.log(`   - Facebook Page   : ${hasFb ? `✔ LIVE (${existingWave.facebook?.postId || existingWave.facebook?.id})` : "⏳ PENDING"}`);
+  console.log(`   - Instagram Feed  : ${hasIg ? `✔ LIVE (${existingWave.instagram?.id})` : "⏳ PENDING"}`);
+  console.log(`   - Meta Threads    : ${hasThreads ? `✔ LIVE (${existingWave.threads?.postId || existingWave.threads?.id})` : "⏳ PENDING"}`);
+
+  if (hasFb && hasIg && hasThreads && !options.force) {
+    console.log(`\n🛡️ [ZERO DUPLICATE GATE] Wave ${wave} for ${targetBook} (${targetDate}) already live across all channels. Skipping.`);
+    return { success: true, skipped: true, targetBook, lang: targetLang };
+  }
+
+  const rawTitle = targetLang === "id" ? story.title || story.originalTitle : story.originalTitle || story.title || targetBook;
+  const cleanTitle = String(rawTitle || targetBook).replace(/[!]+$/, "").trim();
+  const thumbCfg = story.thumbnailConfig?.[targetLang] || story.thumbnailConfig?.id || story.thumbnailConfig?.en || {};
+  const hook = thumbCfg.hook || (targetLang === "id" ? "Petualangan hangat penuh pesan baik untuk keluarga." : "A gentle illustrated bilingual adventure for families.");
+  const moral = extractMoral(story, targetLang);
+
+  const { youtubeUrl, ytThumbnailUrl } = resolveLiveYoutubeInfo(story, targetBook, targetLang);
+  const related = resolveRelatedPublishedVideos(targetBook, targetLang, 2);
+  const wavePhoto = resolveWavePhoto(storyDir, targetLang, wave);
+  const copy = generatePostPublishWaveCopy({
+    wave,
+    bookSlug: targetBook,
+    cleanTitle,
+    lang: targetLang,
+    hook,
+    moral,
+    youtubeUrl,
+    related,
+  });
+
+  console.log(`🖼️ Selected Visual   : ${path.basename(wavePhoto)}`);
+  console.log(`▶️ YouTube Link      : ${youtubeUrl || "(Not yet indexed — falling back to Portal URL)"}`);
+  console.log(`🌐 Portal Deep Link  : ${copy.portalUrlThreads}`);
+  if (related.length > 0) {
+    console.log(`📚 Watch Next        : ${related.map((r) => r.title).join(" | ")}`);
+  }
+
+  const errors: string[] = [];
+  let fbResult = existingWave.facebook;
+  let igResult = existingWave.instagram;
+  let thResult = existingWave.threads;
+
+  // 1. Facebook Photo Post + Clickable Links in First Comment
+  if (!hasFb || options.force) {
+    try {
+      console.log(`\n📘 [1/3] Publishing Wave ${wave} Facebook Photo Post (+ First Comment links)...`);
+      const fbRes = await publishFacebookPhotoPost({
+        photoPath: wavePhoto,
+        caption: copy.facebookCaption,
+        firstComment: copy.facebookFirstComment,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && fbRes.success) {
+        fbResult = {
+          postId: fbRes.postId,
+          url: fbRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (fbErr: any) {
+      console.error(`⚠️ Facebook Wave ${wave} warning:`, fbErr.message);
+      errors.push(`Facebook: ${fbErr.message}`);
+    }
+  }
+
+  // 2. Instagram Feed Photo ("Save for bedtime" + Link in Bio)
+  if (!hasIg || options.force) {
+    try {
+      console.log(`\n📸 [2/3] Publishing Wave ${wave} Instagram Feed Photo...`);
+      const igRes = await publishInstagramFeedPhoto({
+        imagePath: wavePhoto,
+        caption: copy.instagramCaption,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && igRes.success) {
+        igResult = {
+          id: igRes.mediaId,
+          url: igRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (igErr: any) {
+      console.error(`⚠️ Instagram Wave ${wave} warning:`, igErr.message);
+      errors.push(`Instagram: ${igErr.message}`);
+    }
+  }
+
+  // 3. Meta Threads Rich Link Preview Card
+  if (!hasThreads || options.force) {
+    try {
+      console.log(`\n🧵 [3/3] Publishing Wave ${wave} Threads Link Card -> ${copy.portalUrlThreads}...`);
+      const thRes = await publishThreadsLinkPost({
+        text: copy.threadsText,
+        linkUrl: copy.portalUrlThreads,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && thRes.success) {
+        thResult = {
+          id: thRes.postId,
+          postId: thRes.postId,
+          url: thRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (thErr: any) {
+      console.error(`⚠️ Threads Wave ${wave} warning:`, thErr.message);
+      errors.push(`Threads: ${thErr.message}`);
+    }
+  }
+
+  if (!options.dryRun) {
+    story.publications.announcements[targetDate][waveKey] = {
+      announcedAt: new Date().toISOString(),
+      wave,
+      lang: targetLang,
+      portalUrl: copy.portalUrlThreads,
+      youtubeUrl,
+      facebook: fbResult,
+      instagram: igResult,
+      threads: thResult,
+    };
+    await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2), "utf-8");
+    try {
+      await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "push", targetBook, "--manifest-only"]);
+      console.log(`✔ story.json & R2 manifest updated for Wave ${wave}.`);
+    } catch (pushErr: any) {
+      console.warn(`⚠️ Warning syncing manifest to R2:`, pushErr.message);
+    }
+  }
+
+  if (errors.length > 0 && !options.dryRun) {
+    try {
+      await notifyTelegramFailure({
+        bookSlug: targetBook,
+        lang: targetLang,
+        slot: `Wave ${wave} (${waveLabel})`,
+        platform: `Post-Publish Announcement Wave ${wave}`,
+        error: errors.join("\n"),
+      });
+    } catch {}
+  } else if (errors.length === 0) {
+    try {
+      await notifyTelegramAnnouncement({
+        dateStr: targetDate,
+        wave,
+        waveLabel,
+        morningBook: wave === 2 ? targetBook : undefined,
+        morningTitle: wave === 2 ? cleanTitle : undefined,
+        morningLang: wave === 2 ? targetLang : undefined,
+        morningHook: wave === 2 ? hook : undefined,
+        eveningBook: wave === 3 ? targetBook : undefined,
+        eveningTitle: wave === 3 ? cleanTitle : undefined,
+        eveningLang: wave === 3 ? targetLang : undefined,
+        eveningHook: wave === 3 ? hook : undefined,
+        portalUrl: copy.portalUrlThreads,
+        youtubeUrl,
+        relatedTitle: related[0]?.title,
+        relatedUrl: related[0]?.url,
+        photoUrl: ytThumbnailUrl,
+        facebookUrl: fbResult?.url,
+        instagramUrl: igResult?.url,
+        threadsUrl: thResult?.url,
+        dryRun: options.dryRun,
+      });
+    } catch (e: any) {
+      console.warn(`⚠️ Warning sending Telegram Wave ${wave} notification:`, e.message);
+    }
+  }
+
+  console.log(`\n🎉 POST-PUBLISH WAVE ${wave} DISPATCH COMPLETE!\n`);
+  return { success: errors.length === 0, targetBook, lang: targetLang };
+}
+
+/**
  * Main routine: Publishes deduplicated announcement feeds across Facebook, Instagram, and Threads.
  * Note: Telegram is strictly an internal creator notification tool and skipped from public feeds.
  */
@@ -731,6 +1232,10 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
   targetBook?: string;
   lang?: string;
 }> {
+  if (options.wave === 2 || options.wave === 3) {
+    return publishPostPublishWaveAnnouncement({ ...options, wave: options.wave });
+  }
+
   // If daily lineup mode is requested, or if slot is "daily" or "all", or default in morning without explicit book:
   const isDailyLineup =
     options.dailyLineup ||
@@ -1022,6 +1527,8 @@ async function main() {
   const dryRun = args.includes("--dry-run");
   const force = args.includes("--force");
   const dailyLineup = args.includes("--daily-lineup");
+  const waveArg = getArg("--wave");
+  const wave: 1 | 2 | 3 | undefined = waveArg === "2" ? 2 : waveArg === "3" ? 3 : waveArg === "1" ? 1 : undefined;
   const dateArg = getArg("--date");
   const bookSlug = getArg("--book");
   const langArg = getArg("--lang") as "id" | "en" | undefined;
@@ -1032,6 +1539,7 @@ async function main() {
     lang: langArg,
     slot: slotArg,
     dailyLineup,
+    wave,
     date: dateArg,
     dryRun,
     force,

@@ -11,6 +11,7 @@ import {
   mergeAuditRecordLists,
   mergeCalendarSlotLists,
 } from "./lib/portal-sync";
+import { generateStoryLandingPages } from "./lib/story-pages";
 
 interface AuditRecord {
   id: string; // unique audit id e.g. "AUD-001"
@@ -5269,3 +5270,10 @@ ${browserSyncScript}
 
 fs.writeFileSync(path.join(docsDir, "index.html"), indexHtmlContent);
 console.log(`Successfully generated docs/index.html with ${auditRecords.length} records and ${calendarSlots.length} timeline slots!`);
+
+generateStoryLandingPages({
+  docsDir,
+  storiesDir,
+  auditRecords,
+  storyTitlesMap,
+});

@@ -1,8 +1,18 @@
+import fs from "fs";
+import path from "path";
+
 /**
  * SEO Metadata Formatter & Generator for Zayn Storybook
  * Generates search-optimized Titles, Descriptions (200+ words), and Tags
  * tailored for high CTR and discovery in Indonesian & English children's storybook niches.
  */
+
+export const CATALOG_PORTAL_BASE = "https://storybook-catalog.pages.dev";
+
+export interface RelatedVideoLink {
+  title: string;
+  url: string;
+}
 
 export interface SeoMetadataOptions {
   bookSlug: string;
@@ -17,6 +27,70 @@ export interface SeoMetadataOptions {
   chapters?: string; // Timestamps list
   license?: string;
   publisher?: string;
+  portalUrl?: string;
+  relatedVideos?: RelatedVideoLink[];
+}
+
+/**
+ * Builds canonical deep-link URL for a story landing page on the Cloudflare Pages portal.
+ */
+export function buildStoryPortalUrl(
+  bookSlug: string,
+  utm?: { source?: string; medium?: string; campaign?: string }
+): string {
+  const base = `${CATALOG_PORTAL_BASE}/s/${encodeURIComponent(bookSlug)}`;
+  if (!utm) return base;
+  const params = new URLSearchParams();
+  if (utm.source) params.set("utm_source", utm.source);
+  if (utm.medium) params.set("utm_medium", utm.medium);
+  if (utm.campaign) params.set("utm_campaign", utm.campaign);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
+/**
+ * Resolves up to `limit` published YouTube videos from docs/audit-data.json excluding `excludeSlug`.
+ */
+export function resolveRelatedPublishedVideos(
+  excludeSlug: string,
+  lang: "id" | "en",
+  limit: number = 2
+): RelatedVideoLink[] {
+  const auditPath = path.resolve("./docs/audit-data.json");
+  if (!fs.existsSync(auditPath)) return [];
+  try {
+    const records = JSON.parse(fs.readFileSync(auditPath, "utf-8"));
+    if (!Array.isArray(records)) return [];
+    const seen = new Set<string>([excludeSlug]);
+    const candidates = records
+      .filter(
+        (r: any) =>
+          r?.platform === "YouTube" &&
+          r?.format === "Landscape (16:9)" &&
+          r?.language === lang &&
+          r?.videoUrl &&
+          r?.storySlug &&
+          !seen.has(r.storySlug)
+      )
+      .sort((a: any, b: any) => {
+        const tB = new Date(b.publishedAt || 0).getTime();
+        const tA = new Date(a.publishedAt || 0).getTime();
+        return tB - tA;
+      });
+
+    const out: RelatedVideoLink[] = [];
+    for (const c of candidates) {
+      if (seen.has(c.storySlug)) continue;
+      seen.add(c.storySlug);
+      const title =
+        lang === "en" ? c.storyTitleEn || c.storyTitleId || c.storySlug : c.storyTitleId || c.storySlug;
+      out.push({ title, url: c.videoUrl });
+      if (out.length >= limit) break;
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 export interface SeoMetadataResult {
@@ -117,6 +191,14 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
 
   const descLines: string[] = [];
 
+  const portalUrl =
+    options.portalUrl ||
+    (!options.bookSlug.startsWith("kompilasi-") && !options.bookSlug.startsWith("bedtime-")
+      ? buildStoryPortalUrl(options.bookSlug, { source: "youtube", medium: "description" })
+      : CATALOG_PORTAL_BASE);
+  const relatedVideos =
+    options.relatedVideos ?? resolveRelatedPublishedVideos(options.bookSlug, options.lang, 2);
+
   if (isEn) {
     descLines.push(`🌙 Welcome to Zayn Storybook! Tonight's featured animated bedtime story is "${displayTitle}".`);
     descLines.push(`A heartwarming and soothing animated read-aloud picture book designed to help toddlers, preschoolers, and early readers unwind and prepare for a restful night of sleep.`);
@@ -125,6 +207,16 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
     descLines.push(`"${moral}"`);
     if (options.moralDescription) {
       descLines.push(`${options.moralDescription}`);
+    }
+    descLines.push(``);
+    descLines.push(`🌐 BILINGUAL EDITION & FULL STORY ARCHIVE:`);
+    descLines.push(`👉 Read & watch Indonesian/English versions: ${portalUrl}`);
+    if (relatedVideos.length > 0) {
+      descLines.push(``);
+      descLines.push(`📺 WATCH MORE FAVORITE BEDTIME STORIES:`);
+      relatedVideos.forEach((rv) => {
+        descLines.push(`• ${rv.title}: ${rv.url}`);
+      });
     }
     descLines.push(``);
     if (!isVertical && options.chapters) {
@@ -157,6 +249,16 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
     descLines.push(`"${moral}"`);
     if (options.moralDescription) {
       descLines.push(`${options.moralDescription}`);
+    }
+    descLines.push(``);
+    descLines.push(`🌐 VERSI BILINGUAL & KATALOG DONGENG:`);
+    descLines.push(`👉 Tonton versi Bahasa Indonesia & English di sini: ${portalUrl}`);
+    if (relatedVideos.length > 0) {
+      descLines.push(``);
+      descLines.push(`📺 TONTON JUGA DONGENG SERU LAINNYA:`);
+      relatedVideos.forEach((rv) => {
+        descLines.push(`• ${rv.title}: ${rv.url}`);
+      });
     }
     descLines.push(``);
     if (!isVertical && options.chapters) {

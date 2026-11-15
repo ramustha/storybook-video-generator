@@ -637,6 +637,46 @@ export async function publishThreadsCarousel(options: {
 }
 
 /**
+ * Publishes a Threads post with an interactive link preview card (`link_attachment`).
+ * Used by Wave 2 & Wave 3 post-publish social announcements to drive direct click-throughs.
+ */
+export async function publishThreadsLinkPost(options: {
+  text: string;
+  linkUrl: string;
+  dryRun?: boolean;
+}): Promise<{
+  success: boolean;
+  postId?: string;
+  permalink?: string;
+  dryRun?: boolean;
+}> {
+  const config = await loadThreadsConfig();
+  if (!config.threadsAccessToken || !config.threadsUserId) {
+    throw new Error("Threads credentials not configured (missing threadsUserId or threadsAccessToken).");
+  }
+
+  if (options.dryRun) {
+    console.log("\n[DRY RUN] Threads Link Card Post:\n", options.text);
+    console.log(`[DRY RUN] Attached Link Card URL:`, options.linkUrl);
+    return { success: true, dryRun: true };
+  }
+
+  const containerId = await createThreadsContainer(config.threadsUserId, config.threadsAccessToken, {
+    mediaType: "TEXT",
+    text: options.text,
+    linkAttachment: options.linkUrl,
+    isMadeWithAi: false,
+  });
+
+  await waitForThreadsContainer(containerId, config.threadsAccessToken);
+
+  const postId = await publishThreadsContainer(config.threadsUserId, containerId, config.threadsAccessToken);
+  const postDetails = await getThreadsPostDetails(postId, config.threadsAccessToken);
+  console.log(`🎉 SUCCESS! THREADS LINK CARD POST IS LIVE: ${postDetails.permalink}`);
+  return { success: true, postId, permalink: postDetails.permalink };
+}
+
+/**
  * Main execution routine for publishing to Threads
  */
 export async function publishStoryToThreads(options: {
