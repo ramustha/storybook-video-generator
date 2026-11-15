@@ -1,0 +1,37 @@
+scripts/verify-edu-motion-renders.ts
+  698ac31901cd73e0 1-171
+.github/workflows/edu-motion-preview.yml
+  698ac31901cd73e0 1-167
+scripts/manage-story-storage.ts
+  698ac31901cd73e0 5,221,735-855,977-996
+scripts/test-edu-motion-engine.ts
+  698ac31901cd73e0 7,70-92,94-110,113-120,122
+src/motion/compile-edu-motion.ts
+  698ac31901cd73e0 1139
+scripts/buffer-prerender.ts
+  698ac31901cd73e0 211,218,223-225
+scripts/render-book.ts
+  698ac31901cd73e0 271-272,276-284
+src/motion/overlay-scenes.ts
+  698ac31901cd73e0 234,256
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "380e6ef85fa276276bf089cc7bfc0e5c5e9cf892",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 556,
+      "total_deletions": 30,
+      "accepted_lines": 556,
+      "overriden_lines": 0
+    }
+  }
+}
