@@ -640,6 +640,84 @@ export async function checkStoryBufferedVideos(bookSlug: string): Promise<{
   }
 }
 
+export interface StoryR2Readiness {
+  hasManifest: boolean;
+  hasAssets: boolean;
+  hasMotionSpec: boolean;
+  hasLandscapeVideo: boolean;
+  hasVerticalVideo: boolean;
+  missingItems: string[];
+  ready: boolean;
+}
+
+/**
+ * Inspects Cloudflare R2 (plus local fallback for motion-spec.json) to check whether
+ * all assets and rendered MP4 videos needed for an upcoming broadcast slot are ready.
+ */
+export async function inspectStoryReadinessInR2(params: {
+  bookSlug: string;
+  lang: "id" | "en";
+  requireLandscape: boolean;
+  requireVertical: boolean;
+  isFullMotion?: boolean;
+  isCompilation?: boolean;
+}): Promise<StoryR2Readiness> {
+  const { bookSlug, lang, requireLandscape, requireVertical, isFullMotion, isCompilation } = params;
+  const r2 = await loadR2Config();
+  const s3 = getS3Client(r2);
+  const keys: string[] = [];
+  let token: string | undefined;
+
+  do {
+    const res = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: r2.bucketName,
+        Prefix: `stories/${bookSlug}/`,
+        ContinuationToken: token,
+      })
+    );
+    for (const obj of res.Contents || []) {
+      if (obj.Key) keys.push(obj.Key);
+    }
+    token = res.IsTruncated ? res.NextContinuationToken : undefined;
+  } while (token);
+
+  const localMotionSpec = path.resolve("./stories", bookSlug, "motion-spec.json");
+  const hasManifest = isCompilation || keys.some((k) => k === `stories/${bookSlug}/story.json`);
+  const hasAssets =
+    isCompilation ||
+    keys.some(
+      (k) =>
+        k.startsWith(`stories/${bookSlug}/assets/`) ||
+        k.startsWith(`stories/${bookSlug}/motion/`)
+    );
+  const hasMotionSpec =
+    !isFullMotion ||
+    keys.some((k) => k === `stories/${bookSlug}/motion-spec.json`) ||
+    existsSync(localMotionSpec);
+
+  const exportKeys = keys.filter((k) => k.startsWith(`stories/${bookSlug}/exports/${lang}/`));
+  const hasLandscapeVideo = !requireLandscape || exportKeys.some((k) => k.endsWith("16x9.mp4"));
+  const hasVerticalVideo = !requireVertical || exportKeys.some((k) => k.endsWith("9x16.mp4"));
+
+  const missingItems: string[] = [];
+  if (!hasManifest) missingItems.push("story.json manifest (R2)");
+  if (!hasAssets) missingItems.push("assets/illustrations or motion staging (R2)");
+  if (!hasMotionSpec) missingItems.push("motion-spec.json (Full-Motion Creative AI)");
+  if (!hasLandscapeVideo) missingItems.push(`rendered ${lang.toUpperCase()} 16:9 MP4 (R2)`);
+  if (!hasVerticalVideo) missingItems.push(`rendered ${lang.toUpperCase()} 9:16 MP4 (R2)`);
+
+  return {
+    hasManifest,
+    hasAssets,
+    hasMotionSpec,
+    hasLandscapeVideo,
+    hasVerticalVideo,
+    missingItems,
+    ready: missingItems.length === 0,
+  };
+}
+
 /**
  * Lists all stories in R2.
  */

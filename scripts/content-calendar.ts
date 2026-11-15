@@ -25,6 +25,74 @@ export interface ScheduledSlot {
   theme: string;
 }
 
+const SUNDAY_FULL_MOTION_PLAN_2026: Array<{
+  date: string;
+  bookSlug: string;
+  theme: string;
+}> = [
+  {
+    date: "2026-11-15",
+    bookSlug: "edu-budi-papang-teripang",
+    theme: "Full-Motion Edu-Story: Papang Teripang & Terumbu Karang (BUDI Ecosystem)",
+  },
+  {
+    date: "2026-11-22",
+    bookSlug: "edu-budi-fermentasi-nusantara",
+    theme: "Full-Motion Edu-Story: Rahasia Fermentasi Nusantara (Tempe, Tape & Oncom)",
+  },
+  {
+    date: "2026-11-29",
+    bookSlug: "edu-budi-dudung-suka-balap-karung",
+    theme: "Full-Motion Edu-Story: Dudung Suka Balap Karung (Permainan Tradisional)",
+  },
+  {
+    date: "2026-12-06",
+    bookSlug: "edu-budi-petualang-antariksa",
+    theme: "Full-Motion Edu-Story: Petualang Antariksa (Sains & Luar Angkasa)",
+  },
+  {
+    date: "2026-12-13",
+    bookSlug: "edu-budi-keajaiban-di-langit",
+    theme: "Full-Motion Edu-Story: Keajaiban di Langit (Olahraga & Fenomena Udara)",
+  },
+  {
+    date: "2026-12-20",
+    bookSlug: "edu-budi-petualangan-di-gedung-aneh",
+    theme: "Full-Motion Edu-Story: Petualangan di Gedung Aneh (Eksplorasi Sains)",
+  },
+  {
+    date: "2026-12-27",
+    bookSlug: "edu-budi-dengar-laut-mengalun",
+    theme: "Full-Motion Edu-Story: Dengar Laut Mengalun (Tokoh Indonesia & Samudera)",
+  },
+];
+
+export const SUNDAY_FULL_MOTION_2026: ScheduledSlot[] = SUNDAY_FULL_MOTION_PLAN_2026.flatMap(
+  (entry) =>
+    (["en", "id"] as const).map((lang) => ({
+      date: entry.date,
+      dayName: "Minggu" as const,
+      timeSlot: "15:00 WIB",
+      slotType: "Sunday Full-Motion Premiere",
+      bookSlug: entry.bookSlug,
+      lang,
+      format: "both" as const,
+      targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+      theme: entry.theme,
+    }))
+);
+
+export function isFullMotionSlot(slot: {
+  slotType?: string;
+  slot_type?: string;
+  timeSlot?: string;
+  time_slot?: string;
+}): boolean {
+  const type = (slot.slotType || slot.slot_type || "").toLowerCase();
+  const time = (slot.timeSlot || slot.time_slot || "").toLowerCase();
+  return type.includes("full-motion") || type.includes("full motion") || time.startsWith("15:");
+}
+
 export const DAILY_CALENDAR_MONTH_1: ScheduledSlot[] = [
   {
     date: "2026-11-07",
@@ -1236,6 +1304,7 @@ export const DAILY_CALENDAR_MONTH_1: ScheduledSlot[] = [
     targetPlatforms: ["YouTube Master (16:9)", "Facebook Watch", "Instagram Reels", "YouTube Shorts"],
     theme: "Anak Indonesia",
   },
+  ...SUNDAY_FULL_MOTION_2026,
 ];
 
 export const WEEKLY_SCHEDULE: ScheduledSlot[] = [
@@ -1343,7 +1412,7 @@ export const WEEKLY_SCHEDULE: ScheduledSlot[] = [
 
 const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"] as const;
 
-function getTodaySlot(targetDate?: string): ScheduledSlot[] {
+export async function getTodaySlot(targetDate?: string): Promise<ScheduledSlot[]> {
   const now = new Date();
   const jakartaDateStr =
     targetDate ||
@@ -1354,9 +1423,35 @@ function getTodaySlot(targetDate?: string): ScheduledSlot[] {
       day: "2-digit",
     }).format(now);
 
-  const matchedDateSlots = DAILY_CALENDAR_MONTH_1.filter((s) => s.date === jakartaDateStr);
-  if (matchedDateSlots.length > 0) {
-    return matchedDateSlots;
+  const merged = new Map<string, ScheduledSlot>();
+  for (const slot of DAILY_CALENDAR_MONTH_1) {
+    if (slot.date !== jakartaDateStr) continue;
+    merged.set(`${slot.date}::${slot.timeSlot}::${slot.lang}`, slot);
+  }
+
+  try {
+    const d1Slots = await db.getCalendar(jakartaDateStr);
+    for (const row of d1Slots) {
+      const key = `${row.scheduled_date}::${row.time_slot}::${row.lang}`;
+      if (merged.has(key)) continue;
+      merged.set(key, {
+        date: row.scheduled_date,
+        dayName: (row.day_name as ScheduledSlot["dayName"]) || "Senin",
+        timeSlot: row.time_slot,
+        slotType: row.slot_type,
+        bookSlug: row.book_slug,
+        lang: row.lang as "id" | "en",
+        format: (row.format as ScheduledSlot["format"]) || "both",
+        targetPlatforms: ["YouTube (16:9 & Shorts)", "Facebook (Watch & Reels)", "Instagram Reels"],
+        theme: row.theme || "Scheduled Storybook Feature",
+      });
+    }
+  } catch (err: any) {
+    console.warn(`⚠️ D1 calendar lookup failed (${err.message}); using local calendar entries.`);
+  }
+
+  if (merged.size > 0) {
+    return Array.from(merged.values());
   }
 
   const dayIndex = now.getDay(); // 0 is Sunday
@@ -1441,7 +1536,7 @@ async function showToday() {
   console.log(`⏰ Waktu Jakarta : ${timeStr} WIB`);
   console.log("==================================================================\n");
 
-  const todaySlots = getTodaySlot();
+  const todaySlots = await getTodaySlot();
 
   if (todaySlots.length === 0) {
     console.log("🌴 Hari ini tidak ada jadwal rilis wajib. Hari bebas untuk riset atau batch render.");
@@ -1523,8 +1618,8 @@ function showCalendar() {
   console.log("==================================================================\n");
 }
 
-function triggerReminder() {
-  const todaySlots = getTodaySlot();
+async function triggerReminder() {
+  const todaySlots = await getTodaySlot();
   if (todaySlots.length === 0) return;
 
   const slot = todaySlots[0];
@@ -1568,12 +1663,12 @@ async function publishToday(
   dryRun: boolean,
   targetBook?: string,
   targetLang?: "id" | "en",
-  slotFilter?: "morning" | "evening" | "auto" | "all",
+  slotFilter?: "morning" | "evening" | "motion" | "auto" | "all",
   force: boolean = false,
   skipPromo: boolean = false
 ) {
   printHeader();
-  let slots = getTodaySlot();
+  let slots = await getTodaySlot();
   if (targetBook) {
     slots = [
       {
@@ -1595,49 +1690,75 @@ async function publishToday(
   }
 
   if (!targetBook && slotFilter && slotFilter !== "all") {
-    const jakartaHour =
-      parseInt(
-        new Intl.DateTimeFormat("en-US", {
-          timeZone: "Asia/Jakarta",
-          hour: "numeric",
-          hourCycle: "h23",
-        }).format(new Date()),
-        10
-      ) % 24;
-
-    let isMorning = false;
-    if (slotFilter === "morning") {
-      isMorning = true;
-    } else if (slotFilter === "evening") {
-      isMorning = false;
-    } else if (slotFilter === "auto") {
-      if (jakartaHour >= 6 && jakartaHour < 14) {
-        isMorning = true;
-      } else if (jakartaHour >= 16 && jakartaHour <= 23) {
-        isMorning = false;
-      } else {
-        console.warn(`\n⚠️ [SLOT AUTO] Current time is ${jakartaHour}:00 WIB, outside scheduled broadcast windows:`);
-        console.warn(`   • Morning Slot Window : 06:00 - 13:59 WIB (Scheduled 08:30 WIB)`);
-        console.warn(`   • Evening Slot Window : 16:00 - 23:59 WIB (Scheduled 18:30/19:30 WIB)`);
-        console.warn(`🛑 Skipping automated broadcast to prevent unscheduled middle-of-the-night releases.\n`);
+    if (slotFilter === "motion") {
+      const motionSlots = slots.filter((s) => isFullMotionSlot(s));
+      if (motionSlots.length === 0) {
+        console.log("🌴 Tidak ada jadwal Sunday Full-Motion Premiere hari ini. Lewati.");
         return;
       }
-    }
-
-    const filtered = slots.filter((s) => {
-      const isMorningSlot =
-        s.timeSlot.includes("07:") ||
-        s.timeSlot.includes("08:") ||
-        s.timeSlot.toLowerCase().includes("pagi") ||
-        s.slotType.toLowerCase().includes("morning");
-      return isMorning ? isMorningSlot : !isMorningSlot;
-    });
-
-    if (filtered.length > 0) {
-      slots = filtered;
-      console.log(`🎯 Filter Slot Aktif: [${isMorning ? "PAGI / MORNING" : "MALAM / BEDTIME"}] (${slots.length} tayangan)`);
+      slots = motionSlots;
+      console.log(`🎯 Filter Slot Aktif: [SUNDAY FULL-MOTION] (${slots.length} tayangan)`);
     } else {
-      console.log(`ℹ️ Tidak ada slot khusus ${isMorning ? "pagi" : "malam"}. Memproses slot jadwal hari ini...`);
+      const jakartaHour =
+        parseInt(
+          new Intl.DateTimeFormat("en-US", {
+            timeZone: "Asia/Jakarta",
+            hour: "numeric",
+            hourCycle: "h23",
+          }).format(new Date()),
+          10
+        ) % 24;
+
+      let targetMode: "morning" | "evening" | "motion" = "evening";
+      if (slotFilter === "morning") {
+        targetMode = "morning";
+      } else if (slotFilter === "evening") {
+        targetMode = "evening";
+      } else if (slotFilter === "auto") {
+        if (jakartaHour >= 6 && jakartaHour < 14) {
+          targetMode = "morning";
+        } else if (jakartaHour === 15) {
+          targetMode = "motion";
+        } else if (jakartaHour >= 16 && jakartaHour <= 23) {
+          targetMode = "evening";
+        } else {
+          console.warn(`\n⚠️ [SLOT AUTO] Current time is ${jakartaHour}:00 WIB, outside scheduled broadcast windows:`);
+          console.warn(`   • Morning Slot Window     : 06:00 - 13:59 WIB (Scheduled 08:30 WIB)`);
+          console.warn(`   • Sunday Full-Motion      : 15:00 - 15:59 WIB (Sunday Premiere)`);
+          console.warn(`   • Evening Slot Window     : 16:00 - 23:59 WIB (Scheduled 18:30/19:30 WIB)`);
+          console.warn(`🛑 Skipping automated broadcast to prevent unscheduled middle-of-the-night releases.\n`);
+          return;
+        }
+      }
+
+      if (targetMode === "motion") {
+        const motionSlots = slots.filter((s) => isFullMotionSlot(s));
+        if (motionSlots.length === 0) {
+          console.log("🌴 Tidak ada jadwal Sunday Full-Motion Premiere pada pukul 15:00 WIB.");
+          return;
+        }
+        slots = motionSlots;
+        console.log(`🎯 Filter Slot Aktif: [SUNDAY FULL-MOTION] (${slots.length} tayangan)`);
+      } else {
+        const isMorning = targetMode === "morning";
+        const filtered = slots.filter((s) => {
+          if (isFullMotionSlot(s)) return false;
+          const isMorningSlot =
+            s.timeSlot.includes("07:") ||
+            s.timeSlot.includes("08:") ||
+            s.timeSlot.toLowerCase().includes("pagi") ||
+            s.slotType.toLowerCase().includes("morning");
+          return isMorning ? isMorningSlot : !isMorningSlot;
+        });
+
+        if (filtered.length > 0) {
+          slots = filtered;
+          console.log(`🎯 Filter Slot Aktif: [${isMorning ? "PAGI / MORNING" : "MALAM / BEDTIME"}] (${slots.length} tayangan)`);
+        } else {
+          console.log(`ℹ️ Tidak ada slot khusus buku ilustrasi ${isMorning ? "pagi" : "malam"}. Lewati.`);
+          return;
+        }
+      }
     }
   }
 
@@ -1812,7 +1933,7 @@ async function main() {
   if (args.includes("--calendar") || args.includes("--all") || args.includes("-a")) {
     showCalendar();
   } else if (args.includes("--remind")) {
-    triggerReminder();
+    await triggerReminder();
   } else if (args.includes("--cron")) {
     setupCrontab();
   } else if (args.includes("--announce-today") || args.includes("--announce") || args.includes("--teaser")) {
@@ -1845,7 +1966,7 @@ async function main() {
     const langIdx = args.indexOf("--lang");
     const lang = langIdx !== -1 && (args[langIdx + 1] === "id" || args[langIdx + 1] === "en") ? args[langIdx + 1] as "id" | "en" : undefined;
     const slotIdx = args.indexOf("--slot");
-    const slot = slotIdx !== -1 ? (args[slotIdx + 1] as "morning" | "evening" | "auto" | "all") : "auto";
+    const slot = slotIdx !== -1 ? (args[slotIdx + 1] as "morning" | "evening" | "motion" | "auto" | "all") : "auto";
     await publishToday(dryRun, book, lang, slot, force, skipPromo);
   } else {
     await showToday();

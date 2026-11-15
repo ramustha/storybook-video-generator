@@ -1,0 +1,87 @@
+name: Zayn Storybook H-2 Publish Readiness Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Target Slot to Check H-2 (auto, morning, evening, motion, all)'
+        required: true
+        type: choice
+        options:
+          - 'auto'
+          - 'morning'
+          - 'evening'
+          - 'motion'
+          - 'all'
+        default: 'auto'
+      date:
+        description: 'Optional YYYY-MM-DD override (WIB)'
+        required: false
+        default: ''
+      dry_run:
+        description: 'Preview Telegram alert without sending'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  readiness_check:
+    name: Verify Assets & Rendered Videos (H-2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci
+
+      - name: 🔑 Configure R2 & D1 Credentials
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.PERSONAL_R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.PERSONAL_R2_ACCESS_KEY_ID }}
+          R2_SECRET_KEY: ${{ secrets.PERSONAL_R2_SECRET_ACCESS_KEY }}
+          R2_PUBLIC_DOMAIN: ${{ secrets.PERSONAL_R2_PUBLIC_DOMAIN }}
+        run: |
+          mkdir -p config
+          cat <<EOF > config/r2-config.json
+          {
+            "accountId": "${R2_ACCOUNT_ID}",
+            "endpoint": "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+            "accessKeyId": "${R2_ACCESS_KEY_ID}",
+            "secretAccessKey": "${R2_SECRET_KEY}",
+            "bucketName": "zayn-storybook",
+            "publicDomain": "${R2_PUBLIC_DOMAIN:-https://pub-f2786231e5e34f19a6860d7fe9ddd569.r2.dev}"
+          }
+          EOF
+
+          cat <<EOF > config/d1-config.json
+          {
+            "accountId": "e5c0394bca4b8239f091b55cb3e9d3e6",
+            "databaseId": "a979ff27-bed2-4428-a4af-eae976a24253",
+            "databaseName": "zayn-storybook-db",
+            "region": "APAC"
+          }
+          EOF
+
+      - name: ⏰ Run H-2 Readiness Check & Notify Telegram If Incomplete
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_D1_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.PERSONAL_R2_ACCOUNT_ID || 'e5c0394bca4b8239f091b55cb3e9d3e6' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          ARGS="--slot ${{ inputs.slot || 'auto' }}"
+          if [ -n "${{ inputs.date }}" ]; then ARGS="${ARGS} --date ${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="${ARGS} --dry-run"; fi
+          npx tsx scripts/check-publish-readiness.ts ${ARGS}

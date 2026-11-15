@@ -2,14 +2,14 @@ import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { execSync } from "child_process";
-import { DAILY_CALENDAR_MONTH_1, ScheduledSlot } from "./content-calendar";
+import { DAILY_CALENDAR_MONTH_1, ScheduledSlot, isFullMotionSlot } from "./content-calendar";
 import {
   checkStoryBufferedVideos,
   hasStoryManifestInR2,
   pushCompilationBuffer,
 } from "./manage-story-storage";
 import { db } from "./lib/db";
-import { notifyTelegramFailure } from "./notify-telegram";
+import { getTelegramConfig, notifyTelegramFailure, sendTelegramMessage } from "./notify-telegram";
 import {
   getRequiredBufferOrientations,
   getWibDateOffsetIso,
@@ -98,33 +98,48 @@ async function main() {
 
   const daysIdx = args.indexOf("--days");
   const daysAhead = daysIdx !== -1 && args[daysIdx + 1] ? parseInt(args[daysIdx + 1], 10) : 3;
+  const motionDaysIdx = args.indexOf("--motion-days");
+  const motionDaysAhead = Math.max(
+    daysAhead,
+    motionDaysIdx !== -1 && args[motionDaysIdx + 1] ? parseInt(args[motionDaysIdx + 1], 10) : 7
+  );
 
   console.log(`\n==================================================================`);
   console.log(`🛡️  ZAYN STORYBOOK: AUTOMATED PRE-RENDER BUFFER ENGINE`);
   console.log(`==================================================================`);
-  console.log(`📅 Buffer Window : Next ${daysAhead} Days Ahead (H+1 to H+${daysAhead})`);
-  console.log(`🧪 Mode          : ${dryRun ? "DRY RUN (Preview Only)" : "LIVE BATCH RENDER"}`);
-  console.log(`⚡ Force Re-render: ${force ? "YES" : "NO (Skip existing R2 videos)"}`);
+  console.log(`📅 Standard Window  : Next ${daysAhead} Days Ahead (H+1 to H+${daysAhead})`);
+  console.log(`🎬 Creative AI Buff : Next ${motionDaysAhead} Days Ahead (Sunday Full-Motion H+1 to H+${motionDaysAhead})`);
+  console.log(`🧪 Mode             : ${dryRun ? "DRY RUN (Preview Only)" : "LIVE BATCH RENDER"}`);
+  console.log(`⚡ Force Re-render   : ${force ? "YES" : "NO (Skip existing R2 videos)"}`);
   console.log(`==================================================================\n`);
 
   const now = new Date();
   const candidateDates: string[] = [];
+  const motionDates: string[] = [];
 
   for (let i = 1; i <= daysAhead; i++) {
     candidateDates.push(getWibDateOffsetIso(i, now));
   }
+  for (let i = 1; i <= motionDaysAhead; i++) {
+    motionDates.push(getWibDateOffsetIso(i, now));
+  }
 
-  console.log(`🎯 Target Broadcast Dates: ${candidateDates.join(", ")}\n`);
+  const standardDateSet = new Set(candidateDates);
+  console.log(`🎯 Target Broadcast Dates   : ${candidateDates.join(", ")}`);
+  console.log(`🎨 Full-Motion Lookahead    : ${motionDates[0]}..${motionDates[motionDates.length - 1]}\n`);
 
-  const slotsToBuffer = await loadCandidateSlots(candidateDates);
+  const slotsToBuffer = (await loadCandidateSlots(motionDates)).filter(
+    (s) => (s.date && standardDateSet.has(s.date)) || isFullMotionSlot(s)
+  );
 
   if (slotsToBuffer.length === 0) {
-    console.log(`⚠️ No scheduled stories found for dates ${candidateDates.join(", ")}.`);
+    console.log(`⚠️ No scheduled stories found for buffer window ${motionDates[0]}..${motionDates[motionDates.length - 1]}.`);
     return;
   }
 
   console.log(`📋 Found ${slotsToBuffer.length} broadcast slots in the buffer window:\n`);
   const failures: Array<{ bookSlug: string; lang: string; date?: string; error: string }> = [];
+  const creativeAiGaps: Array<{ bookSlug: string; date?: string; theme: string }> = [];
   const handledSlotKeys = new Set<string>();
 
   for (const slot of slotsToBuffer) {
@@ -173,6 +188,8 @@ async function main() {
 
     console.log(`   🟡 [BUFFER MISS] Video not yet buffered in R2 for [${langLabel} / ${req.renderFormatArg}].`);
 
+    const isMotion = isFullMotionSlot(slot);
+
     if (dryRun) {
       if (compTheme) {
         console.log(`   [DRY RUN] Would execute compilation render & R2 sync:`);
@@ -185,9 +202,18 @@ async function main() {
           console.log(`     0. npx tsx scripts/pack-edu-motion.ts --book "${slot.bookSlug}"`);
         } else {
           const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
-          console.log(`   [DRY RUN] R2 Manifest: ${hasManifest ? "PRESENT" : "MISSING (would auto-ingest first)"}`);
-          if (!hasManifest) {
-            console.log(`     0. npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`);
+          if (isMotion) {
+            console.log(`   [DRY RUN] Sunday Full-Motion Slot (${slot.date}): R2 Manifest=${hasManifest ? "PRESENT (will pull & check motion-spec.json)" : "PENDING CREATIVE AI SPEC"}`);
+            if (!hasManifest) {
+              creativeAiGaps.push({ bookSlug: slot.bookSlug, date: slot.date, theme: slot.theme });
+              console.log(`   ⏳ [CREATIVE AI PREP NEEDED] Author & promote stories/${slot.bookSlug}/motion-spec.json before ${slot.date}.`);
+              continue;
+            }
+          } else {
+            console.log(`   [DRY RUN] R2 Manifest: ${hasManifest ? "PRESENT" : "MISSING (would auto-ingest first)"}`);
+            if (!hasManifest) {
+              console.log(`     0. npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`);
+            }
           }
           console.log(`     1. npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`);
         }
@@ -211,6 +237,11 @@ async function main() {
         if (!existsSync(localMotionSpec)) {
           const hasManifest = await hasStoryManifestInR2(slot.bookSlug);
           if (!hasManifest) {
+            if (isMotion) {
+              console.warn(`   ⏳ [CREATIVE AI BUFFER GAP] Full-Motion [${slot.bookSlug}] (${slot.date}) has no motion-spec.json yet. Skipping static PDF fallback.`);
+              creativeAiGaps.push({ bookSlug: slot.bookSlug, date: slot.date, theme: slot.theme });
+              continue;
+            }
             console.log(`   📥 Story [${slot.bookSlug}] not yet in R2. Running auto-ingestion before pre-render...`);
             execSync(`npx tsx scripts/ingest-story.ts --book "${slot.bookSlug}"`, { stdio: "inherit" });
           }
@@ -218,6 +249,12 @@ async function main() {
           // Step 1: Ensure assets (or promoted motion-spec.json in R2) are pulled locally
           console.log(`   ⬇️ Pulling story assets from Cloudflare R2...`);
           execSync(`npx tsx scripts/manage-story-storage.ts pull ${slot.bookSlug}`, { stdio: "inherit" });
+        }
+
+        if (isMotion && !existsSync(localMotionSpec)) {
+          console.warn(`   ⏳ [CREATIVE AI BUFFER GAP] [${slot.bookSlug}] pulled without motion-spec.json for ${slot.date}.`);
+          creativeAiGaps.push({ bookSlug: slot.bookSlug, date: slot.date, theme: slot.theme });
+          continue;
         }
 
         if (existsSync(localMotionSpec)) {
@@ -263,8 +300,27 @@ async function main() {
   }
 
   console.log(`\n==================================================================`);
-  console.log(`✨ Pre-Render Buffer Check Completed (${slotsToBuffer.length - failures.length}/${slotsToBuffer.length} ready): ${candidateDates[0]} to ${candidateDates[candidateDates.length - 1]}`);
+  console.log(`✨ Pre-Render Buffer Check Completed (${slotsToBuffer.length - failures.length - creativeAiGaps.length}/${slotsToBuffer.length} ready): ${motionDates[0]} to ${motionDates[motionDates.length - 1]}`);
   console.log(`==================================================================\n`);
+
+  if (creativeAiGaps.length > 0) {
+    const uniqueGaps = Array.from(
+      new Map(creativeAiGaps.map((g) => [`${g.date}::${g.bookSlug}`, g])).values()
+    );
+    const gapSummary = uniqueGaps
+      .map((g) => `• <b>${g.date}</b>: <code>${g.bookSlug}</code> — ${g.theme}`)
+      .join("\n");
+    console.warn(`⏳ Creative AI Buffer Action Needed (${uniqueGaps.length} upcoming Full-Motion spec(s)):\n${gapSummary}`);
+    if (!dryRun) {
+      const tgConfig = getTelegramConfig();
+      if (tgConfig) {
+        await sendTelegramMessage(
+          tgConfig,
+          `🎨 <b>Creative AI Full-Motion Buffer Reminder</b>\n\nUpcoming Sunday Full-Motion slot(s) within H+7 need authored <code>motion-spec.json</code> promoted to R2:\n${gapSummary}`
+        ).catch(() => {});
+      }
+    }
+  }
 
   if (failures.length > 0) {
     try {

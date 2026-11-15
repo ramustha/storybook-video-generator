@@ -66,7 +66,8 @@ function resolveBookMetadata(
     }
 
     const r2PublicDomain = "https://pub-f2786231e5e34f19a6860d7fe9ddd569.r2.dev";
-    const photoUrl = `${r2PublicDomain}/stories/${slug}/assets/cover.png`;
+    const coverRel = typeof localStory.coverAsset === "string" && localStory.coverAsset.trim() ? localStory.coverAsset.trim() : "assets/cover.png";
+    const photoUrl = `${r2PublicDomain}/stories/${slug}/${coverRel}`;
 
     return {
       cleanTitle,

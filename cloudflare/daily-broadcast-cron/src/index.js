@@ -60,19 +60,28 @@ export default {
         })
       );
     }
-    // 2. Daily Morning Broadcast (01:30 UTC = 08:30 WIB) - English Feature
-    else if (cron === "30 1 * * *") {
-      ctx.waitUntil(
-        dispatchWorkflow(env, "daily-broadcast.yml", {
-          action: "broadcast",
-          slot: "morning",
-          book: "auto",
-          lang: "en",
-          dry_run: false,
-        })
-      );
+    // 2. H-2 Morning Check (23:30 UTC = 06:30 WIB) & Daily Morning Broadcast (01:30 UTC = 08:30 WIB)
+    else if (cron === "30 1,23 * * *" || cron === "30 1 * * *") {
+      if (utcHour === 23) {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "readiness-check.yml", {
+            slot: "morning",
+            dry_run: false,
+          })
+        );
+      } else {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "daily-broadcast.yml", {
+            action: "broadcast",
+            slot: "morning",
+            book: "auto",
+            lang: "en",
+            dry_run: false,
+          })
+        );
+      }
     }
-    // 3. Wave 2 (05:30 UTC = 12:30 WIB) & Wave 3 (13:30 UTC = 20:30 WIB) Post-Publish Funnel
+    // 3. Wave 2 (05:30 UTC = 12:30 WIB) & Wave 3 (13:30 UTC = 20:30 WIB) Post-Publish Funnel (Illustration Books)
     else if (cron === "30 5,13 * * *") {
       const isWave2 = utcHour < 10;
       ctx.waitUntil(
@@ -84,6 +93,46 @@ export default {
           dry_run: false,
         })
       );
+    }
+    // 3B. Daily 17:00 WIB H-2 Evening Check + Dedicated Sunday Full-Motion Schedule (13:00 H-2 Check / 14:00 Before / 15:00 Broadcast / 17:00 After WIB)
+    else if (cron === "0 6,7,8,10 * * *" || cron === "0 7,8,10 * * 0") {
+      const isSunday = scheduledDate.getUTCDay() === 0;
+      if (utcHour === 6 && isSunday) {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "readiness-check.yml", {
+            slot: "motion",
+            dry_run: false,
+          })
+        );
+      } else if ((utcHour === 7 || utcHour === 8) && isSunday) {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "daily-broadcast.yml", {
+            action: utcHour === 7 ? "motion-before" : "broadcast",
+            slot: "motion",
+            book: "auto",
+            lang: "auto",
+            dry_run: false,
+          })
+        );
+      } else if (utcHour === 10) {
+        ctx.waitUntil(
+          dispatchWorkflow(env, "readiness-check.yml", {
+            slot: "evening",
+            dry_run: false,
+          })
+        );
+        if (isSunday) {
+          ctx.waitUntil(
+            dispatchWorkflow(env, "daily-broadcast.yml", {
+              action: "motion-after",
+              slot: "motion",
+              book: "auto",
+              lang: "auto",
+              dry_run: false,
+            })
+          );
+        }
+      }
     }
     // 4. Consolidated 00:00 / 12:00 / 19:00 UTC trigger
     else if (cron === "0 0,12,19 * * *") {

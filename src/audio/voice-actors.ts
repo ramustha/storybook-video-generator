@@ -18,6 +18,14 @@ export type VoiceActorRole =
   | "animal_funny"      // Clever mousedeer, witty cat, playful animals
   | "villager";         // Neighbours, crowd, merchants
 
+export interface ActorVoiceSpec {
+  voiceName: string;
+  pitch: string;
+  rate: string;
+  /** Optional FFmpeg vocal-tract formant scale (>1 sounds younger/child-like). */
+  formantScale?: number;
+}
+
 export interface VoiceActorProfile {
   role: VoiceActorRole;
   defaultName: {
@@ -27,16 +35,8 @@ export interface VoiceActorProfile {
   icon: string;
   signatureColor: string;
   voice: {
-    id: {
-      voiceName: string;
-      pitch: string;
-      rate: string;
-    };
-    en: {
-      voiceName: string;
-      pitch: string;
-      rate: string;
-    };
+    id: ActorVoiceSpec;
+    en: ActorVoiceSpec;
   };
 }
 
@@ -52,8 +52,9 @@ export const VOICE_ACTOR_REGISTRY: Record<VoiceActorRole, VoiceActorProfile> = {
     voice: {
       id: {
         voiceName: "id-ID-GadisNeural",
-        pitch: "+18%", // Lively, funny, attractive, energetic child host (Zayn Storyteller)
-        rate: "+10%",  // Fast, joyful, presentation cadence
+        pitch: "+10%",
+        rate: "+8%",
+        formantScale: 1.17,
       },
       en: {
         voiceName: "en-US-AnaNeural",
@@ -74,8 +75,9 @@ export const VOICE_ACTOR_REGISTRY: Record<VoiceActorRole, VoiceActorProfile> = {
     voice: {
       id: {
         voiceName: "id-ID-GadisNeural",
-        pitch: "+32%", // Sweet, cute, expressive, innocent young child storytelling
-        rate: "+4%",   // Gentle narrative pacing
+        pitch: "+10%",
+        rate: "+4%",
+        formantScale: 1.19,
       },
       en: {
         voiceName: "en-US-AnaNeural",
@@ -96,8 +98,9 @@ export const VOICE_ACTOR_REGISTRY: Record<VoiceActorRole, VoiceActorProfile> = {
     voice: {
       id: {
         voiceName: "id-ID-GadisNeural",
-        pitch: "+10Hz",
+        pitch: "+4%",
         rate: "+4%",
+        formantScale: 1.15,
       },
       en: {
         voiceName: "en-US-AnaNeural",
@@ -118,8 +121,9 @@ export const VOICE_ACTOR_REGISTRY: Record<VoiceActorRole, VoiceActorProfile> = {
     voice: {
       id: {
         voiceName: "id-ID-GadisNeural",
-        pitch: "+14Hz",
+        pitch: "+12%",
         rate: "+5%",
+        formantScale: 1.18,
       },
       en: {
         voiceName: "en-US-AnaNeural",

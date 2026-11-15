@@ -17,6 +17,7 @@ import crypto from "crypto";
 import { execSync } from "child_process";
 import { chromium } from "playwright";
 import { synthesizeSceneVoice, DialogueLine } from "../audio/tts-engine";
+import { getVoiceActor } from "../audio/voice-actors";
 import { resolveChromiumExecutable, resolveFfmpegBinaries } from "./render-motion-stage";
 import {
   CalloutSpec,
@@ -307,13 +308,15 @@ async function synthesizeUniversalChapters(
 
   const timelinePath = path.join(outDir, "timeline.json");
   const voCombinedPath = path.join(outDir, "vo_combined.mp3");
+  const speakerRole = spec.narrator.speakerRole || "narrator";
   const scriptHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
         lang,
         pacing,
-        speakerRole: spec.narrator.speakerRole || "narrator",
+        speakerRole,
+        voiceProfile: getVoiceActor(speakerRole).voice[lang],
         chapters: spec.chapters.map((c) => ({
           id: c.id,
           section: c.section,
@@ -358,7 +361,6 @@ async function synthesizeUniversalChapters(
   }
 
   const rawSegments: RawSentenceSeg[] = [];
-  const speakerRole = spec.narrator.speakerRole || "narrator";
 
   for (let cIdx = 0; cIdx < spec.chapters.length; cIdx++) {
     const ch = spec.chapters[cIdx];

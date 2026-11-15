@@ -62,6 +62,42 @@ export function attachPunctuation(azureWords: string[], originalText: string): s
 }
 
 /**
+ * Shifts vocal-tract formants & pitch via asetrate+atempo while preserving duration/word timings.
+ */
+function applyFormantScale(inputMp3Path: string, outputMp3Path: string, formantScale: number): void {
+  const { ffmpeg } = resolveFfmpegBinaries();
+  const tempo = (1 / formantScale).toFixed(5);
+  const scale = formantScale.toFixed(4);
+  const filter = `aresample=24000,asetrate=24000*${scale},atempo=${tempo},aresample=24000`;
+  execSync(`${ffmpeg} -y -v error -i "${inputMp3Path}" -af "${filter}" -ar 24000 -ac 1 -b:a 96k "${outputMp3Path}"`);
+}
+
+/**
+ * Probes exact audio duration in seconds across macOS (`afinfo`) and Linux (`ffprobe`).
+ */
+function measureAudioDurationSec(audioFilePath: string, fallbackDuration: number): number {
+  try {
+    if (process.platform === "darwin") {
+      const afOut = execSync(`afinfo "${audioFilePath}" 2>/dev/null`).toString();
+      const m = afOut.match(/estimated duration:\s*([\d.]+)\s*sec/);
+      if (m) return parseFloat(m[1]);
+    } else {
+      const { ffprobe } = resolveFfmpegBinaries();
+      const probeOut = execSync(
+        `${ffprobe} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioFilePath}" 2>/dev/null`
+      )
+        .toString()
+        .trim();
+      const parsedDur = parseFloat(probeOut);
+      if (Number.isFinite(parsedDur) && parsedDur > 0) {
+        return parsedDur;
+      }
+    }
+  } catch {}
+  return fallbackDuration;
+}
+
+/**
  * Synthesizes a single dialogue line for a given speaker role with telemetry.
  */
 async function synthesizeLine(
@@ -85,11 +121,15 @@ async function synthesizeLine(
     .replace(/[<>]/g, "")
     .trim();
 
+  const edgeVoiceName = voiceConfig.voiceName;
+  const edgePitch = voiceConfig.pitch;
+  const edgeFormantScale = voiceConfig.formantScale;
+
   let lastError: any = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const tts = new MsEdgeTTS();
-      await tts.setMetadata(voiceConfig.voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
+      await tts.setMetadata(edgeVoiceName, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3, {
         wordBoundaryEnabled: true,
         sentenceBoundaryEnabled: true,
       });
@@ -97,10 +137,17 @@ async function synthesizeLine(
       const lineTempDir = path.join(tempDir, `line_${lineIndex}_att${attempt}`);
       await fs.mkdir(lineTempDir, { recursive: true });
 
-      const { audioFilePath, metadataFilePath } = await tts.toFile(lineTempDir, cleanText, {
-        pitch: voiceConfig.pitch,
+      const { audioFilePath: rawAudioPath, metadataFilePath } = await tts.toFile(lineTempDir, cleanText, {
+        pitch: edgePitch,
         rate: rateOverride ?? voiceConfig.rate,
       });
+
+      let audioFilePath = rawAudioPath;
+      if (edgeFormantScale && Math.abs(edgeFormantScale - 1) > 0.005) {
+        const shapedPath = path.join(lineTempDir, "shaped.mp3");
+        applyFormantScale(rawAudioPath, shapedPath, edgeFormantScale);
+        audioFilePath = shapedPath;
+      }
 
       const words: WordTimingItem[] = [];
       let durationSec = 2.0;
@@ -139,29 +186,7 @@ async function synthesizeLine(
         }
       }
 
-      // Measure true audio file duration (ffprobe on Linux/macOS, afinfo fallback) and add natural breathing tail (+0.8s)
-      let actualAudioSec = durationSec;
-      try {
-        if (process.platform === "darwin") {
-          const afOut = execSync(`afinfo "${audioFilePath}" 2>/dev/null`).toString();
-          const m = afOut.match(/estimated duration:\s*([\d.]+)\s*sec/);
-          if (m) actualAudioSec = parseFloat(m[1]);
-        } else {
-          const { ffprobe } = resolveFfmpegBinaries();
-          const probeOut = execSync(
-            `${ffprobe} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioFilePath}" 2>/dev/null`
-          )
-            .toString()
-            .trim();
-          const parsedDur = parseFloat(probeOut);
-          if (Number.isFinite(parsedDur) && parsedDur > 0) {
-            actualAudioSec = parsedDur;
-          }
-        }
-      } catch {
-        actualAudioSec = durationSec + 0.5;
-      }
-
+      const actualAudioSec = measureAudioDurationSec(audioFilePath, durationSec + 0.5);
       durationSec = parseFloat((actualAudioSec + 0.8).toFixed(2));
 
       return {
