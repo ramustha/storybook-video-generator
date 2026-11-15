@@ -7,6 +7,7 @@ import { publishInstagramFeedPhoto, publishInstagramCarousel } from "./publish-i
 import { publishThreadsPhotoPost, publishThreadsCarousel } from "./publish-threads";
 import {
   notifyTelegramFailure,
+  notifyTelegramAnnouncement,
 } from "./notify-telegram";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { db } from "./lib/db";
@@ -680,6 +681,40 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
         error: errors.join("\n"),
       });
     } catch {}
+  } else if (errors.length === 0) {
+    try {
+      const mTitle = (morningLang === "id"
+        ? morningStory.title || morningStory.originalTitle
+        : morningStory.originalTitle || morningStory.title || morningBook
+      ).replace(/[!]+$/, "").trim();
+      const eTitle = (eveningStory.title || eveningStory.originalTitle || eveningBook).replace(/[!]+$/, "").trim();
+      const mThumb = morningLang === "id" ? morningStory.thumbnailConfig?.id : morningStory.thumbnailConfig?.en;
+      const mHook = mThumb?.hook;
+      const eThumb = eveningStory.thumbnailConfig?.id;
+      const eHook = eThumb?.hook;
+      const mTime = morningSlot.time_slot || morningSlot.timeSlot || "08:30 WIB";
+      const eTime = eveningSlot.time_slot || eveningSlot.timeSlot || "19:00 WIB";
+
+      await notifyTelegramAnnouncement({
+        dateStr: targetDate,
+        morningBook,
+        morningTitle: mTitle,
+        morningLang,
+        morningSlotTime: mTime,
+        morningHook: mHook,
+        eveningBook,
+        eveningTitle: eTitle,
+        eveningLang,
+        eveningSlotTime: eTime,
+        eveningHook: eHook,
+        facebookUrl: fbResult?.url,
+        instagramUrl: igResult?.url,
+        threadsUrl: thResult?.url,
+        dryRun: options.dryRun,
+      });
+    } catch (e: any) {
+      console.warn("⚠️ Warning sending Telegram announcement success alert:", e.message);
+    }
   }
 
   console.log("\n🎉 SINGLE DAILY BILINGUAL ANNOUNCEMENT DISPATCH COMPLETE!\n");
@@ -942,7 +977,7 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     }
   }
 
-  // 7. Alert Telegram if errors occurred
+  // 7. Alert Telegram if errors occurred, or notify success
   if (errors.length > 0 && !options.dryRun) {
     try {
       await notifyTelegramFailure({
@@ -953,6 +988,23 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
         error: errors.join("\n"),
       });
     } catch {}
+  } else if (errors.length === 0) {
+    try {
+      await notifyTelegramAnnouncement({
+        dateStr: todayDate,
+        morningBook: targetBook,
+        morningTitle: story.title,
+        morningLang: lang,
+        morningSlotTime: slotTime,
+        morningHook: story.thumbnailConfig?.[lang]?.hook || story.title,
+        facebookUrl: existingAnn.facebook?.url,
+        instagramUrl: existingAnn.instagram?.url,
+        threadsUrl: existingAnn.threads?.url,
+        dryRun: options.dryRun,
+      });
+    } catch (e: any) {
+      console.warn("⚠️ Warning sending Telegram announcement success alert:", e.message);
+    }
   }
 
   console.log("\n🎉 ANNOUNCEMENT FEED DISPATCH COMPLETE!\n");
