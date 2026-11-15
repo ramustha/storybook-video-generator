@@ -12,6 +12,8 @@ import {
   generateStoryChapters,
   extractStoryMoral,
   extractStoryMoralDescription,
+  resolveYoutubeLanguageConfig,
+  buildYoutubeLocalizations,
 } from "./lib/seo-formatter";
 import { db } from "./lib/db";
 
@@ -298,6 +300,8 @@ async function uploadVideo(
     title: string;
     description: string;
     tags: string[];
+    lang?: "id" | "en";
+    localizations?: Record<string, { title: string; description: string }>;
     categoryId?: string;
     privacyStatus: "public" | "unlisted" | "private";
     isMadeForKids?: boolean;
@@ -326,22 +330,27 @@ async function uploadVideo(
   }
 
   const safeTitle = sanitizeTitle(metadata.title, 95);
+  const langConfig = resolveYoutubeLanguageConfig(metadata.lang || "id");
+  const requestBody: any = {
+    snippet: {
+      title: safeTitle,
+      description: metadata.description,
+      tags: metadata.tags,
+      categoryId: metadata.categoryId || "1", // 1 = Film & Animation, 27 = Education
+      defaultLanguage: langConfig.defaultLanguage,
+      defaultAudioLanguage: langConfig.defaultAudioLanguage,
+    },
+    status: statusBody,
+  };
+  if (metadata.localizations && Object.keys(metadata.localizations).length > 0) {
+    requestBody.localizations = metadata.localizations;
+  }
   let res: any;
   try {
     res = await youtube.videos.insert(
       {
-        part: ["snippet", "status"],
-        requestBody: {
-          snippet: {
-            title: safeTitle,
-            description: metadata.description,
-            tags: metadata.tags,
-            categoryId: metadata.categoryId || "1", // 1 = Film & Animation, 27 = Education
-            defaultLanguage: "id",
-            defaultAudioLanguage: "id",
-          },
-          status: statusBody,
-        },
+        part: requestBody.localizations ? ["snippet", "status", "localizations"] : ["snippet", "status"],
+        requestBody,
         media: {
           body: createReadStream(filePath),
         },
@@ -508,23 +517,32 @@ async function updateVideoMetadata(
     title: string;
     description: string;
     tags: string[];
+    lang?: "id" | "en";
+    localizations?: Record<string, { title: string; description: string }>;
     categoryId?: string;
   }
 ) {
   const safeTitle = sanitizeTitle(metadata.title, 95);
-  console.log(`📝 Updating metadata on YouTube for video ${videoId}...`);
+  const langConfig = resolveYoutubeLanguageConfig(metadata.lang || "id");
+  const requestBody: any = {
+    id: videoId,
+    snippet: {
+      title: safeTitle,
+      description: metadata.description,
+      tags: metadata.tags,
+      categoryId: metadata.categoryId || "1",
+      defaultLanguage: langConfig.defaultLanguage,
+      defaultAudioLanguage: langConfig.defaultAudioLanguage,
+    },
+  };
+  if (metadata.localizations && Object.keys(metadata.localizations).length > 0) {
+    requestBody.localizations = metadata.localizations;
+  }
+  console.log(`📝 Updating metadata on YouTube for video ${videoId} (${langConfig.defaultLanguage}/${langConfig.defaultAudioLanguage})...`);
   try {
     await youtube.videos.update({
-      part: ["snippet"],
-      requestBody: {
-        id: videoId,
-        snippet: {
-          title: safeTitle,
-          description: metadata.description,
-          tags: metadata.tags,
-          categoryId: metadata.categoryId || "1",
-        },
-      },
+      part: requestBody.localizations ? ["snippet", "localizations"] : ["snippet"],
+      requestBody,
     });
     console.log(`✔ Video metadata updated successfully for ${videoId}`);
   } catch (err: any) {
@@ -884,6 +902,7 @@ async function main() {
         title: sanitizeTitle(title, 100),
         description,
         tags: compilationTags,
+        lang,
         categoryId: "27",
         privacyStatus: privacy,
         isMadeForKids: false,
@@ -1118,6 +1137,35 @@ async function main() {
     let landscapeDesc: string = kitMeta?.landscapeDesc || seoLandscape.description;
     let shortsTitle: string = sanitizeTitle(kitMeta?.shortsTitle || seoVertical.title);
     let shortsDesc: string = kitMeta?.shortsDesc || seoVertical.description;
+    const altLang: "id" | "en" = lang === "en" ? "id" : "en";
+    const altChapters = generateChapters(manifest.scenes, altLang);
+    const landscapeLocalizations = buildYoutubeLocalizations({
+      bookSlug,
+      title: manifest.title,
+      originalTitle: manifest.originalTitle,
+      lang,
+      format: "landscape",
+      author: seoAuthor,
+      illustrator: seoIllustrator,
+      alternateMoralHeadline: extractStoryMoral(manifest, altLang),
+      alternateMoralDescription: extractStoryMoralDescription(manifest, altLang),
+      alternateChapters: altChapters,
+      license: seoLicense,
+      publisher: seoPublisher,
+    });
+    const verticalLocalizations = buildYoutubeLocalizations({
+      bookSlug,
+      title: manifest.title,
+      originalTitle: manifest.originalTitle,
+      lang,
+      format: "vertical",
+      author: seoAuthor,
+      illustrator: seoIllustrator,
+      alternateMoralHeadline: extractStoryMoral(manifest, altLang),
+      alternateMoralDescription: extractStoryMoralDescription(manifest, altLang),
+      license: seoLicense,
+      publisher: seoPublisher,
+    });
 
     // 4. Upload Landscape (16:9) with Duration Policy & Pre-Upload Deduplication Check
     if ((effectiveFormat === "landscape" || effectiveFormat === "all") && !existsSync(landscapeVideo)) {
@@ -1172,6 +1220,8 @@ async function main() {
               title: landscapeTitle,
               description: landscapeDesc,
               tags: coreTags,
+              lang,
+              localizations: landscapeLocalizations,
             });
             await uploadThumbnail(youtube, targetVideoId, thumbnailPath);
           } else {
@@ -1233,6 +1283,8 @@ async function main() {
                   title: landscapeTitle,
                   description: landscapeDesc,
                   tags: coreTags,
+                  lang,
+                  localizations: landscapeLocalizations,
                   privacyStatus: privacy,
                   isMadeForKids,
                   publishAt: scheduleTime,
@@ -1248,6 +1300,8 @@ async function main() {
               title: landscapeTitle,
               description: landscapeDesc,
               tags: coreTags,
+              lang,
+              localizations: landscapeLocalizations,
               privacyStatus: privacy,
               isMadeForKids,
               publishAt: scheduleTime,
@@ -1382,6 +1436,8 @@ async function main() {
             title: shortsTitle,
             description: shortsDesc,
             tags: [...coreTags, "shorts", "youtubeshorts"],
+            lang,
+            localizations: verticalLocalizations,
           });
           const langVerticalThumb = path.join(storyDir, `exports/${lang}/thumbnail-vertical.png`);
           const verticalThumbnailPath = existsSync(langVerticalThumb) ? langVerticalThumb : thumbnailPath;
@@ -1456,6 +1512,8 @@ async function main() {
                 title: shortsTitle,
                 description: shortsDesc,
                 tags: [...coreTags, "shorts", "youtubeshorts"],
+                lang,
+                localizations: verticalLocalizations,
                 privacyStatus: privacy,
                 isMadeForKids,
                 publishAt: scheduleTime,
@@ -1471,6 +1529,8 @@ async function main() {
             title: shortsTitle,
             description: shortsDesc,
             tags: [...coreTags, "shorts", "youtubeshorts"],
+            lang,
+            localizations: verticalLocalizations,
             privacyStatus: privacy,
             isMadeForKids,
             publishAt: scheduleTime,
