@@ -9,7 +9,7 @@ import {
   notifyTelegramFailure,
   notifyTelegramAnnouncement,
 } from "./notify-telegram";
-import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
+import { DAILY_CALENDAR_MONTH_1, isFullMotionSlot } from "./content-calendar";
 import { db } from "./lib/db";
 import { buildStoryPortalUrl, resolveRelatedPublishedVideos } from "./lib/seo-formatter";
 import { loadJsonArraySafe } from "./lib/portal-sync";
@@ -17,9 +17,10 @@ import { loadJsonArraySafe } from "./lib/portal-sync";
 export interface AnnouncementOptions {
   bookSlug?: string;
   lang?: "id" | "en";
-  slot?: "morning" | "evening" | "auto" | "all" | "daily";
+  slot?: "morning" | "evening" | "motion" | "auto" | "all" | "daily";
   dailyLineup?: boolean;
   wave?: 1 | 2 | 3;
+  motionPhase?: "before" | "after";
   date?: string;
   dryRun?: boolean;
   force?: boolean;
@@ -308,9 +309,17 @@ function resolveBestPhoto(storyDir: string, lang: "id" | "en"): string {
     if (existsSync(p)) return p;
   }
 
-  // Fallback to neutral book cover only if language exports are missing
-  const neutralCover = path.join(storyDir, "assets", "cover.png");
-  if (existsSync(neutralCover)) return neutralCover;
+  // Fallback to motion cover or neutral book cover when language exports are missing
+  const coverFallbacks = [
+    path.join(storyDir, "motion", "cover_16x9.png"),
+    path.join(storyDir, "motion", "cover_9x16.png"),
+    path.join(storyDir, "assets", "cover.png"),
+    path.join(storyDir, "assets", "cover.jpg"),
+    path.join(storyDir, "assets", "cover.jpeg"),
+  ];
+  for (const fallbackPath of coverFallbacks) {
+    if (existsSync(fallbackPath)) return fallbackPath;
+  }
 
   throw new Error(`No image asset found for announcement in language [${lang.toUpperCase()}] at ${storyDir}`);
 }
@@ -449,28 +458,29 @@ async function resolveDailyLineupSlots(targetDate: string): Promise<{
     });
   }
 
-  if (!slots || slots.length === 0) {
+  const bookSlots = slots.filter((s) => !isFullMotionSlot(s));
+  if (bookSlots.length === 0) {
     return null;
   }
 
   const morningSlot =
-    slots.find((s) => {
+    bookSlots.find((s) => {
       const time = (s.time_slot || s.timeSlot || "").toLowerCase();
       const type = (s.slot_type || s.slotType || "").toLowerCase();
       const lang = s.lang || "";
       return time.includes("08:") || time.includes("07:") || type.includes("morning") || lang === "en";
-    }) || slots[0];
+    }) || bookSlots[0];
 
   const eveningSlot =
-    slots.find((s) => {
+    bookSlots.find((s) => {
       const time = (s.time_slot || s.timeSlot || "").toLowerCase();
       const type = (s.slot_type || s.slotType || "").toLowerCase();
       const lang = s.lang || "";
       return time.includes("19:") || time.includes("18:") || type.includes("prime") || type.includes("bedtime") || (lang === "id" && s !== morningSlot);
-    }) || (slots.length > 1 ? slots[1] : slots[0]);
+    }) || (bookSlots.length > 1 ? bookSlots[1] : bookSlots[0]);
 
   return {
-    slots,
+    slots: bookSlots,
     morningSlot,
     eveningSlot,
     morningBook: morningSlot.book_slug || morningSlot.bookSlug,
@@ -1223,6 +1233,219 @@ export async function publishPostPublishWaveAnnouncement(
 }
 
 /**
+ * Resolves dedicated Sunday Full-Motion slots for a given date without mixing regular book slots.
+ */
+async function resolveFullMotionSlots(targetDate: string, bookSlug?: string): Promise<any[]> {
+  const merged = new Map<string, any>();
+  for (const s of DAILY_CALENDAR_MONTH_1) {
+    if (s.date !== targetDate || !isFullMotionSlot(s)) continue;
+    merged.set(`${s.date}::${s.timeSlot}::${s.lang}`, s);
+  }
+  try {
+    const d1Slots = await db.getCalendar(targetDate);
+    for (const row of d1Slots || []) {
+      if (!isFullMotionSlot(row)) continue;
+      const key = `${row.scheduled_date}::${row.time_slot}::${row.lang}`;
+      if (!merged.has(key)) merged.set(key, row);
+    }
+  } catch (e: any) {
+    console.warn("ℹ️ D1 Full-Motion lookup warning:", e.message);
+  }
+
+  const all = Array.from(merged.values());
+  if (bookSlug) {
+    const filtered = all.filter((s) => (s.book_slug || s.bookSlug) === bookSlug);
+    return filtered.length > 0 ? filtered : [{ bookSlug, timeSlot: "15:00 WIB", lang: "id" }];
+  }
+  return all;
+}
+
+/**
+ * Publishes dedicated BEFORE (14:00 WIB teaser) or AFTER (17:00 WIB watch-now recap) announcements
+ * for Sunday Full-Motion Premieres, completely separate from illustration book schedules.
+ */
+export async function publishFullMotionAnnouncement(
+  options: AnnouncementOptions & { motionPhase: "before" | "after" }
+): Promise<{ success: boolean; skipped?: boolean; targetBook?: string; lang?: string }> {
+  const phase = options.motionPhase;
+  const targetDate = options.date || getJakartaDateString();
+  const phaseKey = phase === "before" ? "fullMotionBefore" : "fullMotionAfter";
+
+  console.log("\n==================================================================");
+  console.log(`🎬 SUNDAY FULL-MOTION ANNOUNCEMENT (${phase.toUpperCase()})`);
+  console.log("==================================================================");
+  console.log(`📅 Target Date (WIB) : ${targetDate}`);
+  console.log(`🧪 Dry Run Mode      : ${options.dryRun ? "YES (Preview Only)" : "NO (Live Post)"}`);
+
+  const motionSlots = await resolveFullMotionSlots(targetDate, options.bookSlug);
+  if (motionSlots.length === 0) {
+    console.log(`🌴 Tidak ada jadwal Sunday Full-Motion Premiere pada ${targetDate}. Lewati.`);
+    return { success: true, skipped: true };
+  }
+
+  const primarySlot = motionSlots[0];
+  const targetBook = primarySlot.book_slug || primarySlot.bookSlug;
+  const slotTime = primarySlot.time_slot || primarySlot.timeSlot || "15:00 WIB";
+  const storyDir = path.resolve("./stories", targetBook);
+  const storyJsonPath = path.join(storyDir, "story.json");
+
+  if (!existsSync(storyJsonPath)) {
+    console.log(`📥 Story assets missing locally for [${targetBook}]. Pulling from Cloudflare R2...`);
+    await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", targetBook]);
+  }
+
+  const story = existsSync(storyJsonPath)
+    ? JSON.parse(await fs.readFile(storyJsonPath, "utf-8"))
+    : { slug: targetBook, title: targetBook, originalTitle: targetBook };
+
+  if (!story.publications) story.publications = {};
+  if (!story.publications.announcements) story.publications.announcements = {};
+  if (!story.publications.announcements[targetDate]) story.publications.announcements[targetDate] = {};
+
+  const existing = story.publications.announcements[targetDate][phaseKey] || {};
+  const hasFb = Boolean(existing.facebook?.id || existing.facebook?.postId);
+  const hasIg = Boolean(existing.instagram?.id);
+  const hasThreads = Boolean(existing.threads?.id || existing.threads?.postId);
+
+  if (hasFb && hasIg && hasThreads && !options.force) {
+    console.log(`🛡️ [ZERO DUPLICATE GATE] Full-Motion ${phase.toUpperCase()} for [${targetBook}] (${targetDate}) already posted.`);
+    return { success: true, skipped: true, targetBook, lang: "bilingual" };
+  }
+
+  const visualPath = resolveBestPhoto(storyDir, "id");
+  const cleanTitleId = (story.title || targetBook).replace(/[!]+$/, "").trim();
+  const cleanTitleEn = (story.originalTitle || cleanTitleId).replace(/[!]+$/, "").trim();
+  const moralId = extractMoral(story, "id");
+  const portalUrlFb = buildStoryPortalUrl(targetBook, { source: "facebook", medium: `motion-${phase}` });
+  const portalUrlTh = buildStoryPortalUrl(targetBook, { source: "threads", medium: `motion-${phase}` });
+  const ytIdUrl = story.publications?.youtube?.id?.landscape || story.publications?.youtube?.id?.vertical;
+  const ytEnUrl = story.publications?.youtube?.en?.landscape || story.publications?.youtube?.en?.vertical;
+
+  const captionIg =
+    phase === "before"
+      ? `🎬✨ SPECIAL SUNDAY FULL-MOTION PREMIERE — 1 JAM LAGI (${slotTime})!\n\nBukan sekadar buku bergambar — Minggu ini Zayn Storybook hadir dalam edisi Full-Motion Animasi + Voice Actor Anak Ekspresif & Efek Suara (Bilingual EN & ID)!\n\n📖 "${cleanTitleId}" / "${cleanTitleEn}"\n💡 Nilai Utama: ${moralId}\n\n💾 Simpan (Save) pengingat ini & tonton bareng si kecil tepat pukul ${slotTime}!\n👉 Katalog resmi di Bio (storybook-catalog.pages.dev)\n\n#ZaynStorybook #FullMotionKids #DongengAnak #SundayPremiere #BilingualKids`
+      : `🎬🌟 SUNDAY FULL-MOTION EDITION — SUDAH TAYANG!\n\nEdisi spesial Full-Motion Animasi "${cleanTitleId}" / "${cleanTitleEn}" kini resmi mengudara dalam Bahasa Indonesia & English!\n\n💡 Pesan Moral: ${moralId}\n▶️ Tonton Full HD (16:9) & Shorts/Reels (9:16) sekarang di YouTube & Portal Zayn Storybook!\n\n💬 Gimana pendapat si kecil tentang animasi Minggu ini? Tulis di komentar!\n\n#ZaynStorybook #FullMotionKids #DongengMinggu #BilingualKids #CeritaAnak`;
+
+  const captionFb =
+    phase === "before"
+      ? `🎬 SPECIAL SUNDAY FULL-MOTION PREMIERE (${slotTime}) — 1 Jam Lagi!\n\nBerbeda dari jadwal buku ilustrasi harian, setiap hari Minggu pukul ${slotTime} kami merilis episode khusus Full-Motion Animasi dengan karakter bergerak & sulih suara anak (EN + ID)!\n\n📖 Judul: "${cleanTitleId}" / "${cleanTitleEn}"\n💡 Pesan Moral: ${moralId}\n\n🔗 Jadwal & episode lengkap:\n${portalUrlFb}`
+      : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${cleanTitleId})\n\nEpisode spesial Full-Motion hari Minggu ini sudah live di semua kanal!\n${ytEnUrl ? `🇬🇧 Watch English Full-Motion: ${ytEnUrl}\n` : ""}${ytIdUrl ? `🇮🇩 Tonton Bahasa Indonesia Full-Motion: ${ytIdUrl}\n` : ""}🌐 Katalog Lengkap: ${portalUrlFb}`;
+
+  const captionTh =
+    phase === "before"
+      ? `🎬 Edisi spesial Minggu! 1 jam lagi (${slotTime}) tayang episode Full-Motion Animasi "${cleanTitleId}" (EN & ID) — karakter hidup + audio cerita anak! Ingatkan si kecil ya 👇\n${portalUrlTh}`
+      : `✨ Sunday Full-Motion "${cleanTitleId}" (EN & ID) SUDAH TAYANG! Animasi bergerak + sulih suara ceria buat menemani sore keluarga 💛\n${ytIdUrl || ytEnUrl || portalUrlTh}`;
+
+  console.log(`📖 Story  : ${cleanTitleId} (${targetBook})`);
+  console.log(`🖼️ Visual : ${path.basename(visualPath)}`);
+
+  if (options.dryRun) {
+    console.log(`\n🧪 [DRY RUN] Preview Full-Motion ${phase.toUpperCase()} Captions:`);
+    console.log(`--- INSTAGRAM ---\n${captionIg}\n--- FACEBOOK ---\n${captionFb}\n--- THREADS ---\n${captionTh}\n`);
+    return { success: true, targetBook, lang: "bilingual" };
+  }
+
+  const errors: string[] = [];
+  let fbResult = existing.facebook;
+  let igResult = existing.instagram;
+  let thResult = existing.threads;
+
+  if (!hasFb || options.force) {
+    try {
+      const fbRes = await publishFacebookPhotoPost({
+        photoPath: visualPath,
+        caption: captionFb,
+        firstComment: portalUrlFb,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && fbRes.success) {
+        fbResult = {
+          postId: fbRes.postId,
+          url: fbRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (err: any) {
+      errors.push(`Facebook (${phase}): ${err.message}`);
+    }
+  }
+  if (!hasIg || options.force) {
+    try {
+      const igRes = await publishInstagramFeedPhoto({
+        imagePath: visualPath,
+        caption: captionIg,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && igRes.success) {
+        igResult = {
+          id: igRes.mediaId,
+          url: igRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (err: any) {
+      errors.push(`Instagram (${phase}): ${err.message}`);
+    }
+  }
+  if (!hasThreads || options.force) {
+    try {
+      const thRes = await publishThreadsPhotoPost({
+        imagePath: visualPath,
+        text: captionTh,
+        dryRun: options.dryRun,
+      });
+      if (!options.dryRun && thRes.success) {
+        thResult = {
+          id: thRes.postId,
+          postId: thRes.postId,
+          url: thRes.permalink,
+          publishedAt: new Date().toISOString(),
+          status: "published",
+        };
+      }
+    } catch (err: any) {
+      errors.push(`Threads (${phase}): ${err.message}`);
+    }
+  }
+
+  story.publications.announcements[targetDate][phaseKey] = {
+    scheduledSlot: slotTime,
+    announcedAt: new Date().toISOString(),
+    phase,
+    facebook: fbResult,
+    instagram: igResult,
+    threads: thResult,
+  };
+  await fs.writeFile(storyJsonPath, JSON.stringify(story, null, 2), "utf-8");
+  await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "push", targetBook, "--manifest-only"]).catch(() => {});
+
+  if (errors.length > 0) {
+    await notifyTelegramFailure({
+      bookSlug: targetBook,
+      lang: "id",
+      slot: `Sunday Full-Motion ${phase.toUpperCase()} (${slotTime})`,
+      platform: "Full-Motion Announcement Dispatcher",
+      error: errors.join("\n"),
+    }).catch(() => {});
+  } else {
+    await notifyTelegramAnnouncement({
+      dateStr: targetDate,
+      morningBook: targetBook,
+      morningTitle: `${cleanTitleId} [Full-Motion ${phase.toUpperCase()}]`,
+      morningLang: "id",
+      morningSlotTime: slotTime,
+      facebookUrl: fbResult?.url,
+      instagramUrl: igResult?.url,
+      threadsUrl: thResult?.url,
+    }).catch(() => {});
+  }
+
+  return { success: errors.length === 0, targetBook, lang: "bilingual" };
+}
+
+/**
  * Main routine: Publishes deduplicated announcement feeds across Facebook, Instagram, and Threads.
  * Note: Telegram is strictly an internal creator notification tool and skipped from public feeds.
  */
@@ -1232,6 +1455,9 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
   targetBook?: string;
   lang?: string;
 }> {
+  if (options.motionPhase) {
+    return publishFullMotionAnnouncement({ ...options, motionPhase: options.motionPhase });
+  }
   if (options.wave === 2 || options.wave === 3) {
     return publishPostPublishWaveAnnouncement({ ...options, wave: options.wave });
   }
@@ -1529,10 +1755,13 @@ async function main() {
   const dailyLineup = args.includes("--daily-lineup");
   const waveArg = getArg("--wave");
   const wave: 1 | 2 | 3 | undefined = waveArg === "2" ? 2 : waveArg === "3" ? 3 : waveArg === "1" ? 1 : undefined;
+  const motionPhaseArg = getArg("--motion-phase");
+  const motionPhase: "before" | "after" | undefined =
+    motionPhaseArg === "before" || motionPhaseArg === "after" ? motionPhaseArg : undefined;
   const dateArg = getArg("--date");
   const bookSlug = getArg("--book");
   const langArg = getArg("--lang") as "id" | "en" | undefined;
-  const slotArg = getArg("--slot") as "morning" | "evening" | "auto" | "daily" | "all" | undefined;
+  const slotArg = getArg("--slot") as "morning" | "evening" | "motion" | "auto" | "daily" | "all" | undefined;
 
   await publishAnnouncement({
     bookSlug,
@@ -1540,6 +1769,7 @@ async function main() {
     slot: slotArg,
     dailyLineup,
     wave,
+    motionPhase,
     date: dateArg,
     dryRun,
     force,

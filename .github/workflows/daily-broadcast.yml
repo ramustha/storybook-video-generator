@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Action (auto, announcement, wave2, wave3, broadcast)'
+        description: 'Action (auto, announcement, wave2, wave3, motion-before, motion-after, broadcast)'
         required: true
         type: choice
         options:
@@ -22,6 +22,8 @@ on:
           - 'announcement'
           - 'wave2'
           - 'wave3'
+          - 'motion-before'
+          - 'motion-after'
           - 'broadcast'
         default: 'auto'
       book:
@@ -38,13 +40,14 @@ on:
           - 'en'
         default: 'auto'
       slot:
-        description: 'Target Slot (auto, morning, evening, all)'
+        description: 'Target Slot (auto, morning, evening, motion, all)'
         required: false
         type: choice
         options:
           - 'auto'
           - 'morning'
           - 'evening'
+          - 'motion'
           - 'all'
         default: 'auto'
       dry_run:
@@ -250,6 +253,7 @@ jobs:
           UTC_MIN=$(date -u +%M)
 
           WAVE_NUM="1"
+          MOTION_PHASE=""
           IS_ANNOUNCEMENT="false"
           if [ "${INPUT_ACTION}" = "announcement" ]; then
             IS_ANNOUNCEMENT="true"
@@ -260,6 +264,12 @@ jobs:
           elif [ "${INPUT_ACTION}" = "wave3" ]; then
             IS_ANNOUNCEMENT="true"
             WAVE_NUM="3"
+          elif [ "${INPUT_ACTION}" = "motion-before" ]; then
+            IS_ANNOUNCEMENT="true"
+            MOTION_PHASE="before"
+          elif [ "${INPUT_ACTION}" = "motion-after" ]; then
+            IS_ANNOUNCEMENT="true"
+            MOTION_PHASE="after"
           elif [ "${INPUT_ACTION}" = "broadcast" ]; then
             IS_ANNOUNCEMENT="false"
           elif [ "${UTC_HOUR}" = "00" ] && [ "${UTC_MIN}" -ge "10" ] && [ "${UTC_MIN}" -le "45" ]; then
@@ -277,7 +287,10 @@ jobs:
           fi
 
           if [ "${IS_ANNOUNCEMENT}" = "true" ]; then
-            if [ "${WAVE_NUM}" = "2" ] || [ "${WAVE_NUM}" = "3" ]; then
+            if [ -n "${MOTION_PHASE}" ]; then
+              echo "🎬 Running Sunday Full-Motion Announcement (${MOTION_PHASE})..."
+              ARGS="--motion-phase ${MOTION_PHASE}"
+            elif [ "${WAVE_NUM}" = "2" ] || [ "${WAVE_NUM}" = "3" ]; then
               echo "🌊 Running Post-Publish Social Funnel Wave ${WAVE_NUM}..."
               ARGS="--wave ${WAVE_NUM}"
             else
