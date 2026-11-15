@@ -1,0 +1,107 @@
+src/motion/compile-edu-motion.ts
+  698ac31901cd73e0 20,311,318-319
+docs/index.html
+  698ac31901cd73e0 2294,2405,2415,2420,2425-2426,2433,2437,2487,2490,2572-2574,2587,3079
+docs/s/ayo-berayun-momo/index.html
+  698ac31901cd73e0 25
+docs/s/uluran-tangan/index.html
+  698ac31901cd73e0 25
+docs/s/lalat-di-langit/index.html
+  698ac31901cd73e0 25
+scripts/schedule-jan2027-motion.ts
+  698ac31901cd73e0 1-381
+src/audio/tts-engine.ts
+  698ac31901cd73e0 65-99,124-126,132,140-141,145-151,189
+scripts/manage-story-storage.ts
+  698ac31901cd73e0 643-720
+docs/s/hari-hujan-ikan/index.html
+  698ac31901cd73e0 25
+docs/s/buaya-dan-kupu-kupu/index.html
+  698ac31901cd73e0 25
+docs/s/tersesat-di-malam-hari/index.html
+  698ac31901cd73e0 25
+docs/s/pipit-dan-buah/index.html
+  698ac31901cd73e0 25
+docs/s/sona-pintar-membantu-ibu/index.html
+  698ac31901cd73e0 25
+docs/s/edu-budi-papang-teripang/index.html
+  698ac31901cd73e0 25
+docs/s/burung-gajah/index.html
+  698ac31901cd73e0 25
+docs/s/edu-hybrid-test-no-image/index.html
+  698ac31901cd73e0 25
+docs/s/poc-kancil/index.html
+  698ac31901cd73e0 25
+.github/workflows/readiness-check.yml
+  698ac31901cd73e0 1-87
+cloudflare/daily-broadcast-cron/wrangler.toml
+  698ac31901cd73e0 6,8-11,13
+docs/s/edu-fabel-kancil-buaya/index.html
+  698ac31901cd73e0 25
+docs/calendar-data.json
+  698ac31901cd73e0 394-438,762-805,1131-1175,1500-1544,1882-1926,2264-2308,2646-2690
+docs/s/vayu-sang-angin/index.html
+  698ac31901cd73e0 25
+docs/s/sringeri-srinivas-belajar-tertawa/index.html
+  698ac31901cd73e0 25
+docs/s/burung-gagak-cerdik/index.html
+  698ac31901cd73e0 25
+scripts/content-calendar.ts
+  698ac31901cd73e0 28-95,1307,1415,1426-1451,1453-1454,1539,1621-1622,1666,1671,1693-1696,1699-1710,1712-1732,1734-1752,1754-1761,1936,1969
+scripts/check-publish-readiness.ts
+  698ac31901cd73e0 1-168
+docs/s/pesta-ulang-tahun/index.html
+  698ac31901cd73e0 25
+docs/s/kheer-bulan-purnama/index.html
+  698ac31901cd73e0 25
+docs/s/pohon-ajaib/index.html
+  698ac31901cd73e0 25
+docs/s/pakai-baju-apa-hari-ini/index.html
+  698ac31901cd73e0 25
+.github/workflows/daily-broadcast.yml
+  698ac31901cd73e0 17,25-26,43,50,256,267-272,290-293
+docs/s/edu-curiosity-awan-jatuh/index.html
+  698ac31901cd73e0 25
+scripts/publish-announcement.ts
+  698ac31901cd73e0 12,20,23,312-322,461-462,467,472,475,480,483,1235-1445,1458-1460,1758-1760,1764,1772
+docs/s/bagaimana-jika/index.html
+  698ac31901cd73e0 25
+docs/s/test-no-image/index.html
+  698ac31901cd73e0 25
+docs/s/katak-ingin-terbang/index.html
+  698ac31901cd73e0 25
+docs/s/payung-merah/index.html
+  698ac31901cd73e0 25
+scripts/buffer-prerender.ts
+  698ac31901cd73e0 5,12,101-105,110-113,118,123-125,127-129,131-133,136,142,191,205-216,240-244,254-257,303,306-323
+docs/s/bima-tukang-tidur/index.html
+  698ac31901cd73e0 25
+docs/s/edu-budi-fermentasi-nusantara/index.html
+  698ac31901cd73e0 25
+scripts/generate-all-announcements.ts
+  698ac31901cd73e0 69-70
+src/audio/voice-actors.ts
+  698ac31901cd73e0 21-28,38-39,55-57,78-80,101,103,124,126
+cloudflare/daily-broadcast-cron/src/index.js
+  698ac31901cd73e0 63-82,84,97-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "ecb8f0426f7f515045a1955f247d4eca5a6a1e50",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 1719,
+      "total_deletions": 181,
+      "accepted_lines": 1719,
+      "overriden_lines": 0
+    }
+  }
+}
