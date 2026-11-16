@@ -101,9 +101,10 @@ export function splitIntoSentences(text: string): string[] {
   for (const part of rawParts) {
     const trimmed = part.trim();
     if (!trimmed) continue;
-    if (trimmed.length < 3 && out.length > 0) {
+    const hasWord = /[\p{L}\p{N}]/u.test(trimmed);
+    if ((!hasWord || trimmed.length < 3) && out.length > 0) {
       out[out.length - 1] = `${out[out.length - 1]} ${trimmed}`;
-    } else {
+    } else if (hasWord) {
       out.push(trimmed);
     }
   }
@@ -231,6 +232,13 @@ export function solveLongFormBudget(
   };
 }
 
+function cleanSpokenCalloutLabel(raw: string): string {
+  return raw
+    .replace(/[•★☆✓✔✕✖!]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
  * Expands a short vertical StoryMotionSpec into a rich multi-act long-form 16:9 chapter sequence
  * designed for YouTube & Facebook long-video monetization (>= 8 minutes).
@@ -267,14 +275,12 @@ export function buildLongFormChapters(spec: StoryMotionSpec): StoryChapterSpec[]
 
     if (ch.section === "story") {
       storyCounter++;
-      if (ch.callout?.id?.title) {
-        factNotesId.push(`${ch.callout.id.title} (${ch.callout.id.ringText})`);
-      }
-      if (ch.callout?.en?.title) {
-        factNotesEn.push(`${ch.callout.en.title} (${ch.callout.en.ringText})`);
-      }
+      const cleanTitleId = ch.callout?.id?.title ? cleanSpokenCalloutLabel(ch.callout.id.title) : "";
+      const cleanTitleEn = ch.callout?.en?.title ? cleanSpokenCalloutLabel(ch.callout.en.title) : "";
+      if (cleanTitleId) factNotesId.push(cleanTitleId);
+      if (cleanTitleEn) factNotesEn.push(cleanTitleEn);
 
-      if (ch.callout) {
+      if (ch.callout && (cleanTitleId || cleanTitleEn)) {
         expanded.push({
           id: `${ch.id}_deep`,
           section: "story",
@@ -284,8 +290,8 @@ export function buildLongFormChapters(spec: StoryMotionSpec): StoryChapterSpec[]
           camera: ch.camera,
           callout: ch.callout,
           text: {
-            id: `Mari kita amati lebih dekat bagian penting ini: ${ch.callout.id.title}, yaitu ${ch.callout.id.ringText}. Setiap makhluk dan bagian kecil di dunia ini punya peran istimewa yang saling menjaga satu sama lain.`,
-            en: `Let's look a little closer at this special detail: ${ch.callout.en.title}, ${ch.callout.en.ringText}. Every small creature and detail in our world plays an important role in caring for one another.`,
+            id: `Mari kita amati lebih dekat bagian penting ini: ${cleanTitleId || spec.book.title}. Setiap makhluk dan bagian kecil di dunia ini punya peran istimewa yang saling menjaga satu sama lain.`,
+            en: `Let's look a little closer at this special part: ${cleanTitleEn || spec.book.originalTitle}. Every small creature and detail in our world plays an important role in caring for one another.`,
           },
         });
       }
@@ -447,8 +453,8 @@ function mixVoiceAmbientAndSfx(options: {
 
   const inputsArg = [`-i "${voiceOnlyPath}"`, ...extraInputs].join(" ");
   execSync(
-    `${ffmpeg} -y ${inputsArg} -filter_complex "${filterChains.join(";")}" -map "[out]" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${voCombinedPath}"`,
-    { stdio: "pipe" }
+    `${ffmpeg} -nostats -loglevel warning -y ${inputsArg} -filter_complex "${filterChains.join(";")}" -map "[out]" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${voCombinedPath}"`,
+    { stdio: "pipe", maxBuffer: 16 * 1024 * 1024 }
   );
 }
 
@@ -711,8 +717,9 @@ async function synthesizeUniversalChapters(
   const concatTxt = path.join(workDir, "concat.txt");
   const voiceOnlyPath = path.join(workDir, "vo_voice_only.mp3");
   await fs.writeFile(concatTxt, concatEntries.join("\n"), "utf-8");
-  execSync(`${ffmpeg} -y -f concat -safe 0 -i "${concatTxt}" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${voiceOnlyPath}"`, {
+  execSync(`${ffmpeg} -nostats -loglevel warning -y -f concat -safe 0 -i "${concatTxt}" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${voiceOnlyPath}"`, {
     stdio: "pipe",
+    maxBuffer: 16 * 1024 * 1024,
   });
 
   const exactVoiceDur = probeDurationSec(ffprobe, voiceOnlyPath);
