@@ -814,6 +814,35 @@ async function resolveDailyLineupSlots(targetDate: string): Promise<{
   };
 }
 
+async function ensureStoryAssetsLocally(
+  storyDir: string,
+  slug: string,
+  dryRun?: boolean
+): Promise<string> {
+  const storyJsonPath = path.join(storyDir, "story.json");
+  const hasVisualAssets =
+    existsSync(path.join(storyDir, "exports")) || existsSync(path.join(storyDir, "assets"));
+
+  if (!dryRun) {
+    try {
+      await pullStory(slug, { manifestOnly: true, force: true });
+    } catch {
+      // Offline or manifest not yet in R2
+    }
+  }
+  if (!existsSync(storyJsonPath) || !hasVisualAssets) {
+    console.log(`📥 Story visual assets not found locally for [${slug}]. Pulling from Cloudflare R2...`);
+    await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slug]);
+    if (!dryRun) {
+      await pullStory(slug, { manifestOnly: true, force: true }).catch(() => {});
+    }
+  }
+  if (!existsSync(storyJsonPath)) {
+    throw new Error(`story.json not found for book '${slug}' at ${storyJsonPath}`);
+  }
+  return storyJsonPath;
+}
+
 /**
  * Publishes a single unified daily bilingual announcement ("Menu Dongeng Hari Ini")
  * featuring both the morning English story and the evening Indonesian story.
@@ -855,22 +884,7 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
     (s) => !s.startsWith("kompilasi-")
   );
   for (const slug of storiesToEnsure) {
-    const sDir = path.resolve("./stories", slug);
-    const sJson = path.join(sDir, "story.json");
-    if (!options.dryRun) {
-      try {
-        await pullStory(slug, { manifestOnly: true, force: true });
-      } catch {
-        // Offline or manifest not yet in R2
-      }
-    }
-    if (!existsSync(sJson)) {
-      console.log(`📥 Story assets not found locally for [${slug}]. Pulling from Cloudflare R2...`);
-      await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", slug]);
-    }
-    if (!existsSync(sJson)) {
-      throw new Error(`story.json not found for book '${slug}' at ${sJson}`);
-    }
+    await ensureStoryAssetsLocally(path.resolve("./stories", slug), slug, options.dryRun);
   }
 
   const morningStoryPath = path.resolve("./stories", morningBook, "story.json");
@@ -1387,21 +1401,7 @@ export async function publishPostPublishWaveAnnouncement(
   }
 
   const storyDir = path.resolve("./stories", targetBook);
-  const storyJsonPath = path.join(storyDir, "story.json");
-  if (!options.dryRun) {
-    try {
-      await pullStory(targetBook, { manifestOnly: true, force: true });
-    } catch {
-      // Offline or manifest not yet in R2
-    }
-  }
-  if (!existsSync(storyJsonPath)) {
-    console.log(`📥 Story assets not found locally for [${targetBook}]. Pulling from Cloudflare R2...`);
-    await runChild("npx", ["tsx", "scripts/manage-story-storage.ts", "pull", targetBook]);
-  }
-  if (!existsSync(storyJsonPath)) {
-    throw new Error(`story.json not found for book '${targetBook}' at ${storyJsonPath}`);
-  }
+  const storyJsonPath = await ensureStoryAssetsLocally(storyDir, targetBook, options.dryRun);
 
   const story: any = JSON.parse(await fs.readFile(storyJsonPath, "utf-8"));
   if (!story.publications) story.publications = {};
