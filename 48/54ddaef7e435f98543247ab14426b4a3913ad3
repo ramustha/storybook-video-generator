@@ -1,0 +1,31 @@
+src/motion/compile-edu-motion.ts
+  698ac31901cd73e0 69-70,79,91,187-229,232-342,485-487,490-507,509-512,518,523,535-539,543-547,550-555,574-575,578,585-586,637-645,648,673,685,711-712,719,739,756-760,1266-1270,1273,1286,1314-1315,1324-1325,1331-1334,1336-1350,1389-1398,1432-1434,1438-1441
+scripts/test-edu-motion-engine.ts
+  698ac31901cd73e0 4-9,128-145
+src/motion/render-motion-stage.ts
+  698ac31901cd73e0 101,105-107
+scripts/pack-edu-motion.ts
+  698ac31901cd73e0 49-51
+src/motion/edu-motion-spec.ts
+  698ac31901cd73e0 63,65-66,213,218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "4854ddaef7e435f98543247ab14426b4a3913ad3",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 317,
+      "total_deletions": 64,
+      "accepted_lines": 315,
+      "overriden_lines": 0
+    }
+  }
+}
