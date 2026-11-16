@@ -1,8 +1,8 @@
 {
-  "recordedAt": "2026-11-16T07:42:48.269Z",
+  "recordedAt": "2026-11-16T09:18:31.066Z",
   "summary": {
     "totalAssets": 173,
-    "totalViews": 6262,
+    "totalViews": 6734,
     "totalLikes": 47,
     "totalComments": 0,
     "youtube": {
@@ -14,13 +14,13 @@
       "totalChannelViews": 4190
     },
     "facebook": {
-      "views": 1916,
+      "views": 1918,
       "likes": 8,
       "comments": 0,
       "videoCount": 62
     },
     "instagram": {
-      "views": 0,
+      "views": 470,
       "likes": 3,
       "comments": 0,
       "videoCount": 30
@@ -90,9 +90,9 @@
         "followers": 0,
         "followersTarget": 5000,
         "followersRemaining": 5000,
-        "totalViews": 1916,
-        "watch16x9Views": 1036,
-        "reel9x16Views": 880,
+        "totalViews": 1918,
+        "watch16x9Views": 1037,
+        "reel9x16Views": 881,
         "watch16x9SharePct": 54.1,
         "likes": 8,
         "comments": 0,
@@ -100,11 +100,11 @@
       },
       "instagram": {
         "followers": 0,
-        "totalPlays": 0,
+        "totalPlays": 470,
         "likes": 3,
         "comments": 0,
         "reelsCount": 30,
-        "insightsPermissionMissing": true
+        "insightsPermissionMissing": false
       },
       "threads": {
         "postsCount": 20,
@@ -114,8 +114,7 @@
       "recommendations": [
         "YT Shorts (3862 views) = 90.8% of YT traffic — funnel Shorts viewers to 16:9 Full Stories & Playlists to build 4,000 watch hours.",
         "YT Sub conversion is 0.09% (4/1,000) — keep Subscribe CTA + Full Episode link above the fold on every upload.",
-        "FB Watch (54.1% of FB views) performs best on long stories/marathons — pin Follow Page CTA & Watch-Next comments to close 5000 follower gap.",
-        "Instagram /insights missing instagram_manage_insights token scope (Reel plays currently unmeasured)."
+        "FB Watch (54.1% of FB views) performs best on long stories/marathons — pin Follow Page CTA & Watch-Next comments to close 5000 follower gap."
       ]
     }
   },
@@ -231,6 +230,17 @@
       "url": "https://www.facebook.com/1473240609201601/videos/2459985614808046/"
     },
     {
+      "id": "18284837872295291",
+      "bookSlug": "gara-gara-kucing",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 140,
+      "likes": 1,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfZxIs5IDjo/"
+    },
+    {
       "id": "1158172683324657",
       "bookSlug": "ayo-berayun-momo",
       "platform": "Facebook",
@@ -262,6 +272,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/952347641080758/"
+    },
+    {
+      "id": "17882481033546482",
+      "bookSlug": "kacamata-nenek",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 109,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DffVdgLiFrO/"
     },
     {
       "id": "pai-hP0s_t4",
@@ -297,6 +318,17 @@
       "url": "https://youtu.be/FPJt9JAI3zA"
     },
     {
+      "id": "17965621653237164",
+      "bookSlug": "edu-budi-papang-teripang",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 53,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfwWVnQGVJd/"
+    },
+    {
       "id": "1539974554636584",
       "bookSlug": "jas-hujan-merah",
       "platform": "Facebook",
@@ -328,6 +360,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1792833705269560/"
+    },
+    {
+      "id": "18012455672989958",
+      "bookSlug": "jas-hujan-merah",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 40,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYSxyjCf75/"
     },
     {
       "id": "990461313498225",
@@ -412,7 +455,7 @@
       "platform": "Facebook",
       "format": "9:16 Reel",
       "lang": "en",
-      "views": 30,
+      "views": 31,
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1645395377085457/"
@@ -427,6 +470,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1142972854990440/"
+    },
+    {
+      "id": "17914920093506777",
+      "bookSlug": "hari-cukur-rambut",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 27,
+      "likes": 1,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfVbzfTis7f/"
     },
     {
       "id": "1444067164551520",
@@ -528,6 +582,17 @@
       "url": "https://youtu.be/Ladb_oJ-1-U"
     },
     {
+      "id": "18116186267173769",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 21,
+      "likes": 1,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfuKWcBDb2V/"
+    },
+    {
       "id": "1173681301755840",
       "bookSlug": "tersenyumlah",
       "platform": "Facebook",
@@ -548,6 +613,17 @@
       "likes": 1,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/2034736543691807/"
+    },
+    {
+      "id": "18640176196041641",
+      "bookSlug": "topsy-turvy-serba-terbalik",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 18,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfd5YyVkZGP/"
     },
     {
       "id": "1471091548284839",
@@ -581,6 +657,28 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/2410623723074279/"
+    },
+    {
+      "id": "18099437378222971",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 15,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYS-6zke8c/"
+    },
+    {
+      "id": "18117727222824577",
+      "bookSlug": "jas-hujan-merah",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 14,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYSo_YAG73/"
     },
     {
       "id": "1861732521509554",
@@ -660,17 +758,6 @@
       "url": "https://www.threads.com/@zayn.storybook/post/DfczfEKhxxp"
     },
     {
-      "id": "1478742464217898",
-      "bookSlug": "dengarkan-tubuhku",
-      "platform": "Facebook",
-      "format": "16:9 Watch",
-      "lang": "id",
-      "views": 10,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1478742464217898/"
-    },
-    {
       "id": "1103378572307871",
       "bookSlug": "dengarkan-tubuhku",
       "platform": "Facebook",
@@ -680,6 +767,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1103378572307871/"
+    },
+    {
+      "id": "1478742464217898",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 10,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1478742464217898/"
     },
     {
       "id": "1645316960326646",
@@ -757,6 +855,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.threads.com/@zayn.storybook/post/DffVsR2AKBH"
+    },
+    {
+      "id": "17953572681049076",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 7,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYTHzjm4jw/"
     },
     {
       "id": "wQStyUFIrKA",
@@ -913,6 +1022,17 @@
       "url": "https://www.threads.com/@zayn.storybook/post/Dfi7f5VmVW7"
     },
     {
+      "id": "18470112652185938",
+      "bookSlug": "gara-gara-kucing",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 5,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYSflyDtbN/"
+    },
+    {
       "id": "M4Z6f71zq44",
       "bookSlug": "jangan-sekarang",
       "platform": "YouTube",
@@ -968,6 +1088,28 @@
       "url": "https://www.threads.com/@zayn.storybook/post/Dfn41tmCC3v"
     },
     {
+      "id": "18110647676238333",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfmb5esjR6U/"
+    },
+    {
+      "id": "17926662621441610",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfkgiEAlXt4/"
+    },
+    {
       "id": "18119935868047352",
       "bookSlug": "kacamata-nenek",
       "platform": "Threads",
@@ -1012,6 +1154,17 @@
       "url": "https://youtube.com/shorts/0cVVh2Bl-Zs"
     },
     {
+      "id": "18089920559330412",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 3,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DftCSbWgpkx/"
+    },
+    {
       "id": "1454493606861068",
       "bookSlug": "di-bawah-tempat-tidurku",
       "platform": "Facebook",
@@ -1021,6 +1174,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1454493606861068/"
+    },
+    {
+      "id": "17916137139284935",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 3,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfpAycBDip8/"
     },
     {
       "id": "18248391934312954",
@@ -1067,6 +1231,17 @@
       "url": "https://youtu.be/ifEj1c9SPII"
     },
     {
+      "id": "29600716806199339",
+      "bookSlug": "sringeri-srinivas-belajar-tertawa",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/29600716806199339/"
+    },
+    {
       "id": "17882572314547885",
       "bookSlug": "dengarkan-tubuhku",
       "platform": "Threads",
@@ -1076,6 +1251,28 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.threads.com/@zayn.storybook/post/DfmcGBYFtzj"
+    },
+    {
+      "id": "18142656691538326",
+      "bookSlug": "jangan-sekarang",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfi7R-ngXad/"
+    },
+    {
+      "id": "18119358566073500",
+      "bookSlug": "pisang-terlalu-banyak",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfV5-fxlOG6/"
     },
     {
       "id": "1712421714034500",
@@ -1188,15 +1385,15 @@
       "url": "https://youtu.be/6sLTErwRXsk"
     },
     {
-      "id": "29600716806199339",
+      "id": "18134498398684174",
       "bookSlug": "sringeri-srinivas-belajar-tertawa",
-      "platform": "Facebook",
-      "format": "16:9 Watch",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
       "lang": "en",
       "views": 1,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/29600716806199339/"
+      "url": "https://www.instagram.com/reel/DfyLzbyHEbU/"
     },
     {
       "id": "1754961388898761",
@@ -1208,6 +1405,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1754961388898761/"
+    },
+    {
+      "id": "18121728923469566",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfvnDcmDan5/"
     },
     {
       "id": "18095433824679726",
@@ -1232,6 +1440,17 @@
       "url": "https://www.threads.com/@zayn.storybook/post/Dfd5i-ghj_K"
     },
     {
+      "id": "18120658937471911",
+      "bookSlug": "terlalu-banyak-suara",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfbY_KJFamJ/"
+    },
+    {
       "id": "1758153918631101",
       "bookSlug": "pisang-terlalu-banyak",
       "platform": "Facebook",
@@ -1254,17 +1473,6 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1121555703939909/"
     },
     {
-      "id": "992738057207627",
-      "bookSlug": "raja-gemuk-anjing-kurus",
-      "platform": "Facebook",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 1,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/992738057207627/"
-    },
-    {
       "id": "1626901022229757",
       "bookSlug": "gara-gara-kucing",
       "platform": "Facebook",
@@ -1274,6 +1482,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1626901022229757/"
+    },
+    {
+      "id": "992738057207627",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/992738057207627/"
     },
     {
       "id": "1485188206789748",
@@ -1408,17 +1627,6 @@
       "url": "https://youtu.be/8d1N51G2Py8"
     },
     {
-      "id": "18134498398684174",
-      "bookSlug": "sringeri-srinivas-belajar-tertawa",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfyLzbyHEbU/"
-    },
-    {
       "id": "17923130424460248",
       "bookSlug": "ayo-berayun-momo",
       "platform": "Instagram",
@@ -1428,28 +1636,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.instagram.com/reel/Dfwz-63ml86/"
-    },
-    {
-      "id": "17965621653237164",
-      "bookSlug": "edu-budi-papang-teripang",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfwWVnQGVJd/"
-    },
-    {
-      "id": "18121728923469566",
-      "bookSlug": "ayo-berayun-momo",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfvnDcmDan5/"
     },
     {
       "id": "1601778344556404",
@@ -1463,28 +1649,6 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1601778344556404/"
     },
     {
-      "id": "18116186267173769",
-      "bookSlug": "pesta-ulang-tahun",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 1,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfuKWcBDb2V/"
-    },
-    {
-      "id": "18089920559330412",
-      "bookSlug": "pesta-ulang-tahun",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DftCSbWgpkx/"
-    },
-    {
       "id": "17927942649449024",
       "bookSlug": "tersenyumlah",
       "platform": "Instagram",
@@ -1494,17 +1658,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.instagram.com/reel/DfsHwk8Ag6b/"
-    },
-    {
-      "id": "18108092321333437",
-      "bookSlug": "tersenyumlah",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfsF54sDlhs/"
     },
     {
       "id": "17979990728932432",
@@ -1518,15 +1671,15 @@
       "url": "https://www.threads.com/@zayn.storybook/post/DfsGISpmE89"
     },
     {
-      "id": "17916137139284935",
-      "bookSlug": "di-bawah-tempat-tidurku",
+      "id": "18108092321333437",
+      "bookSlug": "tersenyumlah",
       "platform": "Instagram",
       "format": "9:16 Reel",
-      "lang": "id",
+      "lang": "en",
       "views": 0,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.instagram.com/reel/DfpAycBDip8/"
+      "url": "https://www.instagram.com/reel/DfsF54sDlhs/"
     },
     {
       "id": "17896037796683454",
@@ -1540,17 +1693,6 @@
       "url": "https://www.instagram.com/reel/Dfn4pR3D53M/"
     },
     {
-      "id": "18110647676238333",
-      "bookSlug": "dengarkan-tubuhku",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/Dfmb5esjR6U/"
-    },
-    {
       "id": "18108615347357698",
       "bookSlug": "jangan-sekarang",
       "platform": "Instagram",
@@ -1560,17 +1702,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.instagram.com/reel/Dfj3cCfCtik/"
-    },
-    {
-      "id": "17926662621441610",
-      "bookSlug": "dengarkan-tubuhku",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfkgiEAlXt4/"
     },
     {
       "id": "1780251976540335",
@@ -1584,28 +1715,6 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1780251976540335/"
     },
     {
-      "id": "18142656691538326",
-      "bookSlug": "jangan-sekarang",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/Dfi7R-ngXad/"
-    },
-    {
-      "id": "17882481033546482",
-      "bookSlug": "kacamata-nenek",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DffVdgLiFrO/"
-    },
-    {
       "id": "18391753921236798",
       "bookSlug": "topsy-turvy-serba-terbalik",
       "platform": "Instagram",
@@ -1615,17 +1724,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.instagram.com/p/Dfe4hWTHXGW/"
-    },
-    {
-      "id": "18640176196041641",
-      "bookSlug": "topsy-turvy-serba-terbalik",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/Dfd5YyVkZGP/"
     },
     {
       "id": "17941901157397263",
@@ -1650,94 +1748,6 @@
       "url": "https://www.instagram.com/reel/DfYTQuyjfL_/"
     },
     {
-      "id": "18120658937471911",
-      "bookSlug": "terlalu-banyak-suara",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfbY_KJFamJ/"
-    },
-    {
-      "id": "18284837872295291",
-      "bookSlug": "gara-gara-kucing",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 1,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfZxIs5IDjo/"
-    },
-    {
-      "id": "17953572681049076",
-      "bookSlug": "raja-gemuk-anjing-kurus",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYTHzjm4jw/"
-    },
-    {
-      "id": "18117727222824577",
-      "bookSlug": "jas-hujan-merah",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYSo_YAG73/"
-    },
-    {
-      "id": "18012455672989958",
-      "bookSlug": "jas-hujan-merah",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYSxyjCf75/"
-    },
-    {
-      "id": "18099437378222971",
-      "bookSlug": "raja-gemuk-anjing-kurus",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYS-6zke8c/"
-    },
-    {
-      "id": "18470112652185938",
-      "bookSlug": "gara-gara-kucing",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYSflyDtbN/"
-    },
-    {
-      "id": "18119358566073500",
-      "bookSlug": "pisang-terlalu-banyak",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfV5-fxlOG6/"
-    },
-    {
       "id": "2118421299039453",
       "bookSlug": "jas-hujan-merah",
       "platform": "Facebook",
@@ -1749,17 +1759,6 @@
       "url": "https://www.facebook.com/1473240609201601/videos/2118421299039453/"
     },
     {
-      "id": "1148399937534781",
-      "bookSlug": "pisang-terlalu-banyak",
-      "platform": "Facebook",
-      "format": "16:9 Watch",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1148399937534781/"
-    },
-    {
       "id": "1675936120858722",
       "bookSlug": "jas-hujan-merah",
       "platform": "Facebook",
@@ -1769,6 +1768,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1675936120858722/"
+    },
+    {
+      "id": "1148399937534781",
+      "bookSlug": "pisang-terlalu-banyak",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1148399937534781/"
     },
     {
       "id": "1526407702581920",
@@ -1813,17 +1823,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1160553539869262/"
-    },
-    {
-      "id": "17914920093506777",
-      "bookSlug": "hari-cukur-rambut",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 1,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfVbzfTis7f/"
     },
     {
       "id": "18125455933905850",

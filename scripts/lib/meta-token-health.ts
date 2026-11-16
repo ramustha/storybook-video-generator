@@ -33,6 +33,17 @@ export interface MetaTokenHealthReport {
 }
 
 /**
+ * Identifies genuine OAuth / insights scope errors vs deleted-object errors (code 100 / subcode 33).
+ */
+export function isMetaInsightsPermissionError(error: any): boolean {
+  if (!error) return false;
+  const code = Number(error.code);
+  const subcode = Number(error.error_subcode);
+  if (code === 100 && subcode === 33) return false;
+  return code === 10 || code === 200 || code === 190;
+}
+
+/**
  * Compares granted OAuth scopes from Graph API debug_token against required scopes.
  */
 export function auditMetaScopes(grantedScopes: readonly string[]): ScopeAuditResult {

@@ -9,6 +9,7 @@ import {
   TopContentItem,
 } from "./notify-telegram";
 import { buildMonetizationAudit } from "./lib/monetization-audit";
+import { isMetaInsightsPermissionError } from "./lib/meta-token-health";
 import { db } from "./lib/db";
 
 // ============================================================================
@@ -76,7 +77,7 @@ async function fetchInstagramMediaStats(
       `https://graph.facebook.com/v21.0/${mediaId}/insights?metric=views,reach&access_token=${token}`
     );
     const dataInsights = await resInsights.json();
-    if (dataInsights?.error?.code === 10 || /permission/i.test(dataInsights?.error?.message || "")) {
+    if (isMetaInsightsPermissionError(dataInsights?.error)) {
       insightsBlocked = true;
     } else if (Array.isArray(dataInsights.data)) {
       for (const item of dataInsights.data) {

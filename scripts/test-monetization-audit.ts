@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { buildMonetizationAudit } from "./lib/monetization-audit";
 import { buildSocialEngagementCta, generateSeoMetadata } from "./lib/seo-formatter";
-import { auditMetaScopes, buildMetaReauthInstructions, REQUIRED_META_SCOPES } from "./lib/meta-token-health";
+import {
+  auditMetaScopes,
+  buildMetaReauthInstructions,
+  isMetaInsightsPermissionError,
+  REQUIRED_META_SCOPES,
+} from "./lib/meta-token-health";
 import { buildCaption, buildCompilationCaption } from "./upload-meta";
 import { DEFAULT_LAUNCH_CAPTION } from "./publish-instagram-post";
 
@@ -113,6 +118,19 @@ function runTests(): void {
   assert.equal(healthyAudit.ok, true);
   assert.equal(healthyAudit.insightsReady, true);
   assert.deepEqual(healthyAudit.missingScopes, []);
+
+  assert.equal(
+    isMetaInsightsPermissionError({ code: 10, message: "(#10) Application does not have permission" }),
+    true
+  );
+  assert.equal(
+    isMetaInsightsPermissionError({
+      code: 100,
+      error_subcode: 33,
+      message: "Object with ID '123' does not exist, cannot be loaded due to missing permissions",
+    }),
+    false
+  );
 
   console.log("✅ All monetization audit, Save/Follow caption & Meta scope audit checks passed!");
 }
