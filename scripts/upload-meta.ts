@@ -4,6 +4,7 @@ import path from "path";
 import { spawn } from "child_process";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { db } from "./lib/db";
+import { resolveRelatedPublishedVideos } from "./lib/seo-formatter";
 
 interface MetaConfig {
   appId: string;
@@ -216,8 +217,11 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
     const hashtags = isLandscape
       ? "#CeritaAnak #DongengAnak #Storybook #BukuAnak #AnimasiAnak #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook #FacebookWatch #VideoAnak"
       : "#CeritaAnak #DongengAnak #Storybook #KidsStory #AnimasiAnak #Reels #FacebookReels #InstagramReels #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook";
+    const ctaLine = isLandscape
+      ? `💬 Setelah menonton, bagian mana yang paling disukai si kecil? Tulis di komentar!\n➕ FOLLOW halaman @ZaynStorybook & BAGIKAN ke Ayah Bunda lain agar tiap malam ada dongeng baru!\n📺 Tonton maraton 16:9 lengkap di Facebook Watch & YouTube @zayn.storybook.`
+      : `🔖 SIMPAN (Save) Reels ini untuk dongeng sebelum tidur nanti malam!\n➕ FOLLOW @zayn.storybook biar tidak ketinggalan cerita baru setiap hari.\n💬 Pelajaran baik apa nih yang paling diingat si kecil? Yuk tulis di komentar!`;
 
-    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Seri Cerita & Dongeng Anak Bergambar Zayn Storybook\n✨ Nilai Moral: ${moral}\n\n${hashtags}`;
+    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n${bedtimeHook}\n\n✨ Nilai Moral: ${moral}\n\n${ctaLine}\n\n📖 ${badge} — Zayn Storybook\n${hashtags}`;
   } else {
     const rawTitle = story.originalTitle || story.title || "Kids Storybook";
     const hook = story.thumbnailConfig?.en?.hook || story.thumbnailConfig?.en?.headlineTop || "A wonderful story for kids!";
@@ -227,8 +231,11 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
     const hashtags = isLandscape
       ? "#KidsBooks #Storytime #BedtimeStory #Animation #ChildrensBook #KidsAnimation #ZaynStorybook #FacebookWatch #ReadAloud"
       : "#KidsBooks #Storytime #BedtimeStory #Animation #Reels #InstagramReels #FacebookReels #ChildrensBook #KidsAnimation #ZaynStorybook";
+    const ctaLine = isLandscape
+      ? `💬 Which moment made your child smile or wonder most? Tell us in the comments!\n➕ FOLLOW our Facebook Page & SHARE with fellow parents for nightly storytime!\n📺 Watch full episodes on Facebook Watch & YouTube @zayn.storybook.`
+      : `🔖 SAVE this Reel for tonight's bedtime routine!\n➕ FOLLOW @zayn.storybook for daily bilingual kids stories.\n💬 What lesson stood out most to your little one? Share below!`;
 
-    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Zayn Storybook Children's Animated Picture Book Series\n✨ Moral Lesson: ${moral}\n\n${hashtags}`;
+    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n${bedtimeHook}\n\n✨ Moral Lesson: ${moral}\n\n${ctaLine}\n\n📖 ${badge} — Zayn Storybook\n${hashtags}`;
   }
 }
 
@@ -643,13 +650,22 @@ async function findLiveFacebookVideoByTitle(
  * Uploads video to Facebook Page feed using Cloudflare R2 file_url or local multipart form-data.
  * Handles both Normal Videos (16:9 Landscape) and Reels (9:16 Vertical).
  */
+function buildFacebookVideoFirstComment(bookSlug: string, lang: "id" | "en"): string | undefined {
+  const related = resolveRelatedPublishedVideos(bookSlug, lang, 2);
+  if (related.length === 0) return undefined;
+  return lang === "id"
+    ? `🌙 Lanjut nonton dongeng berikutnya di YouTube @zayn.storybook:\n${related.map((r) => `▶️ "${r.title}": ${r.url}`).join("\n")}\n➕ Follow halaman Zayn Storybook biar tidak ketinggalan dongeng baru setiap malam!`
+    : `🌙 Watch next on YouTube @zayn.storybook:\n${related.map((r) => `▶️ "${r.title}": ${r.url}`).join("\n")}\n➕ Follow Zayn Storybook Page so your family never misses bedtime storytime!`;
+}
+
 async function uploadToFacebookPage(
   videoSource: { localPath?: string; publicUrl?: string },
   title: string,
   caption: string,
   config: MetaConfig,
   format: "vertical" | "landscape",
-  thumbnailPath?: string
+  thumbnailPath?: string,
+  firstComment?: string
 ): Promise<{ videoId: string; permalink: string }> {
   const isLandscape = format === "landscape";
   const postTypeLabel = isLandscape ? "NORMAL VIDEO (16:9 LANDSCAPE / WATCH)" : "FACEBOOK REEL (9:16 VERTICAL)";
@@ -773,6 +789,25 @@ async function uploadToFacebookPage(
   // if the reel is newly uploaded or accessed without page context.
   const pageVideoUrl = `https://www.facebook.com/${config.facebookPageId}/videos/${videoId}/`;
   let permalink = pageVideoUrl;
+
+  if (firstComment) {
+    try {
+      const cRes = await fetch(`https://graph.facebook.com/v21.0/${videoId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: config.pageAccessToken,
+          message: firstComment,
+        }),
+      });
+      const cData = await cRes.json();
+      if (cData?.id) {
+        console.log(`   💬 Pinned Watch-Next & Follow first comment (${cData.id}).`);
+      }
+    } catch (cErr: any) {
+      console.warn(`   ⚠️ Optional Facebook video first comment skipped: ${cErr.message}`);
+    }
+  }
 
   console.log(`\n🎉 FACEBOOK ${isLandscape ? "NORMAL VIDEO" : "REEL"} LIVE!`);
   console.log(`🔗 Link: ${permalink}`);
@@ -1082,7 +1117,8 @@ async function main() {
             caption,
             config,
             options.format as "vertical" | "landscape",
-            thumbnailPath
+            thumbnailPath,
+            buildFacebookVideoFirstComment(options.bookSlug, options.lang as "id" | "en")
           );
 
           if (!story.publications.facebook) story.publications.facebook = {};
@@ -1154,7 +1190,8 @@ async function main() {
       caption,
       config,
       options.format as "vertical" | "landscape",
-      thumbnailPath
+      thumbnailPath,
+      buildFacebookVideoFirstComment(options.bookSlug, options.lang as "id" | "en")
     );
 
     if (!story.publications.facebook) story.publications.facebook = {};

@@ -28,6 +28,8 @@ export interface SeoMetadataOptions {
   license?: string;
   publisher?: string;
   portalUrl?: string;
+  fullEpisodeUrl?: string;
+  playlistUrl?: string;
   relatedVideos?: RelatedVideoLink[];
 }
 
@@ -201,6 +203,13 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
 
   if (isEn) {
     descLines.push(`🌙 Welcome to Zayn Storybook! Tonight's featured animated bedtime story is "${displayTitle}".`);
+    if (isVertical && options.fullEpisodeUrl) {
+      descLines.push(`▶️ WATCH FULL STORY (16:9 HD): ${options.fullEpisodeUrl}`);
+    }
+    if (options.playlistUrl) {
+      descLines.push(`📚 BINGE BEDTIME PLAYLIST: ${options.playlistUrl}`);
+    }
+    descLines.push(`🔔 Subscribe for free bedtime stories: https://youtube.com/@zayn.storybook?sub_confirmation=1`);
     descLines.push(`A heartwarming and soothing animated read-aloud picture book designed to help toddlers, preschoolers, and early readers unwind and prepare for a restful night of sleep.`);
     descLines.push(``);
     descLines.push(`💡 MORAL LESSON / VALUE:`);
@@ -243,6 +252,13 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
   } else {
     // Indonesian
     descLines.push(`🌙 Selamat datang di Zayn Storybook! Malam ini kita akan mendengarkan dongeng anak sebelum tidur yang seru dan mendidik berjudul "${displayTitle}".`);
+    if (isVertical && options.fullEpisodeUrl) {
+      descLines.push(`▶️ TONTON VERSI LENGKAP (16:9 HD): ${options.fullEpisodeUrl}`);
+    }
+    if (options.playlistUrl) {
+      descLines.push(`📚 PUTAR MARATON DONGENG NON-STOP: ${options.playlistUrl}`);
+    }
+    descLines.push(`🔔 Subscribe Gratis untuk dongeng baru setiap hari: https://youtube.com/@zayn.storybook?sub_confirmation=1`);
     descLines.push(`Cerita bergambar anak animasi yang hangat dan menenangkan, sangat cocok didengarkan bersama si kecil sebelum tidur malam, saat bersantai di rumah, atau sebagai media belajar membaca dan mengasah imajinasi.`);
     descLines.push(``);
     descLines.push(`💡 PESAN MORAL CERITA:`);

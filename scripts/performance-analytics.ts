@@ -8,6 +8,7 @@ import {
   PlatformStatsSummary,
   TopContentItem,
 } from "./notify-telegram";
+import { buildMonetizationAudit } from "./lib/monetization-audit";
 import { db } from "./lib/db";
 
 // ============================================================================
@@ -52,10 +53,14 @@ async function fetchFacebookVideoStats(videoId: string, token: string): Promise<
   }
 }
 
-async function fetchInstagramMediaStats(mediaId: string, token: string): Promise<{ views: number; likes: number; comments: number }> {
+async function fetchInstagramMediaStats(
+  mediaId: string,
+  token: string
+): Promise<{ views: number; likes: number; comments: number; insightsBlocked?: boolean }> {
   let views = 0;
   let likes = 0;
   let comments = 0;
+  let insightsBlocked = false;
 
   try {
     const res = await fetch(
@@ -71,14 +76,16 @@ async function fetchInstagramMediaStats(mediaId: string, token: string): Promise
       `https://graph.facebook.com/v21.0/${mediaId}/insights?metric=views,reach&access_token=${token}`
     );
     const dataInsights = await resInsights.json();
-    if (Array.isArray(dataInsights.data)) {
+    if (dataInsights?.error?.code === 10 || /permission/i.test(dataInsights?.error?.message || "")) {
+      insightsBlocked = true;
+    } else if (Array.isArray(dataInsights.data)) {
       for (const item of dataInsights.data) {
         if (item.name === "views") views = item.values?.[0]?.value || 0;
       }
     }
   } catch {}
 
-  return { views, likes, comments };
+  return { views, likes, comments, insightsBlocked };
 }
 
 async function fetchThreadsPostStats(postId: string, accessToken?: string): Promise<{ views: number; likes: number; comments: number }> {
@@ -178,10 +185,31 @@ async function main() {
   let fbStats: PlatformStatsSummary | undefined;
   let igStats: PlatformStatsSummary | undefined;
   let thStats: PlatformStatsSummary | undefined;
+  let fbFollowers = 0;
+  let igFollowers = 0;
+  let instagramInsightsBlocked = false;
 
   if (!youtubeOnly && existsSync(META_CONFIG_PATH)) {
     try {
       const metaConfig = JSON.parse(await fs.readFile(META_CONFIG_PATH, "utf-8"));
+      try {
+        if (metaConfig.facebookPageId && metaConfig.pageAccessToken) {
+          const fbPage = await (
+            await fetch(
+              `https://graph.facebook.com/v21.0/${metaConfig.facebookPageId}?fields=followers_count,fan_count&access_token=${metaConfig.pageAccessToken}`
+            )
+          ).json();
+          fbFollowers = fbPage.followers_count || fbPage.fan_count || 0;
+        }
+        if (metaConfig.instagramUserId && metaConfig.pageAccessToken) {
+          const igAcct = await (
+            await fetch(
+              `https://graph.facebook.com/v21.0/${metaConfig.instagramUserId}?fields=followers_count&access_token=${metaConfig.pageAccessToken}`
+            )
+          ).json();
+          igFollowers = igAcct.followers_count || 0;
+        }
+      } catch {}
       const metaPubs = publications.filter((p) =>
         ["facebook", "instagram", "threads"].includes(p.platform)
       );
@@ -221,6 +249,7 @@ async function main() {
               });
             } else if (p.platform === "instagram") {
               const res = await fetchInstagramMediaStats(extId, metaConfig.pageAccessToken);
+              if (res.insightsBlocked) instagramInsightsBlocked = true;
               igViews += res.views;
               igLikes += res.likes;
               igComments += res.comments;
@@ -264,8 +293,10 @@ async function main() {
       igStats = { views: igViews, likes: igLikes, comments: igComments, videoCount: igCount };
       thStats = { views: thViews, likes: thLikes, comments: thComments, videoCount: thCount };
 
-      console.log(`  ✔ Facebook  : ${fbViews.toLocaleString()} views | ${fbLikes} likes | ${fbCount} assets`);
-      console.log(`  ✔ Instagram : ${igViews.toLocaleString()} plays | ${igLikes} likes | ${igCount} reels`);
+      console.log(`  ✔ Facebook  : ${fbViews.toLocaleString()} views | ${fbLikes} likes | ${fbCount} assets (Followers: ${fbFollowers})`);
+      console.log(
+        `  ✔ Instagram : ${igViews.toLocaleString()} plays | ${igLikes} likes | ${igCount} reels (Followers: ${igFollowers})${instagramInsightsBlocked ? " [⚠️ insights scope missing]" : ""}`
+      );
       console.log(`  ✔ Threads   : ${thViews.toLocaleString()} views | ${thLikes} likes | ${thCount} posts`);
     } catch (err: any) {
       console.warn("⚠️ Meta stats warning:", err.message);
@@ -366,7 +397,15 @@ async function main() {
     url: item.url,
   }));
 
-  // 5. Console & Step Summary Report
+  // 5. Monetization Gap Audit & Console Report
+  const monetizationAudit = buildMonetizationAudit({
+    items: allItems,
+    youtubeSubscribers: ytStats?.subscribers || 0,
+    facebookFollowers: fbFollowers,
+    instagramFollowers: igFollowers,
+    instagramInsightsBlocked,
+  });
+
   const totalAggViews = (ytStats?.views || 0) + (fbStats?.views || 0) + (igStats?.views || 0) + (thStats?.views || 0);
   const totalAggLikes = (ytStats?.likes || 0) + (fbStats?.likes || 0) + (igStats?.likes || 0) + (thStats?.likes || 0);
   const totalAggComments = (ytStats?.comments || 0) + (fbStats?.comments || 0) + (igStats?.comments || 0) + (thStats?.comments || 0);
@@ -378,6 +417,13 @@ async function main() {
   console.log(`Total Live Views/Plays : ${totalAggViews.toLocaleString()}`);
   console.log(`Total Likes            : ${totalAggLikes.toLocaleString()}`);
   console.log(`Total Comments         : ${totalAggComments.toLocaleString()}`);
+  console.log(`YT Monetization Gap    : ${monetizationAudit.youtube.subscribers}/1,000 subs (${monetizationAudit.youtube.longViewSharePct}% 16:9 long views vs Shorts)`);
+  console.log(`FB Monetization Gap    : ${monetizationAudit.facebook.followers}/5,000 followers (${monetizationAudit.facebook.watch16x9SharePct}% 16:9 Watch views)`);
+  if (monetizationAudit.recommendations.length > 0) {
+    console.log("-------------------------------------------------------");
+    console.log("🎯 MONETIZATION BOOST ACTIONS:");
+    monetizationAudit.recommendations.forEach((rec) => console.log(`  • ${rec}`));
+  }
   console.log("-------------------------------------------------------");
   if (topContent.length > 0) {
     console.log("🏆 TOP 3 PERFORMING CONTENT:");
@@ -402,6 +448,7 @@ async function main() {
       instagram: igStats,
       threads: thStats,
       topContent,
+      monetizationAudit,
     },
     items: allItems.map((item) => ({
       id: item.id,
@@ -452,6 +499,7 @@ async function main() {
       instagram: igStats,
       threads: thStats,
       topContent,
+      monetizationAudit,
       dryRun,
     });
 

@@ -1,87 +1,176 @@
 {
-  "recordedAt": "2026-11-10T07:30:14.744Z",
+  "recordedAt": "2026-11-16T07:42:48.269Z",
   "summary": {
-    "totalAssets": 85,
-    "totalViews": 1862,
-    "totalLikes": 15,
+    "totalAssets": 173,
+    "totalViews": 6262,
+    "totalLikes": 47,
     "totalComments": 0,
     "youtube": {
-      "views": 679,
-      "likes": 5,
+      "views": 4254,
+      "likes": 36,
       "comments": 0,
-      "videoCount": 36,
-      "subscribers": 2,
-      "totalChannelViews": 652
+      "videoCount": 61,
+      "subscribers": 4,
+      "totalChannelViews": 4190
     },
     "facebook": {
-      "views": 1181,
+      "views": 1916,
       "likes": 8,
       "comments": 0,
-      "videoCount": 32
+      "videoCount": 62
     },
     "instagram": {
       "views": 0,
-      "likes": 2,
+      "likes": 3,
       "comments": 0,
-      "videoCount": 16
+      "videoCount": 30
     },
     "threads": {
-      "views": 2,
+      "views": 92,
       "likes": 0,
       "comments": 0,
-      "videoCount": 1
+      "videoCount": 20
     },
     "topContent": [
+      {
+        "title": "Dongeng Anak Sebelum Tidur: Mendengarkan Tubuhku! 🌙📖 #Shorts #DongengAnak",
+        "platform": "YouTube",
+        "format": "9:16 Shorts",
+        "views": 1006,
+        "likes": 10,
+        "url": "https://youtube.com/shorts/t8J3phS5t4g"
+      },
+      {
+        "title": "Bedtime Story: Listen to My Body! 📖✨ #Shorts #KidsStories",
+        "platform": "YouTube",
+        "format": "9:16 Shorts",
+        "views": 890,
+        "likes": 14,
+        "url": "https://youtube.com/shorts/dZzMRStVFX8"
+      },
+      {
+        "title": "Dongeng Anak Sebelum Tidur: Jangan Sekarang, Tunggu Dulu!! 🌙📖 #Shorts #DongengAnak",
+        "platform": "YouTube",
+        "format": "9:16 Shorts",
+        "views": 878,
+        "likes": 4,
+        "url": "https://youtube.com/shorts/Y42FMl6dgJQ"
+      },
+      {
+        "title": "Buku Cerita Anak: Misteri Kacamata Nenek! 📖 #Shorts #DongengAnak",
+        "platform": "YouTube",
+        "format": "9:16 Shorts",
+        "views": 439,
+        "likes": 3,
+        "url": "https://youtube.com/shorts/H0-FQxp4PAE"
+      },
       {
         "title": "Dongeng Anak Sebelum Tidur: Bulan dan Topi Biru! 🌙📖 #Shorts #DongengAnak",
         "platform": "YouTube",
         "format": "9:16 Shorts",
-        "views": 381,
+        "views": 383,
         "likes": 4,
         "url": "https://youtube.com/shorts/aEVbwiAM_h8"
-      },
-      {
-        "title": "Hari Cukur Rambut Sringeri Srinivas!",
-        "platform": "Facebook",
-        "format": "16:9 Watch",
-        "views": 265,
-        "likes": 0,
-        "url": "https://www.facebook.com/1473240609201601/videos/1817025729617280/"
-      },
-      {
-        "title": "Kumpulan Dongeng Anak Sebelum Tidur (14 Menit Non-Stop) | Cerita Bergambar Penuh Pesan Moral 🌙✨",
-        "platform": "Facebook",
-        "format": "16:9 Watch",
-        "views": 224,
-        "likes": 1,
-        "url": "https://www.facebook.com/1473240609201601/videos/2062363441135054/"
-      },
-      {
-        "title": "Hari Cukur Rambut Sringeri Srinivas!",
-        "platform": "Facebook",
-        "format": "9:16 Reel",
-        "views": 213,
-        "likes": 3,
-        "url": "https://www.facebook.com/1473240609201601/videos/1636294957984746/"
-      },
-      {
-        "title": "Dongeng Anak Sebelum Tidur: Hari Cukur Rambut Sringeri Srinivas! | Cerita Bergambar Penuh Pesa…",
-        "platform": "YouTube",
-        "format": "16:9 Full HD",
-        "views": 148,
-        "likes": 1,
-        "url": "https://youtu.be/W_s0hTXPYfw"
       }
-    ]
+    ],
+    "monetizationAudit": {
+      "youtube": {
+        "subscribers": 4,
+        "subsTarget": 1000,
+        "subsRemaining": 996,
+        "totalViews": 4254,
+        "shortsViews": 3862,
+        "longViews": 392,
+        "longViewSharePct": 9.2,
+        "subConversionPct": 0.09,
+        "idViews": 3276,
+        "enViews": 978
+      },
+      "facebook": {
+        "followers": 0,
+        "followersTarget": 5000,
+        "followersRemaining": 5000,
+        "totalViews": 1916,
+        "watch16x9Views": 1036,
+        "reel9x16Views": 880,
+        "watch16x9SharePct": 54.1,
+        "likes": 8,
+        "comments": 0,
+        "engagementRatePct": 0.42
+      },
+      "instagram": {
+        "followers": 0,
+        "totalPlays": 0,
+        "likes": 3,
+        "comments": 0,
+        "reelsCount": 30,
+        "insightsPermissionMissing": true
+      },
+      "threads": {
+        "postsCount": 20,
+        "totalViews": 92,
+        "avgViewsPerPost": 4.6
+      },
+      "recommendations": [
+        "YT Shorts (3862 views) = 90.8% of YT traffic — funnel Shorts viewers to 16:9 Full Stories & Playlists to build 4,000 watch hours.",
+        "YT Sub conversion is 0.09% (4/1,000) — keep Subscribe CTA + Full Episode link above the fold on every upload.",
+        "FB Watch (54.1% of FB views) performs best on long stories/marathons — pin Follow Page CTA & Watch-Next comments to close 5000 follower gap.",
+        "Instagram /insights missing instagram_manage_insights token scope (Reel plays currently unmeasured)."
+      ]
+    }
   },
   "items": [
+    {
+      "id": "t8J3phS5t4g",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 1006,
+      "likes": 10,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/t8J3phS5t4g"
+    },
+    {
+      "id": "dZzMRStVFX8",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 890,
+      "likes": 14,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/dZzMRStVFX8"
+    },
+    {
+      "id": "Y42FMl6dgJQ",
+      "bookSlug": "jangan-sekarang",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 878,
+      "likes": 4,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/Y42FMl6dgJQ"
+    },
+    {
+      "id": "H0-FQxp4PAE",
+      "bookSlug": "kacamata-nenek",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 439,
+      "likes": 3,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/H0-FQxp4PAE"
+    },
     {
       "id": "aEVbwiAM_h8",
       "bookSlug": "bulan-dan-topi-biru",
       "platform": "YouTube",
       "format": "9:16 Shorts",
       "lang": "id",
-      "views": 381,
+      "views": 383,
       "likes": 4,
       "comments": 0,
       "url": "https://youtube.com/shorts/aEVbwiAM_h8"
@@ -103,7 +192,7 @@
       "platform": "Facebook",
       "format": "16:9 Watch",
       "lang": "id",
-      "views": 224,
+      "views": 237,
       "likes": 1,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/2062363441135054/"
@@ -114,7 +203,7 @@
       "platform": "Facebook",
       "format": "9:16 Reel",
       "lang": "en",
-      "views": 213,
+      "views": 214,
       "likes": 3,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1636294957984746/"
@@ -142,15 +231,70 @@
       "url": "https://www.facebook.com/1473240609201601/videos/2459985614808046/"
     },
     {
-      "id": "1520718406558418",
-      "bookSlug": "bulan-dan-topi-biru",
+      "id": "1158172683324657",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 136,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1158172683324657/"
+    },
+    {
+      "id": "kU9jMHCVpQE",
+      "bookSlug": "tersenyumlah",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 135,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/kU9jMHCVpQE"
+    },
+    {
+      "id": "952347641080758",
+      "bookSlug": "ayo-berayun-momo",
       "platform": "Facebook",
       "format": "16:9 Watch",
-      "lang": "id",
-      "views": 41,
-      "likes": 1,
+      "lang": "en",
+      "views": 109,
+      "likes": 0,
       "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1520718406558418/"
+      "url": "https://www.facebook.com/1473240609201601/videos/952347641080758/"
+    },
+    {
+      "id": "pai-hP0s_t4",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 78,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/pai-hP0s_t4"
+    },
+    {
+      "id": "1723830349306468",
+      "bookSlug": "tersenyumlah",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 63,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1723830349306468/"
+    },
+    {
+      "id": "FPJt9JAI3zA",
+      "bookSlug": "terlalu-banyak-suara",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 56,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/FPJt9JAI3zA"
     },
     {
       "id": "1539974554636584",
@@ -158,10 +302,32 @@
       "platform": "Facebook",
       "format": "16:9 Watch",
       "lang": "en",
-      "views": 40,
+      "views": 44,
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1539974554636584/"
+    },
+    {
+      "id": "1520718406558418",
+      "bookSlug": "bulan-dan-topi-biru",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 42,
+      "likes": 1,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1520718406558418/"
+    },
+    {
+      "id": "1792833705269560",
+      "bookSlug": "tersenyumlah",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 40,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1792833705269560/"
     },
     {
       "id": "990461313498225",
@@ -169,21 +335,10 @@
       "platform": "Facebook",
       "format": "9:16 Reel",
       "lang": "id",
-      "views": 39,
+      "views": 40,
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/990461313498225/"
-    },
-    {
-      "id": "_-umN46Ocx4",
-      "bookSlug": "bedtime-id",
-      "platform": "YouTube",
-      "format": "16:9 Full HD",
-      "lang": "id",
-      "views": 37,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtu.be/_-umN46Ocx4"
     },
     {
       "id": "995878986912324",
@@ -191,10 +346,54 @@
       "platform": "Facebook",
       "format": "9:16 Reel",
       "lang": "en",
-      "views": 34,
+      "views": 40,
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/995878986912324/"
+    },
+    {
+      "id": "_-umN46Ocx4",
+      "bookSlug": "bedtime-id",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 39,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/_-umN46Ocx4"
+    },
+    {
+      "id": "1168642599061167",
+      "bookSlug": "jangan-sekarang",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 34,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1168642599061167/"
+    },
+    {
+      "id": "1141545321611182",
+      "bookSlug": "edu-budi-papang-teripang",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 33,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1141545321611182/"
+    },
+    {
+      "id": "1435892498655506",
+      "bookSlug": "kacamata-nenek",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 32,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1435892498655506/"
     },
     {
       "id": "1799790807919845",
@@ -208,6 +407,17 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1799790807919845/"
     },
     {
+      "id": "1645395377085457",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 30,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1645395377085457/"
+    },
+    {
       "id": "1142972854990440",
       "bookSlug": "terlalu-banyak-suara",
       "platform": "Facebook",
@@ -217,6 +427,50 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/1142972854990440/"
+    },
+    {
+      "id": "1444067164551520",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 26,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1444067164551520/"
+    },
+    {
+      "id": "aKJ1y5LXEKQ",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 26,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/aKJ1y5LXEKQ"
+    },
+    {
+      "id": "aKJ1y5LXEKQ",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 26,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/aKJ1y5LXEKQ"
+    },
+    {
+      "id": "aKJ1y5LXEKQ",
+      "bookSlug": "topsy-turvy-serba-terbalik",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 26,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/aKJ1y5LXEKQ"
     },
     {
       "id": "U1Bi31IWBzI",
@@ -230,6 +484,61 @@
       "url": "https://youtu.be/U1Bi31IWBzI"
     },
     {
+      "id": "1918372582481811",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 25,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1918372582481811/"
+    },
+    {
+      "id": "1506215348100083",
+      "bookSlug": "tersenyumlah",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 23,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1506215348100083/"
+    },
+    {
+      "id": "1867889771324434",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 22,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1867889771324434/"
+    },
+    {
+      "id": "Ladb_oJ-1-U",
+      "bookSlug": "gara-gara-kucing",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 22,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/Ladb_oJ-1-U"
+    },
+    {
+      "id": "1173681301755840",
+      "bookSlug": "tersenyumlah",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 20,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1173681301755840/"
+    },
+    {
       "id": "2034736543691807",
       "bookSlug": "hari-cukur-rambut",
       "platform": "Facebook",
@@ -239,17 +548,6 @@
       "likes": 1,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/2034736543691807/"
-    },
-    {
-      "id": "Ladb_oJ-1-U",
-      "bookSlug": "gara-gara-kucing",
-      "platform": "YouTube",
-      "format": "16:9 Full HD",
-      "lang": "id",
-      "views": 20,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtu.be/Ladb_oJ-1-U"
     },
     {
       "id": "1471091548284839",
@@ -274,17 +572,6 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1169050305454367/"
     },
     {
-      "id": "FPJt9JAI3zA",
-      "bookSlug": "terlalu-banyak-suara",
-      "platform": "YouTube",
-      "format": "16:9 Full HD",
-      "lang": "id",
-      "views": 17,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtu.be/FPJt9JAI3zA"
-    },
-    {
       "id": "2410623723074279",
       "bookSlug": "bulan-dan-topi-biru",
       "platform": "Facebook",
@@ -296,26 +583,59 @@
       "url": "https://www.facebook.com/1473240609201601/videos/2410623723074279/"
     },
     {
+      "id": "1861732521509554",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 13,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1861732521509554/"
+    },
+    {
+      "id": "1481263907258686",
+      "bookSlug": "kacamata-nenek",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 13,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1481263907258686/"
+    },
+    {
       "id": "3238706459653330",
       "bookSlug": "topsy-turvy-serba-terbalik",
       "platform": "Facebook",
       "format": "9:16 Reel",
       "lang": "en",
-      "views": 12,
+      "views": 13,
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/3238706459653330/"
     },
     {
-      "id": "aKJ1y5LXEKQ",
-      "bookSlug": "topsy-turvy-serba-terbalik",
-      "platform": "YouTube",
-      "format": "16:9 Full HD",
-      "lang": "id",
-      "views": 12,
+      "id": "1861062161558498",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 11,
       "likes": 0,
       "comments": 0,
-      "url": "https://youtu.be/aKJ1y5LXEKQ"
+      "url": "https://www.facebook.com/1473240609201601/videos/1861062161558498/"
+    },
+    {
+      "id": "905295805907776",
+      "bookSlug": "jangan-sekarang",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 11,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/905295805907776/"
     },
     {
       "id": "1159806090332517",
@@ -329,15 +649,37 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1159806090332517/"
     },
     {
-      "id": "905295805907776",
-      "bookSlug": "jangan-sekarang",
+      "id": "17987002244984487",
+      "bookSlug": "gara-gara-kucing",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 11,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfczfEKhxxp"
+    },
+    {
+      "id": "1478742464217898",
+      "bookSlug": "dengarkan-tubuhku",
       "platform": "Facebook",
-      "format": "9:16 Reel",
-      "lang": "en",
+      "format": "16:9 Watch",
+      "lang": "id",
       "views": 10,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/905295805907776/"
+      "url": "https://www.facebook.com/1473240609201601/videos/1478742464217898/"
+    },
+    {
+      "id": "1103378572307871",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 10,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1103378572307871/"
     },
     {
       "id": "1645316960326646",
@@ -351,6 +693,17 @@
       "url": "https://www.facebook.com/reel/1645316960326646/"
     },
     {
+      "id": "18129601075874549",
+      "bookSlug": "jas-hujan-merah",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 9,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfczzpETJ11"
+    },
+    {
       "id": "XJ8QuH2pXSY",
       "bookSlug": "jas-hujan-merah",
       "platform": "YouTube",
@@ -362,15 +715,202 @@
       "url": "https://youtu.be/XJ8QuH2pXSY"
     },
     {
+      "id": "4834311076856038",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 8,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/4834311076856038/"
+    },
+    {
+      "id": "29443611191923996",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 8,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/29443611191923996/"
+    },
+    {
+      "id": "18174909988413441",
+      "bookSlug": "pisang-terlalu-banyak",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 8,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfcz82zp1cE"
+    },
+    {
+      "id": "18093088121692639",
+      "bookSlug": "kacamata-nenek",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 7,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DffVsR2AKBH"
+    },
+    {
+      "id": "wQStyUFIrKA",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 7,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/wQStyUFIrKA"
+    },
+    {
+      "id": "2061237407719187",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/2061237407719187/"
+    },
+    {
+      "id": "18100256906426344",
+      "bookSlug": "tersenyumlah",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfsH_TumGDw"
+    },
+    {
+      "id": "1442543538048570",
+      "bookSlug": "kacamata-nenek",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1442543538048570/"
+    },
+    {
+      "id": "18162032395502473",
+      "bookSlug": "hari-cukur-rambut",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfczoZzOjXP"
+    },
+    {
       "id": "885937334542328",
       "bookSlug": "gara-gara-kucing",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/885937334542328/"
+    },
+    {
+      "id": "965300522892737",
+      "bookSlug": "gara-gara-kucing",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/965300522892737/"
+    },
+    {
+      "id": "DJctEROJ7wo",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/DJctEROJ7wo"
+    },
+    {
+      "id": "DJctEROJ7wo",
+      "bookSlug": "raja-gemuk-remotion",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 6,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/DJctEROJ7wo"
+    },
+    {
+      "id": "2033991293955562",
+      "bookSlug": "sringeri-srinivas-belajar-tertawa",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 5,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/2033991293955562/"
+    },
+    {
+      "id": "18001388409029670",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 5,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfuKlJ8Fsaa"
+    },
+    {
+      "id": "18383752126241754",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 5,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DftCfK-EX9R"
+    },
+    {
+      "id": "1133111562967223",
+      "bookSlug": "jangan-sekarang",
       "platform": "Facebook",
       "format": "16:9 Watch",
       "lang": "id",
       "views": 5,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/885937334542328/"
+      "url": "https://www.facebook.com/1473240609201601/videos/1133111562967223/"
+    },
+    {
+      "id": "18098946035450020",
+      "bookSlug": "jangan-sekarang",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 5,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfi7f5VmVW7"
     },
     {
       "id": "M4Z6f71zq44",
@@ -378,10 +918,76 @@
       "platform": "YouTube",
       "format": "16:9 Full HD",
       "lang": "en",
-      "views": 4,
+      "views": 5,
       "likes": 0,
       "comments": 0,
       "url": "https://youtu.be/M4Z6f71zq44"
+    },
+    {
+      "id": "18233117005334670",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfvnan1Guqk"
+    },
+    {
+      "id": "2984644831889062",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/2984644831889062/"
+    },
+    {
+      "id": "17967219069227155",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfpBC9foBfc"
+    },
+    {
+      "id": "18397493815160492",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfn41tmCC3v"
+    },
+    {
+      "id": "18119935868047352",
+      "bookSlug": "kacamata-nenek",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfgMsQhjfrJ"
+    },
+    {
+      "id": "18145840588593443",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfc0H-2P7TM"
     },
     {
       "id": "1PdVTKQjtlc",
@@ -395,37 +1001,81 @@
       "url": "https://youtu.be/1PdVTKQjtlc"
     },
     {
-      "id": "DJctEROJ7wo",
-      "bookSlug": "raja-gemuk-anjing-kurus",
+      "id": "0cVVh2Bl-Zs",
+      "bookSlug": "gara-gara-kucing",
       "platform": "YouTube",
-      "format": "16:9 Full HD",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 4,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/0cVVh2Bl-Zs"
+    },
+    {
+      "id": "1454493606861068",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
       "lang": "en",
       "views": 3,
       "likes": 0,
       "comments": 0,
-      "url": "https://youtu.be/DJctEROJ7wo"
+      "url": "https://www.facebook.com/1473240609201601/videos/1454493606861068/"
     },
     {
-      "id": "DJctEROJ7wo",
-      "bookSlug": "raja-gemuk-remotion",
-      "platform": "YouTube",
-      "format": "16:9 Full HD",
-      "lang": "en",
-      "views": 3,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtu.be/DJctEROJ7wo"
-    },
-    {
-      "id": "18098946035450020",
+      "id": "18248391934312954",
       "bookSlug": "jangan-sekarang",
       "platform": "Threads",
       "format": "Post",
+      "lang": "id",
+      "views": 3,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfj3q5-ERlU"
+    },
+    {
+      "id": "18648875911036785",
+      "bookSlug": "bulan-dan-topi-biru",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
+      "views": 3,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfczWUaoBgV"
+    },
+    {
+      "id": "oUOhp3mOa2Q",
+      "bookSlug": "kacamata-nenek",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
       "lang": "en",
+      "views": 3,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/oUOhp3mOa2Q"
+    },
+    {
+      "id": "ifEj1c9SPII",
+      "bookSlug": "terlalu-banyak-suara",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 3,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/ifEj1c9SPII"
+    },
+    {
+      "id": "17882572314547885",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "id",
       "views": 2,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.threads.com/@zayn.storybook/post/Dfi7f5VmVW7"
+      "url": "https://www.threads.com/@zayn.storybook/post/DfmcGBYFtzj"
     },
     {
       "id": "1712421714034500",
@@ -439,26 +1089,81 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1712421714034500/"
     },
     {
-      "id": "ifEj1c9SPII",
-      "bookSlug": "terlalu-banyak-suara",
+      "id": "JkSk558PFTI",
+      "bookSlug": "edu-budi-papang-teripang",
       "platform": "YouTube",
       "format": "16:9 Full HD",
       "lang": "en",
       "views": 2,
       "likes": 0,
       "comments": 0,
-      "url": "https://youtu.be/ifEj1c9SPII"
+      "url": "https://youtu.be/JkSk558PFTI"
     },
     {
-      "id": "0cVVh2Bl-Zs",
-      "bookSlug": "gara-gara-kucing",
+      "id": "xGk8yInFwns",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/xGk8yInFwns"
+    },
+    {
+      "id": "KPX4hLvRjT8",
+      "bookSlug": "tersenyumlah",
       "platform": "YouTube",
       "format": "9:16 Shorts",
       "lang": "en",
       "views": 2,
       "likes": 0,
       "comments": 0,
-      "url": "https://youtube.com/shorts/0cVVh2Bl-Zs"
+      "url": "https://youtube.com/shorts/KPX4hLvRjT8"
+    },
+    {
+      "id": "0kYkY1RfU3g",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/0kYkY1RfU3g"
+    },
+    {
+      "id": "0wmcWIqUyUc",
+      "bookSlug": "topsy-turvy-serba-terbalik",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/0wmcWIqUyUc"
+    },
+    {
+      "id": "Pjkcxxai7JY",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/Pjkcxxai7JY"
+    },
+    {
+      "id": "JDwdkGaB49Q",
+      "bookSlug": "jas-hujan-merah",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 2,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/JDwdkGaB49Q"
     },
     {
       "id": "CkSoydfX-tc",
@@ -483,6 +1188,50 @@
       "url": "https://youtu.be/6sLTErwRXsk"
     },
     {
+      "id": "29600716806199339",
+      "bookSlug": "sringeri-srinivas-belajar-tertawa",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/29600716806199339/"
+    },
+    {
+      "id": "1754961388898761",
+      "bookSlug": "edu-budi-papang-teripang",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1754961388898761/"
+    },
+    {
+      "id": "18095433824679726",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfkgtgRFdEE"
+    },
+    {
+      "id": "18001541820015690",
+      "bookSlug": "topsy-turvy-serba-terbalik",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/Dfd5i-ghj_K"
+    },
+    {
       "id": "1758153918631101",
       "bookSlug": "pisang-terlalu-banyak",
       "platform": "Facebook",
@@ -505,26 +1254,103 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1121555703939909/"
     },
     {
-      "id": "N4F6oLz3I1A",
-      "bookSlug": "topsy-turvy-serba-terbalik",
-      "platform": "YouTube",
-      "format": "9:16 Shorts",
+      "id": "992738057207627",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
       "lang": "id",
       "views": 1,
       "likes": 0,
       "comments": 0,
-      "url": "https://youtube.com/shorts/N4F6oLz3I1A"
+      "url": "https://www.facebook.com/1473240609201601/videos/992738057207627/"
     },
     {
-      "id": "0wmcWIqUyUc",
-      "bookSlug": "topsy-turvy-serba-terbalik",
+      "id": "1626901022229757",
+      "bookSlug": "gara-gara-kucing",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1626901022229757/"
+    },
+    {
+      "id": "1485188206789748",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1485188206789748/"
+    },
+    {
+      "id": "Dw2VW-eoKK8",
+      "bookSlug": "edu-budi-papang-teripang",
       "platform": "YouTube",
       "format": "9:16 Shorts",
       "lang": "en",
       "views": 1,
       "likes": 0,
       "comments": 0,
-      "url": "https://youtube.com/shorts/0wmcWIqUyUc"
+      "url": "https://youtube.com/shorts/Dw2VW-eoKK8"
+    },
+    {
+      "id": "iOwJCgIWQWg",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/iOwJCgIWQWg"
+    },
+    {
+      "id": "RvAR5jKnDPE",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/RvAR5jKnDPE"
+    },
+    {
+      "id": "-BQAhdnX8y8",
+      "bookSlug": "tersenyumlah",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/-BQAhdnX8y8"
+    },
+    {
+      "id": "Jc_PPn_TwyE",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/Jc_PPn_TwyE"
+    },
+    {
+      "id": "rRO2SDxd4lM",
+      "bookSlug": "kacamata-nenek",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/rRO2SDxd4lM"
     },
     {
       "id": "XkTR_Or5B2U",
@@ -536,17 +1362,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://youtube.com/shorts/XkTR_Or5B2U"
-    },
-    {
-      "id": "Pjkcxxai7JY",
-      "bookSlug": "raja-gemuk-anjing-kurus",
-      "platform": "YouTube",
-      "format": "9:16 Shorts",
-      "lang": "id",
-      "views": 1,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtube.com/shorts/Pjkcxxai7JY"
     },
     {
       "id": "cXcfE2qbFTY",
@@ -571,6 +1386,17 @@
       "url": "https://youtube.com/shorts/5qPMf_HgVMs"
     },
     {
+      "id": "YLLhBToycek",
+      "bookSlug": "bulan-dan-topi-biru",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 1,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/YLLhBToycek"
+    },
+    {
       "id": "8d1N51G2Py8",
       "bookSlug": "pisang-terlalu-banyak",
       "platform": "YouTube",
@@ -580,6 +1406,171 @@
       "likes": 0,
       "comments": 0,
       "url": "https://youtu.be/8d1N51G2Py8"
+    },
+    {
+      "id": "18134498398684174",
+      "bookSlug": "sringeri-srinivas-belajar-tertawa",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfyLzbyHEbU/"
+    },
+    {
+      "id": "17923130424460248",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfwz-63ml86/"
+    },
+    {
+      "id": "17965621653237164",
+      "bookSlug": "edu-budi-papang-teripang",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfwWVnQGVJd/"
+    },
+    {
+      "id": "18121728923469566",
+      "bookSlug": "ayo-berayun-momo",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfvnDcmDan5/"
+    },
+    {
+      "id": "1601778344556404",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1601778344556404/"
+    },
+    {
+      "id": "18116186267173769",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 1,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfuKWcBDb2V/"
+    },
+    {
+      "id": "18089920559330412",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DftCSbWgpkx/"
+    },
+    {
+      "id": "17927942649449024",
+      "bookSlug": "tersenyumlah",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfsHwk8Ag6b/"
+    },
+    {
+      "id": "18108092321333437",
+      "bookSlug": "tersenyumlah",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfsF54sDlhs/"
+    },
+    {
+      "id": "17979990728932432",
+      "bookSlug": "tersenyumlah",
+      "platform": "Threads",
+      "format": "Post",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.threads.com/@zayn.storybook/post/DfsGISpmE89"
+    },
+    {
+      "id": "17916137139284935",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfpAycBDip8/"
+    },
+    {
+      "id": "17896037796683454",
+      "bookSlug": "di-bawah-tempat-tidurku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfn4pR3D53M/"
+    },
+    {
+      "id": "18110647676238333",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfmb5esjR6U/"
+    },
+    {
+      "id": "18108615347357698",
+      "bookSlug": "jangan-sekarang",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/Dfj3cCfCtik/"
+    },
+    {
+      "id": "17926662621441610",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfkgiEAlXt4/"
     },
     {
       "id": "1780251976540335",
@@ -593,17 +1584,6 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1780251976540335/"
     },
     {
-      "id": "18391753921236798",
-      "bookSlug": "topsy-turvy-serba-terbalik",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/p/Dfe4hWTHXGW/"
-    },
-    {
       "id": "18142656691538326",
       "bookSlug": "jangan-sekarang",
       "platform": "Instagram",
@@ -615,15 +1595,26 @@
       "url": "https://www.instagram.com/reel/Dfi7R-ngXad/"
     },
     {
-      "id": "18120658937471911",
-      "bookSlug": "terlalu-banyak-suara",
+      "id": "17882481033546482",
+      "bookSlug": "kacamata-nenek",
       "platform": "Instagram",
       "format": "9:16 Reel",
       "lang": "id",
       "views": 0,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.instagram.com/reel/DfbY_KJFamJ/"
+      "url": "https://www.instagram.com/reel/DffVdgLiFrO/"
+    },
+    {
+      "id": "18391753921236798",
+      "bookSlug": "topsy-turvy-serba-terbalik",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/p/Dfe4hWTHXGW/"
     },
     {
       "id": "18640176196041641",
@@ -637,6 +1628,17 @@
       "url": "https://www.instagram.com/reel/Dfd5YyVkZGP/"
     },
     {
+      "id": "17941901157397263",
+      "bookSlug": "bulan-dan-topi-biru",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYTiJ1jrP6/"
+    },
+    {
       "id": "18082174070754341",
       "bookSlug": "bulan-dan-topi-biru",
       "platform": "Instagram",
@@ -648,15 +1650,15 @@
       "url": "https://www.instagram.com/reel/DfYTQuyjfL_/"
     },
     {
-      "id": "17941901157397263",
-      "bookSlug": "bulan-dan-topi-biru",
+      "id": "18120658937471911",
+      "bookSlug": "terlalu-banyak-suara",
       "platform": "Instagram",
       "format": "9:16 Reel",
-      "lang": "en",
+      "lang": "id",
       "views": 0,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYTiJ1jrP6/"
+      "url": "https://www.instagram.com/reel/DfbY_KJFamJ/"
     },
     {
       "id": "18284837872295291",
@@ -670,17 +1672,6 @@
       "url": "https://www.instagram.com/reel/DfZxIs5IDjo/"
     },
     {
-      "id": "18012455672989958",
-      "bookSlug": "jas-hujan-merah",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYSxyjCf75/"
-    },
-    {
       "id": "17953572681049076",
       "bookSlug": "raja-gemuk-anjing-kurus",
       "platform": "Instagram",
@@ -690,17 +1681,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.instagram.com/reel/DfYTHzjm4jw/"
-    },
-    {
-      "id": "18099437378222971",
-      "bookSlug": "raja-gemuk-anjing-kurus",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfYS-6zke8c/"
     },
     {
       "id": "18117727222824577",
@@ -714,6 +1694,28 @@
       "url": "https://www.instagram.com/reel/DfYSo_YAG73/"
     },
     {
+      "id": "18012455672989958",
+      "bookSlug": "jas-hujan-merah",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYSxyjCf75/"
+    },
+    {
+      "id": "18099437378222971",
+      "bookSlug": "raja-gemuk-anjing-kurus",
+      "platform": "Instagram",
+      "format": "9:16 Reel",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.instagram.com/reel/DfYS-6zke8c/"
+    },
+    {
       "id": "18470112652185938",
       "bookSlug": "gara-gara-kucing",
       "platform": "Instagram",
@@ -723,17 +1725,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.instagram.com/reel/DfYSflyDtbN/"
-    },
-    {
-      "id": "1148399937534781",
-      "bookSlug": "pisang-terlalu-banyak",
-      "platform": "Facebook",
-      "format": "16:9 Watch",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1148399937534781/"
     },
     {
       "id": "18119358566073500",
@@ -747,50 +1738,6 @@
       "url": "https://www.instagram.com/reel/DfV5-fxlOG6/"
     },
     {
-      "id": "1526407702581920",
-      "bookSlug": "pisang-terlalu-banyak",
-      "platform": "Facebook",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1526407702581920/"
-    },
-    {
-      "id": "1626901022229757",
-      "bookSlug": "gara-gara-kucing",
-      "platform": "Facebook",
-      "format": "9:16 Reel",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1626901022229757/"
-    },
-    {
-      "id": "1128493626754619",
-      "bookSlug": "gara-gara-kucing",
-      "platform": "Facebook",
-      "format": "16:9 Watch",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1128493626754619/"
-    },
-    {
-      "id": "18650700574043587",
-      "bookSlug": "pisang-terlalu-banyak",
-      "platform": "Instagram",
-      "format": "9:16 Reel",
-      "lang": "id",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://www.instagram.com/reel/DfV5qMUCVd8/"
-    },
-    {
       "id": "2118421299039453",
       "bookSlug": "jas-hujan-merah",
       "platform": "Facebook",
@@ -800,6 +1747,17 @@
       "likes": 0,
       "comments": 0,
       "url": "https://www.facebook.com/1473240609201601/videos/2118421299039453/"
+    },
+    {
+      "id": "1148399937534781",
+      "bookSlug": "pisang-terlalu-banyak",
+      "platform": "Facebook",
+      "format": "16:9 Watch",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1148399937534781/"
     },
     {
       "id": "1675936120858722",
@@ -813,26 +1771,37 @@
       "url": "https://www.facebook.com/1473240609201601/videos/1675936120858722/"
     },
     {
-      "id": "992738057207627",
-      "bookSlug": "raja-gemuk-anjing-kurus",
+      "id": "1526407702581920",
+      "bookSlug": "pisang-terlalu-banyak",
       "platform": "Facebook",
+      "format": "9:16 Reel",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://www.facebook.com/1473240609201601/videos/1526407702581920/"
+    },
+    {
+      "id": "18650700574043587",
+      "bookSlug": "pisang-terlalu-banyak",
+      "platform": "Instagram",
       "format": "9:16 Reel",
       "lang": "id",
       "views": 0,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/992738057207627/"
+      "url": "https://www.instagram.com/reel/DfV5qMUCVd8/"
     },
     {
-      "id": "1485188206789748",
-      "bookSlug": "raja-gemuk-anjing-kurus",
+      "id": "1128493626754619",
+      "bookSlug": "gara-gara-kucing",
       "platform": "Facebook",
       "format": "16:9 Watch",
-      "lang": "id",
+      "lang": "en",
       "views": 0,
       "likes": 0,
       "comments": 0,
-      "url": "https://www.facebook.com/1473240609201601/videos/1485188206789748/"
+      "url": "https://www.facebook.com/1473240609201601/videos/1128493626754619/"
     },
     {
       "id": "1160553539869262",
@@ -868,6 +1837,50 @@
       "url": "https://www.instagram.com/reel/DfVbgehjOAX/"
     },
     {
+      "id": "qxmNv1NGrbg",
+      "bookSlug": "pesta-ulang-tahun",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "en",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/qxmNv1NGrbg"
+    },
+    {
+      "id": "lhWzCnYwAiU",
+      "bookSlug": "tersenyumlah",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/lhWzCnYwAiU"
+    },
+    {
+      "id": "0bzGC7L7e7M",
+      "bookSlug": "dengarkan-tubuhku",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/0bzGC7L7e7M"
+    },
+    {
+      "id": "4KEy8f1Ta04",
+      "bookSlug": "jangan-sekarang",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/4KEy8f1Ta04"
+    },
+    {
       "id": "FU6TqsvOSrI",
       "bookSlug": "jangan-sekarang",
       "platform": "YouTube",
@@ -877,6 +1890,28 @@
       "likes": 0,
       "comments": 0,
       "url": "https://youtube.com/shorts/FU6TqsvOSrI"
+    },
+    {
+      "id": "s7mlzicBhsY",
+      "bookSlug": "kacamata-nenek",
+      "platform": "YouTube",
+      "format": "16:9 Full HD",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtu.be/s7mlzicBhsY"
+    },
+    {
+      "id": "N4F6oLz3I1A",
+      "bookSlug": "topsy-turvy-serba-terbalik",
+      "platform": "YouTube",
+      "format": "9:16 Shorts",
+      "lang": "id",
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "url": "https://youtube.com/shorts/N4F6oLz3I1A"
     },
     {
       "id": "AL3URKYnEn4",
@@ -890,17 +1925,6 @@
       "url": "https://youtube.com/shorts/AL3URKYnEn4"
     },
     {
-      "id": "JDwdkGaB49Q",
-      "bookSlug": "jas-hujan-merah",
-      "platform": "YouTube",
-      "format": "9:16 Shorts",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtube.com/shorts/JDwdkGaB49Q"
-    },
-    {
       "id": "70DyRzuctS0",
       "bookSlug": "jas-hujan-merah",
       "platform": "YouTube",
@@ -910,17 +1934,6 @@
       "likes": 0,
       "comments": 0,
       "url": "https://youtube.com/shorts/70DyRzuctS0"
-    },
-    {
-      "id": "YLLhBToycek",
-      "bookSlug": "bulan-dan-topi-biru",
-      "platform": "YouTube",
-      "format": "9:16 Shorts",
-      "lang": "en",
-      "views": 0,
-      "likes": 0,
-      "comments": 0,
-      "url": "https://youtube.com/shorts/YLLhBToycek"
     },
     {
       "id": "HbjJuqguQ3A",
