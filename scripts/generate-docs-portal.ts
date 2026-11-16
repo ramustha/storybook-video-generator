@@ -577,14 +577,19 @@ const initialCalToday = calendarSlots.filter((s) => s.date === todayIso).length;
 const initialCalUpcoming = calendarSlots.filter((s) => s.date > todayIso && !s.isCompleted).length;
 const initialCalProgress = initialCalTotal > 0 ? ((initialCalCompleted / initialCalTotal) * 100).toFixed(1) : "0.0";
 
-// Find active next-up slot dynamically
+// Find active next-up slot dynamically (today pending first, then next future scheduled slot)
 const todaySlots = calendarSlots.filter((s) => s.date === todayIso);
 const todayPendingSlots = todaySlots.filter((s) => !s.isCompleted);
-const nextUpPool = todayPendingSlots.length > 0 ? todayPendingSlots : todaySlots;
-const nextUpSlot = nextUpPool.find((s) => {
-  const isMorning = s.timeSlot.includes("08:") || s.slotType.toLowerCase().includes("morning");
-  return currentHour < 12 ? isMorning : !isMorning;
-}) || nextUpPool[0] || calendarSlots.find((s) => s.status === "upcoming");
+const futureUpcomingSlot = calendarSlots.find((s) => s.date > todayIso && !s.isCompleted);
+const nextUpSlot =
+  todayPendingSlots.find((s) => {
+    const isMorning = s.timeSlot.includes("08:") || s.slotType.toLowerCase().includes("morning");
+    return currentHour < 12 ? isMorning : !isMorning;
+  }) ||
+  todayPendingSlots[0] ||
+  futureUpcomingSlot ||
+  todaySlots[0] ||
+  calendarSlots.find((s) => s.status === "upcoming");
 
 // Generate docs/index.html
 const indexHtmlContent = `<!DOCTYPE html>
@@ -3146,7 +3151,7 @@ const indexHtmlContent = `<!DOCTYPE html>
               "${nextUpSlot ? ((nextUpSlot.lang === "en" ? storyMetaMap[nextUpSlot.bookSlug]?.summaryEn : storyMetaMap[nextUpSlot.bookSlug]?.summaryId) || nextUpSlot.theme) : "Children's Character Education"}"
             </div>
           </div>
-          <div style="display: flex; gap: 0.3rem; align-items: center; flex-shrink: 0;">
+          <div id="pipelineSpotlightPlatforms" style="display: flex; gap: 0.3rem; align-items: center; flex-shrink: 0;">
             <span class="platform-mini-tag">📺 YouTube</span>
             <span class="platform-mini-tag">📘 Facebook</span>
             <span class="platform-mini-tag">📸 Instagram</span>
@@ -3159,11 +3164,11 @@ const indexHtmlContent = `<!DOCTYPE html>
           <div class="pipeline-stage-card" id="stageCardBuffer">
             <div class="stage-card-top">
               <span class="stage-step-tag">STAGE 1 · CLOUD BUFFER</span>
-              <span class="stage-time-tag">Daily 07:00</span>
+              <span class="stage-time-tag">Daily 02:00 WIB</span>
             </div>
             <div class="stage-name">📦 Asset Pre-render Buffer</div>
             <div id="stageBufferStatus" class="stage-status-pill queued">⏳ Checking Buffer...</div>
-            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Daily 07:00 WIB</div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem;" id="stageBufferNextText">Next Cron: Daily 02:00 WIB (R2 CDN)</div>
           </div>
 
           <!-- Stage 2: Daily Announcement -->
@@ -4779,20 +4784,27 @@ ${browserSyncScript}
         const totalSecNow = wibHour * 3600 + wibMin * 60 + wibSec;
 
         // Schedule milestones in seconds:
-        const SEC_BUFFER = 7 * 3600;
+        const SEC_BUFFER = 2 * 3600;
         const SEC_ANNOUNCE = 7 * 3600 + 15 * 60;
         const SEC_MORNING = 8 * 3600 + 30 * 60;
         const SEC_BEDTIME = 19 * 3600;
 
-        // Today's and upcoming slots
+        // Today's and upcoming tomorrow date's slots
         const todaySlots = (RAW_CALENDAR_DATA || []).filter(s => s.date === clientTodayIso);
-        const tomorrowSlots = (RAW_CALENDAR_DATA || []).filter(s => s.date > clientTodayIso).slice(0, 2);
+        const futureAfterToday = (RAW_CALENDAR_DATA || []).filter(s => s.date > clientTodayIso);
+        const nextScheduledDate = futureAfterToday[0]?.date;
+        const tomorrowSlots = nextScheduledDate ? futureAfterToday.filter(s => s.date === nextScheduledDate) : [];
 
-        const todayMorning = todaySlots.find(s => s.timeSlot.includes('08:') || (s.slotType && s.slotType.toLowerCase().includes('morning'))) || todaySlots[0];
-        const todayBedtime = todaySlots.find(s => s.timeSlot.includes('19:') || (s.slotType && s.slotType.toLowerCase().includes('bedtime'))) || todaySlots[1];
+        const isMorningSlot = (s) => (s.timeSlot || '').includes('08:') || (s.slotType && s.slotType.toLowerCase().includes('morning'));
+        const isBedtimeSlot = (s) => (s.timeSlot || '').includes('19:') || (s.slotType && s.slotType.toLowerCase().includes('bedtime'));
+        const isMotionSlot = (s) => (s.timeSlot || '').includes('15:') || (s.slotType && s.slotType.toLowerCase().includes('motion'));
 
-        const tomorrowMorning = tomorrowSlots.find(s => s.timeSlot.includes('08:') || (s.slotType && s.slotType.toLowerCase().includes('morning'))) || tomorrowSlots[0];
-        const tomorrowBedtime = tomorrowSlots.find(s => s.timeSlot.includes('19:') || (s.slotType && s.slotType.toLowerCase().includes('bedtime'))) || tomorrowSlots[1];
+        const todayMorning = todaySlots.find(isMorningSlot) || todaySlots[0];
+        const todayMotion = todaySlots.find(isMotionSlot);
+        const todayBedtime = todaySlots.find(isBedtimeSlot) || todaySlots[1];
+
+        const tomorrowMorning = tomorrowSlots.find(isMorningSlot) || tomorrowSlots[0];
+        const tomorrowBedtime = tomorrowSlots.find(isBedtimeSlot) || tomorrowSlots[1];
 
         // Stage 1: Asset Buffering
         const bufferEl = document.getElementById('stageBufferStatus');
@@ -4812,14 +4824,17 @@ ${browserSyncScript}
           }
         }
         if (bufferNextEl) {
-          bufferNextEl.textContent = 'Next Cron: Daily 07:00 WIB (R2 CDN)';
+          bufferNextEl.textContent = 'Next Cron: Daily 02:00 WIB (H+1..H+3 R2 Buffer)';
         }
 
         // Stage 2: Daily Bilingual Announcement
         const announceEl = document.getElementById('stageAnnounceStatus');
         const announceNextEl = document.getElementById('stageAnnounceNextText');
         if (announceEl) {
-          if (totalSecNow >= SEC_ANNOUNCE) {
+          if (todaySlots.length === 0) {
+            announceEl.className = 'stage-status-pill queued';
+            announceEl.textContent = '⏭️ No Slot Today';
+          } else if (totalSecNow >= SEC_ANNOUNCE) {
             announceEl.className = 'stage-status-pill done';
             announceEl.textContent = '✅ Sent Today (07:15 WIB)';
           } else {
@@ -4855,7 +4870,8 @@ ${browserSyncScript}
         }
         if (morningNextEl) {
           if ((morningDone || totalSecNow >= SEC_MORNING) && tomorrowMorning) {
-            morningNextEl.textContent = \`Next: Tomorrow 08:30 WIB · \${tomorrowMorning.storyTitleEn || tomorrowMorning.storyTitleId}\`;
+            const mBadge = tomorrowMorning.isBuffered ? '🟢 Buffered' : tomorrowMorning.hasAssets ? '🟡 Assets' : '⏳ Queued';
+            morningNextEl.textContent = \`Next: Tomorrow 08:30 WIB · \${tomorrowMorning.storyTitleEn || tomorrowMorning.storyTitleId} (\${mBadge})\`;
           } else if (todayMorning) {
             morningNextEl.textContent = \`Today: \${todayMorning.storyTitleEn || todayMorning.storyTitleId} [EN]\`;
           }
@@ -4885,94 +4901,75 @@ ${browserSyncScript}
         }
         if (bedtimeNextEl) {
           if ((bedtimeDone || totalSecNow >= SEC_BEDTIME) && tomorrowBedtime) {
-            bedtimeNextEl.textContent = \`Next: Tomorrow 19:00 WIB · \${tomorrowBedtime.storyTitleId}\`;
+            const bBadge = tomorrowBedtime.isBuffered ? '🟢 Buffered' : tomorrowBedtime.hasAssets ? '🟡 Assets' : '⏳ Queued';
+            bedtimeNextEl.textContent = \`Next: Tomorrow 19:00 WIB · \${tomorrowBedtime.storyTitleId} (\${bBadge})\`;
           } else if (todayBedtime) {
             bedtimeNextEl.textContent = \`Tonight: \${todayBedtime.storyTitleId} [ID]\`;
           }
         }
 
-        // Active Card Highlight in Grid
+        // Active Card Highlight & Unified Spotlight Resolution
         const cardBuffer = document.getElementById('stageCardBuffer');
         const cardAnnounce = document.getElementById('stageCardAnnounce');
         const cardMorning = document.getElementById('stageCardMorning');
         const cardBedtime = document.getElementById('stageCardBedtime');
         [cardBuffer, cardAnnounce, cardMorning, cardBedtime].forEach(c => c && c.classList.remove('active-stage'));
 
-        // Immediate Next Automated Pipeline Event
-        let nextEventName = '';
-        let targetSecRemaining = 0;
-        let spotlightSlot = null;
-        let spotlightSub = '';
-        let shortActionName = 'Broadcast';
+        const spotlight = resolvePipelineSpotlight({
+          totalSecNow,
+          wibDayOfWeek,
+          todaySlots,
+          tomorrowSlots,
+          todayMorning,
+          todayMotion,
+          todayBedtime,
+          tomorrowMorning,
+          tomorrowBedtime
+        });
 
-        if (totalSecNow < SEC_ANNOUNCE) {
-          nextEventName = '📣 Daily Bilingual Social Announcement (07:15 WIB)';
-          shortActionName = 'Announcement';
-          targetSecRemaining = SEC_ANNOUNCE - totalSecNow;
-          spotlightSlot = todayMorning || todayBedtime;
-          spotlightSub = 'Bilingual Teaser Carousel for Instagram, Facebook, and Threads';
-          if (cardAnnounce) cardAnnounce.classList.add('active-stage');
-        } else if (totalSecNow < SEC_MORNING) {
-          nextEventName = '🌅 Morning English Broadcast (08:30 WIB)';
-          shortActionName = 'Morning [EN]';
-          targetSecRemaining = SEC_MORNING - totalSecNow;
-          spotlightSlot = todayMorning;
-          spotlightSub = 'Educational English Story (9:16 Shorts & 16:9 Landscape) on YouTube, Facebook, and Instagram';
-          if (cardMorning) cardMorning.classList.add('active-stage');
-        } else if (totalSecNow < SEC_BEDTIME) {
-          nextEventName = '🌙 Prime Bedtime Indonesian Broadcast (19:00 WIB)';
-          shortActionName = 'Bedtime [ID]';
-          targetSecRemaining = SEC_BEDTIME - totalSecNow;
-          spotlightSlot = todayBedtime;
-          spotlightSub = 'Indonesian Bedtime Tale with Relaxing Soundscape on YouTube, Facebook, and Instagram';
-          if (cardBedtime) cardBedtime.classList.add('active-stage');
-        } else {
-          const isTomorrowBuffer = wibDayOfWeek === 'Sun' || wibDayOfWeek === 'Wed';
-          const nextTargetSec = isTomorrowBuffer ? SEC_BUFFER : SEC_ANNOUNCE;
-          targetSecRemaining = (86400 - totalSecNow) + nextTargetSec;
-          nextEventName = isTomorrowBuffer
-            ? '📦 Cloudflare R2 Pre-render Buffering (Tomorrow 07:00 WIB)'
-            : '📣 Daily Bilingual Social Announcement (Tomorrow 07:15 WIB)';
-          shortActionName = isTomorrowBuffer ? 'R2 Buffer' : 'Announcement';
-          spotlightSlot = tomorrowMorning || tomorrowBedtime;
-          spotlightSub = 'Tomorrow Launch Preparation · Cloudflare Worker Cron Dispatch';
-          if (isTomorrowBuffer && cardBuffer) cardBuffer.classList.add('active-stage');
-          else if (cardAnnounce) cardAnnounce.classList.add('active-stage');
+        const cardByKey = {
+          buffer: cardBuffer,
+          announce: cardAnnounce,
+          morning: cardMorning,
+          bedtime: cardBedtime
+        };
+        if (cardByKey[spotlight.activeCard]) {
+          cardByKey[spotlight.activeCard].classList.add('active-stage');
         }
 
-        // Format Countdown String
-        const cdHours = Math.floor(targetSecRemaining / 3600);
-        const cdMins = Math.floor((targetSecRemaining % 3600) / 60);
-        const cdSecs = targetSecRemaining % 60;
+        const cdHours = Math.floor(spotlight.targetSecRemaining / 3600);
+        const cdMins = Math.floor((spotlight.targetSecRemaining % 3600) / 60);
+        const cdSecs = spotlight.targetSecRemaining % 60;
         const countdownStr = \`⏳ T - \${String(cdHours).padStart(2, '0')}h \${String(cdMins).padStart(2, '0')}m \${String(cdSecs).padStart(2, '0')}s\`;
 
-        // Update Spotlight UI elements
+        const badgeEl = document.getElementById('pipelineSpotlightBadge');
+        if (badgeEl) badgeEl.textContent = spotlight.badgeText;
+
         const nameEl = document.getElementById('pipelineSpotlightName');
-        if (nameEl) nameEl.textContent = nextEventName;
+        if (nameEl) nameEl.textContent = spotlight.eventName;
 
         const cdEl = document.getElementById('pipelineCountdown');
         if (cdEl) cdEl.textContent = countdownStr;
 
         const titleEl = document.getElementById('pipelineSpotlightTitle');
-        if (titleEl && spotlightSlot) {
-          const spTitles = getLocalizedStoryPair(spotlightSlot, spotlightSlot.lang);
-          titleEl.textContent = \`\${spTitles.primary} (\${(spotlightSlot.lang || 'id').toUpperCase()})\`;
-        }
+        if (titleEl) titleEl.textContent = spotlight.titleText;
 
         const metaEl = document.getElementById('pipelineSpotlightMeta');
-        if (metaEl && spotlightSlot) {
-          metaEl.innerHTML = \`<span>📅 \${spotlightSlot.dayName}, \${spotlightSlot.date}</span> · <span>⏰ \${spotlightSlot.timeSlot}</span> · <span>📺 \${spotlightSlot.slotType}</span> · <span style="color: var(--accent-primary); font-weight: 600;">\${spotlightSlot.format}</span>\`;
+        if (metaEl) {
+          metaEl.innerHTML = \`<span>📅 \${spotlight.metaDayName}, \${spotlight.metaDate}</span> · <span>⏰ \${spotlight.metaTime}</span> · <span>📺 \${spotlight.metaType}</span> · <span style="color: var(--accent-primary); font-weight: 600;">\${spotlight.metaFormat}</span>\`;
         }
 
         const descEl = document.getElementById('pipelineSpotlightDesc');
-        if (descEl) {
-          descEl.textContent = spotlightSlot ? \`"\${getLocalizedSlotContent(spotlightSlot)}" — \${spotlightSub}\` : spotlightSub;
+        if (descEl) descEl.textContent = spotlight.descText;
+
+        const platformsEl = document.getElementById('pipelineSpotlightPlatforms');
+        if (platformsEl && Array.isArray(spotlight.platformTags)) {
+          platformsEl.innerHTML = spotlight.platformTags.map(t => \`<span class="platform-mini-tag">\${t}</span>\`).join('');
         }
 
-        // Update Top Header Pipeline Pill
         const headerPillText = document.getElementById('pipelineHeaderStatusText');
         if (headerPillText) {
-          headerPillText.textContent = \`⚡ Next: \${shortActionName} in \${String(cdHours).padStart(2, '0')}h \${String(cdMins).padStart(2, '0')}m\`;
+          headerPillText.textContent = \`⚡ Next: \${spotlight.shortActionName} in \${String(cdHours).padStart(2, '0')}h \${String(cdMins).padStart(2, '0')}m\`;
         }
 
         // Tick per-card runner countdowns in-place
@@ -5204,7 +5201,7 @@ ${browserSyncScript}
       const dateStr = slot.date && /^\\d{4}-\\d{2}-\\d{2}$/.test(slot.date) ? slot.date : null;
       if (!dateStr) return { ingestMs: null, bufferMs: null, publishMs: null };
 
-      const publishTime = isMorning ? '08:30:00' : '19:00:00';
+      const publishTime = extractSlotTimeHms(slot.timeSlot, isMorning ? '08:30:00' : '19:00:00');
       const publishMs = new Date(\`\${dateStr}T\${publishTime}+07:00\`).getTime();
 
       // Nightly pre-render buffer runs at 02:00 WIB for the next 3 days
