@@ -1,0 +1,39 @@
+scripts/upload-meta.ts
+  698ac31901cd73e0 4,8-10,189,215-216,242-257,869-874,883,924-925,1265-1274
+scripts/lib/seo-formatter.ts
+  698ac31901cd73e0 474-496
+scripts/lib/meta-token-health.ts
+  698ac31901cd73e0 1-138
+scripts/publish-announcement.ts
+  698ac31901cd73e0 20-22,330-331,346-347,364,376,518-519,539-540,1252,1265,1330,1644-1645,1659-1660,1674-1675,1689,1707-1708,1720-1721,1731,1742
+scripts/refresh-meta-token.ts
+  698ac31901cd73e0 4-7,13,28-29,94,107-130,173-175,177,203-216,247-248
+scripts/test-meta-connection.ts
+  698ac31901cd73e0 4-7,116-134
+scripts/generate-social-promo.ts
+  698ac31901cd73e0 130-131
+scripts/publish-instagram-post.ts
+  698ac31901cd73e0 6,103,123
+scripts/test-monetization-audit.ts
+  698ac31901cd73e0 3-6,8-12,72-115,117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "79abc26ad5ef8dd8d033d3784d5ca89a2b364eab",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 375,
+      "total_deletions": 53,
+      "accepted_lines": 373,
+      "overriden_lines": 0
+    }
+  }
+}
