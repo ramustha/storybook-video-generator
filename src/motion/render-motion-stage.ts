@@ -98,11 +98,13 @@ export async function renderEduMotionVideo(options: RenderMotionVideoOptions): P
   const { storyDir, lang, format, outputLocation, fps = 30 } = options;
   const motionDir = path.join(storyDir, "motion", lang);
 
-  // Check for format-specific HTML (e.g. index-16x9.html or index-9x16.html) or universal responsive index.html
+  // Check for format-specific HTML & audio (index-16x9.html / vo_combined-16x9.mp3 vs index-9x16.html / vo_combined-9x16.mp3)
   const formatHtml = path.join(motionDir, format === "vertical" ? "index-9x16.html" : "index-16x9.html");
   const defaultHtml = path.join(motionDir, "index.html");
   const htmlPath = existsSync(formatHtml) ? formatHtml : defaultHtml;
-  const voMp3Path = path.join(motionDir, "vo_combined.mp3");
+  const formatVo = path.join(motionDir, format === "vertical" ? "vo_combined-9x16.mp3" : "vo_combined-16x9.mp3");
+  const defaultVo = path.join(motionDir, "vo_combined.mp3");
+  const voMp3Path = existsSync(formatVo) ? formatVo : defaultVo;
 
   if (!existsSync(htmlPath)) {
     throw new Error(`Edu-Motion stage HTML not found at: ${htmlPath}`);

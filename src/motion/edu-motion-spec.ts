@@ -60,8 +60,10 @@ export interface PacingConfig {
   introPauseSec?: number;
   /** Breathing pause after Moral before Outro starts (seconds). */
   outroPauseSec?: number;
-  /** Hard platform duration ceiling (IG/FB Reels 90s cap => 88.0s safe target). */
+  /** Hard platform duration ceiling for short vertical Reels/Shorts (default 89.5s). */
   maxVerticalDurationSec?: number;
+  /** Target minimum duration for long-form 16:9 YouTube Mid-Roll + Facebook In-Stream monetization (default 485s = 8m05s). */
+  minLandscapeDurationSec?: number;
 }
 
 export interface CalloutSpec {
@@ -208,10 +210,12 @@ export interface StoryMotionSpec {
   book: BookMetadataSpec;
   narrator: NarratorSpec;
   pacing?: PacingConfig;
+  longFormPacing?: PacingConfig;
   backdrop: BackdropSpec;
   actors: StageActorSpec[];
   proceduralLoops?: ProceduralLoopSpec[];
   chapters: StoryChapterSpec[];
+  landscapeChapters?: StoryChapterSpec[];
   moral: MoralSpec;
   outro?: OutroSpec;
 }

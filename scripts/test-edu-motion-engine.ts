@@ -1,7 +1,13 @@
 import assert from "assert";
 import fs from "fs/promises";
 import path from "path";
-import { splitIntoSentences, solveDurationBudget } from "../src/motion/compile-edu-motion";
+import {
+  buildLongFormChapters,
+  LONG_FORM_MIN_DURATION_SEC,
+  solveDurationBudget,
+  solveLongFormBudget,
+  splitIntoSentences,
+} from "../src/motion/compile-edu-motion";
 import { buildHostCircularBadgeSvg } from "../src/motion/character-registry";
 import { validateStoryMotionSpec } from "../src/motion/edu-motion-spec";
 import { buildOverlayScenesHtml } from "../src/motion/overlay-scenes";
@@ -118,6 +124,25 @@ async function runTests() {
   });
   assert(overlayHtml.includes("KEMENDIKDASMEN •"));
   assert(!/\bBUDI\b/i.test(overlayHtml), "Overlay HTML should not expose BUDI prefix");
+
+  // 8. Long-form 16:9 monetization target (>= 485s = 8m05s) and chapter expansion
+  assert(LONG_FORM_MIN_DURATION_SEC >= 480, "Long-form minimum must clear 8-minute YouTube mid-roll & 3-minute Facebook threshold");
+  const expanded = buildLongFormChapters(fixtureSpec);
+  assert(expanded.length > fixtureSpec.chapters.length, "Long-form chapter expansion must add welcome/moral/recap beats");
+  assert(expanded.some((c) => c.id === "intro_welcome"), "Expected extended cover welcome beat");
+  assert(expanded.some((c) => c.id === "moral_practice"), "Expected extended moral reflection beat");
+  assert(expanded.some((c) => c.id === "story_recap"), "Expected story recap beat before outro");
+
+  const longPlan = solveLongFormBudget(
+    0.3,
+    Array.from({ length: 12 }, () => ({ speechDurSec: 18.0, pauseAfterSec: 1.2, minPauseAfterSec: 0.6 })),
+    LONG_FORM_MIN_DURATION_SEC
+  );
+  assert.strictEqual(longPlan.speechTempo, 1.0, "Long-form budget must preserve natural speech tempo");
+  assert(
+    longPlan.fittedTotalSec >= LONG_FORM_MIN_DURATION_SEC,
+    `Expected long-form duration >= ${LONG_FORM_MIN_DURATION_SEC}s, got ${longPlan.fittedTotalSec}s`
+  );
 
   console.log("✅ All 7 Universal Edu-Motion unit checks passed!");
 }
