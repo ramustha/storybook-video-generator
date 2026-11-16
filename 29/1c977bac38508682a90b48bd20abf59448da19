@@ -1,0 +1,29 @@
+scripts/performance-analytics.ts
+  698ac31901cd73e0 12,80
+scripts/lib/meta-token-health.ts
+  698ac31901cd73e0 36-45
+docs/stats-data.json
+  698ac31901cd73e0 2,5,17,23,93-95,103,233-242,277-286,321-330,365-374,459,475-484,585-594,618-627,662-682,762,765,770,773,776,781,860-869,1025-1034,1091-1111,1157-1166,1179-1188,1234-1243,1256-1276,1389,1391-1392,1397,1410-1419,1443-1452,1675-1676,1679,1683,1752,1754,1760,1763,1765,1771
+scripts/test-monetization-audit.ts
+  698ac31901cd73e0 4-8,122-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "291c977bac38508682a90b48bd20abf59448da19",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 281,
+      "total_deletions": 251,
+      "accepted_lines": 280,
+      "overriden_lines": 0
+    }
+  }
+}
