@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { buildMonetizationAudit } from "./lib/monetization-audit";
-import { generateSeoMetadata } from "./lib/seo-formatter";
+import { buildSocialEngagementCta, generateSeoMetadata } from "./lib/seo-formatter";
+import { auditMetaScopes, buildMetaReauthInstructions, REQUIRED_META_SCOPES } from "./lib/meta-token-health";
+import { buildCaption, buildCompilationCaption } from "./upload-meta";
+import { DEFAULT_LAUNCH_CAPTION } from "./publish-instagram-post";
+
+function assertHasSaveAndFollow(text: string, label: string): void {
+  assert.ok(/save|simpan/i.test(text), `${label} must include Save/Simpan CTA`);
+  assert.ok(/follow/i.test(text), `${label} must include Follow CTA`);
+  assert.ok(/comment|komentar|share below|tulis di/i.test(text), `${label} must include Comment CTA`);
+}
 
 function runTests(): void {
   // 1. Monetization gap & Shorts-heavy traffic audit
@@ -60,7 +69,52 @@ function runTests(): void {
     "Shorts EN top description must link to 16:9 episode"
   );
 
-  console.log("✅ All monetization audit & Shorts-to-Long funnel unit checks passed!");
+  // 3. Meta/Instagram captions across Reels, Watch, Compilations & Feed posts carry Save/Follow/Comment CTAs
+  const sampleStory = {
+    title: "Mendengarkan Tubuhku",
+    originalTitle: "Listen to My Body",
+    moral: {
+      headlineId: "Tubuh memberi tanda saat lelah atau lapar.",
+      headlineEn: "Listening to body signals helps us stay healthy.",
+    },
+  };
+  for (const lang of ["id", "en"] as const) {
+    for (const format of ["vertical", "landscape"] as const) {
+      assertHasSaveAndFollow(buildCaption(sampleStory, lang, format), `buildCaption(${lang}, ${format})`);
+    }
+    assertHasSaveAndFollow(
+      buildCompilationCaption("Compilation", "Bedtime stories", "00:00 Story 1", lang),
+      `buildCompilationCaption(${lang})`
+    );
+    for (const surface of ["reel", "watch", "feed", "compilation"] as const) {
+      assertHasSaveAndFollow(buildSocialEngagementCta(lang, surface), `buildSocialEngagementCta(${lang}, ${surface})`);
+    }
+  }
+  assertHasSaveAndFollow(DEFAULT_LAUNCH_CAPTION, "DEFAULT_LAUNCH_CAPTION");
+
+  // 4. Meta token permission audit detects missing instagram_manage_insights / read_insights
+  const currentTokenAudit = auditMetaScopes([
+    "pages_show_list",
+    "business_management",
+    "instagram_basic",
+    "instagram_content_publish",
+    "pages_read_engagement",
+    "pages_manage_posts",
+    "public_profile",
+  ]);
+  assert.equal(currentTokenAudit.ok, false);
+  assert.equal(currentTokenAudit.insightsReady, false);
+  assert.deepEqual(currentTokenAudit.missingInsightsScopes, ["instagram_manage_insights", "read_insights"]);
+  const guide = buildMetaReauthInstructions("1099494459651856", currentTokenAudit.missingScopes).join("\n");
+  assert.ok(guide.includes("instagram_manage_insights"));
+  assert.ok(guide.includes("refresh-meta-token.ts --user-token"));
+
+  const healthyAudit = auditMetaScopes([...REQUIRED_META_SCOPES]);
+  assert.equal(healthyAudit.ok, true);
+  assert.equal(healthyAudit.insightsReady, true);
+  assert.deepEqual(healthyAudit.missingScopes, []);
+
+  console.log("✅ All monetization audit, Save/Follow caption & Meta scope audit checks passed!");
 }
 
 runTests();

@@ -1,10 +1,14 @@
 import fs from "fs/promises";
 import { existsSync, createReadStream, readdirSync } from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { spawn } from "child_process";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { db } from "./lib/db";
-import { resolveRelatedPublishedVideos } from "./lib/seo-formatter";
+import {
+  buildSocialEngagementCta,
+  resolveRelatedPublishedVideos,
+} from "./lib/seo-formatter";
 
 interface MetaConfig {
   appId: string;
@@ -182,7 +186,7 @@ async function loadR2Config(): Promise<R2Config> {
 /**
  * Builds rich, engaging caption adapted to any story.
  */
-function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "landscape"): string {
+export function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "landscape"): string {
   const isLandscape = format === "landscape";
   const isEn = lang === "en";
 
@@ -208,6 +212,8 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
     if (!moral) moral = "Selalu belajar hal baik, berbuat jujur, dan saling menyayangi setiap hari!";
   }
 
+  const ctaLine = buildSocialEngagementCta(lang, isLandscape ? "watch" : "reel");
+
   if (lang === "id") {
     const rawTitle = (story.title || "Cerita Anak Bergambar").replace(/\(.*\)/, "").trim();
     const hook = story.thumbnailConfig?.id?.hook || story.thumbnailConfig?.id?.headlineTop || "Kisah seru dan penuh tawa!";
@@ -217,9 +223,6 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
     const hashtags = isLandscape
       ? "#CeritaAnak #DongengAnak #Storybook #BukuAnak #AnimasiAnak #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook #FacebookWatch #VideoAnak"
       : "#CeritaAnak #DongengAnak #Storybook #KidsStory #AnimasiAnak #Reels #FacebookReels #InstagramReels #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook";
-    const ctaLine = isLandscape
-      ? `💬 Setelah menonton, bagian mana yang paling disukai si kecil? Tulis di komentar!\n➕ FOLLOW halaman @ZaynStorybook & BAGIKAN ke Ayah Bunda lain agar tiap malam ada dongeng baru!\n📺 Tonton maraton 16:9 lengkap di Facebook Watch & YouTube @zayn.storybook.`
-      : `🔖 SIMPAN (Save) Reels ini untuk dongeng sebelum tidur nanti malam!\n➕ FOLLOW @zayn.storybook biar tidak ketinggalan cerita baru setiap hari.\n💬 Pelajaran baik apa nih yang paling diingat si kecil? Yuk tulis di komentar!`;
 
     return `${rawTitle} 📖✨\n\n${hook}${sticker}\n${bedtimeHook}\n\n✨ Nilai Moral: ${moral}\n\n${ctaLine}\n\n📖 ${badge} — Zayn Storybook\n${hashtags}`;
   } else {
@@ -231,12 +234,27 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
     const hashtags = isLandscape
       ? "#KidsBooks #Storytime #BedtimeStory #Animation #ChildrensBook #KidsAnimation #ZaynStorybook #FacebookWatch #ReadAloud"
       : "#KidsBooks #Storytime #BedtimeStory #Animation #Reels #InstagramReels #FacebookReels #ChildrensBook #KidsAnimation #ZaynStorybook";
-    const ctaLine = isLandscape
-      ? `💬 Which moment made your child smile or wonder most? Tell us in the comments!\n➕ FOLLOW our Facebook Page & SHARE with fellow parents for nightly storytime!\n📺 Watch full episodes on Facebook Watch & YouTube @zayn.storybook.`
-      : `🔖 SAVE this Reel for tonight's bedtime routine!\n➕ FOLLOW @zayn.storybook for daily bilingual kids stories.\n💬 What lesson stood out most to your little one? Share below!`;
 
     return `${rawTitle} 📖✨\n\n${hook}${sticker}\n${bedtimeHook}\n\n✨ Moral Lesson: ${moral}\n\n${ctaLine}\n\n📖 ${badge} — Zayn Storybook\n${hashtags}`;
   }
+}
+
+/**
+ * Builds Save / Follow / Comment enabled caption for Facebook Watch compilation uploads.
+ */
+export function buildCompilationCaption(
+  title: string,
+  descPart: string,
+  timestampsPart: string,
+  lang: "id" | "en"
+): string {
+  const isEn = lang === "en";
+  const ctaLine = buildSocialEngagementCta(lang, "compilation");
+  const hashtags = isEn
+    ? "#BedtimeStories #KidsStories #StorybookAnimation #ChildrenBooks #ZaynStorybook #PictureBooks #FacebookWatch #KidsAnimation"
+    : "#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak";
+  const body = [title, descPart, timestampsPart, ctaLine, hashtags].filter((p) => p && p.trim().length > 0);
+  return body.join("\n\n");
 }
 
 /**
@@ -848,7 +866,12 @@ async function main() {
     let title = isEn
       ? "Bedtime Stories Marathon for Kids (12 Mins Non-Stop) | Calming Animated Picture Books 🌙✨"
       : "Kumpulan Dongeng Pengantar Tidur Anak 🌙✨";
-    let caption = "Kompilasi dongeng anak bergambar non-stop...";
+    let caption = buildCompilationCaption(
+      title,
+      isEn ? "Non-stop illustrated bedtime stories marathon for kids." : "Kompilasi dongeng anak bergambar non-stop...",
+      "",
+      options.lang
+    );
     if (existsSync(metaPath)) {
       const metaContent = await fs.readFile(metaPath, "utf-8");
       const titleMatch = metaContent.match(/JUDUL:\s*\n([^\n]+)/);
@@ -857,10 +880,7 @@ async function main() {
       const descPart = descMatch ? descMatch[1].trim() : "";
       const timestampsMatch = metaContent.match(/(⏳ TIMESTAMPS[\s\S]+?)(?=\n===|$)/);
       const timestampsPart = timestampsMatch ? timestampsMatch[1].trim() : "";
-      const hashtags = isEn
-        ? "#BedtimeStories #KidsStories #StorybookAnimation #ChildrenBooks #ZaynStorybook #PictureBooks #FacebookWatch #KidsAnimation"
-        : "#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak";
-      caption = `${title}\n\n${descPart}\n\n${timestampsPart}\n\n${hashtags}`;
+      caption = buildCompilationCaption(title, descPart, timestampsPart, options.lang);
     }
 
     const thumbnailCandidates = [
@@ -901,7 +921,8 @@ async function main() {
         caption,
         config,
         "landscape",
-        thumbnailPath
+        thumbnailPath,
+        buildFacebookVideoFirstComment(`kompilasi-${options.compilationTheme}`, options.lang)
       );
 
       console.log(`\n🎉 COMPILATION VIDEO [${options.lang.toUpperCase()}] LIVE ON FACEBOOK WATCH!`);
@@ -1241,7 +1262,13 @@ async function main() {
   console.log("\n✨ ALL COMPLETED SUCCESSFULLY! ✨\n");
 }
 
-main().catch((err) => {
-  console.error("\n❌ Fatal error in Meta Uploader:", err);
-  process.exit(1);
-});
+const isDirectRun =
+  Boolean(process.argv[1]) &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error("\n❌ Fatal error in Meta Uploader:", err);
+    process.exit(1);
+  });
+}

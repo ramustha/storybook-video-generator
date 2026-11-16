@@ -471,3 +471,26 @@ export function buildYoutubeLocalizations(
   };
 }
 
+/**
+ * Shared Save / Follow / Comment CTA block for Instagram & Facebook captions.
+ */
+export function buildSocialEngagementCta(
+  lang: "id" | "en",
+  surface: "reel" | "watch" | "feed" | "compilation" = "feed"
+): string {
+  const isEn = lang === "en";
+  if (surface === "reel") {
+    return isEn
+      ? `🔖 SAVE this Reel for tonight's bedtime routine!\n➕ FOLLOW @zayn.storybook for daily bilingual kids stories.\n💬 What lesson stood out most to your little one? Share below!`
+      : `🔖 SIMPAN (Save) Reels ini untuk dongeng sebelum tidur nanti malam!\n➕ FOLLOW @zayn.storybook biar tidak ketinggalan cerita baru setiap hari.\n💬 Pelajaran baik apa nih yang paling diingat si kecil? Yuk tulis di komentar!`;
+  }
+  if (surface === "watch" || surface === "compilation") {
+    return isEn
+      ? `🔖 SAVE this story for tonight's family watch list!\n➕ FOLLOW our @ZaynStorybook Facebook Page & SHARE with fellow parents for nightly storytime!\n💬 Which moment made your child smile or wonder most? Tell us in the comments!\n📺 Watch full episodes on Facebook Watch & YouTube @zayn.storybook.`
+      : `🔖 SIMPAN video ini ke daftar tonton malam keluarga!\n➕ FOLLOW halaman @ZaynStorybook & BAGIKAN ke Ayah Bunda lain agar tiap malam ada dongeng baru!\n💬 Setelah menonton, bagian mana yang paling disukai si kecil? Tulis di komentar!\n📺 Tonton maraton 16:9 lengkap di Facebook Watch & YouTube @zayn.storybook.`;
+  }
+  return isEn
+    ? `🔖 SAVE this post for tonight's bedtime routine!\n➕ FOLLOW @zayn.storybook for daily bilingual storybooks & family tales.\n💬 Which lesson are you excited to discuss with your child? Share in the comments!`
+    : `🔖 SIMPAN (Save) postingan ini agar mudah diputar saat mendongeng malam nanti!\n➕ FOLLOW @zayn.storybook untuk update dongeng & animasi anak setiap hari.\n💬 Nilai baik apa nih yang paling ingin Ayah Bunda bahas bersama si kecil? Tulis di komentar!`;
+}
+

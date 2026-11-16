@@ -17,7 +17,10 @@ import {
 import { DAILY_CALENDAR_MONTH_1, isFullMotionSlot } from "./content-calendar";
 import { db } from "./lib/db";
 import { pullStory } from "./manage-story-storage";
-import { resolveRelatedPublishedVideos } from "./lib/seo-formatter";
+import {
+  buildSocialEngagementCta,
+  resolveRelatedPublishedVideos,
+} from "./lib/seo-formatter";
 import { loadJsonArraySafe } from "./lib/portal-sync";
 
 export const SOCIAL_YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@zayn.storybook";
@@ -324,8 +327,8 @@ ${storySummary}
 💡 Pesan Moral untuk Si Kecil:
 ${moral}
 
-🔔 Nyalakan lonceng pengingat di YouTube & ikuti Instagram Reels, Facebook Page, serta Threads @zayn.storybook agar tidak ketinggalan kisah penuh keteladanan ini!
-💬 Pelajaran baik apa nih yang ingin Ayah Bunda ajarkan lewat cerita hari ini? 👇❤️
+🔔 Nyalakan lonceng pengingat di YouTube @zayn.storybook!
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #DongengSebelumTidur #CeritaAnakBergambar #PesanMoralAnak #ParentingIndonesia`
     : `⏰ PREMIERING IN 1 HOUR (${slotTime}) 🌟✨
@@ -340,8 +343,8 @@ ${storySummary}
 💡 Moral of the Story:
 ${moral}
 
-🔔 Set your reminder on YouTube and follow @zayn.storybook across Instagram, Facebook & Threads so your family never misses a story!
-💬 What lesson are you excited to talk about with your child after watching? 👇❤️
+🔔 Set your reminder on YouTube @zayn.storybook!
+${buildSocialEngagementCta("en", "feed")}
 
 #ZaynStorybook #KidsStories #ReadAloud #BedtimeStories #MoralStories`;
 
@@ -358,7 +361,7 @@ ${moral}
 
 📺 Tayang perdana pukul ${slotTime} di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}) serta hadir versi ringkas di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
 
-💬 Setelah menonton nanti, ajak si kecil ngobrol tentang pesan moralnya ya Ayah & Bunda. Tulis pendapat si kecil di komentar! 👇❤️`
+${buildSocialEngagementCta("id", "feed")}`
     : `⏰ PREMIERE REMINDER: 1 HOUR TO GO (${slotTime}) 🌟✨
 📖 "${cleanTitle}"
 
@@ -370,7 +373,7 @@ ${moral}
 
 📺 Premiering at ${slotTime} on YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), with highlights on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
 
-💬 Share your little one's favorite part in the comments below! 👇❤️`;
+${buildSocialEngagementCta("en", "feed")}`;
 
   // 3. META THREADS CAPTION (< 500 chars)
   const captionThreadsRaw = isId
@@ -512,8 +515,8 @@ Selamat pagi Ayah, Bunda & Adik-adik tersayang! 🥰
 💖 Pesan Moral: ${eveningMoral}
 
 👉 Geser ke kiri untuk preview kedua cerita!
-📺 Tonton tayangan lengkapnya di YouTube @zayn.storybook, dan ikuti cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-💬 Pesan moral cerita mana yang paling cocok dibahas bareng si kecil hari ini? 👇❤️
+📺 Tonton tayangan lengkapnya di YouTube @zayn.storybook!
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #MenuDongengHariIni #DongengAnak #PesanMoralAnak #BilingualKids`;
 
@@ -533,8 +536,8 @@ ${eveningSummary}
 💖 Pesan Moral:
 ${eveningMoral}
 
-📺 Subscribe & nyalakan lonceng di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), serta ikuti kami di Instagram, Facebook Page & Threads @zayn.storybook!
-💬 Cerita mana nih yang paling dinanti si kecil hari ini? 👇❤️
+📺 Subscribe & nyalakan lonceng di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL})!
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #DongengAnak #CeritaAnakBergambar #PesanMoral #KeluargaBahagia`;
 
@@ -1246,7 +1249,7 @@ ${summary}
 ${moral}
 
 📺 Watch full episode on YouTube @zayn.storybook, and catch moments on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-🔖 Save this post so it's easy to find for storytime tonight! ❤️
+${buildSocialEngagementCta("en", "feed")}
 
 #ZaynStorybook #KidsStories #ReadAloud #MoralOfTheStory #FamilyStorytime`
         : `☀️ SUDAH TAYANG DI YOUTUBE! 🎬🌟
@@ -1259,7 +1262,7 @@ ${summary}
 ${moral}
 
 📺 Tonton versi penuhnya di YouTube @zayn.storybook, serta hadir di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-🔖 Simpan postingan ini biar gampang diputar ulang bersama si kecil! ❤️
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #DongengAnak #PesanMoral #CeritaAnakBergambar #ParentingIndonesia`;
 
@@ -1323,10 +1326,8 @@ ${summary}
 💖 Pesan Moral:
 ${moral}
 
-🔖 SAVE postingan ini untuk menemani rutinitas tidur si kecil!
 📺 Tonton tayangan lengkapnya di YouTube @zayn.storybook serta ikuti cuplikan hangatnya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-
-💬 Nilai baik apa yang ingin Ayah Bunda bahas bersama si kecil malam ini? ❤️
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #DongengSebelumTidur #PesanMoralAnak #CeritaAnak #TidurNyenyak`;
 
@@ -1640,7 +1641,8 @@ ${storySummary}
 ${moral}
 
 🎭 Featuring Full-Motion character animation + expressive child voice acting!
-📺 Watch the premiere on YouTube @zayn.storybook and follow Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+📺 Watch the premiere on YouTube @zayn.storybook and catch clips on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+${buildSocialEngagementCta("en", "feed")}
 
 #ZaynStorybook #FullMotionKids #KidsStories #MoralOfTheStory #${dayHeadingEn === "WEDNESDAY" ? "WednesdayPremiere" : "SundayPremiere"}`
         : `🎬✨ SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}) — 1 JAM LAGI (${slotTime})!
@@ -1654,7 +1656,8 @@ ${storySummary}
 ${moral}
 
 🎭 Edisi spesial Full-Motion Animasi dengan karakter bergerak & sulih suara anak ekspresif!
-📺 Saksikan tayang perdananya di YouTube @zayn.storybook dan ikuti Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+📺 Saksikan tayang perdananya di YouTube @zayn.storybook serta cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #FullMotionKids #DongengAnak #PesanMoralAnak #${dayHeadingEn === "WEDNESDAY" ? "WednesdayPremiere" : "SundayPremiere"}`
       : isEn
@@ -1668,8 +1671,8 @@ ${storySummary}
 💡 Moral of the Story:
 ${moral}
 
-▶️ Watch Full HD (16:9) on YouTube @zayn.storybook, and catch Shorts/Reels on Instagram, Facebook Watch & Threads @zayn.storybook!
-💬 What part of "${cleanTitleEn}" did your child talk about most? Share below! ❤️
+▶️ Watch Full HD (16:9) on YouTube @zayn.storybook, plus Reels & clips on Instagram, Facebook Watch & Threads @zayn.storybook!
+${buildSocialEngagementCta("en", "feed")}
 
 #ZaynStorybook #FullMotionKids #KidsStories #MoralStories #FamilyStorytime`
         : `🎬🌟 FULL-MOTION EDITION (${afterLangBanner}) — SUDAH TAYANG!
@@ -1683,7 +1686,7 @@ ${storySummary}
 ${moral}
 
 ▶️ Tonton Full HD (16:9) di YouTube @zayn.storybook serta Shorts/Reels di Instagram, Facebook Watch & Threads @zayn.storybook!
-💬 Pelajaran baik apa nih yang paling diingat si kecil setelah menonton? Tulis di komentar! ❤️
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #FullMotionKids #Dongeng${dayLabelId} #PesanMoral #CeritaAnak`;
 
@@ -1701,7 +1704,8 @@ ${storySummary}
 ${moral}
 
 🎭 Enjoy lively character animation, playful sound design & expressive child narration!
-📺 Tune in on YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}) plus Instagram Reels, Facebook Watch & Threads @zayn.storybook!`
+📺 Tune in on YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL})!
+${buildSocialEngagementCta("en", "feed")}`
         : `🎬 SPECIAL ${dayHeadingEn} FULL-MOTION PREMIERE (${slotLangBanner}, ${slotTime}) — 1 Jam Lagi!
 
 📖 "${displayTitle}"
@@ -1713,7 +1717,8 @@ ${storySummary}
 ${moral}
 
 🎭 Nikmati animasi karakter bergerak, efek suara ceria & sulih suara anak yang ekspresif!
-📺 Tonton di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL}), serta ikuti Instagram Reels, Facebook Watch & Threads @zayn.storybook!`
+📺 Tonton di YouTube Zayn Storybook (${SOCIAL_YOUTUBE_CHANNEL_URL})!
+${buildSocialEngagementCta("id", "feed")}`
       : isEn
         ? `🎬✨ FULL-MOTION EDITION — NOW STREAMING! (${cleanTitleEn} — ${afterLangBanner})
 
@@ -1723,8 +1728,7 @@ ${storySummary}
 💡 Moral of the Story:
 ${moral}
 
-${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Watch Full HD on YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}📱 Also catch Shorts/Reels and updates on Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-💬 What lesson stood out most for your child in this story? Share in the comments! ❤️
+${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Watch Full HD on YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}${buildSocialEngagementCta("en", "feed")}
 
 #ZaynStorybook #FullMotionKids #KidsStories #MoralOfTheStory #FamilyStorytime`
         : `🎬✨ FULL-MOTION EDITION SUDAH TAYANG! (${displayTitle} — ${afterLangBanner})
@@ -1735,8 +1739,7 @@ ${storySummary}
 💡 Pesan Moral:
 ${moral}
 
-${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Tonton Full HD di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}📱 Ikuti juga cuplikannya di Instagram Reels, Facebook Watch & Threads @zayn.storybook!
-💬 Pesan moral apa yang paling berkesan untuk si kecil dari cerita ini? Yuk bagikan di komentar! ❤️
+${youtubeWatchLines ? `${youtubeWatchLines}\n` : `📺 Tonton Full HD di YouTube Zayn Storybook: ${SOCIAL_YOUTUBE_CHANNEL_URL}\n`}${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #FullMotionKids #Dongeng${dayLabelId} #PesanMoral #CeritaAnak`;
 
