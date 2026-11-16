@@ -9,6 +9,7 @@ import {
 } from "./lib/meta-token-health";
 import { buildCaption, buildCompilationCaption } from "./upload-meta";
 import { DEFAULT_LAUNCH_CAPTION } from "./publish-instagram-post";
+import { hasPrimaryPublishFailures } from "./publish-all";
 
 function assertHasSaveAndFollow(text: string, label: string): void {
   assert.ok(/save|simpan/i.test(text), `${label} must include Save/Simpan CTA`);
@@ -131,6 +132,12 @@ function runTests(): void {
     }),
     false
   );
+
+  // 5. Partial publish failure gate fails CI on primary platforms (YouTube/Meta/FB/IG), ignores optional TikTok
+  assert.equal(hasPrimaryPublishFailures([]), false);
+  assert.equal(hasPrimaryPublishFailures([{ platform: "TikTok (API)", lang: "en", error: "sandbox" }]), false);
+  assert.equal(hasPrimaryPublishFailures([{ platform: "YouTube", lang: "en", error: "invalid_grant" }]), true);
+  assert.equal(hasPrimaryPublishFailures([{ platform: "Meta Reels (instagram)", lang: "en", error: "token" }]), true);
 
   console.log("✅ All monetization audit, Save/Follow caption & Meta scope audit checks passed!");
 }
