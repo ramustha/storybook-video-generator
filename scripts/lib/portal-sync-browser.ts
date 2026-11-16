@@ -412,3 +412,268 @@ export function resolveSlotDisplayState(
     footerKind: "queued",
   };
 }
+
+export interface PipelineSpotlightResolution {
+  activeCard: "buffer" | "announce" | "morning" | "bedtime";
+  badgeText: string;
+  eventName: string;
+  shortActionName: string;
+  targetSecRemaining: number;
+  metaDate: string;
+  metaDayName: string;
+  metaTime: string;
+  metaType: string;
+  metaFormat: string;
+  titleText: string;
+  descText: string;
+  platformTags: string[];
+}
+
+/**
+ * Extracts HH:MM:00 from a slot time string such as "15:00 WIB".
+ */
+export function extractSlotTimeHms(timeSlot?: string, fallback: string = "08:30:00"): string {
+  const m = String(timeSlot || "").match(/(\d{1,2}):(\d{2})/);
+  if (!m) return fallback;
+  return `${m[1].padStart(2, "0")}:${m[2]}:00`;
+}
+
+function slotDisplayTitle(slot: Partial<CalendarSlotLike> | undefined): string {
+  if (!slot) return "Storybook Feature";
+  const lang = String(slot.lang || "id").toLowerCase();
+  const base =
+    lang === "en"
+      ? slot.storyTitleEn || slot.storyTitleId || formatSlugFallbackTitle(slot.bookSlug || "")
+      : slot.storyTitleId || slot.storyTitleEn || formatSlugFallbackTitle(slot.bookSlug || "");
+  return `${base} (${lang.toUpperCase()})`;
+}
+
+function summarizeSlotTargetDay(slots: CalendarSlotLike[]): string {
+  if (!slots || slots.length === 0) return "Upcoming Bilingual Storybooks";
+  return slots.map(slotDisplayTitle).join(" + ");
+}
+
+function formatReadinessSuffix(slot: CalendarSlotLike | undefined): string {
+  if (!slot) return "";
+  if (slot.isCompleted || slot.status === "completed") return " (✅ Done)";
+  if (slot.isBuffered) return " (🟢 Ready in R2)";
+  if (slot.hasAssets) return " (🟡 Assets Ready)";
+  return " (⏳ Queued)";
+}
+
+/**
+ * Computes consistent Spotlight banner copy, countdown target, and platform tags
+ * matching the live WIB schedule without mixing event timestamps across slots.
+ */
+export function resolvePipelineSpotlight(params: {
+  totalSecNow: number;
+  wibDayOfWeek?: string;
+  todaySlots: CalendarSlotLike[];
+  tomorrowSlots: CalendarSlotLike[];
+  todayMorning?: CalendarSlotLike;
+  todayMotion?: CalendarSlotLike;
+  todayBedtime?: CalendarSlotLike;
+  tomorrowMorning?: CalendarSlotLike;
+  tomorrowBedtime?: CalendarSlotLike;
+}): PipelineSpotlightResolution {
+  const {
+    totalSecNow,
+    todaySlots,
+    tomorrowSlots,
+    todayMorning,
+    todayMotion,
+    todayBedtime,
+    tomorrowMorning,
+    tomorrowBedtime,
+  } = params;
+
+  const SEC_BUFFER = 2 * 3600;
+  const SEC_ANNOUNCE = 7 * 3600 + 15 * 60;
+  const SEC_MORNING = 8 * 3600 + 30 * 60;
+  const SEC_WAVE2 = 12 * 3600 + 30 * 60;
+  const SEC_MOTION = 15 * 3600;
+  const SEC_BEDTIME = 19 * 3600;
+  const SEC_WAVE3 = 20 * 3600 + 30 * 60;
+
+  const morningDone = !todayMorning || Boolean(todayMorning.isCompleted || todayMorning.status === "completed");
+  const motionDone = !todayMotion || Boolean(todayMotion.isCompleted || todayMotion.status === "completed");
+  const bedtimeDone = !todayBedtime || Boolean(todayBedtime.isCompleted || todayBedtime.status === "completed");
+
+  const tomorrowBufferedCount = tomorrowSlots.filter((s) => s.isBuffered || s.isCompleted).length;
+  const tomorrowAllBuffered = tomorrowSlots.length > 0 && tomorrowBufferedCount === tomorrowSlots.length;
+  const tomorrowAnchor = tomorrowMorning || tomorrowBedtime || tomorrowSlots[0];
+  const tomorrowDate = tomorrowAnchor?.date || "Tomorrow";
+  const tomorrowDayName = tomorrowAnchor?.dayName || "Scheduled";
+
+  if (totalSecNow < SEC_BUFFER && !tomorrowAllBuffered && tomorrowSlots.length > 0) {
+    return {
+      activeCard: "buffer",
+      badgeText: "⚡ NEXT EVENT",
+      eventName: "📦 Nightly Cloudflare R2 Pre-Render Buffer (02:00 WIB)",
+      shortActionName: "R2 Buffer",
+      targetSecRemaining: SEC_BUFFER - totalSecNow,
+      metaDate: tomorrowDate,
+      metaDayName: tomorrowDayName,
+      metaTime: "02:00 WIB",
+      metaType: "Pre-Render Queue (H+1..H+3)",
+      metaFormat: "MP4 16:9 & 9:16",
+      titleText: `${summarizeSlotTargetDay(tomorrowSlots)}`,
+      descText: "Rendering upcoming 16:9 & 9:16 MP4 videos to Cloudflare R2 ahead of launch",
+      platformTags: ["☁️ Cloudflare R2", "🎬 Remotion MP4"],
+    };
+  }
+
+  if (totalSecNow < SEC_ANNOUNCE && todaySlots.length > 0) {
+    const todayAnchor = todayMorning || todayBedtime || todaySlots[0];
+    return {
+      activeCard: "announce",
+      badgeText: "⚡ NEXT EVENT",
+      eventName: "📣 Daily Bilingual Social Announcement (07:15 WIB)",
+      shortActionName: "Announcement",
+      targetSecRemaining: SEC_ANNOUNCE - totalSecNow,
+      metaDate: todayAnchor?.date || "Today",
+      metaDayName: todayAnchor?.dayName || "Today",
+      metaTime: "07:15 WIB",
+      metaType: "Wave 1 Daily Lineup Teaser",
+      metaFormat: "Social Carousel",
+      titleText: summarizeSlotTargetDay(todaySlots),
+      descText: `Today's bilingual teaser ahead of ${todayMorning ? "08:30" : ""}${todayMorning && todayBedtime ? " & " : ""}${todayBedtime ? "19:00" : ""} WIB broadcasts`,
+      platformTags: ["📸 Instagram", "📘 Facebook", "🧵 Threads"],
+    };
+  }
+
+  if (todayMorning && (!morningDone || totalSecNow < SEC_MORNING)) {
+    const pendingAfterWindow = totalSecNow >= SEC_MORNING && !morningDone;
+    return {
+      activeCard: "morning",
+      badgeText: pendingAfterWindow ? "⏳ SYNCING" : "⚡ NEXT EVENT",
+      eventName: pendingAfterWindow
+        ? "🌅 Morning English Broadcast (08:30 WIB · Syncing)"
+        : "🌅 Morning English Broadcast (08:30 WIB)",
+      shortActionName: "Morning [EN]",
+      targetSecRemaining: Math.max(0, SEC_MORNING - totalSecNow),
+      metaDate: todayMorning.date,
+      metaDayName: todayMorning.dayName,
+      metaTime: todayMorning.timeSlot || "08:30 WIB",
+      metaType: todayMorning.slotType || "Morning English Feature",
+      metaFormat: todayMorning.format || "Landscape (16:9) & Shorts (9:16)",
+      titleText: `${slotDisplayTitle(todayMorning)}${formatReadinessSuffix(todayMorning)}`,
+      descText: todayMorning.theme || "English Read-Aloud Story Premiere",
+      platformTags: ["📺 YouTube", "📘 Facebook", "📸 Instagram"],
+    };
+  }
+
+  if (todayMotion && !motionDone && totalSecNow < SEC_MOTION) {
+    return {
+      activeCard: "morning",
+      badgeText: "⚡ NEXT EVENT",
+      eventName: "🎬 Special Full-Motion Premiere (15:00 WIB)",
+      shortActionName: "Full-Motion",
+      targetSecRemaining: SEC_MOTION - totalSecNow,
+      metaDate: todayMotion.date,
+      metaDayName: todayMotion.dayName,
+      metaTime: todayMotion.timeSlot || "15:00 WIB",
+      metaType: todayMotion.slotType || "Full-Motion Animation",
+      metaFormat: todayMotion.format || "Landscape (16:9) & Shorts (9:16)",
+      titleText: `${slotDisplayTitle(todayMotion)}${formatReadinessSuffix(todayMotion)}`,
+      descText: todayMotion.theme || "Animated Character Full-Motion Edition",
+      platformTags: ["📺 YouTube", "📘 Facebook", "📸 Instagram"],
+    };
+  }
+
+  if (totalSecNow < SEC_WAVE2 && todayMorning && morningDone && todayBedtime) {
+    return {
+      activeCard: "announce",
+      badgeText: "⚡ NEXT EVENT",
+      eventName: "🌊 Wave 2 Midday Watch-Now Funnel (12:30 WIB)",
+      shortActionName: "Wave 2",
+      targetSecRemaining: SEC_WAVE2 - totalSecNow,
+      metaDate: todayMorning.date,
+      metaDayName: todayMorning.dayName,
+      metaTime: "12:30 WIB",
+      metaType: "Wave 2 Post-Publish Funnel",
+      metaFormat: "4:5 Portrait Feed",
+      titleText: slotDisplayTitle(todayMorning),
+      descText: `Midday social highlight driving viewers to tonight's 19:00 WIB premiere`,
+      platformTags: ["📸 Instagram", "📘 Facebook", "🧵 Threads"],
+    };
+  }
+
+  if (todayBedtime && (!bedtimeDone || totalSecNow < SEC_BEDTIME)) {
+    const pendingAfterWindow = totalSecNow >= SEC_BEDTIME && !bedtimeDone;
+    return {
+      activeCard: "bedtime",
+      badgeText: pendingAfterWindow ? "⏳ SYNCING" : "⚡ NEXT EVENT",
+      eventName: pendingAfterWindow
+        ? "🌙 Prime Bedtime Indonesian Broadcast (19:00 WIB · Syncing)"
+        : "🌙 Prime Bedtime Indonesian Broadcast (19:00 WIB)",
+      shortActionName: "Bedtime [ID]",
+      targetSecRemaining: Math.max(0, SEC_BEDTIME - totalSecNow),
+      metaDate: todayBedtime.date,
+      metaDayName: todayBedtime.dayName,
+      metaTime: todayBedtime.timeSlot || "19:00 WIB",
+      metaType: todayBedtime.slotType || "Prime Bedtime Story",
+      metaFormat: todayBedtime.format || "Landscape (16:9) & Shorts (9:16)",
+      titleText: `${slotDisplayTitle(todayBedtime)}${formatReadinessSuffix(todayBedtime)}`,
+      descText: todayBedtime.theme || "Indonesian Bedtime Tale Premiere",
+      platformTags: ["📺 YouTube", "📘 Facebook", "📸 Instagram"],
+    };
+  }
+
+  if (totalSecNow < SEC_WAVE3 && todayBedtime && bedtimeDone) {
+    return {
+      activeCard: "announce",
+      badgeText: "✅ TODAY AIRED · NEXT WAVE",
+      eventName: "🌊 Wave 3 Bedtime Highlight Funnel (20:30 WIB)",
+      shortActionName: "Wave 3",
+      targetSecRemaining: SEC_WAVE3 - totalSecNow,
+      metaDate: todayBedtime.date,
+      metaDayName: todayBedtime.dayName,
+      metaTime: "20:30 WIB",
+      metaType: "Wave 3 Bedtime Watch-Next Funnel",
+      metaFormat: "4:5 Portrait Feed",
+      titleText: slotDisplayTitle(todayBedtime),
+      descText: `Nighttime social highlight for ${slotDisplayTitle(todayBedtime)}`,
+      platformTags: ["📸 Instagram", "📘 Facebook", "🧵 Threads"],
+    };
+  }
+
+  // Tonight/overnight after today's broadcasts complete -> point cleanly to next unbuffered cron or tomorrow 07:15 announcement + premiere summary
+  if (!tomorrowAllBuffered && tomorrowSlots.length > 0) {
+    return {
+      activeCard: "buffer",
+      badgeText: "🌙 TODAY DONE · UP NEXT",
+      eventName: "📦 Cloudflare R2 Pre-Render Buffer (Tomorrow 02:00 WIB)",
+      shortActionName: "R2 Buffer",
+      targetSecRemaining: 86400 - totalSecNow + SEC_BUFFER,
+      metaDate: tomorrowDate,
+      metaDayName: tomorrowDayName,
+      metaTime: "02:00 WIB",
+      metaType: "Nightly Pre-Render Queue",
+      metaFormat: `${tomorrowBufferedCount}/${tomorrowSlots.length} Buffered`,
+      titleText: summarizeSlotTargetDay(tomorrowSlots),
+      descText: `Preparing MP4 buffer ahead of tomorrow's 08:30 WIB premiere`,
+      platformTags: ["☁️ Cloudflare R2", "🎬 Remotion MP4"],
+    };
+  }
+
+  const nextPremiereSummary = tomorrowMorning
+    ? `Next Video Premiere: ${tomorrowMorning.timeSlot || "08:30 WIB"} (${String(tomorrowMorning.lang || "en").toUpperCase()})`
+    : "Next Launch Preparation";
+
+  return {
+    activeCard: "announce",
+    badgeText: todaySlots.length > 0 && morningDone && bedtimeDone ? "✅ TODAY DONE · UP NEXT" : "⚡ NEXT EVENT",
+    eventName: "📣 Daily Bilingual Social Announcement (Tomorrow 07:15 WIB)",
+    shortActionName: "Announcement",
+    targetSecRemaining: 86400 - totalSecNow + SEC_ANNOUNCE,
+    metaDate: tomorrowDate,
+    metaDayName: tomorrowDayName,
+    metaTime: "07:15 WIB",
+    metaType: "Wave 1 Bilingual Social Teaser",
+    metaFormat: nextPremiereSummary,
+    titleText: summarizeSlotTargetDay(tomorrowSlots),
+    descText: `Tomorrow's dual teaser · ${nextPremiereSummary}${tomorrowBedtime ? ` & ${tomorrowBedtime.timeSlot || "19:00 WIB"}` : ""}`,
+    platformTags: ["📸 Instagram", "📘 Facebook", "🧵 Threads"],
+  };
+}

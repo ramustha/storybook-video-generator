@@ -10,10 +10,12 @@ import {
   AuditRecordLike,
   buildAuditRecordKey,
   CalendarSlotLike,
+  extractSlotTimeHms,
   fetchRemoteSlotPublicationMap,
   mergeAuditRecordLists,
   mergeCalendarSlotLists,
   resolveExistingSlotPublications,
+  resolvePipelineSpotlight,
   resolveSlotDisplayState,
 } from "./lib/portal-sync";
 
@@ -459,6 +461,96 @@ async function runUnitTests(): Promise<void> {
   assert.equal(resolvedUnpublished.ig, false);
   assert.equal(resolvedUnpublished.allPrimaryLive, false);
 
+  // Pipeline Monitor spotlight resolution tests
+  assert.equal(extractSlotTimeHms("15:00 WIB"), "15:00:00");
+  assert.equal(extractSlotTimeHms("08:30 WIB"), "08:30:00");
+
+  const doneMorning = makeCalendarSlot({
+    date: "2026-11-16",
+    dayName: "Senin",
+    timeSlot: "08:30 WIB",
+    lang: "en",
+    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    storyTitleEn: "Sringeri Srinivas Learns to Laugh",
+    status: "completed",
+    isCompleted: true,
+    isBuffered: true,
+  });
+  const doneBedtime = makeCalendarSlot({
+    date: "2026-11-16",
+    dayName: "Senin",
+    timeSlot: "19:00 WIB",
+    lang: "id",
+    bookSlug: "sringeri-srinivas-belajar-tertawa",
+    storyTitleId: "Sringeri Srinivas Belajar Tertawa!",
+    status: "completed",
+    isCompleted: true,
+    isBuffered: true,
+  });
+  const tomorrowEn = makeCalendarSlot({
+    date: "2026-11-17",
+    dayName: "Selasa",
+    timeSlot: "08:30 WIB",
+    lang: "en",
+    bookSlug: "pakai-baju-apa-hari-ini",
+    storyTitleEn: "What Shall I Wear Today?",
+    isBuffered: true,
+  });
+  const tomorrowId = makeCalendarSlot({
+    date: "2026-11-17",
+    dayName: "Selasa",
+    timeSlot: "19:00 WIB",
+    lang: "id",
+    bookSlug: "pakai-baju-apa-hari-ini",
+    storyTitleId: "Pakai Baju Apa Hari Ini?",
+    isBuffered: true,
+  });
+
+  // At 22:52 WIB with today's broadcasts complete and tomorrow 2/2 buffered
+  const nightSpot = resolvePipelineSpotlight({
+    totalSecNow: 22 * 3600 + 52 * 60 + 28,
+    wibDayOfWeek: "Mon",
+    todaySlots: [doneMorning, doneBedtime],
+    tomorrowSlots: [tomorrowEn, tomorrowId],
+    todayMorning: doneMorning,
+    todayBedtime: doneBedtime,
+    tomorrowMorning: tomorrowEn,
+    tomorrowBedtime: tomorrowId,
+  });
+  assert.equal(nightSpot.badgeText, "✅ TODAY DONE · UP NEXT");
+  assert.ok(nightSpot.eventName.includes("Tomorrow 07:15 WIB"));
+  assert.equal(nightSpot.metaTime, "07:15 WIB");
+  assert.ok(nightSpot.metaFormat.includes("08:30 WIB"));
+  assert.ok(nightSpot.titleText.includes("What Shall I Wear Today? (EN)") && nightSpot.titleText.includes("Pakai Baju Apa Hari Ini? (ID)"));
+
+  // At 22:52 WIB when tomorrow is NOT buffered yet -> points to 02:00 WIB buffer cron
+  const nightUnbuffered = resolvePipelineSpotlight({
+    totalSecNow: 22 * 3600 + 52 * 60 + 28,
+    wibDayOfWeek: "Mon",
+    todaySlots: [doneMorning, doneBedtime],
+    tomorrowSlots: [{ ...tomorrowEn, isBuffered: false }, tomorrowId],
+    todayMorning: doneMorning,
+    todayBedtime: doneBedtime,
+    tomorrowMorning: { ...tomorrowEn, isBuffered: false },
+    tomorrowBedtime: tomorrowId,
+  });
+  assert.equal(nightUnbuffered.activeCard, "buffer");
+  assert.equal(nightUnbuffered.metaTime, "02:00 WIB");
+
+  // At 19:05 WIB when bedtime is STILL pending -> keeps spotlight on syncing 19:00 WIB broadcast
+  const pendingBedtime = { ...doneBedtime, status: "today", isCompleted: false };
+  const syncingSpot = resolvePipelineSpotlight({
+    totalSecNow: 19 * 3600 + 5 * 60,
+    todaySlots: [doneMorning, pendingBedtime],
+    tomorrowSlots: [tomorrowEn, tomorrowId],
+    todayMorning: doneMorning,
+    todayBedtime: pendingBedtime,
+    tomorrowMorning: tomorrowEn,
+    tomorrowBedtime: tomorrowId,
+  });
+  assert.equal(syncingSpot.activeCard, "bedtime");
+  assert.equal(syncingSpot.badgeText, "⏳ SYNCING");
+
   console.log("✅ All unit tests passed.");
 }
 
@@ -567,6 +659,7 @@ function startStaticDocsServer(rootDir: string): Promise<{ server: http.Server; 
 }
 
 declare const RAW_AUDIT_DATA: AuditRecordLike[];
+declare let RAW_CALENDAR_DATA: CalendarSlotLike[];
 
 async function runPlaywrightTests(): Promise<void> {
   const realHtmlPath = path.resolve(__dirname, "..", "docs", "index.html");
@@ -803,6 +896,34 @@ async function runPlaywrightTests(): Promise<void> {
       assert.equal(await page.locator(".timeline-day-header.today").count(), 1);
       await page.click("#viewCalTableBtn");
       assert.equal(await page.locator("#timelineTableBody tr.today-row").count(), 2);
+
+      // Verify after-publish evening spotlight (22:52 WIB):
+      // 1) Unbuffered tomorrow -> points to 02:00 WIB Pre-Render Buffer cron
+      await page.evaluate(() => {
+        (window as any).__setFakeWibTime("2026-11-12T22:52:28+07:00");
+        (window as any).updatePipelineMonitor();
+      });
+      const stage1TimeTag = await page.locator("#stageCardBuffer .stage-time-tag").innerText();
+      assert.equal(stage1TimeTag, "Daily 02:00 WIB");
+      const spotBadgeUnbuf = await page.locator("#pipelineSpotlightBadge").innerText();
+      assert.equal(spotBadgeUnbuf, "🌙 TODAY DONE · UP NEXT");
+      const spotMetaUnbuf = await page.locator("#pipelineSpotlightMeta").innerText();
+      assert.ok(spotMetaUnbuf.includes("02:00 WIB"), `Expected 02:00 WIB for unbuffered tomorrow, got "${spotMetaUnbuf}"`);
+
+      // 2) Buffered tomorrow -> points to 07:15 WIB announcement + Next Video Premiere 08:30 WIB
+      await page.evaluate(() => {
+        RAW_CALENDAR_DATA = RAW_CALENDAR_DATA.map((s: any) =>
+          s.date === "2026-11-13" ? { ...s, isBuffered: true } : s
+        );
+        (window as any).updatePipelineMonitor();
+      });
+      const spotBadge = await page.locator("#pipelineSpotlightBadge").innerText();
+      assert.equal(spotBadge, "✅ TODAY DONE · UP NEXT");
+      const spotMeta = await page.locator("#pipelineSpotlightMeta").innerText();
+      assert.ok(spotMeta.includes("07:15 WIB"), `Expected 07:15 WIB in spotlight meta, got "${spotMeta}"`);
+      assert.ok(spotMeta.includes("08:30 WIB"), `Expected next video premiere reference 08:30 WIB, got "${spotMeta}"`);
+      const spotTitle = await page.locator("#pipelineSpotlightTitle").innerText();
+      assert.ok(spotTitle.includes("+"), `Expected bilingual tomorrow summary in spotlight title, got "${spotTitle}"`);
 
       await page.evaluate(() => {
         (window as any).__setFakeWibTime("2026-11-13T00:00:05+07:00");
