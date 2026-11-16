@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { verifyStoryThumbnails, renderStoryThumbnails } from "./render-thumbnail";
 import { notifyTelegramPublish, notifyTelegramFailure } from "./notify-telegram";
 import { db } from "./lib/db";
@@ -23,6 +24,19 @@ interface PublishAllOptions {
   skipPromo: boolean;
   force: boolean;
   privacy: "public" | "unlisted" | "private";
+}
+
+export interface PublishFailureRecord {
+  platform: string;
+  lang: string;
+  error: string;
+}
+
+/**
+ * Identifies failures on primary automated CI broadcast platforms (YouTube, Instagram, Facebook).
+ */
+export function hasPrimaryPublishFailures(failures: readonly PublishFailureRecord[]): boolean {
+  return failures.some((f) => /^(youtube|meta|facebook|instagram)/i.test(f.platform));
 }
 
 function parseArgs(): PublishAllOptions {
@@ -529,26 +543,38 @@ async function main() {
   }
 
   console.log("\n✨ Done! You can monitor live performance anytime with: npm run stats:meta & npm run stats\n");
+
+  if (hasPrimaryPublishFailures(allFailures)) {
+    const failedPlatforms = Array.from(new Set(allFailures.map((f) => `${f.platform} [${f.lang.toUpperCase()}]`))).join(", ");
+    console.error(`❌ Exiting non-zero due to primary broadcast failure(s): ${failedPlatforms}`);
+    process.exitCode = 1;
+  }
 }
 
-main().catch(async (err) => {
-  console.error("❌ Fatal error in Multi-Platform Publisher:", err);
-  try {
-    const bookIdx = process.argv.indexOf("--book");
-    const bookSlug = bookIdx !== -1 ? process.argv[bookIdx + 1] : undefined;
-    const langIdx = process.argv.indexOf("--lang");
-    const lang =
-      langIdx !== -1 && (process.argv[langIdx + 1] === "en" || process.argv[langIdx + 1] === "id")
-        ? (process.argv[langIdx + 1] as "id" | "en")
-        : "id";
-    const dryRun = process.argv.includes("--dry-run");
-    await notifyTelegramFailure({
-      bookSlug,
-      lang,
-      platform: "Multi-Platform Publisher (Fatal)",
-      error: err,
-      dryRun,
-    });
-  } catch {}
-  process.exit(1);
-});
+const isDirectRun =
+  Boolean(process.argv[1]) &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isDirectRun) {
+  main().catch(async (err) => {
+    console.error("❌ Fatal error in Multi-Platform Publisher:", err);
+    try {
+      const bookIdx = process.argv.indexOf("--book");
+      const bookSlug = bookIdx !== -1 ? process.argv[bookIdx + 1] : undefined;
+      const langIdx = process.argv.indexOf("--lang");
+      const lang =
+        langIdx !== -1 && (process.argv[langIdx + 1] === "en" || process.argv[langIdx + 1] === "id")
+          ? (process.argv[langIdx + 1] as "id" | "en")
+          : "id";
+      const dryRun = process.argv.includes("--dry-run");
+      await notifyTelegramFailure({
+        bookSlug,
+        lang,
+        platform: "Multi-Platform Publisher (Fatal)",
+        error: err,
+        dryRun,
+      });
+    } catch {}
+    process.exit(1);
+  });
+}
