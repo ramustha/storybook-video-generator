@@ -83,9 +83,27 @@ const calendarJsonPath = path.join(docsDir, "calendar-data.json");
 const existingAuditRecords = loadJsonArraySafe<AuditRecord>(auditJsonPath);
 const existingCalendarSlots = loadJsonArraySafe<EnrichedCalendarSlot>(calendarJsonPath);
 
-// 1. Build Story Titles & Bilingual Content Map
+// 1. Build Story Titles & Bilingual Content + Compact Script Map
 const storyTitlesMap = new Map<string, { id: string; en: string }>();
-const storyMetaMap: Record<string, { id: string; en: string; summaryId?: string; summaryEn?: string }> = {};
+const storyScriptsJsonPath = path.join(docsDir, "story-scripts.json");
+interface StoryMetaEntry {
+  id: string;
+  en: string;
+  summaryId?: string;
+  summaryEn?: string;
+  moralId?: string;
+  moralEn?: string;
+  scenesId?: string[];
+  scenesEn?: string[];
+}
+let storyMetaMap: Record<string, StoryMetaEntry> = {};
+if (fs.existsSync(storyScriptsJsonPath)) {
+  try {
+    storyMetaMap = JSON.parse(fs.readFileSync(storyScriptsJsonPath, "utf-8")) || {};
+  } catch {
+    storyMetaMap = {};
+  }
+}
 
 function extractPortalSummary(data: any, lang: "id" | "en"): string | undefined {
   const explicit = (data?.summary?.[lang] || data?.synopsis?.[lang] || data?.description?.[lang])?.trim();
@@ -100,6 +118,31 @@ function extractPortalSummary(data: any, lang: "id" | "en"): string | undefined 
     .map((sc) => (lang === "en" ? sc?.audio?.en?.text : sc?.audio?.text))
     .find((t) => typeof t === "string" && t.trim().length > 15);
   return typeof firstLine === "string" ? firstLine.replace(/\s+/g, " ").trim().slice(0, 140) : undefined;
+}
+
+function extractCompactScriptLines(data: any, lang: "id" | "en"): string[] {
+  const storyScenes: any[] = Array.isArray(data?.scenes)
+    ? data.scenes.filter((sc: any) => !["cover", "intro", "moral", "outro"].includes(sc?.type) && !["cover", "intro", "moral", "outro"].includes(sc?.sceneId))
+    : [];
+  return storyScenes
+    .map((sc) => (lang === "en" ? sc?.audio?.en?.text : sc?.audio?.text))
+    .filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+    .map((t) => t.replace(/\s+/g, " ").trim());
+}
+
+function extractPortalMoral(data: any, lang: "id" | "en"): string | undefined {
+  const m = data?.moral || {};
+  const headline = (lang === "id" ? m.headlineId : m.headlineEn)?.trim();
+  const detail = (lang === "id" ? m.spokenId || m.summaryId : m.spokenEn || m.summaryEn)?.trim();
+  if (headline && detail && !detail.toLowerCase().includes(headline.toLowerCase())) {
+    return `${headline.replace(/[!?.]+$/, "")}! ${detail}`;
+  }
+  if (headline) return headline;
+  const moralScene = Array.isArray(data?.scenes)
+    ? data.scenes.find((sc: any) => sc?.type === "moral" || sc?.sceneId === "moral")
+    : undefined;
+  const raw = lang === "en" ? moralScene?.audio?.en?.text : moralScene?.audio?.text;
+  return typeof raw === "string" ? raw.replace(/\s+/g, " ").trim() : undefined;
 }
 
 const stories = fs.existsSync(storiesDir)
@@ -121,16 +164,25 @@ for (const s of stories) {
     const id = typeof data.title === "object" ? data.title.id : data.title;
     const en = data.originalTitle || (typeof data.title === "object" ? data.title.en : id);
     storyTitlesMap.set(s, { id, en });
+    const scenesId = extractCompactScriptLines(data, "id");
+    const scenesEn = extractCompactScriptLines(data, "en");
     storyMetaMap[s] = {
+      ...(storyMetaMap[s] || {}),
       id,
       en,
-      summaryId: extractPortalSummary(data, "id"),
-      summaryEn: extractPortalSummary(data, "en"),
+      summaryId: extractPortalSummary(data, "id") || storyMetaMap[s]?.summaryId,
+      summaryEn: extractPortalSummary(data, "en") || storyMetaMap[s]?.summaryEn,
+      moralId: extractPortalMoral(data, "id") || storyMetaMap[s]?.moralId,
+      moralEn: extractPortalMoral(data, "en") || storyMetaMap[s]?.moralEn,
+      ...(scenesId.length > 0 ? { scenesId } : {}),
+      ...(scenesEn.length > 0 ? { scenesEn } : {}),
     };
   } catch {
     // Ignore parse error
   }
 }
+
+fs.writeFileSync(storyScriptsJsonPath, JSON.stringify(storyMetaMap, null, 2));
 
 if (fs.existsSync(curatedPath)) {
   try {
@@ -2486,6 +2538,55 @@ const indexHtmlContent = `<!DOCTYPE html>
       color: var(--text-muted);
     }
 
+    /* Compact Story Script Reader Modal */
+    .script-modal-window {
+      max-width: 680px;
+      width: 94%;
+    }
+    .script-modal-body {
+      padding: 1rem 1.2rem;
+      max-height: 68vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      background: var(--bg-primary);
+    }
+    .script-beat {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 0.65rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.025);
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: var(--text-main);
+    }
+    .script-beat-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #38bdf8;
+      padding-top: 0.14rem;
+    }
+    .script-moral-box {
+      margin-top: 0.35rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 10px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 0.83rem;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+    .script-lang-switch {
+      display: inline-flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
     /* Toast Notification */
     .toast {
       position: fixed;
@@ -3260,6 +3361,25 @@ const indexHtmlContent = `<!DOCTYPE html>
         <div class="modal-player-container" id="modalPlayerFrame">
           <!-- Iframe injected dynamically -->
         </div>
+      </div>
+    </div>
+
+    <!-- Story Script Reader Modal -->
+    <div id="scriptModal" class="modal-backdrop" onclick="closeScriptModal()">
+      <div class="modal-window script-modal-window" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div style="min-width: 0;">
+            <div class="modal-title" id="scriptModalTitle">Story Script</div>
+            <div style="font-size: 0.72rem; color: var(--text-dim);" id="scriptModalMeta"></div>
+          </div>
+          <div class="script-lang-switch">
+            <button type="button" class="filter-chip" id="scriptLangIdBtn" onclick="switchScriptModalLang('id')" style="padding: 0.22rem 0.55rem; font-size: 0.72rem;">🇮🇩 ID</button>
+            <button type="button" class="filter-chip" id="scriptLangEnBtn" onclick="switchScriptModalLang('en')" style="padding: 0.22rem 0.55rem; font-size: 0.72rem;">🇬🇧 EN</button>
+            <button type="button" class="btn-card" id="scriptCopyBtn" onclick="copyActiveStoryScript()" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;">📋 Copy</button>
+            <button class="modal-close" onclick="closeScriptModal()">&times;</button>
+          </div>
+        </div>
+        <div class="script-modal-body" id="scriptModalBody"></div>
       </div>
     </div>
 
@@ -4084,6 +4204,13 @@ ${browserSyncScript}
                 <span>\${formatDate(group.latestPublishedAt)} · <strong style="color: var(--success-green); font-size: 0.7rem;">CC BY 4.0</strong></span>
               </div>
             </div>
+            \${hasStoryScript(group.storySlug) ? \`
+            <div class="card-actions" style="margin-top: 0.45rem;">
+              <button type="button" class="btn-card" onclick="openScriptModal('\${escapeAttr(group.storySlug)}', '\${groupLangHint}')" title="\${uiLang === 'id' ? 'Baca Naskah Cerita' : 'Read Story Script'}">
+                📖 \${uiLang === 'id' ? 'Naskah Cerita' : 'Read Script'}
+              </button>
+            </div>
+            \` : ''}
           </div>
         </div>
       \`;
@@ -4135,6 +4262,11 @@ ${browserSyncScript}
               <button class="btn-card" onclick="openPreviewModal('\${item.id}')" title="\${tUi('preview')}">
                 ▶
               </button>
+              \${hasStoryScript(item.storySlug) ? \`
+              <button class="btn-card" onclick="openScriptModal('\${escapeAttr(item.storySlug)}', '\${(item.language || 'id').toLowerCase()}')" title="\${uiLang === 'id' ? 'Baca Naskah Cerita' : 'Read Story Script'}">
+                📖
+              </button>
+              \` : ''}
               <a href="\${item.videoUrl}" target="_blank" rel="noopener noreferrer" class="btn-card primary" title="Open on \${item.platform}">
                 ↗
               </a>
@@ -5283,6 +5415,11 @@ ${browserSyncScript}
                 : tUi('noEmbedNotice', { platform: item.platform })
           }</span>
           <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+            \${hasStoryScript(item.storySlug) ? \`
+            <button type="button" class="btn-card" onclick="openScriptModal('\${escapeAttr(item.storySlug)}', '\${(item.language || 'id').toLowerCase()}')" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
+              📖 \${uiLang === 'id' ? 'Naskah' : 'Script'}
+            </button>
+            \` : ''}
             <a href="\${escapeAttr(item.videoUrl)}" target="_blank" rel="noopener noreferrer" class="btn-card primary" style="padding: 0.45rem 0.9rem; font-size: 0.78rem;">
               \${tUi('openOn', { platform: item.platform })}
             </a>
@@ -5333,8 +5470,91 @@ ${browserSyncScript}
       modal.classList.remove('open');
     }
 
+    let activeScriptSlug = '';
+    let activeScriptLang = 'en';
+
+    function hasStoryScript(slug) {
+      const meta = STORY_META[slug];
+      return Boolean(meta && ((meta.scenesId && meta.scenesId.length > 0) || (meta.scenesEn && meta.scenesEn.length > 0)));
+    }
+
+    function renderScriptModalContent() {
+      const meta = STORY_META[activeScriptSlug];
+      if (!meta) return;
+      const lines = activeScriptLang === 'en' ? (meta.scenesEn || meta.scenesId || []) : (meta.scenesId || meta.scenesEn || []);
+      const moral = activeScriptLang === 'en' ? (meta.moralEn || meta.moralId || '') : (meta.moralId || meta.moralEn || '');
+      const title = activeScriptLang === 'en' ? (meta.en || meta.id) : (meta.id || meta.en);
+
+      const titleEl = document.getElementById('scriptModalTitle');
+      if (titleEl) titleEl.textContent = '📖 ' + title;
+      const metaEl = document.getElementById('scriptModalMeta');
+      if (metaEl) metaEl.textContent = lines.length + (activeScriptLang === 'en' ? ' story beats · Read-Along Script' : ' bagian cerita · Naskah Baca');
+
+      const idBtn = document.getElementById('scriptLangIdBtn');
+      const enBtn = document.getElementById('scriptLangEnBtn');
+      if (idBtn) idBtn.classList.toggle('active', activeScriptLang === 'id');
+      if (enBtn) enBtn.classList.toggle('active', activeScriptLang === 'en');
+
+      const bodyEl = document.getElementById('scriptModalBody');
+      if (!bodyEl) return;
+      const beatsHtml = lines.map((line, i) => \`
+        <div class="script-beat">
+          <span class="script-beat-num">\${String(i + 1).padStart(2, '0')}</span>
+          <span>\${escapeHtml(line)}</span>
+        </div>
+      \`).join('');
+      const moralHtml = moral ? \`
+        <div class="script-moral-box">
+          <strong>💡 \${activeScriptLang === 'en' ? 'Moral of the Story:' : 'Pesan Moral:'}</strong> \${escapeHtml(moral)}
+        </div>
+      \` : '';
+      bodyEl.innerHTML = (beatsHtml || '<div style="color:var(--text-dim);font-size:0.85rem;">Script not available yet.</div>') + moralHtml;
+    }
+
+    function openScriptModal(slug, langHint) {
+      const meta = STORY_META[slug];
+      if (!meta) return;
+      activeScriptSlug = slug;
+      const preferred = (langHint || uiLang || 'en').toLowerCase() === 'id' ? 'id' : 'en';
+      activeScriptLang = preferred === 'en' && meta.scenesEn && meta.scenesEn.length > 0
+        ? 'en'
+        : preferred === 'id' && meta.scenesId && meta.scenesId.length > 0
+          ? 'id'
+          : (meta.scenesEn && meta.scenesEn.length > 0 ? 'en' : 'id');
+      renderScriptModalContent();
+      const modal = document.getElementById('scriptModal');
+      if (modal) modal.classList.add('open');
+    }
+
+    function switchScriptModalLang(lang) {
+      activeScriptLang = lang === 'id' ? 'id' : 'en';
+      renderScriptModalContent();
+    }
+
+    function closeScriptModal() {
+      const modal = document.getElementById('scriptModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function copyActiveStoryScript() {
+      const meta = STORY_META[activeScriptSlug];
+      if (!meta) return;
+      const lines = activeScriptLang === 'en' ? (meta.scenesEn || meta.scenesId || []) : (meta.scenesId || meta.scenesEn || []);
+      const moral = activeScriptLang === 'en' ? (meta.moralEn || meta.moralId || '') : (meta.moralId || meta.moralEn || '');
+      const title = activeScriptLang === 'en' ? (meta.en || meta.id) : (meta.id || meta.en);
+      const text = [title, '', ...lines, moral ? ('\\n💡 ' + moral) : ''].filter(Boolean).join('\\n');
+      copyToClipboard(text, activeScriptLang === 'en' ? 'Story Script (EN)' : 'Naskah Cerita (ID)');
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        closeModal();
+        closeScriptModal();
+      }
     });
 
     // Dynamic CSV Export
