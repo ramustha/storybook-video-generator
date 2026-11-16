@@ -46,7 +46,9 @@ async function main() {
   console.log(`\n==================================================================`);
   console.log(`📊 UNIVERSAL EDU-MOTION PACKAGING SUMMARY`);
   for (const r of results) {
-    console.log(`   ✔ ${r.slug.padEnd(32)} ID=${r.idDurationSec.toFixed(2)}s | EN=${r.enDurationSec.toFixed(2)}s`);
+    console.log(
+      `   ✔ ${r.slug.padEnd(32)} Short(9:16) ID=${r.idDurationSec.toFixed(2)}s | EN=${r.enDurationSec.toFixed(2)}s || Long(16:9) ID=${r.idLongDurationSec.toFixed(2)}s | EN=${r.enLongDurationSec.toFixed(2)}s`
+    );
   }
   console.log(`==================================================================\n`);
 }

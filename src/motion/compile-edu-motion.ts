@@ -66,6 +66,8 @@ export interface CompiledTimelineData {
   chapters: CompiledChapter[];
 }
 
+export const LONG_FORM_MIN_DURATION_SEC = 485.0; // 8m 05s: unlocks YouTube Mid-Roll Ads (>=8m) + Facebook In-Stream (>=3m)
+
 export const DEFAULT_PACING: Required<PacingConfig> = {
   rateOverride: "+0%",
   leadSilenceSec: 0.3,
@@ -74,6 +76,7 @@ export const DEFAULT_PACING: Required<PacingConfig> = {
   introPauseSec: 0.75,
   outroPauseSec: 0.65,
   maxVerticalDurationSec: 89.5,
+  minLandscapeDurationSec: LONG_FORM_MIN_DURATION_SEC,
 };
 
 export function resolvePacingConfig(pacing?: PacingConfig): Required<PacingConfig> {
@@ -85,6 +88,7 @@ export function resolvePacingConfig(pacing?: PacingConfig): Required<PacingConfi
     introPauseSec: pacing?.introPauseSec ?? DEFAULT_PACING.introPauseSec,
     outroPauseSec: pacing?.outroPauseSec ?? DEFAULT_PACING.outroPauseSec,
     maxVerticalDurationSec: pacing?.maxVerticalDurationSec ?? DEFAULT_PACING.maxVerticalDurationSec,
+    minLandscapeDurationSec: pacing?.minLandscapeDurationSec ?? DEFAULT_PACING.minLandscapeDurationSec,
   };
 }
 
@@ -178,6 +182,164 @@ export function solveDurationBudget(
       fittedPauseAfterSec: compressedPauses[idx],
     })),
   };
+}
+
+/**
+ * Ensures long-form 16:9 landscape narration meets the monetization minimum duration
+ * (`minDurationSec`, default 485s / 8m05s) by adding calm, child-friendly breathing pauses
+ * between scenes when needed, without ever altering speech tempo.
+ */
+export function solveLongFormBudget(
+  leadSilenceSec: number,
+  segments: DurationSegmentInput[],
+  minDurationSec = LONG_FORM_MIN_DURATION_SEC
+): DurationBudgetPlan {
+  const totalSpeech = segments.reduce((sum, s) => sum + s.speechDurSec, 0);
+  const totalPause = segments.reduce((sum, s) => sum + s.pauseAfterSec, 0);
+  const naturalTotalSec = Number((leadSilenceSec + totalSpeech + totalPause).toFixed(3));
+
+  if (naturalTotalSec >= minDurationSec || segments.length === 0) {
+    return {
+      naturalTotalSec,
+      fittedTotalSec: naturalTotalSec,
+      speechTempo: 1.0,
+      segments: segments.map((s) => ({
+        targetSpeechDurSec: s.speechDurSec,
+        fittedPauseAfterSec: Number(s.pauseAfterSec.toFixed(3)),
+      })),
+    };
+  }
+
+  const deficit = Number((minDurationSec - naturalTotalSec + 0.5).toFixed(3));
+  const extraPerSeg = Number((deficit / segments.length).toFixed(3));
+  const paddedPauses = segments.map((s, idx) => {
+    const isLast = idx === segments.length - 1;
+    const base = s.pauseAfterSec + extraPerSeg;
+    return Number((isLast ? Math.max(base, 2.0) : base).toFixed(3));
+  });
+  const paddedSum = paddedPauses.reduce((a, b) => a + b, 0);
+  const fittedTotalSec = Number((leadSilenceSec + totalSpeech + paddedSum).toFixed(3));
+
+  return {
+    naturalTotalSec,
+    fittedTotalSec,
+    speechTempo: 1.0,
+    segments: segments.map((s, idx) => ({
+      targetSpeechDurSec: s.speechDurSec,
+      fittedPauseAfterSec: paddedPauses[idx],
+    })),
+  };
+}
+
+/**
+ * Expands a short vertical StoryMotionSpec into a rich multi-act long-form 16:9 chapter sequence
+ * designed for YouTube & Facebook long-video monetization (>= 8 minutes).
+ */
+export function buildLongFormChapters(spec: StoryMotionSpec): StoryChapterSpec[] {
+  if (spec.landscapeChapters && spec.landscapeChapters.length > 0) {
+    return spec.landscapeChapters;
+  }
+
+  const expanded: StoryChapterSpec[] = [];
+  const storyBeats = spec.chapters.filter((c) => c.section === "story");
+  const factNotesId: string[] = [];
+  const factNotesEn: string[] = [];
+  let storyCounter = 0;
+
+  for (const ch of spec.chapters) {
+    expanded.push(ch);
+
+    if (ch.section === "cover") {
+      expanded.push({
+        id: `${ch.id}_welcome`,
+        section: "story",
+        pose: "wave",
+        poseSwitchTo: "point",
+        poseSwitchDelay: 3.5,
+        camera: { dx: 0, dy: 0, ds: 1.04, durationSec: 3.5, ease: "power1.inOut" },
+        text: {
+          id: `Sebelum kita mulai petualangan "${spec.book.title}", tarik napas pelan dan dengarkan dengan nyaman ya. Cerita ini ditulis oleh ${spec.book.author} untuk mengajak kita mengamati keajaiban alam dan belajar kebaikan bersama.`,
+          en: `Before we begin "${spec.book.originalTitle}", take a calm breath and get cozy. Written by ${spec.book.author}, this full-length story invites us to look closely at nature and discover kindness together.`,
+        },
+      });
+      continue;
+    }
+
+    if (ch.section === "story") {
+      storyCounter++;
+      if (ch.callout?.id?.title) {
+        factNotesId.push(`${ch.callout.id.title} (${ch.callout.id.ringText})`);
+      }
+      if (ch.callout?.en?.title) {
+        factNotesEn.push(`${ch.callout.en.title} (${ch.callout.en.ringText})`);
+      }
+
+      if (ch.callout) {
+        expanded.push({
+          id: `${ch.id}_deep`,
+          section: "story",
+          pose: "point",
+          poseSwitchTo: "eureka",
+          poseSwitchDelay: 4.0,
+          camera: ch.camera,
+          callout: ch.callout,
+          text: {
+            id: `Mari kita amati lebih dekat bagian penting ini: ${ch.callout.id.title}, yaitu ${ch.callout.id.ringText}. Setiap makhluk dan bagian kecil di dunia ini punya peran istimewa yang saling menjaga satu sama lain.`,
+            en: `Let's look a little closer at this special detail: ${ch.callout.en.title}, ${ch.callout.en.ringText}. Every small creature and detail in our world plays an important role in caring for one another.`,
+          },
+        });
+      }
+
+      if (storyCounter % 2 === 0 && storyCounter < storyBeats.length) {
+        expanded.push({
+          id: `${ch.id}_reflect`,
+          section: "story",
+          pose: "shock",
+          poseSwitchTo: "wave",
+          poseSwitchDelay: 3.0,
+          camera: ch.camera,
+          text: {
+            id: `Sekarang coba bayangkan sejenak bersama ayah atau bunda: kira-kira apa yang akan terjadi selanjutnya? Mari kita perhatikan kelanjutan kisahnya dengan tenang.`,
+            en: `Now pause for a moment and wonder together: what do you think might happen next in our story? Let's watch calmly to see what unfolds.`,
+          },
+        });
+      }
+      continue;
+    }
+
+    if (ch.section === "moral") {
+      expanded.push({
+        id: `${ch.id}_practice`,
+        section: "moral",
+        pose: "eureka",
+        camera: ch.camera,
+        text: {
+          id: `Ingat selalu pesan utama cerita hari ini: ${spec.moral.headlineId}. ${spec.moral.spokenId} Sebelum tidur malam ini, coba ceritakan satu kebaikan kecil yang ingin kamu lakukan esok hari.`,
+          en: `Let's remember today's core lesson: ${spec.moral.headlineEn}. ${spec.moral.spokenEn} Before bedtime tonight, share one small kind action you want to try tomorrow.`,
+        },
+      });
+      continue;
+    }
+
+    if (ch.section === "outro") {
+      const recapId = factNotesId.length > 0 ? factNotesId.slice(0, 3).join(", ") : spec.book.title;
+      const recapEn = factNotesEn.length > 0 ? factNotesEn.slice(0, 3).join(", ") : spec.book.originalTitle;
+      const outroIdx = expanded.length - 1;
+      expanded.splice(outroIdx, 0, {
+        id: "story_recap",
+        section: "story",
+        pose: "wave",
+        poseSwitchTo: "eureka",
+        poseSwitchDelay: 3.5,
+        text: {
+          id: `Hebat sekali sudah menyimak kisah "${spec.book.title}" sampai tuntas! Hari ini kita belajar tentang ${recapId}. Semoga cerita tenang ini membawa mimpi indah.`,
+          en: `Wonderful job listening all the way through "${spec.book.originalTitle}"! Today we explored ${recapEn}. May this gentle story bring peaceful dreams.`,
+        },
+      });
+    }
+  }
+
+  return expanded;
 }
 
 function probeDurationSec(ffprobe: string, filePath: string): number {
@@ -320,24 +482,45 @@ async function synthesizeUniversalChapters(
   spec: StoryMotionSpec,
   storyDir: string,
   lang: "id" | "en",
-  outDir: string
-): Promise<CompiledTimelineData> {
+  outDir: string,
+  formatMode: "vertical" | "landscape" = "vertical"
+): Promise<{ timelineData: CompiledTimelineData; activeSpec: StoryMotionSpec }> {
   await fs.mkdir(outDir, { recursive: true });
   const { ffmpeg, ffprobe } = resolveFfmpegBinaries();
-  const pacing = resolvePacingConfig(spec.pacing);
+  const isLandscape = formatMode === "landscape";
+  const activeChapters = isLandscape ? buildLongFormChapters(spec) : spec.chapters;
+  const basePacing = resolvePacingConfig(spec.pacing);
+  const pacing: Required<PacingConfig> = isLandscape
+    ? {
+        ...basePacing,
+        rateOverride: spec.longFormPacing?.rateOverride ?? "-6%",
+        sentencePauseSec: spec.longFormPacing?.sentencePauseSec ?? 0.9,
+        chapterPauseSec: spec.longFormPacing?.chapterPauseSec ?? 1.35,
+        introPauseSec: spec.longFormPacing?.introPauseSec ?? 1.2,
+        outroPauseSec: spec.longFormPacing?.outroPauseSec ?? 1.2,
+        minLandscapeDurationSec: spec.longFormPacing?.minLandscapeDurationSec ?? basePacing.minLandscapeDurationSec,
+      }
+    : basePacing;
+  const activeSpec: StoryMotionSpec = { ...spec, chapters: activeChapters, pacing };
 
-  const timelinePath = path.join(outDir, "timeline.json");
-  const voCombinedPath = path.join(outDir, "vo_combined.mp3");
+  const workDir = isLandscape ? path.join(outDir, "landscape_tmp") : outDir;
+  await fs.mkdir(workDir, { recursive: true });
+
+  const timelinePath = path.join(outDir, isLandscape ? "timeline-16x9.json" : "timeline-9x16.json");
+  const voCombinedPath = path.join(outDir, isLandscape ? "vo_combined-16x9.mp3" : "vo_combined-9x16.mp3");
+  const legacyTimelinePath = path.join(outDir, "timeline.json");
+  const legacyVoCombinedPath = path.join(outDir, "vo_combined.mp3");
   const speakerRole = spec.narrator.speakerRole || "narrator";
   const scriptHash = crypto
     .createHash("sha256")
     .update(
       JSON.stringify({
+        formatMode,
         lang,
         pacing,
         speakerRole,
         voiceProfile: getVoiceActor(speakerRole).voice[lang],
-        chapters: spec.chapters.map((c) => ({
+        chapters: activeChapters.map((c) => ({
           id: c.id,
           section: c.section,
           text: c.text[lang],
@@ -349,21 +532,27 @@ async function synthesizeUniversalChapters(
     .digest("hex")
     .slice(0, 14);
 
-  if (existsSync(timelinePath) && existsSync(voCombinedPath)) {
-    const existing: CompiledTimelineData = JSON.parse(await fs.readFile(timelinePath, "utf-8"));
-    if (existing.scriptHash === scriptHash && existing.chapters.length === spec.chapters.length) {
+  const reusePath = existsSync(timelinePath) ? timelinePath : (!isLandscape && existsSync(legacyTimelinePath) ? legacyTimelinePath : null);
+  const reuseVo = existsSync(voCombinedPath) ? voCombinedPath : (!isLandscape && existsSync(legacyVoCombinedPath) ? legacyVoCombinedPath : null);
+  if (reusePath && reuseVo) {
+    const existing: CompiledTimelineData = JSON.parse(await fs.readFile(reusePath, "utf-8"));
+    if (existing.scriptHash === scriptHash && existing.chapters.length === activeChapters.length) {
       existing.characterId = spec.narrator.characterId;
       existing.chapters = existing.chapters.map((ec, idx) => ({
         ...ec,
-        section: spec.chapters[idx].section,
-        pose: spec.chapters[idx].pose,
-        poseSwitchTo: spec.chapters[idx].poseSwitchTo,
-        poseSwitchDelay: spec.chapters[idx].poseSwitchDelay,
-        callout: spec.chapters[idx].callout?.[lang],
+        section: activeChapters[idx].section,
+        pose: activeChapters[idx].pose,
+        poseSwitchTo: activeChapters[idx].poseSwitchTo,
+        poseSwitchDelay: activeChapters[idx].poseSwitchDelay,
+        callout: activeChapters[idx].callout?.[lang],
       }));
       await fs.writeFile(timelinePath, JSON.stringify(existing, null, 2), "utf-8");
-      console.log(`   ✔ Reusing synthesized VO & syncing visual metadata [${lang.toUpperCase()}] (${scriptHash})`);
-      return existing;
+      if (!isLandscape) {
+        await fs.writeFile(legacyTimelinePath, JSON.stringify(existing, null, 2), "utf-8");
+        if (reuseVo !== voCombinedPath) await fs.copyFile(reuseVo, voCombinedPath);
+      }
+      console.log(`   ✔ Reusing synthesized VO & syncing visual metadata [${lang.toUpperCase()} ${formatMode}] (${scriptHash})`);
+      return { timelineData: existing, activeSpec };
     }
   }
 
@@ -382,19 +571,19 @@ async function synthesizeUniversalChapters(
 
   const rawSegments: RawSentenceSeg[] = [];
 
-  for (let cIdx = 0; cIdx < spec.chapters.length; cIdx++) {
-    const ch = spec.chapters[cIdx];
+  for (let cIdx = 0; cIdx < activeChapters.length; cIdx++) {
+    const ch = activeChapters[cIdx];
     const sentences = splitIntoSentences(ch.text[lang]);
     console.log(
-      `   🎙️ Synthesizing [${lang.toUpperCase()}] ${ch.id} (${ch.section}, ${sentences.length} sentence${sentences.length > 1 ? "s" : ""})...`
+      `   🎙️ Synthesizing [${lang.toUpperCase()} ${formatMode}] ${ch.id} (${ch.section}, ${sentences.length} sentence${sentences.length > 1 ? "s" : ""})...`
     );
 
     for (let sIdx = 0; sIdx < sentences.length; sIdx++) {
       const sentenceText = sentences[sIdx];
       const isLast = sIdx === sentences.length - 1;
       const baseId = `${ch.id}_s${sIdx + 1}`;
-      const rawMp3Path = path.join(outDir, `${baseId}.mp3`);
-      const wordsPath = path.join(outDir, `${baseId}_words.json`);
+      const rawMp3Path = path.join(workDir, `${baseId}.mp3`);
+      const wordsPath = path.join(workDir, `${baseId}_words.json`);
       const lines: DialogueLine[] = [{ speakerRole, text: sentenceText }];
 
       await synthesizeSceneVoice({
@@ -445,19 +634,18 @@ async function synthesizeUniversalChapters(
     }
   }
 
-  // Run deterministic platform duration guardrail
-  const budgetPlan = solveDurationBudget(
-    pacing.leadSilenceSec,
-    rawSegments.map((s) => ({
-      speechDurSec: s.rawDurSec,
-      pauseAfterSec: s.pauseAfterSec,
-      minPauseAfterSec: s.minPauseAfterSec,
-    })),
-    pacing.maxVerticalDurationSec
-  );
+  // Run deterministic platform duration guardrail (vertical ceiling <=89.5s vs landscape minimum >=485s)
+  const budgetInput = rawSegments.map((s) => ({
+    speechDurSec: s.rawDurSec,
+    pauseAfterSec: s.pauseAfterSec,
+    minPauseAfterSec: s.minPauseAfterSec,
+  }));
+  const budgetPlan = isLandscape
+    ? solveLongFormBudget(pacing.leadSilenceSec, budgetInput, pacing.minLandscapeDurationSec)
+    : solveDurationBudget(pacing.leadSilenceSec, budgetInput, pacing.maxVerticalDurationSec);
 
   console.log(
-    `   ⏱️ Pacing Guardrail [${lang.toUpperCase()}]: natural=${budgetPlan.naturalTotalSec.toFixed(2)}s, fitted=${budgetPlan.fittedTotalSec.toFixed(2)}s, cap=${pacing.maxVerticalDurationSec}s, tempo=${budgetPlan.speechTempo.toFixed(3)}x`
+    `   ⏱️ Pacing Guardrail [${lang.toUpperCase()} ${formatMode}]: natural=${budgetPlan.naturalTotalSec.toFixed(2)}s, fitted=${budgetPlan.fittedTotalSec.toFixed(2)}s, ${isLandscape ? `min=${pacing.minLandscapeDurationSec}s` : `cap=${pacing.maxVerticalDurationSec}s`}, tempo=${budgetPlan.speechTempo.toFixed(3)}x`
   );
 
   // Apply gentle atempo per sentence only when needed, preserving crisp pauses and word sync
@@ -482,7 +670,7 @@ async function synthesizeUniversalChapters(
   }
 
   // Assemble lead + sentence + exact fitted pause concatenation list
-  const leadFile = await ensureSilenceMp3(ffmpeg, outDir, pacing.leadSilenceSec);
+  const leadFile = await ensureSilenceMp3(ffmpeg, workDir, pacing.leadSilenceSec);
   const concatEntries: string[] = [`file '${leadFile}'`];
   let cursorSec = probeDurationSec(ffprobe, leadFile);
 
@@ -494,7 +682,7 @@ async function synthesizeUniversalChapters(
   for (let i = 0; i < rawSegments.length; i++) {
     const seg = rawSegments[i];
     const fittedPause = budgetPlan.segments[i].fittedPauseAfterSec;
-    const pauseFile = await ensureSilenceMp3(ffmpeg, outDir, fittedPause);
+    const pauseFile = await ensureSilenceMp3(ffmpeg, workDir, fittedPause);
     const pauseDur = probeDurationSec(ffprobe, pauseFile);
 
     if (!chapterStarts.has(seg.chapterIdx)) {
@@ -520,15 +708,15 @@ async function synthesizeUniversalChapters(
     chapterEnds.set(seg.chapterIdx, Number(cursorSec.toFixed(3)));
   }
 
-  const concatTxt = path.join(outDir, "concat.txt");
-  const voiceOnlyPath = path.join(outDir, "vo_voice_only.mp3");
+  const concatTxt = path.join(workDir, "concat.txt");
+  const voiceOnlyPath = path.join(workDir, "vo_voice_only.mp3");
   await fs.writeFile(concatTxt, concatEntries.join("\n"), "utf-8");
   execSync(`${ffmpeg} -y -f concat -safe 0 -i "${concatTxt}" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${voiceOnlyPath}"`, {
     stdio: "pipe",
   });
 
   const exactVoiceDur = probeDurationSec(ffprobe, voiceOnlyPath);
-  const compiledChapters: CompiledChapter[] = spec.chapters.map((ch, idx) => ({
+  const compiledChapters: CompiledChapter[] = activeChapters.map((ch, idx) => ({
     id: ch.id,
     section: ch.section,
     pose: ch.pose,
@@ -548,7 +736,7 @@ async function synthesizeUniversalChapters(
     voiceOnlyPath,
     voCombinedPath,
     totalDuration: exactVoiceDur,
-    specChapters: spec.chapters,
+    specChapters: activeChapters,
     compiledChapters,
   });
 
@@ -565,7 +753,11 @@ async function synthesizeUniversalChapters(
   };
 
   await fs.writeFile(timelinePath, JSON.stringify(timelineData, null, 2), "utf-8");
-  return timelineData;
+  if (!isLandscape) {
+    await fs.writeFile(legacyTimelinePath, JSON.stringify(timelineData, null, 2), "utf-8");
+    await fs.copyFile(voCombinedPath, legacyVoCombinedPath);
+  }
+  return { timelineData, activeSpec };
 }
 
 function buildOnDemandCalloutSvg(): string {
@@ -1071,10 +1263,14 @@ async function captureUniversalThumbnails(storyDir: string, seekSec: number): Pr
 
   try {
     for (const lang of ["id", "en"] as const) {
-      const htmlPath = path.join(storyDir, "motion", lang, "index.html");
+      const verticalHtml = path.join(storyDir, "motion", lang, "index-9x16.html");
+      const landscapeHtml = path.join(storyDir, "motion", lang, "index-16x9.html");
+      const fallbackHtml = path.join(storyDir, "motion", lang, "index.html");
+      const pHtml = existsSync(verticalHtml) ? verticalHtml : fallbackHtml;
+      const lHtml = existsSync(landscapeHtml) ? landscapeHtml : fallbackHtml;
 
       const pPage = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
-      await pPage.goto(`file://${htmlPath}?clean=1&format=vertical`, { waitUntil: "networkidle" });
+      await pPage.goto(`file://${pHtml}?clean=1&format=vertical`, { waitUntil: "networkidle" });
       await pPage.evaluate(() => document.fonts.ready);
       await pPage.evaluate((t) => (window as any).OPENER.seek(t), seekSec);
       await pPage.waitForTimeout(50);
@@ -1087,7 +1283,7 @@ async function captureUniversalThumbnails(storyDir: string, seekSec: number): Pr
       await pPage.close();
 
       const lPage = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-      await lPage.goto(`file://${htmlPath}?clean=1&format=landscape`, { waitUntil: "networkidle" });
+      await lPage.goto(`file://${lHtml}?clean=1&format=landscape`, { waitUntil: "networkidle" });
       await lPage.evaluate(() => document.fonts.ready);
       await lPage.evaluate((t) => (window as any).OPENER.seek(t), seekSec);
       await lPage.waitForTimeout(50);
@@ -1115,6 +1311,8 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
   slug: string;
   idDurationSec: number;
   enDurationSec: number;
+  idLongDurationSec: number;
+  enLongDurationSec: number;
 }> {
   const specPath = path.join(storyDir, "motion-spec.json");
   const raw = JSON.parse(await fs.readFile(specPath, "utf-8"));
@@ -1123,25 +1321,33 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
   console.log(`\n==================================================================`);
   console.log(`🎬 UNIVERSAL EDU-MOTION COMPILER: [${spec.book.slug}]`);
   console.log(`   Host      : ${spec.narrator.characterId} (${spec.narrator.displayName?.id || spec.narrator.characterId})`);
-  console.log(`   Chapters  : ${spec.chapters.length} (${spec.chapters.map((c) => c.section).join(" → ")})`);
+  console.log(`   Short     : ${spec.chapters.length} chapters (cap <= ${resolvePacingConfig(spec.pacing).maxVerticalDurationSec}s)`);
+  console.log(`   Long 16:9 : ${buildLongFormChapters(spec).length} chapters (min >= ${spec.longFormPacing?.minLandscapeDurationSec ?? LONG_FORM_MIN_DURATION_SEC}s)`);
   console.log(`==================================================================\n`);
 
   const coverFile = await ensureOfficialCoverAsset(storyDir, spec.book.coverUrl);
   const coverRelUrl = coverFile ? `../../assets/${coverFile}` : undefined;
 
-  const idTimeline = await synthesizeUniversalChapters(spec, storyDir, "id", path.join(storyDir, "motion/id"));
-  const enTimeline = await synthesizeUniversalChapters(spec, storyDir, "en", path.join(storyDir, "motion/en"));
+  const idShort = await synthesizeUniversalChapters(spec, storyDir, "id", path.join(storyDir, "motion/id"), "vertical");
+  const enShort = await synthesizeUniversalChapters(spec, storyDir, "en", path.join(storyDir, "motion/en"), "vertical");
+  const idLong = await synthesizeUniversalChapters(spec, storyDir, "id", path.join(storyDir, "motion/id"), "landscape");
+  const enLong = await synthesizeUniversalChapters(spec, storyDir, "en", path.join(storyDir, "motion/en"), "landscape");
 
-  await fs.writeFile(
-    path.join(storyDir, "motion/id/index.html"),
-    buildUniversalStageHtml({ spec, lang: "id", timelineData: idTimeline, coverDataUri: coverRelUrl }),
-    "utf-8"
-  );
-  await fs.writeFile(
-    path.join(storyDir, "motion/en/index.html"),
-    buildUniversalStageHtml({ spec, lang: "en", timelineData: enTimeline, coverDataUri: coverRelUrl }),
-    "utf-8"
-  );
+  const idShortHtml = buildUniversalStageHtml({ spec: idShort.activeSpec, lang: "id", timelineData: idShort.timelineData, coverDataUri: coverRelUrl });
+  const enShortHtml = buildUniversalStageHtml({ spec: enShort.activeSpec, lang: "en", timelineData: enShort.timelineData, coverDataUri: coverRelUrl });
+  const idLongHtml = buildUniversalStageHtml({ spec: idLong.activeSpec, lang: "id", timelineData: idLong.timelineData, coverDataUri: coverRelUrl });
+  const enLongHtml = buildUniversalStageHtml({ spec: enLong.activeSpec, lang: "en", timelineData: enLong.timelineData, coverDataUri: coverRelUrl });
+
+  await fs.writeFile(path.join(storyDir, "motion/id/index.html"), idShortHtml, "utf-8");
+  await fs.writeFile(path.join(storyDir, "motion/id/index-9x16.html"), idShortHtml, "utf-8");
+  await fs.writeFile(path.join(storyDir, "motion/id/index-16x9.html"), idLongHtml, "utf-8");
+
+  await fs.writeFile(path.join(storyDir, "motion/en/index.html"), enShortHtml, "utf-8");
+  await fs.writeFile(path.join(storyDir, "motion/en/index-9x16.html"), enShortHtml, "utf-8");
+  await fs.writeFile(path.join(storyDir, "motion/en/index-16x9.html"), enLongHtml, "utf-8");
+
+  const idTimeline = idShort.timelineData;
+  const enTimeline = enShort.timelineData;
 
   // Pick a vivid focal story beat (midway through educational beats) for thumbnails
   const firstHeroBeat =
@@ -1180,6 +1386,16 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
     coverAsset: coverFile ? `assets/${coverFile}` : undefined,
     language: "id-ID",
     moral: spec.moral,
+    formats: {
+      vertical: {
+        idDurationSeconds: idShort.timelineData.totalDuration,
+        enDurationSeconds: enShort.timelineData.totalDuration,
+      },
+      landscape: {
+        idDurationSeconds: idLong.timelineData.totalDuration,
+        enDurationSeconds: enLong.timelineData.totalDuration,
+      },
+    },
     thumbnails: {
       id: {
         landscape: "assets/thumbnails/id-16x9.png",
@@ -1213,11 +1429,15 @@ export async function compileEduMotionStory(storyDir: string): Promise<{
   };
 
   await fs.writeFile(storyJsonPath, JSON.stringify(manifest, null, 2), "utf-8");
-  console.log(`\n✅ Compiled Edu-Motion [${spec.book.slug}] (ID=${idTimeline.totalDuration}s, EN=${enTimeline.totalDuration}s)`);
+  console.log(
+    `\n✅ Compiled Edu-Motion [${spec.book.slug}] Short(9:16): ID=${idShort.timelineData.totalDuration}s, EN=${enShort.timelineData.totalDuration}s | Long(16:9): ID=${idLong.timelineData.totalDuration}s, EN=${enLong.timelineData.totalDuration}s`
+  );
 
   return {
     slug: spec.book.slug,
-    idDurationSec: idTimeline.totalDuration,
-    enDurationSec: enTimeline.totalDuration,
+    idDurationSec: idShort.timelineData.totalDuration,
+    enDurationSec: enShort.timelineData.totalDuration,
+    idLongDurationSec: idLong.timelineData.totalDuration,
+    enLongDurationSec: enLong.timelineData.totalDuration,
   };
 }
