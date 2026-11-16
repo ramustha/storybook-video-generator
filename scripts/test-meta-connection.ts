@@ -1,6 +1,10 @@
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import {
+  buildMetaReauthInstructions,
+  inspectMetaTokenHealth,
+} from "./lib/meta-token-health";
 
 interface MetaConfig {
   appId: string;
@@ -107,6 +111,27 @@ async function main() {
     const total = quotaData.data?.[0]?.config?.quota_total ?? 100;
     console.log(`   ✔ Daily Publishing Quota: ${usage}/${total} posts used`);
     console.log(`   ✔ Remaining Quota       : ${total - usage} posts available today`);
+  }
+
+  // 4. Verify Token Scopes & Instagram /insights Permission
+  console.log(`\n🔎 4. Checking Token Scopes & Instagram /insights Permission...`);
+  const health = await inspectMetaTokenHealth({
+    appId: config.appId,
+    facebookPageId,
+    instagramUserId,
+    pageAccessToken,
+  });
+  console.log(`   📜 Granted Scopes : ${health.scopeAudit.grantedScopes.join(", ") || "none"}`);
+  if (health.scopeAudit.missingScopes.length > 0 || !health.igInsightsOk) {
+    hasError = true;
+    console.error(
+      `   ❌ Insights Permission Check Failed: ${health.igInsightsError || `Missing scopes (${health.scopeAudit.missingScopes.join(", ")})`}`
+    );
+    for (const line of buildMetaReauthInstructions(config.appId, health.scopeAudit.missingScopes)) {
+      console.error(`      ${line}`);
+    }
+  } else {
+    console.log(`   ✔ Instagram /insights accessible & all required scopes present!`);
   }
 
   if (hasError) {

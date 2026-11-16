@@ -1,11 +1,16 @@
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import {
+  buildMetaReauthInstructions,
+  inspectMetaTokenHealth,
+} from "./lib/meta-token-health";
 
 interface RefreshOptions {
   token?: string;
   userToken?: string;
   appSecret?: string;
+  checkOnly?: boolean;
 }
 
 function parseArgs(): RefreshOptions {
@@ -20,6 +25,8 @@ function parseArgs(): RefreshOptions {
       options.userToken = args[++i];
     } else if ((arg === "--secret" || arg === "-s") && args[i + 1]) {
       options.appSecret = args[++i];
+    } else if (arg === "--check") {
+      options.checkOnly = true;
     }
   }
 
@@ -84,6 +91,7 @@ async function main() {
 
   let candidatePageToken =
     options.token ||
+    (options.checkOnly ? config.pageAccessToken : undefined) ||
     process.env.PERSONAL_META_ACCESS_TOKEN ||
     process.env.META_PAGE_ACCESS_TOKEN ||
     process.env.PAGE_ACCESS_TOKEN;
@@ -95,6 +103,30 @@ async function main() {
   console.log(`📘 Facebook Page ID : ${config.facebookPageId} (${config.facebookPageName || "Zayn Storybook"})`);
   console.log(`📸 Instagram ID     : ${config.instagramUserId} (@${config.instagramUsername || "zayn.storybook"})`);
   console.log("=======================================================\n");
+
+  if (options.checkOnly) {
+    if (!candidatePageToken) {
+      throw new Error("No active pageAccessToken found in config/meta-config.json or environment.");
+    }
+    const report = await inspectMetaTokenHealth({
+      appId: config.appId,
+      facebookPageId: config.facebookPageId,
+      instagramUserId: config.instagramUserId,
+      pageAccessToken: candidatePageToken,
+    });
+    console.log(`🔎 Token Valid       : ${report.tokenValid ? "YES" : "NO"} (${report.tokenType || "unknown"}, expires_at=${report.expiresAt ?? "?"})`);
+    console.log(`📜 Granted Scopes    : ${report.scopeAudit.grantedScopes.join(", ") || "none"}`);
+    console.log(`📊 IG /insights      : ${report.igInsightsOk ? "✔ ACCESSIBLE" : `❌ BLOCKED (${report.igInsightsError || "missing permission"})`}`);
+    if (report.scopeAudit.missingScopes.length > 0 || !report.igInsightsOk) {
+      console.error("\n⚠️ TOKEN MISSING REQUIRED SCOPES / INSIGHTS PERMISSION:");
+      for (const line of buildMetaReauthInstructions(config.appId, report.scopeAudit.missingScopes)) {
+        console.error(`   ${line}`);
+      }
+      process.exit(1);
+    }
+    console.log("\n✅ Token has all required publishing & insights scopes!\n");
+    return;
+  }
 
   let longLivedUserToken = "";
 
@@ -138,9 +170,11 @@ async function main() {
   if (!candidatePageToken) {
     console.log("❌ No token provided.");
     console.log("\nUsage Options:");
-    console.log("1. Direct Page Token:");
+    console.log("1. Check active token scopes & /insights access:");
+    console.log("   npx tsx scripts/refresh-meta-token.ts --check\n");
+    console.log("2. Direct Page Token:");
     console.log("   npx tsx scripts/refresh-meta-token.ts --token <NEW_PAGE_ACCESS_TOKEN>\n");
-    console.log("2. Auto Long-Lived Exchange (Permanent Never-Expire):");
+    console.log("3. Auto Long-Lived Exchange (Permanent Never-Expire):");
     console.log("   npx tsx scripts/refresh-meta-token.ts --user-token <USER_TOKEN> --secret <APP_SECRET>\n");
     process.exit(1);
   }
@@ -165,6 +199,21 @@ async function main() {
     throw new Error(`Instagram check failed: ${JSON.stringify(igData.error)}`);
   }
   console.log(`   ✔ Instagram Account verified: @${igData.username} (ID: ${igData.id})`);
+
+  const health = await inspectMetaTokenHealth({
+    appId: config.appId,
+    facebookPageId: config.facebookPageId,
+    instagramUserId: config.instagramUserId,
+    pageAccessToken: candidatePageToken,
+  });
+  console.log(`   📜 Granted Scopes: ${health.scopeAudit.grantedScopes.join(", ") || "none"}`);
+  console.log(`   📊 IG /insights  : ${health.igInsightsOk ? "✔ ACCESSIBLE" : `⚠️ BLOCKED (${health.igInsightsError || "missing permission"})`}`);
+  if (health.scopeAudit.missingScopes.length > 0 || !health.igInsightsOk) {
+    console.warn("\n   ⚠️ WARNING: Token was saved, but is still missing analytics scopes:");
+    for (const line of buildMetaReauthInstructions(config.appId, health.scopeAudit.missingScopes)) {
+      console.warn(`      ${line}`);
+    }
+  }
 
   // Save new token to config/meta-config.json
   config.pageAccessToken = candidatePageToken;
@@ -195,7 +244,8 @@ async function main() {
   }
 
   console.log(`\n🎉 SUCCESS! New verified token saved to ${configPath}!`);
-  console.log("🚀 You can now proceed with: npm run sync:meta\n");
+  console.log("📌 Remember to update GitHub Actions secret PERSONAL_META_ACCESS_TOKEN if refreshing scopes.");
+  console.log("🚀 You can verify full insights access with: npx tsx scripts/test-meta-connection.ts\n");
 }
 
 main().catch((err) => {

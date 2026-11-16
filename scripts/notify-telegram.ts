@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
+import type { MonetizationAuditSummary } from "./lib/monetization-audit";
 
 export interface TelegramConfig {
   botToken: string;
@@ -75,6 +76,7 @@ export interface AnalyticsReportOptions {
   instagram?: PlatformStatsSummary;
   threads?: PlatformStatsSummary;
   topContent?: TopContentItem[];
+  monetizationAudit?: MonetizationAuditSummary;
   dryRun?: boolean;
 }
 
@@ -631,6 +633,20 @@ export async function notifyTelegramAnalytics(options: AnalyticsReportOptions): 
         `    👀 ${item.views.toLocaleString("id-ID")} views • ❤️ ${item.likes} likes • <a href="${item.url}">Tonton ➔</a>`
       );
     });
+  }
+
+  if (options.monetizationAudit) {
+    const m = options.monetizationAudit;
+    lines.push(`\n🎯 <b>Gap Monetisasi Platform:</b>`);
+    lines.push(
+      `▶️ <b>YouTube YPP:</b> ${m.youtube.subscribers}/${m.youtube.subsTarget} subs (${m.youtube.longViewSharePct}% 16:9 vs ${(100 - m.youtube.longViewSharePct).toFixed(1)}% Shorts • ID ${m.youtube.idViews} vs EN ${m.youtube.enViews})`
+    );
+    lines.push(
+      `📘 <b>Facebook:</b> ${m.facebook.followers}/${m.facebook.followersTarget} followers • 16:9 Watch ${m.facebook.watch16x9SharePct}% (${m.facebook.watch16x9Views} views)`
+    );
+    if (m.instagram.insightsPermissionMissing) {
+      lines.push(`📸 <b>Instagram:</b> Plays unmeasured (token butuh izin instagram_manage_insights)`);
+    }
   }
 
   lines.push(`\n✨ <i>Laporan dikirim otomatis oleh GitHub Actions & Cloudflare Scheduler.</i> 🌙`);

@@ -28,6 +28,8 @@ export interface SeoMetadataOptions {
   license?: string;
   publisher?: string;
   portalUrl?: string;
+  fullEpisodeUrl?: string;
+  playlistUrl?: string;
   relatedVideos?: RelatedVideoLink[];
 }
 
@@ -201,6 +203,13 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
 
   if (isEn) {
     descLines.push(`🌙 Welcome to Zayn Storybook! Tonight's featured animated bedtime story is "${displayTitle}".`);
+    if (isVertical && options.fullEpisodeUrl) {
+      descLines.push(`▶️ WATCH FULL STORY (16:9 HD): ${options.fullEpisodeUrl}`);
+    }
+    if (options.playlistUrl) {
+      descLines.push(`📚 BINGE BEDTIME PLAYLIST: ${options.playlistUrl}`);
+    }
+    descLines.push(`🔔 Subscribe for free bedtime stories: https://youtube.com/@zayn.storybook?sub_confirmation=1`);
     descLines.push(`A heartwarming and soothing animated read-aloud picture book designed to help toddlers, preschoolers, and early readers unwind and prepare for a restful night of sleep.`);
     descLines.push(``);
     descLines.push(`💡 MORAL LESSON / VALUE:`);
@@ -243,6 +252,13 @@ export function generateSeoMetadata(options: SeoMetadataOptions): SeoMetadataRes
   } else {
     // Indonesian
     descLines.push(`🌙 Selamat datang di Zayn Storybook! Malam ini kita akan mendengarkan dongeng anak sebelum tidur yang seru dan mendidik berjudul "${displayTitle}".`);
+    if (isVertical && options.fullEpisodeUrl) {
+      descLines.push(`▶️ TONTON VERSI LENGKAP (16:9 HD): ${options.fullEpisodeUrl}`);
+    }
+    if (options.playlistUrl) {
+      descLines.push(`📚 PUTAR MARATON DONGENG NON-STOP: ${options.playlistUrl}`);
+    }
+    descLines.push(`🔔 Subscribe Gratis untuk dongeng baru setiap hari: https://youtube.com/@zayn.storybook?sub_confirmation=1`);
     descLines.push(`Cerita bergambar anak animasi yang hangat dan menenangkan, sangat cocok didengarkan bersama si kecil sebelum tidur malam, saat bersantai di rumah, atau sebagai media belajar membaca dan mengasah imajinasi.`);
     descLines.push(``);
     descLines.push(`💡 PESAN MORAL CERITA:`);
@@ -453,5 +469,28 @@ export function buildYoutubeLocalizations(
       description: altSeo.description,
     },
   };
+}
+
+/**
+ * Shared Save / Follow / Comment CTA block for Instagram & Facebook captions.
+ */
+export function buildSocialEngagementCta(
+  lang: "id" | "en",
+  surface: "reel" | "watch" | "feed" | "compilation" = "feed"
+): string {
+  const isEn = lang === "en";
+  if (surface === "reel") {
+    return isEn
+      ? `🔖 SAVE this Reel for tonight's bedtime routine!\n➕ FOLLOW @zayn.storybook for daily bilingual kids stories.\n💬 What lesson stood out most to your little one? Share below!`
+      : `🔖 SIMPAN (Save) Reels ini untuk dongeng sebelum tidur nanti malam!\n➕ FOLLOW @zayn.storybook biar tidak ketinggalan cerita baru setiap hari.\n💬 Pelajaran baik apa nih yang paling diingat si kecil? Yuk tulis di komentar!`;
+  }
+  if (surface === "watch" || surface === "compilation") {
+    return isEn
+      ? `🔖 SAVE this story for tonight's family watch list!\n➕ FOLLOW our @ZaynStorybook Facebook Page & SHARE with fellow parents for nightly storytime!\n💬 Which moment made your child smile or wonder most? Tell us in the comments!\n📺 Watch full episodes on Facebook Watch & YouTube @zayn.storybook.`
+      : `🔖 SIMPAN video ini ke daftar tonton malam keluarga!\n➕ FOLLOW halaman @ZaynStorybook & BAGIKAN ke Ayah Bunda lain agar tiap malam ada dongeng baru!\n💬 Setelah menonton, bagian mana yang paling disukai si kecil? Tulis di komentar!\n📺 Tonton maraton 16:9 lengkap di Facebook Watch & YouTube @zayn.storybook.`;
+  }
+  return isEn
+    ? `🔖 SAVE this post for tonight's bedtime routine!\n➕ FOLLOW @zayn.storybook for daily bilingual storybooks & family tales.\n💬 Which lesson are you excited to discuss with your child? Share in the comments!`
+    : `🔖 SIMPAN (Save) postingan ini agar mudah diputar saat mendongeng malam nanti!\n➕ FOLLOW @zayn.storybook untuk update dongeng & animasi anak setiap hari.\n💬 Nilai baik apa nih yang paling ingin Ayah Bunda bahas bersama si kecil? Tulis di komentar!`;
 }
 

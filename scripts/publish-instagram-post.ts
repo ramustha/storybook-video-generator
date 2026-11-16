@@ -3,6 +3,7 @@ import { createReadStream, existsSync } from "fs";
 import path from "path";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { generateBilingualSocialKit } from "./generate-social-promo.js";
+import { buildSocialEngagementCta } from "./lib/seo-formatter";
 
 const META_CONFIG_PATH = path.resolve("./config/meta-config.json");
 const R2_CONFIG_PATH = path.resolve("./config/r2-config.json");
@@ -99,7 +100,7 @@ async function pollInstagramContainer(containerId: string, accessToken: string):
   throw new Error(`Timed out waiting for Instagram container ${containerId}`);
 }
 
-const DEFAULT_LAUNCH_CAPTION = `🎉 HOREEE! Rumah Dongeng @zayn.storybook resmi hadir! 🎈✨
+export const DEFAULT_LAUNCH_CAPTION = `🎉 HOREEE! Rumah Dongeng @zayn.storybook resmi hadir! 🎈✨
 Tempat petualangan ceria & pengantar tidur nyenyak buat si kecil tercinta 🌙💤
 
 Halo Ayah, Bunda, dan adik-adik tersayang! 🥰👋
@@ -119,7 +120,7 @@ Semua video beranimasi halus, warna ceria, suara anak ramah, dan bebas suara kag
 🌙 Mau nonton kompilasi maraton 14 menit dongeng pengantar tidur non-stop?
 Tonton di YouTube & Facebook Watch resmi kami: Zayn Storybook! 🍿✨
 
-💬 Cerita nomor berapa nih yang mau ditonton bareng si kecil malam ini? Tulis di kolom komentar yuk! 👇❤️
+${buildSocialEngagementCta("id", "feed")}
 
 #ZaynStorybook #DongengAnak #CeritaAnakBergambar #ParentingCeria #BukuCeritaAnak #DongengSebelumTidur #EdukasiAnak #BedtimeStories #CeritaBergambar`;
 

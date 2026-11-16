@@ -127,7 +127,8 @@ Does your little one love funny characters or magical bedtime tales best? Let's 
 ------------------------------------------------------------
 🍿 YUK NONTON BARENG:
 📺 YouTube: Link in Bio (@zayn.storybook) untuk video layar lebar 16:9 yang jernih!
-⭐ Ayah Bunda, jangan lupa SIMPAN (SAVE) postingan ini buat dongeng bobo nanti malam ya! 💾✨
+🔖 Ayah Bunda, SIMPAN (SAVE) postingan ini buat dongeng bobo nanti malam ya! 💾✨
+➕ FOLLOW @zayn.storybook biar tidak ketinggalan dongeng bilingual baru setiap hari! ❤️
 
 #ZaynStorybook #DongengAnakLucu #CeritaAnakBergambar #DongengSebelumTidur #BukuCeritaAnak #KartunAnakIndonesia #BilingualKids #KidsBedtimeStories #ReadAloud #BedtimeStoriesForKids #FunnyStorybook #ChildrenBooks
 \`\`\`

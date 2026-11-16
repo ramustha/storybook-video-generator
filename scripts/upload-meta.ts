@@ -1,9 +1,14 @@
 import fs from "fs/promises";
 import { existsSync, createReadStream, readdirSync } from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { spawn } from "child_process";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { db } from "./lib/db";
+import {
+  buildSocialEngagementCta,
+  resolveRelatedPublishedVideos,
+} from "./lib/seo-formatter";
 
 interface MetaConfig {
   appId: string;
@@ -181,7 +186,7 @@ async function loadR2Config(): Promise<R2Config> {
 /**
  * Builds rich, engaging caption adapted to any story.
  */
-function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "landscape"): string {
+export function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "landscape"): string {
   const isLandscape = format === "landscape";
   const isEn = lang === "en";
 
@@ -207,6 +212,8 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
     if (!moral) moral = "Selalu belajar hal baik, berbuat jujur, dan saling menyayangi setiap hari!";
   }
 
+  const ctaLine = buildSocialEngagementCta(lang, isLandscape ? "watch" : "reel");
+
   if (lang === "id") {
     const rawTitle = (story.title || "Cerita Anak Bergambar").replace(/\(.*\)/, "").trim();
     const hook = story.thumbnailConfig?.id?.hook || story.thumbnailConfig?.id?.headlineTop || "Kisah seru dan penuh tawa!";
@@ -217,7 +224,7 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
       ? "#CeritaAnak #DongengAnak #Storybook #BukuAnak #AnimasiAnak #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook #FacebookWatch #VideoAnak"
       : "#CeritaAnak #DongengAnak #Storybook #KidsStory #AnimasiAnak #Reels #FacebookReels #InstagramReels #BedtimeStory #EdukasiAnak #BukuCeritaAnak #ZaynStorybook";
 
-    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Seri Cerita & Dongeng Anak Bergambar Zayn Storybook\n✨ Nilai Moral: ${moral}\n\n${hashtags}`;
+    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n${bedtimeHook}\n\n✨ Nilai Moral: ${moral}\n\n${ctaLine}\n\n📖 ${badge} — Zayn Storybook\n${hashtags}`;
   } else {
     const rawTitle = story.originalTitle || story.title || "Kids Storybook";
     const hook = story.thumbnailConfig?.en?.hook || story.thumbnailConfig?.en?.headlineTop || "A wonderful story for kids!";
@@ -228,8 +235,26 @@ function buildCaption(story: any, lang: "id" | "en", format: "vertical" | "lands
       ? "#KidsBooks #Storytime #BedtimeStory #Animation #ChildrensBook #KidsAnimation #ZaynStorybook #FacebookWatch #ReadAloud"
       : "#KidsBooks #Storytime #BedtimeStory #Animation #Reels #InstagramReels #FacebookReels #ChildrensBook #KidsAnimation #ZaynStorybook";
 
-    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n\n${bedtimeHook}\n\n${badge}\n\n📖 Zayn Storybook Children's Animated Picture Book Series\n✨ Moral Lesson: ${moral}\n\n${hashtags}`;
+    return `${rawTitle} 📖✨\n\n${hook}${sticker}\n${bedtimeHook}\n\n✨ Moral Lesson: ${moral}\n\n${ctaLine}\n\n📖 ${badge} — Zayn Storybook\n${hashtags}`;
   }
+}
+
+/**
+ * Builds Save / Follow / Comment enabled caption for Facebook Watch compilation uploads.
+ */
+export function buildCompilationCaption(
+  title: string,
+  descPart: string,
+  timestampsPart: string,
+  lang: "id" | "en"
+): string {
+  const isEn = lang === "en";
+  const ctaLine = buildSocialEngagementCta(lang, "compilation");
+  const hashtags = isEn
+    ? "#BedtimeStories #KidsStories #StorybookAnimation #ChildrenBooks #ZaynStorybook #PictureBooks #FacebookWatch #KidsAnimation"
+    : "#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak";
+  const body = [title, descPart, timestampsPart, ctaLine, hashtags].filter((p) => p && p.trim().length > 0);
+  return body.join("\n\n");
 }
 
 /**
@@ -643,13 +668,22 @@ async function findLiveFacebookVideoByTitle(
  * Uploads video to Facebook Page feed using Cloudflare R2 file_url or local multipart form-data.
  * Handles both Normal Videos (16:9 Landscape) and Reels (9:16 Vertical).
  */
+function buildFacebookVideoFirstComment(bookSlug: string, lang: "id" | "en"): string | undefined {
+  const related = resolveRelatedPublishedVideos(bookSlug, lang, 2);
+  if (related.length === 0) return undefined;
+  return lang === "id"
+    ? `🌙 Lanjut nonton dongeng berikutnya di YouTube @zayn.storybook:\n${related.map((r) => `▶️ "${r.title}": ${r.url}`).join("\n")}\n➕ Follow halaman Zayn Storybook biar tidak ketinggalan dongeng baru setiap malam!`
+    : `🌙 Watch next on YouTube @zayn.storybook:\n${related.map((r) => `▶️ "${r.title}": ${r.url}`).join("\n")}\n➕ Follow Zayn Storybook Page so your family never misses bedtime storytime!`;
+}
+
 async function uploadToFacebookPage(
   videoSource: { localPath?: string; publicUrl?: string },
   title: string,
   caption: string,
   config: MetaConfig,
   format: "vertical" | "landscape",
-  thumbnailPath?: string
+  thumbnailPath?: string,
+  firstComment?: string
 ): Promise<{ videoId: string; permalink: string }> {
   const isLandscape = format === "landscape";
   const postTypeLabel = isLandscape ? "NORMAL VIDEO (16:9 LANDSCAPE / WATCH)" : "FACEBOOK REEL (9:16 VERTICAL)";
@@ -774,6 +808,25 @@ async function uploadToFacebookPage(
   const pageVideoUrl = `https://www.facebook.com/${config.facebookPageId}/videos/${videoId}/`;
   let permalink = pageVideoUrl;
 
+  if (firstComment) {
+    try {
+      const cRes = await fetch(`https://graph.facebook.com/v21.0/${videoId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: config.pageAccessToken,
+          message: firstComment,
+        }),
+      });
+      const cData = await cRes.json();
+      if (cData?.id) {
+        console.log(`   💬 Pinned Watch-Next & Follow first comment (${cData.id}).`);
+      }
+    } catch (cErr: any) {
+      console.warn(`   ⚠️ Optional Facebook video first comment skipped: ${cErr.message}`);
+    }
+  }
+
   console.log(`\n🎉 FACEBOOK ${isLandscape ? "NORMAL VIDEO" : "REEL"} LIVE!`);
   console.log(`🔗 Link: ${permalink}`);
 
@@ -813,7 +866,12 @@ async function main() {
     let title = isEn
       ? "Bedtime Stories Marathon for Kids (12 Mins Non-Stop) | Calming Animated Picture Books 🌙✨"
       : "Kumpulan Dongeng Pengantar Tidur Anak 🌙✨";
-    let caption = "Kompilasi dongeng anak bergambar non-stop...";
+    let caption = buildCompilationCaption(
+      title,
+      isEn ? "Non-stop illustrated bedtime stories marathon for kids." : "Kompilasi dongeng anak bergambar non-stop...",
+      "",
+      options.lang
+    );
     if (existsSync(metaPath)) {
       const metaContent = await fs.readFile(metaPath, "utf-8");
       const titleMatch = metaContent.match(/JUDUL:\s*\n([^\n]+)/);
@@ -822,10 +880,7 @@ async function main() {
       const descPart = descMatch ? descMatch[1].trim() : "";
       const timestampsMatch = metaContent.match(/(⏳ TIMESTAMPS[\s\S]+?)(?=\n===|$)/);
       const timestampsPart = timestampsMatch ? timestampsMatch[1].trim() : "";
-      const hashtags = isEn
-        ? "#BedtimeStories #KidsStories #StorybookAnimation #ChildrenBooks #ZaynStorybook #PictureBooks #FacebookWatch #KidsAnimation"
-        : "#DongengAnak #CeritaAnak #BedtimeStory #KompilasiDongeng #ZaynStorybook #CeritaBergambar #FacebookWatch #VideoAnak";
-      caption = `${title}\n\n${descPart}\n\n${timestampsPart}\n\n${hashtags}`;
+      caption = buildCompilationCaption(title, descPart, timestampsPart, options.lang);
     }
 
     const thumbnailCandidates = [
@@ -866,7 +921,8 @@ async function main() {
         caption,
         config,
         "landscape",
-        thumbnailPath
+        thumbnailPath,
+        buildFacebookVideoFirstComment(`kompilasi-${options.compilationTheme}`, options.lang)
       );
 
       console.log(`\n🎉 COMPILATION VIDEO [${options.lang.toUpperCase()}] LIVE ON FACEBOOK WATCH!`);
@@ -1082,7 +1138,8 @@ async function main() {
             caption,
             config,
             options.format as "vertical" | "landscape",
-            thumbnailPath
+            thumbnailPath,
+            buildFacebookVideoFirstComment(options.bookSlug, options.lang as "id" | "en")
           );
 
           if (!story.publications.facebook) story.publications.facebook = {};
@@ -1154,7 +1211,8 @@ async function main() {
       caption,
       config,
       options.format as "vertical" | "landscape",
-      thumbnailPath
+      thumbnailPath,
+      buildFacebookVideoFirstComment(options.bookSlug, options.lang as "id" | "en")
     );
 
     if (!story.publications.facebook) story.publications.facebook = {};
@@ -1204,7 +1262,13 @@ async function main() {
   console.log("\n✨ ALL COMPLETED SUCCESSFULLY! ✨\n");
 }
 
-main().catch((err) => {
-  console.error("\n❌ Fatal error in Meta Uploader:", err);
-  process.exit(1);
-});
+const isDirectRun =
+  Boolean(process.argv[1]) &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error("\n❌ Fatal error in Meta Uploader:", err);
+    process.exit(1);
+  });
+}

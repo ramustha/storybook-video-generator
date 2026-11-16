@@ -550,6 +550,139 @@ async function updateVideoMetadata(
   }
 }
 
+const PLAYLIST_CACHE_PATH = path.join(CONFIG_DIR, "youtube-playlists.json");
+
+function resolvePlaylistTargetTitle(opts: {
+  lang: "id" | "en";
+  format: "landscape" | "vertical";
+  isEduMotion?: boolean;
+  isCompilation?: boolean;
+}): { key: string; title: string; description: string } {
+  if (opts.format === "vertical") {
+    return opts.lang === "en"
+      ? {
+          key: "shorts-en",
+          title: "1-Minute Bedtime Stories (#Shorts) | Zayn Storybook",
+          description: "Quick bilingual animated storybooks and moral lessons for curious kids.",
+        }
+      : {
+          key: "shorts-id",
+          title: "Dongeng Singkat 1 Menit (#Shorts) | Zayn Storybook",
+          description: "Kumpulan cerita pendek animasi anak berbahasa Indonesia penuh pesan moral.",
+        };
+  }
+  if (opts.isEduMotion) {
+    return opts.lang === "en"
+      ? {
+          key: "edu-en",
+          title: "Zayn Edu-Motion: Science & Nature Stories (Full HD)",
+          description: "Full-length animated science & nature adventures for kids and families.",
+        }
+      : {
+          key: "edu-id",
+          title: "Zayn Edu-Motion: Sains & Alam Nusantara (Full HD)",
+          description: "Serial edukasi sains, budaya, dan alam Indonesia full-motion untuk anak.",
+        };
+  }
+  if (opts.isCompilation) {
+    return opts.lang === "en"
+      ? {
+          key: "marathon-en",
+          title: "Bedtime Story Marathons (Non-Stop) | Zayn Storybook",
+          description: "Long non-stop calming bedtime story compilations for peaceful sleep.",
+        }
+      : {
+          key: "marathon-id",
+          title: "Maraton Dongeng Pengantar Tidur Non-Stop | Zayn Storybook",
+          description: "Kumpulan dongeng pengantar tidur durasi panjang untuk menemani anak tidur nyenyak.",
+        };
+  }
+  return opts.lang === "en"
+    ? {
+        key: "bedtime-en",
+        title: "English Bedtime Stories for Kids (Full HD Read-Aloud)",
+        description: "Soothing animated English read-aloud storybooks with moral lessons.",
+      }
+    : {
+        key: "bedtime-id",
+        title: "Dongeng Anak Sebelum Tidur (Full HD) | Zayn Storybook",
+        description: "Dongeng bergambar anak Indonesia yang hangat, santai, dan mendidik sebelum tidur.",
+      };
+}
+
+/**
+ * Best-effort assigns an uploaded YouTube video to a curated watch-session playlist
+ * to increase binge-watching and accelerate 4,000 watch-hour monetization.
+ */
+async function ensureYoutubePlaylistAndAddVideo(
+  youtube: any,
+  opts: {
+    videoId: string;
+    lang: "id" | "en";
+    format: "landscape" | "vertical";
+    isEduMotion?: boolean;
+    isCompilation?: boolean;
+  }
+): Promise<string | undefined> {
+  if (!youtube || !opts.videoId) return undefined;
+  const target = resolvePlaylistTargetTitle(opts);
+  try {
+    let cache: Record<string, string> = {};
+    if (existsSync(PLAYLIST_CACHE_PATH)) {
+      try {
+        cache = JSON.parse(await fs.readFile(PLAYLIST_CACHE_PATH, "utf-8")) || {};
+      } catch {}
+    }
+
+    let playlistId = cache[target.key];
+    if (!playlistId) {
+      const listed = await youtube.playlists.list({
+        part: ["snippet"],
+        mine: true,
+        maxResults: 50,
+      });
+      const existing = (listed.data?.items || []).find(
+        (p: any) => (p.snippet?.title || "").trim().toLowerCase() === target.title.toLowerCase()
+      );
+      if (existing?.id) {
+        playlistId = existing.id;
+      } else {
+        const created = await youtube.playlists.insert({
+          part: ["snippet", "status"],
+          requestBody: {
+            snippet: { title: target.title, description: target.description },
+            status: { privacyStatus: "public" },
+          },
+        });
+        playlistId = created.data?.id;
+        console.log(`📚 Created curated YouTube playlist "${target.title}" (${playlistId})`);
+      }
+      if (playlistId) {
+        cache[target.key] = playlistId;
+        await fs.writeFile(PLAYLIST_CACHE_PATH, JSON.stringify(cache, null, 2));
+      }
+    }
+
+    if (playlistId) {
+      await youtube.playlistItems.insert({
+        part: ["snippet"],
+        requestBody: {
+          snippet: {
+            playlistId,
+            resourceId: { kind: "youtube#video", videoId: opts.videoId },
+          },
+        },
+      });
+      const playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+      console.log(`   📚 Added video ${opts.videoId} to playlist: ${target.title}`);
+      return playlistUrl;
+    }
+  } catch (err: any) {
+    console.warn(`   ⚠️ Playlist assignment skipped (${target.title}): ${err.message}`);
+  }
+  return undefined;
+}
+
 /**
  * Deletes remote video on YouTube before replacement.
  */
@@ -911,6 +1044,12 @@ async function main() {
       if (thumbnailPath) {
         await uploadThumbnail(youtube, videoId, thumbnailPath);
       }
+      await ensureYoutubePlaylistAndAddVideo(youtube, {
+        videoId,
+        lang,
+        format: "landscape",
+        isCompilation: true,
+      });
 
       let pubRecord: Record<string, any> = {};
       if (existsSync(pubRecordPath)) {
@@ -1368,6 +1507,13 @@ async function main() {
             console.warn(`   ⚠️ Cloudflare D1 sync warning: ${d1Err.message}`);
           }
 
+          await ensureYoutubePlaylistAndAddVideo(youtube, {
+            videoId: targetVideoId,
+            lang,
+            format: "landscape",
+            isEduMotion: (manifest as any).pipelineTrack === "edu-motion",
+          });
+
           if (autoCleanup && existsSync(landscapeVideo)) {
             await fs.unlink(landscapeVideo);
             console.log(`   🧹 Auto-cleanup: Removed local 16:9 MP4 (${path.basename(landscapeVideo)}) after verified upload.`);
@@ -1376,7 +1522,22 @@ async function main() {
       }
     }
 
-    // 5. Upload Vertical Shorts (9:16) with Pre-Upload Deduplication Check
+    // 5. Upload Vertical Shorts (9:16) with Pre-Upload Deduplication Check & Landscape Funnel Link
+    const knownLandscapeId =
+      currentLandscapeId ||
+      (manifest as any).publications?.youtube?.[lang]?.landscape?.id ||
+      (manifest.exports as any)?.[lang]?.landscape?.youtubeId;
+    if (knownLandscapeId) {
+      const fullEpisodeUrl = `https://youtu.be/${knownLandscapeId}`;
+      const funnelBanner =
+        lang === "en"
+          ? `▶️ WATCH FULL STORY (16:9 HD): ${fullEpisodeUrl}`
+          : `▶️ TONTON VERSI LENGKAP (16:9 HD): ${fullEpisodeUrl}`;
+      if (!shortsDesc.includes(knownLandscapeId)) {
+        shortsDesc = `${funnelBanner}\n\n${shortsDesc}`;
+      }
+    }
+
     const langDuration = manifest.scenes
       ? manifest.scenes.reduce((acc: number, s: any) => {
           if (lang === "en") {
@@ -1577,6 +1738,12 @@ async function main() {
           title: shortsTitle,
           status: "published",
         };
+        await ensureYoutubePlaylistAndAddVideo(youtube, {
+          videoId: targetShortsId,
+          lang,
+          format: "vertical",
+          isEduMotion: (manifest as any).pipelineTrack === "edu-motion",
+        });
 
         await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
 
