@@ -241,6 +241,82 @@ async function collectLocalStoryFiles(
   return results;
 }
 
+const BUFFER_UPLOAD_LIMIT_BYTES = 25 * 1024 * 1024;
+
+export function isRetryableR2UploadError(err: any): boolean {
+  const code = err?.Code || err?.code || err?.name || "";
+  const status = err?.$metadata?.httpStatusCode;
+  const msg = String(err?.message || "");
+  if (status && status >= 400 && status < 500 && status !== 429 && status !== 408) {
+    return false;
+  }
+  if (status && (status >= 500 || status === 429 || status === 408)) return true;
+  return /internal error|non-retryable streaming|ECONNRESET|ETIMEDOUT|EPIPE|EAI_AGAIN|socket hang up|Timeout|ServiceUnavailable|SlowDown/i.test(
+    `${code} ${msg}`
+  );
+}
+
+/**
+ * Uploads a single file to R2 with fresh Body/stream creation per attempt so transient R2 errors recover safely.
+ */
+export async function uploadFileToR2WithRetry(params: {
+  s3: { send: (cmd: any) => Promise<any> };
+  bucketName: string;
+  key: string;
+  localPath: string;
+  contentType: string;
+  sizeBytes: number;
+  maxAttempts?: number;
+  baseDelayMs?: number;
+}): Promise<void> {
+  const {
+    s3,
+    bucketName,
+    key,
+    localPath,
+    contentType,
+    sizeBytes,
+    maxAttempts = 4,
+    baseDelayMs = 800,
+  } = params;
+
+  const useBuffer = sizeBytes <= BUFFER_UPLOAD_LIMIT_BYTES;
+  const cachedBuffer = useBuffer ? await fs.readFile(localPath) : null;
+
+  let lastError: any;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const body = cachedBuffer ?? createReadStream(localPath);
+    try {
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: key,
+          Body: body,
+          ContentType: contentType,
+          ContentLength: sizeBytes,
+        })
+      );
+      return;
+    } catch (err: any) {
+      if (body && typeof (body as any).destroy === "function") {
+        (body as any).destroy();
+      }
+      lastError = err;
+      if (attempt >= maxAttempts || !isRetryableR2UploadError(err)) {
+        throw err;
+      }
+      const waitMs = baseDelayMs * 2 ** (attempt - 1);
+      console.warn(
+        `   ⚠️ R2 upload retry ${attempt}/${maxAttempts - 1} for ${key} (${err?.message || err}); waiting ${waitMs}ms...`
+      );
+      if (waitMs > 0) {
+        await new Promise((r) => setTimeout(r, waitMs));
+      }
+    }
+  }
+  throw lastError;
+}
+
 /**
  * Pushes a book to R2.
  */
@@ -331,18 +407,15 @@ export async function pushStory(
       return;
     }
 
-    const fileStream = createReadStream(item.localPath);
     const contentType = getContentType(item.localPath);
-
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: r2.bucketName,
-        Key: item.r2Key,
-        Body: fileStream,
-        ContentType: contentType,
-        ContentLength: item.sizeBytes,
-      })
-    );
+    await uploadFileToR2WithRetry({
+      s3,
+      bucketName: r2.bucketName,
+      key: item.r2Key,
+      localPath: item.localPath,
+      contentType,
+      sizeBytes: item.sizeBytes,
+    });
 
     uploadedCount++;
     uploadedBytes += item.sizeBytes;
@@ -525,15 +598,14 @@ export async function pushCompilationBuffer(
     const localPath = path.join(compDir, file);
     const stat = await fs.stat(localPath);
     const r2Key = `stories/${compSlug}/exports/${lang}/${file}`;
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: r2.bucketName,
-        Key: r2Key,
-        Body: createReadStream(localPath),
-        ContentType: getContentType(localPath),
-        ContentLength: stat.size,
-      })
-    );
+    await uploadFileToR2WithRetry({
+      s3,
+      bucketName: r2.bucketName,
+      key: r2Key,
+      localPath,
+      contentType: getContentType(localPath),
+      sizeBytes: stat.size,
+    });
     console.log(`   ✔ Uploaded compilation buffer: ${r2Key} (${formatBytes(stat.size)})`);
   }
 

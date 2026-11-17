@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { buildMonetizationAudit } from "./lib/monetization-audit";
 import { buildSocialEngagementCta, generateSeoMetadata } from "./lib/seo-formatter";
 import {
@@ -10,6 +13,7 @@ import {
 import { buildCaption, buildCompilationCaption } from "./upload-meta";
 import { DEFAULT_LAUNCH_CAPTION } from "./publish-instagram-post";
 import { hasPrimaryPublishFailures } from "./publish-all";
+import { isRetryableR2UploadError, uploadFileToR2WithRetry } from "./manage-story-storage";
 
 function assertHasSaveAndFollow(text: string, label: string): void {
   assert.ok(/save|simpan/i.test(text), `${label} must include Save/Simpan CTA`);
@@ -17,7 +21,7 @@ function assertHasSaveAndFollow(text: string, label: string): void {
   assert.ok(/comment|komentar|share below|tulis di/i.test(text), `${label} must include Comment CTA`);
 }
 
-function runTests(): void {
+async function runTests(): Promise<void> {
   // 1. Monetization gap & Shorts-heavy traffic audit
   const summary = buildMonetizationAudit({
     items: [
@@ -139,7 +143,41 @@ function runTests(): void {
   assert.equal(hasPrimaryPublishFailures([{ platform: "YouTube", lang: "en", error: "invalid_grant" }]), true);
   assert.equal(hasPrimaryPublishFailures([{ platform: "Meta Reels (instagram)", lang: "en", error: "token" }]), true);
 
+  // 6. R2 upload retry recovers from transient InternalError and non-retryable streaming failures
+  assert.equal(isRetryableR2UploadError(new Error("We encountered an internal error. Please try again.")), true);
+  assert.equal(isRetryableR2UploadError({ $metadata: { httpStatusCode: 403 }, message: "AccessDenied" }), false);
+
+  const tmpFile = path.join(os.tmpdir(), `r2-retry-test-${Date.now()}.txt`);
+  fs.writeFileSync(tmpFile, "hello r2 retry", "utf-8");
+  try {
+    let attempts = 0;
+    await uploadFileToR2WithRetry({
+      s3: {
+        send: async () => {
+          attempts++;
+          if (attempts < 3) {
+            throw new Error("We encountered an internal error. Please try again.");
+          }
+          return {};
+        },
+      },
+      bucketName: "test-bucket",
+      key: "stories/test/file.txt",
+      localPath: tmpFile,
+      contentType: "text/plain",
+      sizeBytes: 14,
+      maxAttempts: 4,
+      baseDelayMs: 0,
+    });
+    assert.equal(attempts, 3, "Expected uploadFileToR2WithRetry to succeed on attempt 3");
+  } finally {
+    fs.rmSync(tmpFile, { force: true });
+  }
+
   console.log("✅ All monetization audit, Save/Follow caption & Meta scope audit checks passed!");
 }
 
-runTests();
+runTests().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
