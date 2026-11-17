@@ -40,11 +40,12 @@ on:
           - 'en'
         default: 'auto'
       slot:
-        description: 'Target Slot (auto, morning, evening, motion, all)'
+        description: 'Target Slot (auto, daily, morning, evening, motion, all)'
         required: false
         type: choice
         options:
           - 'auto'
+          - 'daily'
           - 'morning'
           - 'evening'
           - 'motion'
