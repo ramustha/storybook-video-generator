@@ -1,0 +1,27 @@
+scripts/lib/artwork-framing.ts
+  698ac31901cd73e0 329,359,363-365,409
+scripts/prepare-organic-video-plates.ts
+  698ac31901cd73e0 228-232,234
+scripts/render-thumbnail.ts
+  698ac31901cd73e0 281-282,285-294
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "de58a79741f5b04e18109f97e1e4702ebcc2b206",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 24,
+      "total_deletions": 14,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
