@@ -4,6 +4,12 @@ import path from "path";
 import sharp from "sharp";
 import { execSync } from "child_process";
 import { getGeminiApiKey } from "./audit-story-quality";
+import {
+  assessArtworkQuality,
+  classifyAspectOrientation,
+  detectTightArtworkBounds,
+  type ArtworkQualityReport,
+} from "./lib/artwork-framing";
 
 export interface BoundingBox2D {
   text: string;
@@ -23,7 +29,12 @@ export interface PageOcrAnalysis {
  * Extracts high-resolution PNG pages from raw/source-book.pdf.
  * Uses pdftoppm if available (Ubuntu/Linux standard), or Swift PDFKit (macOS).
  */
-export async function extractPdfPages(storyDir: string): Promise<string[]> {
+export async function extractPdfPages(
+  storyDir: string,
+  options: { dpi?: number; force?: boolean } = {}
+): Promise<string[]> {
+  const dpi = options.dpi ?? 150;
+  const force = Boolean(options.force);
   const rawDir = path.join(storyDir, "raw");
   const pagesDir = path.join(rawDir, "pages");
   const pdfPath = path.join(rawDir, "source-book.pdf");
@@ -34,21 +45,28 @@ export async function extractPdfPages(storyDir: string): Promise<string[]> {
     ? readdirSync(pagesDir).filter((f) => f.endsWith(".png")).sort()
     : [];
 
-  if (existing.length > 0) {
+  if (existing.length > 0 && !force) {
     console.log(`✔ Found ${existing.length} existing extracted pages in ${pagesDir}`);
     return existing.map((f) => path.join(pagesDir, f));
   }
 
   if (!existsSync(pdfPath)) {
+    if (existing.length > 0) return existing.map((f) => path.join(pagesDir, f));
     throw new Error(`PDF source not found at ${pdfPath}`);
   }
 
-  console.log(`📄 Extracting PDF pages from ${pdfPath}...`);
+  if (force && existing.length > 0) {
+    for (const f of existing) {
+      await fs.unlink(path.join(pagesDir, f)).catch(() => {});
+    }
+  }
+
+  console.log(`📄 Extracting PDF pages from ${pdfPath} at ${dpi} DPI...`);
 
   // 1. Try pdftoppm (standard on Ubuntu Linux with poppler-utils)
   let extractedWithPdftoppm = false;
   try {
-    execSync(`pdftoppm -png -r 150 "${pdfPath}" "${path.join(pagesDir, "page")}"`, {
+    execSync(`pdftoppm -png -r ${dpi} "${pdfPath}" "${path.join(pagesDir, "page")}"`, {
       stdio: "pipe",
     });
     // Rename page-1.png -> page_01.png format
@@ -64,15 +82,15 @@ export async function extractPdfPages(storyDir: string): Promise<string[]> {
       }
     }
     extractedWithPdftoppm = true;
-    console.log(`✔ Extracted pages using pdftoppm (poppler).`);
+    console.log(`✔ Extracted pages using pdftoppm (poppler, ${dpi} DPI).`);
   } catch {
     extractedWithPdftoppm = false;
   }
 
   // 2. Fallback to Swift PDFKit on macOS
   if (!extractedWithPdftoppm && process.platform === "darwin") {
-    console.log(`⚙️ Extracting pages using macOS Swift PDFKit engine...`);
-    execSync(`swift scripts/render-pdf-pages.swift "${pdfPath}" "${pagesDir}"`, {
+    console.log(`⚙️ Extracting pages using macOS Swift PDFKit engine (${dpi} DPI)...`);
+    execSync(`swift scripts/render-pdf-pages.swift "${pdfPath}" "${pagesDir}" ${dpi}`, {
       stdio: "inherit",
     });
   }
@@ -198,14 +216,21 @@ Analyze this book page:
   throw lastError || new Error("All Gemini Vision candidate models failed.");
 }
 
+export interface AlignedScenePlatesResult {
+  master16x9: Buffer;
+  tightArtwork: Buffer;
+  quality: ArtworkQualityReport;
+}
+
 /**
- * Inpaints text boxes and applies smart centering to create a 1920x1080 16:9 plate.
+ * Inpaints text boxes, tightly strips blank paper/hairline rules/pagination flecks,
+ * assesses image size/orientation quality, and builds both a 1920x1080 master plate and tight native artwork.
  */
-export async function inpaintAndCenterPlate(
+export async function prepareAlignedScenePlates(
   imageBuffer: Buffer,
   analysis: PageOcrAnalysis,
   options: { smartCenter?: boolean } = {}
-): Promise<Buffer> {
+): Promise<AlignedScenePlatesResult> {
   const meta = await sharp(imageBuffer).metadata();
   const W = meta.width || 1920;
   const H = meta.height || 1080;
@@ -236,72 +261,63 @@ export async function inpaintAndCenterPlate(
       .toBuffer();
   }
 
+  // 2. Detect tight artwork bounds (strips blank paper, hairline rules, and corner page numbers)
+  const bounds = await detectTightArtworkBounds(cleanedBuffer, {
+    geminiBox: smartCenter && analysis.is_off_center ? analysis.artwork_box_2d : undefined,
+    excludeIsolatedText: true,
+    paddingRatio: 0.002,
+  });
+
+  const tightArtwork = bounds.wasCropped
+    ? await sharp(cleanedBuffer)
+        .extract({ left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height })
+        .png()
+        .toBuffer()
+    : await sharp(cleanedBuffer).png().toBuffer();
+
+  const quality = assessArtworkQuality({
+    croppedWidth: bounds.width,
+    croppedHeight: bounds.height,
+    rawWidth: bounds.rawWidth,
+    rawHeight: bounds.rawHeight,
+    isFullBleed: bounds.isFullBleed,
+  });
+
+  // 3. Build 1920x1080 16:9 master plate from tight artwork (ambient blur never pulls white paper margins)
   const targetW = 1920;
   const targetH = 1080;
 
-  // 2. Smart Re-Centering: if artwork is off-center or has large empty text margins
-  if (smartCenter && analysis.is_off_center && analysis.artwork_box_2d) {
-    const [artYmin, artXmin, artYmax, artXmax] = analysis.artwork_box_2d;
-    const cropPadX = Math.round(W * 0.03);
-    const cropPadY = Math.round(H * 0.03);
-
-    const cropLeft = Math.max(0, Math.floor((artXmin / 1000) * W) - cropPadX);
-    const cropTop = Math.max(0, Math.floor((artYmin / 1000) * H) - cropPadY);
-    const cropWidth = Math.min(W - cropLeft, Math.ceil(((artXmax - artXmin) / 1000) * W) + cropPadX * 2);
-    const cropHeight = Math.min(H - cropTop, Math.ceil(((artYmax - artYmin) / 1000) * H) + cropPadY * 2);
-
-    if (cropWidth > 100 && cropHeight > 100) {
-      const croppedArtwork = await sharp(cleanedBuffer)
-        .extract({ left: cropLeft, top: cropTop, width: cropWidth, height: cropHeight })
-        .toBuffer();
-
-      // Create 16:9 canvas with dominant background color
-      const canvasBg = await sharp({
-        create: {
-          width: targetW,
-          height: targetH,
-          channels: 4,
-          background: analysis.dominant_bg_hex || "#FFFFFF",
-        },
-      })
-        .png()
-        .toBuffer();
-
-      // Ambient blur backdrop from artwork for cinematic depth
-      const ambientBlur = await sharp(cleanedBuffer)
-        .resize(targetW, targetH, { fit: "cover" })
-        .blur(25)
-        .toBuffer();
-
-      const maxArtH = Math.round(targetH * 0.90);
-      const maxArtW = Math.round(targetW * 0.90);
-
-      const resizedArt = await sharp(croppedArtwork)
-        .resize({ width: maxArtW, height: maxArtH, fit: "inside" })
-        .toBuffer();
-
-      // Composite artwork dead-center on ambient backdrop
-      return sharp(ambientBlur)
-        .composite([{ input: resizedArt, gravity: "center" }])
-        .png()
-        .toBuffer();
-    }
-  }
-
-  // 3. Standard Centered Composition with Ambient Blur
-  const blurredBg = await sharp(cleanedBuffer)
+  const blurredBg = await sharp(tightArtwork)
     .resize(targetW, targetH, { fit: "cover" })
-    .blur(20)
+    .blur(44)
+    .modulate({ brightness: 0.48, saturation: 1.2 })
     .toBuffer();
 
-  const centerArt = await sharp(cleanedBuffer)
-    .resize({ height: targetH, fit: "inside" })
+  const maxArtW = bounds.isFullBleed ? targetW : Math.round(targetW * 0.92);
+  const maxArtH = bounds.isFullBleed ? targetH : Math.round(targetH * 0.94);
+
+  const centerArt = await sharp(tightArtwork)
+    .resize({ width: maxArtW, height: maxArtH, fit: "inside" })
     .toBuffer();
 
-  return sharp(blurredBg)
+  const master16x9 = await sharp(blurredBg)
     .composite([{ input: centerArt, gravity: "center" }])
     .png()
     .toBuffer();
+
+  return { master16x9, tightArtwork, quality };
+}
+
+/**
+ * Inpaints text boxes and applies tight cropping + smart centering to create a 1920x1080 16:9 plate.
+ */
+export async function inpaintAndCenterPlate(
+  imageBuffer: Buffer,
+  analysis: PageOcrAnalysis,
+  options: { smartCenter?: boolean } = {}
+): Promise<Buffer> {
+  const { master16x9 } = await prepareAlignedScenePlates(imageBuffer, analysis, options);
+  return master16x9;
 }
 
 /**
@@ -338,8 +354,12 @@ export async function prepareStoryPlatesHybrid(
   const engine = options.engine || "auto";
   const useGemini = (engine === "gemini" || engine === "auto") && Boolean(apiKey);
 
+  const portraitAssetsDir = path.join(assetsDir, "portrait");
+  await fs.mkdir(portraitAssetsDir, { recursive: true });
+
   // 1. Ensure high-res pages are extracted
-  const pageFiles = await extractPdfPages(storyDir);
+  let currentDpi = 150;
+  let pageFiles = await extractPdfPages(storyDir, { dpi: currentDpi });
 
   // If engine is explicitly apple and on macOS, delegate to Swift
   if (engine === "apple" && process.platform === "darwin") {
@@ -349,100 +369,251 @@ export async function prepareStoryPlatesHybrid(
   }
 
   if (!useGemini) {
-    if (process.platform === "darwin") {
-      console.log("⚠️ No Gemini API key found. Falling back to Apple Vision Swift engine...");
-      execSync(`swift scripts/prepare-plates.swift --book "${slug}"`, { stdio: "inherit" });
-      return;
-    } else {
-      console.log("⚠️ No Gemini API key found on Linux. Using ambient 16:9 plate fallback...");
-    }
+    console.log("⚙️ Running Sharp Tight-Crop + Ambient Plate Pipeline (OCR optional)...");
   } else {
-    console.log("🚀 Executing Primary Engine: Gemini Vision OCR + Smart Re-Centering (Sharp)...");
+    console.log("🚀 Executing Primary Engine: Gemini Vision OCR + Tight-Crop Alignment (Sharp)...");
   }
 
   // Helper to resolve page file for a 1-based page number
-  const getPageFile = (pageNumber: number): string => {
+  let getPageFile = (pageNumber: number): string => {
     const filename = `page_${String(pageNumber).padStart(2, "0")}.png`;
     const target = path.join(rawDir, "pages", filename);
     if (existsSync(target)) return target;
     return pageFiles[Math.min(pageNumber - 1, pageFiles.length - 1)];
   };
 
-  // 2. Process Cover Plate (Preserve 100% Authentic Original Cover)
+  // Auto-upgrade to 300 DPI when PDF source yields small/sparse artwork at 150 DPI
+  let needsHighDpi = false;
+  const pdfPath = path.join(rawDir, "source-book.pdf");
   const coverPageNum = manifest.coverPage || 1;
+  const scenes = manifest.scenes || [];
+  if (existsSync(pdfPath) && pageFiles.length > 0) {
+    const firstScenePageNum =
+      scenes.find((s: any) => s.type !== "cover" && s.type !== "outro")?.sourcePage ||
+      scenes.find((s: any) => s.type !== "cover" && s.type !== "outro")?.pageNumber ||
+      2;
+    const probeFiles = [getPageFile(coverPageNum), getPageFile(firstScenePageNum)].filter(
+      (f, idx, arr) => Boolean(f) && existsSync(f) && arr.indexOf(f) === idx
+    );
+    for (const pf of probeFiles) {
+      const b = await detectTightArtworkBounds(await fs.readFile(pf), {
+        excludeIsolatedText: true,
+        paddingRatio: 0.002,
+      });
+      const q = assessArtworkQuality({
+        croppedWidth: b.width,
+        croppedHeight: b.height,
+        rawWidth: b.rawWidth,
+        rawHeight: b.rawHeight,
+        isFullBleed: b.isFullBleed,
+      });
+      if (q.warnings.includes("LOW_CROPPED_RESOLUTION") || q.warnings.includes("HIGH_UPSCALE_FACTOR")) {
+        needsHighDpi = true;
+        console.log(`⚠️ [${path.basename(pf)}] Small illustration detected at 150 DPI (${q.summary}) — upgrading PDF extraction to 300 DPI...`);
+        break;
+      }
+    }
+    if (needsHighDpi) {
+      currentDpi = 300;
+      pageFiles = await extractPdfPages(storyDir, { dpi: currentDpi, force: true });
+      getPageFile = (pageNumber: number): string => {
+        const filename = `page_${String(pageNumber).padStart(2, "0")}.png`;
+        const target = path.join(rawDir, "pages", filename);
+        if (existsSync(target)) return target;
+        return pageFiles[Math.min(pageNumber - 1, pageFiles.length - 1)];
+      };
+    }
+  }
+
+  // 2. Process Cover Plate (Tight-Crop Artwork from Original Book Cover, Stripping Hairlines/Whitespace)
   const coverPageFile = getPageFile(coverPageNum);
-  console.log(`\n🖼️  [1/3] Processing Cover Plate from ${path.basename(coverPageFile)} (Preserving Original Book Cover)...`);
+  console.log(`\n🖼️  [1/3] Processing Cover Plate from ${path.basename(coverPageFile)} (${currentDpi} DPI)...`);
   const coverRaw = await fs.readFile(coverPageFile);
-  // Keep the cover 100% original without text inpainting (preserves book title lettering & artist styling)
-  const originalCover = await sharp(coverRaw).png().toBuffer();
-  await fs.writeFile(path.join(assetsDir, "cover.png"), originalCover);
-  console.log(`✔ Cover plate saved: assets/cover.png (100% authentic original cover preserved)`);
+  const coverBounds = await detectTightArtworkBounds(coverRaw, {
+    excludeIsolatedText: true,
+    paddingRatio: 0.002,
+  });
+  const coverBuffer = coverBounds.wasCropped
+    ? await sharp(coverRaw)
+        .extract({ left: coverBounds.left, top: coverBounds.top, width: coverBounds.width, height: coverBounds.height })
+        .png()
+        .toBuffer()
+    : await sharp(coverRaw).png().toBuffer();
+
+  const coverQuality = assessArtworkQuality({
+    croppedWidth: coverBounds.width,
+    croppedHeight: coverBounds.height,
+    rawWidth: coverBounds.rawWidth,
+    rawHeight: coverBounds.rawHeight,
+    isFullBleed: coverBounds.isFullBleed,
+  });
+
+  await fs.writeFile(path.join(assetsDir, "cover.png"), coverBuffer);
+  if (coverBounds.wasCropped) {
+    await fs.writeFile(path.join(assetsDir, "cover_raw.png"), await sharp(coverRaw).png().toBuffer());
+  }
+  console.log(
+    `✔ Cover plate saved: assets/cover.png (${coverQuality.croppedWidth}x${coverQuality.croppedHeight}, orientation=${coverQuality.orientation}, ratio=${coverQuality.aspectRatio}${coverQuality.isTooSmall ? ` | ⚠️ ${coverQuality.warnings.join(",")}` : ""})`
+  );
+
+  // Persist accurate cover orientation metadata onto manifest
+  manifest.coverOrientation = coverQuality.orientation;
+  manifest.coverAspectRatio = coverQuality.aspectRatio;
 
   // 3. Process Story Scenes
-  console.log(`\n🎬 [2/3] Processing 16:9 Scene Plates...`);
-  const scenes = manifest.scenes || [];
+  console.log(`\n🎬 [2/3] Processing 16:9 Master + Tight-Cropped Portrait/Native Scene Plates...`);
   let processedCount = 0;
+  const smallScenes: Array<{ sceneId: string; summary: string }> = [];
+  const orientationCounts: Record<string, number> = { portrait: 0, landscape: 0, square: 0 };
 
   for (const scene of scenes) {
-    if (scene.type === "cover" || scene.type === "outro") continue;
+    if (scene.type === "cover" || scene.type === "outro") {
+      if (scene.type === "cover") {
+        scene.visual = {
+          ...(scene.visual || {}),
+          imagePath: "assets/cover.png",
+          orientation: coverQuality.orientation,
+          aspectRatio: coverQuality.aspectRatio,
+          isPortrait: coverQuality.isPortrait,
+          croppedWidth: coverQuality.croppedWidth,
+          croppedHeight: coverQuality.croppedHeight,
+          isTooSmall: coverQuality.isTooSmall,
+          qualityWarnings: coverQuality.warnings,
+        };
+      }
+      continue;
+    }
 
     const sceneId = scene.sceneId || `scene_${String(scene.index).padStart(2, "0")}`;
     const pageNum = scene.sourcePage || scene.pageNumber || scene.index + 1;
     const pageFile = getPageFile(pageNum);
     const outPlatePath = path.join(assetsDir, `${sceneId}.png`);
+    const outPortraitPath = path.join(portraitAssetsDir, `${sceneId}.png`);
 
-    if (existsSync(outPlatePath) && !options.force) {
-      console.log(`⏩ [${sceneId}] Already exists. Skipping.`);
+    if (existsSync(outPlatePath) && existsSync(outPortraitPath) && !(options.force || needsHighDpi)) {
+      const pMeta = await sharp(outPortraitPath).metadata();
+      const rawMeta = existsSync(pageFile) ? await sharp(pageFile).metadata() : pMeta;
+      const cls = classifyAspectOrientation(pMeta.width || 1920, pMeta.height || 1080);
+      const q = assessArtworkQuality({
+        croppedWidth: pMeta.width || 1920,
+        croppedHeight: pMeta.height || 1080,
+        rawWidth: rawMeta.width || pMeta.width || 1920,
+        rawHeight: rawMeta.height || pMeta.height || 1080,
+      });
+      orientationCounts[cls.orientation] = (orientationCounts[cls.orientation] || 0) + 1;
+      if (q.isTooSmall) smallScenes.push({ sceneId, summary: q.summary });
+      scene.visual = {
+        ...(scene.visual || {}),
+        imagePath: `assets/${sceneId}.png`,
+        verticalImagePath: `assets/portrait/${sceneId}.png`,
+        orientation: cls.orientation,
+        aspectRatio: cls.aspectRatio,
+        isPortrait: cls.isPortrait,
+        croppedWidth: pMeta.width,
+        croppedHeight: pMeta.height,
+        isTooSmall: q.isTooSmall,
+        qualityWarnings: q.warnings,
+      };
+      console.log(`⏩ [${sceneId}] Already exists (${cls.orientation}, ratio=${cls.aspectRatio}). Skipping render.`);
       continue;
     }
 
     console.log(`▶️  [${sceneId}] Processing page ${pageNum} (${path.basename(pageFile)})...`);
     const pageRaw = await fs.readFile(pageFile);
-    let analysis: PageOcrAnalysis;
-    try {
-      analysis = await analyzePageWithGemini(pageRaw, apiKey!);
-      if (analysis.is_off_center) {
-        console.log(`   ✨ Smart Re-Centering triggered! Artwork bounds: [${analysis.artwork_box_2d.join(",")}]`);
+    let analysis: PageOcrAnalysis = {
+      textElements: [],
+      artwork_box_2d: [0, 0, 1000, 1000],
+      is_off_center: false,
+      dominant_bg_hex: "#FFFFFF",
+      durationMs: 0,
+    };
+
+    if (useGemini && apiKey) {
+      try {
+        analysis = await analyzePageWithGemini(pageRaw, apiKey);
+        if (analysis.is_off_center) {
+          console.log(`   ✨ Gemini OCR detected off-center art: [${analysis.artwork_box_2d.join(",")}]`);
+        }
+      } catch (err: any) {
+        console.warn(`⚠️ Scene [${sceneId}] OCR analysis failed: ${err.message}. Using tight-crop ambient plate.`);
       }
-    } catch (err: any) {
-      console.warn(`⚠️ Scene [${sceneId}] OCR analysis failed: ${err.message}. Using fallback ambient plate.`);
-      analysis = {
-        textElements: [],
-        artwork_box_2d: [0, 0, 1000, 1000],
-        is_off_center: false,
-        dominant_bg_hex: "#FFFFFF",
-        durationMs: 0,
-      };
     }
 
-    const finalPlate = await inpaintAndCenterPlate(pageRaw, analysis, {
+    const { master16x9, tightArtwork, quality } = await prepareAlignedScenePlates(pageRaw, analysis, {
       smartCenter: options.smartCenter !== false,
     });
-    await fs.writeFile(outPlatePath, finalPlate);
+    await fs.writeFile(outPlatePath, master16x9);
+    await fs.writeFile(outPortraitPath, tightArtwork);
     processedCount++;
-    console.log(`   ✔ [${sceneId}] 16:9 plate created: ${outPlatePath} (${analysis.textElements.length} text inpainted)`);
+
+    orientationCounts[quality.orientation] = (orientationCounts[quality.orientation] || 0) + 1;
+    if (quality.isTooSmall) {
+      smallScenes.push({ sceneId, summary: quality.summary });
+      console.warn(`   ⚠️ [${sceneId}] SMALL ARTWORK WARNING: ${quality.summary}`);
+    }
+
+    scene.visual = {
+      ...(scene.visual || {}),
+      imagePath: `assets/${sceneId}.png`,
+      verticalImagePath: `assets/portrait/${sceneId}.png`,
+      orientation: quality.orientation,
+      aspectRatio: quality.aspectRatio,
+      isPortrait: quality.isPortrait,
+      croppedWidth: quality.croppedWidth,
+      croppedHeight: quality.croppedHeight,
+      isTooSmall: quality.isTooSmall,
+      qualityWarnings: quality.warnings,
+    };
+
+    console.log(
+      `   ✔ [${sceneId}] Plates ready (${quality.croppedWidth}x${quality.croppedHeight}, ${quality.orientation} ratio=${quality.aspectRatio}, ${analysis.textElements.length} text inpainted)`
+    );
   }
 
-  // 4. Extract Protagonist Avatar
+  // 4. Extract Protagonist Avatar from Tight-Cropped Illustration (not empty PDF margins)
   console.log(`\n🧑 [3/3] Extracting Protagonist Avatar...`);
   const avatarPageNum = manifest.avatarPage || 2;
   const avatarPageFile = getPageFile(avatarPageNum);
   const avatarRaw = await fs.readFile(avatarPageFile);
-  const avatarMeta = await sharp(avatarRaw).metadata();
-  const aW = avatarMeta.width || 1000;
-  const aH = avatarMeta.height || 1000;
-  const aCropSize = Math.min(aW, aH, 600);
+  const avatarBounds = await detectTightArtworkBounds(avatarRaw, {
+    excludeIsolatedText: true,
+    paddingRatio: 0.002,
+  });
+  const avatarCropped = avatarBounds.wasCropped
+    ? await sharp(avatarRaw)
+        .extract({ left: avatarBounds.left, top: avatarBounds.top, width: avatarBounds.width, height: avatarBounds.height })
+        .toBuffer()
+    : avatarRaw;
 
-  const avatar = await sharp(avatarRaw)
+  const avatar = await sharp(avatarCropped)
     .resize(600, 600, { fit: "cover" })
     .png()
     .toBuffer();
   await fs.writeFile(path.join(assetsDir, "protagonist_avatar.png"), avatar);
   console.log(`✔ Protagonist avatar saved: assets/protagonist_avatar.png`);
 
+  // Persist orientation & quality metadata into story.json
+  manifest.artworkQuality = {
+    sourceDpi: currentDpi,
+    coverOrientation: coverQuality.orientation,
+    coverAspectRatio: coverQuality.aspectRatio,
+    coverIsTooSmall: coverQuality.isTooSmall,
+    coverWarnings: coverQuality.warnings,
+    orientationBreakdown: orientationCounts,
+    smallScenesCount: smallScenes.length,
+    smallScenes,
+    analyzedAt: new Date().toISOString(),
+  };
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
+
   console.log(`\n=======================================================`);
   console.log(`🎉 HYBRID PLATE PREPARATION COMPLETE!`);
-  console.log(`   Story: ${slug}`);
+  console.log(`   Story       : ${slug} (${currentDpi} DPI)`);
+  console.log(`   Cover Format: ${coverQuality.orientation} (ratio ${coverQuality.aspectRatio})`);
+  console.log(`   Orientations: P=${orientationCounts.portrait} | L=${orientationCounts.landscape} | S=${orientationCounts.square}`);
+  if (smallScenes.length > 0 || coverQuality.isTooSmall) {
+    console.warn(`   ⚠️ Too-Small Illustrations Detected: cover=${coverQuality.isTooSmall}, scenes=${smallScenes.length}`);
+  }
   console.log(`   Total Plates Created: ${processedCount + 1}`);
   console.log(`=======================================================\n`);
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { ProceduralIllustration } from "./ProceduralIllustration";
+import { computeAlignedVideoFrame } from "./artworkLayout";
 
 interface CoverSceneProps {
   scene: any;
@@ -52,28 +53,26 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
       ? scene.visual.imagePath
       : staticFile(scene.visual.imagePath);
 
-  // Support both portrait (aspect ratio < 1.0) and landscape (aspect ratio > 1.0) picture books
+  // Support portrait, square, and landscape picture books aligned dynamically to actual cover aspect ratio
   const isCoverPortrait =
     book.coverOrientation === "portrait" ||
     scene.visual?.isPortrait === true ||
-    (typeof book.coverAspectRatio === "number" && book.coverAspectRatio < 1.0);
+    (typeof book.coverAspectRatio === "number" && book.coverAspectRatio < 0.92);
 
-  // Scaled to fit inside the Universal 9:16 Safe Zone (Y: 170px -> 1480px) without touching top/bottom platform UI
-  const bookWidth = isCoverPortrait
-    ? isVertical
-      ? 680
-      : 540
-    : isVertical
-      ? 920
-      : 1120;
+  const coverFrame = computeAlignedVideoFrame({
+    imageWidth: scene.visual?.croppedWidth,
+    imageHeight: scene.visual?.croppedHeight,
+    imageAspectRatio:
+      typeof book.coverAspectRatio === "number"
+        ? book.coverAspectRatio
+        : scene.visual?.aspectRatio,
+    isVertical,
+    safeMaxWidth: isCoverPortrait ? (isVertical ? 760 : 580) : isVertical ? 940 : 1140,
+    safeMaxHeight: isCoverPortrait ? (isVertical ? 920 : 720) : isVertical ? 680 : 660,
+  });
 
-  const bookHeight = isCoverPortrait
-    ? isVertical
-      ? 920
-      : 720
-    : isVertical
-      ? 518
-      : 630;
+  const bookWidth = coverFrame.width;
+  const bookHeight = coverFrame.height;
 
   const isEn = book.language?.startsWith("en");
 
@@ -170,7 +169,29 @@ export const CoverScene: React.FC<CoverSceneProps> = ({ scene, book, isVertical 
             backgroundColor: "#0B0F19",
           }}
         >
-          <Img src={coverImgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {coverFrame.useContainBackdrop && (
+            <Img
+              src={coverImgSrc}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: "scale(1.16)",
+                filter: "blur(26px) brightness(0.65) saturate(1.25)",
+              }}
+            />
+          )}
+          <Img
+            src={coverImgSrc}
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              objectFit: coverFrame.useContainBackdrop ? "contain" : "cover",
+            }}
+          />
 
           {/* Spine crease shadow on left */}
           <div

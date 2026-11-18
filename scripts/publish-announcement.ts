@@ -589,6 +589,7 @@ const DEFAULT_SOCIAL_CLIENTS: SocialPlatformClients = {
 export async function syncAnnouncementPlatforms(params: {
   label: string;
   imagePaths: string[];
+  instagramImagePaths?: string[];
   facebookCaption: string;
   facebookFirstComment?: string;
   facebookFallbackCaption?: string;
@@ -612,6 +613,7 @@ export async function syncAnnouncementPlatforms(params: {
   const {
     label,
     imagePaths,
+    instagramImagePaths,
     facebookCaption,
     facebookFirstComment,
     facebookFallbackCaption,
@@ -623,6 +625,7 @@ export async function syncAnnouncementPlatforms(params: {
     dryRun = false,
     clients = DEFAULT_SOCIAL_CLIENTS,
   } = params;
+  const igImages = instagramImagePaths && instagramImagePaths.length > 0 ? instagramImagePaths : imagePaths;
 
   const errors: string[] = [];
   let fbResult = existing.facebook;
@@ -710,9 +713,9 @@ export async function syncAnnouncementPlatforms(params: {
     try {
       console.log(`\n📸 [2/3] Publishing ${label} to Instagram Feed...`);
       const igRes =
-        imagePaths.length > 1
-          ? await clients.publishInstagramCarousel({ imagePaths, caption: instagramCaption, dryRun })
-          : await clients.publishInstagramFeedPhoto({ imagePath: imagePaths[0], caption: instagramCaption, dryRun });
+        igImages.length > 1
+          ? await clients.publishInstagramCarousel({ imagePaths: igImages, caption: instagramCaption, dryRun })
+          : await clients.publishInstagramFeedPhoto({ imagePath: igImages[0], caption: instagramCaption, dryRun });
       if (!dryRun && igRes.success) {
         igResult = {
           id: igRes.mediaId || (igRes as any).id,
@@ -738,11 +741,11 @@ export async function syncAnnouncementPlatforms(params: {
     try {
       console.log(`\n🧵 [3/3] Publishing ${label} to Meta Threads...`);
       const thRes =
-        imagePaths.length > 1
-          ? await clients.publishThreadsCarousel({ imagePaths, text: threadsText, dryRun })
+        igImages.length > 1
+          ? await clients.publishThreadsCarousel({ imagePaths: igImages, text: threadsText, dryRun })
           : threadsLinkUrl
             ? await clients.publishThreadsLinkPost({ text: threadsText, linkUrl: threadsLinkUrl, dryRun })
-            : await clients.publishThreadsPhotoPost({ imagePath: imagePaths[0], text: threadsText, dryRun });
+            : await clients.publishThreadsPhotoPost({ imagePath: igImages[0], text: threadsText, dryRun });
       if (!dryRun && thRes.success) {
         thResult = {
           id: thRes.postId,
@@ -1048,8 +1051,14 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
  * Resolves a fresh visual still for Wave 2 (Midday) & Wave 3 (Bedtime) so post-publish posts
  * avoid repeating Wave 1's portrait thumbnail verbatim.
  */
-function resolveWavePhoto(storyDir: string, lang: "id" | "en", wave: 2 | 3): string {
+function resolveWavePhoto(
+  storyDir: string,
+  lang: "id" | "en",
+  wave: 2 | 3,
+  platform: "facebook" | "instagram" = "facebook"
+): string {
   const assetsDir = path.join(storyDir, "assets");
+  const portraitAssetsDir = path.join(assetsDir, "portrait");
   let sceneImages: string[] = [];
   if (existsSync(assetsDir)) {
     sceneImages = readdirSync(assetsDir)
@@ -1057,13 +1066,48 @@ function resolveWavePhoto(storyDir: string, lang: "id" | "en", wave: 2 | 3): str
       .sort()
       .map((f) => path.join(assetsDir, f));
   }
+  let portraitSceneImages: string[] = [];
+  if (existsSync(portraitAssetsDir)) {
+    portraitSceneImages = readdirSync(portraitAssetsDir)
+      .filter((f) => /^(scene|page)[_-]?\d+\.(png|jpg|jpeg|webp)$/i.test(f))
+      .sort()
+      .map((f) => path.join(portraitAssetsDir, f));
+  }
 
   const preferredScene =
     wave === 2
       ? sceneImages[1] || sceneImages[0]
       : sceneImages[Math.min(2, Math.max(0, sceneImages.length - 1))] || sceneImages[0];
+  const preferredPortraitScene =
+    wave === 2
+      ? portraitSceneImages[1] || portraitSceneImages[0]
+      : portraitSceneImages[Math.min(2, Math.max(0, portraitSceneImages.length - 1))] || portraitSceneImages[0];
 
-  const candidates =
+  if (platform === "instagram") {
+    const igCandidates =
+      wave === 2
+        ? [
+            path.join(storyDir, "exports", lang, "thumbnail-portrait.png"),
+            path.join(storyDir, "exports", lang, "thumbnail-vertical.png"),
+            preferredPortraitScene,
+            path.join(storyDir, "exports", lang, "thumbnail-popular.png"),
+            path.join(storyDir, "assets", "cover.png"),
+          ]
+        : [
+            path.join(storyDir, "exports", lang, "thumbnail-bedtime-portrait.png"),
+            path.join(storyDir, "exports", lang, "thumbnail-portrait.png"),
+            path.join(storyDir, "exports", lang, "thumbnail-vertical.png"),
+            preferredPortraitScene,
+            path.join(storyDir, "exports", lang, "thumbnail-bedtime.png"),
+            path.join(storyDir, "assets", "cover.png"),
+          ];
+    for (const p of igCandidates) {
+      if (p && existsSync(p)) return p;
+    }
+    return resolveBestPhoto(storyDir, lang);
+  }
+
+  const fbCandidates =
     wave === 2
       ? [
           path.join(storyDir, "exports", lang, "thumbnail-popular.png"),
@@ -1075,12 +1119,13 @@ function resolveWavePhoto(storyDir: string, lang: "id" | "en", wave: 2 | 3): str
       : [
           path.join(storyDir, "exports", lang, "thumbnail-bedtime.png"),
           preferredScene,
+          path.join(storyDir, "exports", lang, "thumbnail-bedtime-portrait.png"),
           path.join(storyDir, "exports", lang, "thumbnail-popular.png"),
           path.join(storyDir, "exports", lang, "thumbnail.png"),
           path.join(storyDir, "assets", "cover.png"),
         ];
 
-  for (const p of candidates) {
+  for (const p of fbCandidates) {
     if (p && existsSync(p)) return p;
   }
   return resolveBestPhoto(storyDir, lang);
@@ -1434,7 +1479,8 @@ export async function publishPostPublishWaveAnnouncement(
 
   const { youtubeUrl, ytThumbnailUrl } = await resolveLiveYoutubeInfo(story, targetBook, targetLang);
   const related = resolveRelatedPublishedVideos(targetBook, targetLang, 2);
-  const wavePhoto = resolveWavePhoto(storyDir, targetLang, wave);
+  const wavePhoto = resolveWavePhoto(storyDir, targetLang, wave, "facebook");
+  const igWavePhoto = resolveWavePhoto(storyDir, targetLang, wave, "instagram");
   const copy = generatePostPublishWaveCopy({
     wave,
     bookSlug: targetBook,
@@ -1448,7 +1494,7 @@ export async function publishPostPublishWaveAnnouncement(
     related,
   });
 
-  console.log(`🖼️ Selected Visual   : ${path.basename(wavePhoto)}`);
+  console.log(`🖼️ Selected Visuals  : FB=${path.basename(wavePhoto)} | IG=${path.basename(igWavePhoto)}`);
   console.log(`▶️ YouTube Link      : ${youtubeUrl || "(Not yet indexed — referencing channel handle)"}`);
   if (related.length > 0) {
     console.log(`📚 Watch Next        : ${related.map((r) => r.title).join(" | ")}`);
@@ -1457,6 +1503,7 @@ export async function publishPostPublishWaveAnnouncement(
   const synced = await syncAnnouncementPlatforms({
     label: `Wave ${wave}`,
     imagePaths: [wavePhoto],
+    instagramImagePaths: [igWavePhoto],
     facebookCaption: copy.facebookCaption,
     facebookFirstComment: copy.facebookFirstComment,
     facebookFallbackCaption: copy.facebookFallbackCaption,

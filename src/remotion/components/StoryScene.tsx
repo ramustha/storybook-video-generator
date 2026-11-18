@@ -3,6 +3,7 @@ import { Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "r
 import { AtmosphereOverlay, WeatherType } from "./AtmosphereOverlay";
 import { KineticSubtitles, WordTiming } from "./KineticSubtitles";
 import { ProceduralIllustration } from "./ProceduralIllustration";
+import { computeAlignedVideoFrame } from "./artworkLayout";
 
 interface StorySceneProps {
   scene: any;
@@ -136,7 +137,32 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
     }
   }
 
-  const imgSrc = staticFile(scene.visual.imagePath);
+  const activeImagePath =
+    isVertical && scene.visual?.verticalImagePath
+      ? scene.visual.verticalImagePath
+      : scene.visual.imagePath;
+  const imgSrc = staticFile(activeImagePath);
+  const backdropImgSrc = staticFile(scene.visual.imagePath);
+
+  const alignedFrame = computeAlignedVideoFrame({
+    imageWidth: scene.visual?.croppedWidth,
+    imageHeight: scene.visual?.croppedHeight,
+    imageAspectRatio: scene.visual?.aspectRatio,
+    isVertical,
+    safeMaxWidth: isVertical ? 984 : 1920,
+    safeMaxHeight: isVertical ? 730 : 1080,
+  });
+
+  // Dynamically anchor portrait/square frames cleanly between the top story badge and lower Shorts subtitles
+  const verticalTopPx =
+    alignedFrame.height > 565
+      ? Math.max(335, Math.round(350 - (alignedFrame.height - 554) * 0.08))
+      : 350;
+  const verticalSubtitleTopPx =
+    alignedFrame.height > 565
+      ? Math.min(1115, verticalTopPx + alignedFrame.height + 36)
+      : 945;
+
   const bgScale = 1.25 + cameraBreath * 2;
 
   return (
@@ -207,29 +233,44 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
             {book.title} • Adegan {scene.index}
           </div>
 
-          {/* Layer 4: Floating Uncropped 16:9 Centerpiece Illustration (Y: 350px -> 904px, forming a cohesive unit with subtitles at Y: 945px) */}
+          {/* Layer 4: Aspect-Aligned Centerpiece Illustration (dynamically adapts to portrait, square, or 16:9 artwork) */}
           <div
             style={{
               position: "absolute",
-              top: "350px",
+              top: `${verticalTopPx}px`,
               left: "50%",
               transform: `translateX(-50%) scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-              width: "984px",
-              height: "554px", // Exact 16:9 ratio
+              width: `${alignedFrame.width}px`,
+              height: `${alignedFrame.height}px`,
               borderRadius: "20px",
               overflow: "hidden",
               border: "3px solid rgba(251, 191, 36, 0.5)",
               boxShadow: "0 30px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(251, 191, 36, 0.15)",
               zIndex: 20,
-              backgroundColor: "#0B0F19",
+              backgroundColor: "#0B0F1A",
             }}
           >
+            {alignedFrame.useContainBackdrop && (
+              <Img
+                src={backdropImgSrc}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "scale(1.15)",
+                  filter: "blur(24px) brightness(0.6) saturate(1.2)",
+                }}
+              />
+            )}
             <Img
               src={imgSrc}
               style={{
+                position: "relative",
                 width: "100%",
                 height: "100%",
-                objectFit: "contain",
+                objectFit: alignedFrame.useContainBackdrop ? "contain" : "cover",
               }}
             />
 
@@ -253,11 +294,15 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
           />
 
           {/* Layer 6: Subtitles safely in the lower section without occluding artwork */}
-          <KineticSubtitles words={words} isVertical={isVertical} />
+          <KineticSubtitles
+            words={words}
+            isVertical={isVertical}
+            verticalTop={`${verticalSubtitleTopPx}px`}
+          />
         </>
       ) : (
         <>
-          {/* Landscape 16:9 Full-Bleed Mode */}
+          {/* Landscape 16:9 Full-Bleed Mode (with blurred backdrop when raw portrait art isn't pre-baked) */}
           <div
             style={{
               position: "absolute",
@@ -265,14 +310,30 @@ export const StoryScene: React.FC<StorySceneProps> = ({ scene, book, isVertical,
               transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
               transition: "transform 0.05s linear",
               transformOrigin: "center center",
+              backgroundColor: "#0B0F1A",
             }}
           >
+            {alignedFrame.useContainBackdrop && !scene.visual?.verticalImagePath && (
+              <Img
+                src={backdropImgSrc}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "scale(1.15)",
+                  filter: "blur(30px) brightness(0.55) saturate(1.25)",
+                }}
+              />
+            )}
             <Img
               src={imgSrc}
               style={{
+                position: "relative",
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: alignedFrame.useContainBackdrop && !scene.visual?.verticalImagePath ? "contain" : "cover",
               }}
             />
           </div>

@@ -10,7 +10,8 @@ guard args.count >= 3, let doc = PDFDocument(url: URL(fileURLWithPath: args[1]))
 }
 let outDir = args[2]
 try? FileManager.default.createDirectory(atPath: outDir, withIntermediateDirectories: true)
-let scale: CGFloat = 150.0 / 72.0
+let requestedDpi: CGFloat = CommandLine.arguments.count > 3 ? (CGFloat(Double(CommandLine.arguments[3]) ?? 150.0)) : 150.0
+let scale: CGFloat = requestedDpi / 72.0
 
 for i in 0..<doc.pageCount {
     guard let page = doc.page(at: i) else { continue }
