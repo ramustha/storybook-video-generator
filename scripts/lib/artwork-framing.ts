@@ -326,7 +326,7 @@ export async function detectTightArtworkBounds(
     rowActive[y] = nonBg >= Math.max(2, Math.round(scanW * 0.005));
   }
 
-  const maxVerticalGap = Math.max(2, Math.round(h * 0.015));
+  const maxVerticalGap = Math.max(1, Math.round(h * 0.005));
   const vBands = segmentActiveSpans(rowActive, rowInk, rowChroma, maxVerticalGap);
 
   let strippedHairlines = 0;
@@ -356,13 +356,13 @@ export async function detectTightArtworkBounds(
       return false;
     }
 
-    // In color-illustrated books, strip isolated monochrome title/caption typography separated from colorful art
+    // In color-illustrated books, strip isolated monochrome title/paragraph typography separated from colorful art
     if (
       excludeText &&
       maxBandChroma >= 0.05 &&
-      band.size <= Math.round(h * 0.14) &&
-      band.meanChroma < 0.018 &&
-      band.meanInk < 0.25
+      band.size <= Math.round(h * 0.38) &&
+      band.meanChroma < 0.025 &&
+      band.meanInk < 0.38
     ) {
       strippedTextBands++;
       return false;
@@ -406,7 +406,7 @@ export async function detectTightArtworkBounds(
     colActive[x] = nonBg >= Math.max(2, Math.round(chosenH * 0.008));
   }
 
-  const maxHorizontalGap = Math.max(2, Math.round(w * 0.015));
+  const maxHorizontalGap = Math.max(1, Math.round(w * 0.006));
   const hBands = segmentActiveSpans(colActive, colInk, colChroma, maxHorizontalGap);
   const hairlineMaxW = Math.max(4, Math.round(w * 0.015));
 
