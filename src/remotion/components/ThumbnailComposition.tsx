@@ -1,6 +1,7 @@
 import React from "react";
 import { Img, staticFile, useVideoConfig } from "remotion";
 import { ProceduralIllustration } from "./ProceduralIllustration";
+import { computeThumbnailHeroFrame } from "./artworkLayout";
 
 export interface ThumbnailConfig {
   headlineTop?: string;
@@ -18,6 +19,8 @@ export interface ThumbnailProps {
   book: {
     title: string;
     originalTitle?: string;
+    coverOrientation?: "portrait" | "landscape" | "square";
+    coverAspectRatio?: number;
     scenes?: any[];
     source?: {
       publisher?: string;
@@ -41,6 +44,9 @@ export interface ThumbnailProps {
   orientation?: "landscape" | "vertical" | "portrait";
   heroImagePath?: string;
   backdropImagePath?: string;
+  heroWidth?: number;
+  heroHeight?: number;
+  heroAspectRatio?: number;
   customHeadline?: string;
   customHook?: string;
 }
@@ -80,6 +86,313 @@ function splitHeadline(
   return [words.slice(0, mid).join(" "), `${words.slice(mid).join(" ")}${suffix}`];
 }
 
+function scaleFontByLength(baseSize: number, text: string, softLimit: number, minSize: number): number {
+  const len = text.trim().length;
+  if (len <= softLimit) return baseSize;
+  const ratio = softLimit / len;
+  return Math.max(minSize, Math.round(baseSize * (0.45 + 0.55 * ratio)));
+}
+
+interface HeroCardProps {
+  heroSrc: string | null;
+  backdropSrc: string | null;
+  heroWidth?: number;
+  heroHeight?: number;
+  heroAspectRatio?: number;
+  layout: "landscape" | "portrait" | "vertical";
+  borderColor: string;
+  glowColor: string;
+  rotationDeg: number;
+  stickerText?: string;
+  ribbonText?: string;
+  book: ThumbnailProps["book"];
+}
+
+const ThumbnailHeroCard: React.FC<HeroCardProps> = ({
+  heroSrc,
+  backdropSrc,
+  heroWidth,
+  heroHeight,
+  heroAspectRatio,
+  layout,
+  borderColor,
+  glowColor,
+  rotationDeg,
+  ribbonText,
+  book,
+}) => {
+  const frame = computeThumbnailHeroFrame({
+    imageWidth: heroWidth,
+    imageHeight: heroHeight,
+    imageAspectRatio: heroAspectRatio,
+    layout,
+  });
+
+  const blurLayerSrc = heroSrc || backdropSrc;
+  // Pattern T1: Wide panoramic strips (like Bheema / Sringeri 3.5:1) span full edge-to-edge width cleanly
+  // with vertical fade-into-canvas gradients instead of awkward thick borders & matte bars.
+  const isPanoramicEdgeBleed = Boolean(heroSrc && frame.aspectRatio > 2.1 && layout !== "landscape");
+
+  if (isPanoramicEdgeBleed && heroSrc) {
+    const bleedH = Math.max(260, Math.min(layout === "vertical" ? 480 : 400, Math.round(1080 / Math.min(4.2, frame.aspectRatio))));
+    return (
+      <div
+        style={{
+          width: 1080,
+          height: bleedH,
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#070B14",
+          flexShrink: 0,
+        }}
+      >
+        {blurLayerSrc && (
+          <Img
+            src={blurLayerSrc}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transform: "scale(1.12)",
+              filter: "blur(32px) brightness(0.45) saturate(1.2)",
+            }}
+          />
+        )}
+        <Img
+          src={heroSrc}
+          style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to bottom, #070B14 0%, rgba(7,11,20,0) 16%, rgba(7,11,20,0) 84%, #070B14 100%)",
+            pointerEvents: "none",
+          }}
+        />
+        {ribbonText && (
+          <div
+            style={{
+              position: "absolute",
+              top: 22,
+              right: 28,
+              background: "linear-gradient(135deg, #F59E0B, #B45309)",
+              color: "#FFF",
+              fontWeight: 800,
+              fontSize: 16,
+              letterSpacing: "0.06em",
+              padding: "7px 16px",
+              borderRadius: 10,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+              border: "1px solid rgba(255, 255, 255, 0.4)",
+              textTransform: "uppercase",
+            }}
+          >
+            {ribbonText}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const radius = layout === "landscape" ? 30 : layout === "vertical" ? 28 : 26;
+  const borderWidth = layout === "landscape" ? 5 : 4;
+  const effectiveRotation = layout === "landscape" ? rotationDeg * 0.6 : 0;
+
+  return (
+    <div
+      style={{
+        width: frame.width,
+        height: frame.height,
+        position: "relative",
+        borderRadius: radius,
+        overflow: "hidden",
+        border: `${borderWidth}px solid ${borderColor}`,
+        boxShadow: `0 24px 64px rgba(0, 0, 0, 0.92), 0 0 48px ${glowColor}`,
+        transform: `rotate(${effectiveRotation}deg)`,
+        backgroundColor: "#070B14",
+        flexShrink: 0,
+      }}
+    >
+      {heroSrc ? (
+        <>
+          {frame.useContainBackdrop && blurLayerSrc && (
+            <Img
+              src={blurLayerSrc}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: "scale(1.16)",
+                filter: "blur(30px) brightness(0.42) saturate(1.2)",
+              }}
+            />
+          )}
+          <Img
+            src={heroSrc}
+            style={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              objectFit: frame.useContainBackdrop ? "contain" : "cover",
+            }}
+          />
+        </>
+      ) : (
+        <ProceduralIllustration
+          scene={{ index: 0, type: "cover" }}
+          book={book}
+          isVertical={layout === "vertical"}
+          isCover={true}
+          showTitle={false}
+        />
+      )}
+
+      {ribbonText && (
+        <div
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            background: "linear-gradient(135deg, #F59E0B, #B45309)",
+            color: "#FFF",
+            fontWeight: 800,
+            fontSize: layout === "landscape" ? 18 : 16,
+            letterSpacing: "0.06em",
+            padding: "7px 16px",
+            borderRadius: 10,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+            border: "1px solid rgba(255, 255, 255, 0.4)",
+            textTransform: "uppercase",
+          }}
+        >
+          {ribbonText}
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface HookBannerProps {
+  text: string;
+  emoji: string;
+  isBedtime: boolean;
+  fontSize: number;
+  maxWidth: number;
+}
+
+const ThumbnailHookBanner: React.FC<HookBannerProps> = ({
+  text,
+  emoji,
+  isBedtime,
+  fontSize,
+  maxWidth,
+}) => (
+  <div
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 14,
+      padding: isBedtime ? "14px 32px" : "15px 34px",
+      borderRadius: 20,
+      background: isBedtime
+        ? "rgba(15, 23, 42, 0.94)"
+        : "linear-gradient(135deg, #E11D48 0%, #9F1239 100%)",
+      border: isBedtime
+        ? "2.5px solid rgba(251, 191, 36, 0.8)"
+        : "3px solid rgba(255, 255, 255, 0.9)",
+      boxShadow: isBedtime
+        ? "0 12px 28px rgba(0,0,0,0.72)"
+        : "0 10px 0 #4C0519, 0 20px 38px rgba(225, 29, 72, 0.45)",
+      maxWidth,
+      boxSizing: "border-box",
+    }}
+  >
+    <span style={{ fontSize: Math.round(fontSize * 1.08), flexShrink: 0 }}>{emoji}</span>
+    <span
+      style={{
+        color: isBedtime ? "#FEF08A" : "#FFFFFF",
+        fontSize,
+        fontWeight: 900,
+        lineHeight: 1.16,
+        letterSpacing: isBedtime ? "0.01em" : "0.02em",
+        textTransform: isBedtime ? "none" : "uppercase",
+        textShadow: isBedtime ? "none" : "0 3px 8px rgba(0, 0, 0, 0.75)",
+      }}
+    >
+      {text}
+    </span>
+  </div>
+);
+
+interface HeadlineProps {
+  top: string;
+  bottom: string;
+  topSize: number;
+  bottomSize: number;
+  maxWidth: number;
+  align?: "center" | "left";
+}
+
+const ThumbnailHeadline: React.FC<HeadlineProps> = ({
+  top,
+  bottom,
+  topSize,
+  bottomSize,
+  maxWidth,
+  align = "center",
+}) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: align === "left" ? "flex-start" : "center",
+      textAlign: align,
+      maxWidth,
+      gap: 2,
+      filter: "drop-shadow(0 10px 22px rgba(0, 0, 0, 0.95))",
+    }}
+  >
+    <div
+      style={{
+        fontSize: topSize,
+        fontWeight: 900,
+        lineHeight: 1.0,
+        color: "#FFFFFF",
+        WebkitTextStroke: "2px #070B14",
+        textShadow: "0 4px 0 #070B14, 0 8px 18px rgba(0, 0, 0, 0.9)",
+        letterSpacing: "-0.015em",
+      }}
+    >
+      {top}
+    </div>
+    <div
+      style={{
+        fontSize: bottomSize,
+        fontWeight: 900,
+        lineHeight: 1.0,
+        color: "#FDE047",
+        WebkitTextStroke: "2.5px #070B14",
+        textShadow: "0 5px 0 #78350F, 0 10px 22px rgba(0, 0, 0, 0.95)",
+        letterSpacing: "-0.015em",
+      }}
+    >
+      {bottom}
+    </div>
+  </div>
+);
+
 export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   book,
   lang = "id",
@@ -87,6 +400,9 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   orientation,
   heroImagePath,
   backdropImagePath,
+  heroWidth,
+  heroHeight,
+  heroAspectRatio,
   customHeadline,
   customHook,
 }) => {
@@ -96,6 +412,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   const isPortrait = orientation === "portrait" || (height === 1350 && width === 1080);
   const isVertical = orientation === "vertical" || (height > width && !isPortrait);
   const isEn = lang === "en";
+  const isBedtime = variant === "bedtime";
 
   // Dynamic book metadata
   const rawTitle = isEn ? (book.originalTitle || book.title) : book.title;
@@ -107,6 +424,10 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
 
   const bgSrc = hasBg ? staticFile(backdropImagePath!) : null;
   const heroSrc = hasHero ? staticFile(heroImagePath!) : null;
+  const effectiveHeroRatio =
+    heroAspectRatio ||
+    (heroWidth && heroHeight ? heroWidth / heroHeight : undefined) ||
+    book.coverAspectRatio;
 
   const authorName = book.source?.originalAuthor || (isEn ? "Author" : "Penulis");
   const illustratorName = book.source?.originalIllustrator || (isEn ? "Illustrator" : "Ilustrator");
@@ -130,7 +451,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
 
   const badgeText =
     config.badge ||
-    (isEn ? "Hilarious Kids Storybook" : "Cerita Anak Bergambar!");
+    (isEn ? "Kids Storybook" : "Cerita Anak!");
 
   const bedtimeTitle =
     customHeadline ||
@@ -148,9 +469,15 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
   const attributionPill = `⭐ ${publisher}${licenseShort ? ` • ${licenseShort}` : ""}`.trim();
 
   // ==========================================
-  // PORTRAIT 4:5 THUMBNAIL (INSTAGRAM FEED & FACEBOOK ANNOUNCEMENT)
+  // PORTRAIT 4:5 THUMBNAIL (IG FEED, CAROUSEL & FB ANNOUNCEMENT)
+  // Core badge + hero art + title + CTA fit safely inside center 1:1 grid crop (Y: 135..1215)
   // ==========================================
   if (isPortrait) {
+    const portTopSize = scaleFontByLength(60, isBedtime ? bedtimeTitle : headlineTop, 16, 42);
+    const portBottomSize = scaleFontByLength(74, isBedtime ? bedtimeTitle : headlineBottom, 16, 48);
+    const portHookText = isBedtime ? bedtimeHook : hookText;
+    const portHookSize = scaleFontByLength(isBedtime ? 30 : 34, portHookText, 26, 25);
+
     return (
       <div
         style={{
@@ -158,8 +485,10 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           height: 1350,
           position: "relative",
           overflow: "hidden",
-          backgroundColor: "#0B0F1A",
-          fontFamily: "'Arial Black', 'Impact', 'Montserrat', -apple-system, sans-serif",
+          backgroundColor: "#060913",
+          fontFamily: isBedtime
+            ? "'Segoe UI', 'SF Pro Display', -apple-system, sans-serif"
+            : "'Arial Black', 'Impact', 'Montserrat', -apple-system, sans-serif",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -172,12 +501,14 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             position: "absolute",
             inset: 0,
             transform: "scale(1.15)",
-            filter: "brightness(0.35) saturate(1.6) blur(40px)",
+            filter: isBedtime
+              ? "brightness(0.32) saturate(1.4) blur(42px)"
+              : "brightness(0.36) saturate(1.55) blur(40px)",
             zIndex: 1,
           }}
         >
-          {bgSrc ? (
-            <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {bgSrc || heroSrc ? (
+            <Img src={(bgSrc || heroSrc)!} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <div
               style={{
@@ -194,146 +525,107 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              "radial-gradient(circle at center, rgba(15, 23, 42, 0.1) 0%, rgba(2, 6, 23, 0.88) 100%)",
+            background: isBedtime
+              ? "radial-gradient(circle at 50% 42%, rgba(99, 102, 241, 0.24) 0%, rgba(2, 6, 23, 0.92) 100%)"
+              : "radial-gradient(circle at 50% 45%, rgba(15, 23, 42, 0.14) 0%, rgba(2, 6, 23, 0.92) 100%)",
             zIndex: 2,
           }}
         />
 
-        {/* Content Container (4:5 with 1:1 Profile Grid Safe Zone) */}
+        {/* Top Edge Channel Strip (outside 1:1 crop zone so feed gets branding without crowding grid core) */}
         <div
           style={{
             position: "relative",
             zIndex: 10,
             width: "100%",
-            height: 1350,
+            height: 120,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            paddingBottom: 14,
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "7px 22px",
+              borderRadius: 999,
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              border: "1.5px solid rgba(253, 224, 71, 0.45)",
+              color: "#FDE047",
+              fontSize: 18,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+            }}
+          >
+            <span>{isBedtime ? "🌙 ZAYN STORYBOOK BEDTIME" : "⭐ ZAYN STORYBOOK"}</span>
+            {licenseShort && <span style={{ color: "rgba(255,255,255,0.65)" }}>• {licenseShort}</span>}
+          </div>
+        </div>
+
+        {/* CENTER 1:1 IG-GRID SAFE ZONE (Y: 135..1215 = 1080px tall) */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "100%",
+            height: 1080,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "46px 36px 54px 36px",
+            padding: "20px 0",
             boxSizing: "border-box",
           }}
         >
-          {/* Top Pill / Badge */}
+          {/* Single Sleek Category Pill */}
           <div
             style={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              gap: 12,
+              gap: 10,
+              padding: "9px 26px",
+              borderRadius: 999,
+              background: isBedtime
+                ? "linear-gradient(135deg, rgba(30, 27, 75, 0.95), rgba(67, 56, 202, 0.9))"
+                : "rgba(15, 23, 42, 0.92)",
+              border: "2.5px solid rgba(253, 224, 71, 0.85)",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.65)",
             }}
           >
-            <div
+            <span style={{ fontSize: 22 }}>{isBedtime ? "🌙" : "🔥"}</span>
+            <span
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 28px",
-                borderRadius: 18,
-                backgroundColor: "#EF4444",
-                border: "3px solid #FFFFFF",
-                boxShadow: "0 8px 24px rgba(239, 68, 68, 0.7)",
-                transform: "rotate(-1.5deg)",
-              }}
-            >
-              <span style={{ fontSize: 24 }}>🔥</span>
-              <span
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: 22,
-                  fontWeight: 900,
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {badgeText}
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "8px 20px",
-                borderRadius: 14,
-                backgroundColor: "rgba(15, 23, 42, 0.85)",
-                border: "2px solid rgba(255, 255, 255, 0.3)",
                 color: "#FDE047",
-                fontSize: 18,
-                fontWeight: 800,
-                letterSpacing: "0.04em",
-              }}
-            >
-              ⭐ ZAYN STORYBOOK
-            </div>
-          </div>
-
-          {/* Centerpiece Hero Artwork with Clean Sticker Border */}
-          <div
-            style={{
-              width: 1000,
-              height: 680,
-              position: "relative",
-              borderRadius: 36,
-              overflow: "hidden",
-              border: "10px solid #FFFFFF",
-              boxShadow:
-                "0 25px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(253, 224, 71, 0.35)",
-              transform: "rotate(1deg)",
-              backgroundColor: "#1E293B",
-            }}
-          >
-            {heroSrc ? (
-              <Img
-                src={heroSrc}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <ProceduralIllustration
-                scene={{ index: 0, type: "cover" }}
-                book={book}
-                isVertical={false}
-                isCover={true}
-                showTitle={false}
-              />
-            )}
-
-            {/* Inner Vignette */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                boxShadow: "inset 0 0 40px rgba(0,0,0,0.5)",
-                pointerEvents: "none",
-              }}
-            />
-
-            {/* Comic Floating Reaction Sticker on Artwork */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 20,
-                left: 20,
-                backgroundColor: "#FACC15",
-                color: "#000",
+                fontSize: 21,
                 fontWeight: 900,
-                fontSize: 26,
-                padding: "10px 24px",
-                borderRadius: 18,
-                border: "4px solid #000",
-                boxShadow: "0 6px 0 #000",
-                transform: "rotate(-4deg)",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
               }}
             >
-              {stickerText}
-            </div>
+              {isBedtime ? (isEn ? "Bedtime Read-Aloud" : "Dongeng Sebelum Tidur") : badgeText}
+            </span>
           </div>
 
-          {/* Lower Section: Title, Curiosity Hook & Channel Attribution */}
+          {/* Aspect-Aligned / Edge-Bleed Hero Artwork */}
+          <ThumbnailHeroCard
+            heroSrc={heroSrc}
+            backdropSrc={bgSrc}
+            heroWidth={heroWidth}
+            heroHeight={heroHeight}
+            heroAspectRatio={effectiveHeroRatio}
+            layout="portrait"
+            borderColor={isBedtime ? "rgba(251, 191, 36, 0.92)" : "#FDE047"}
+            glowColor={isBedtime ? "rgba(251, 191, 36, 0.35)" : "rgba(253, 224, 71, 0.35)"}
+            rotationDeg={0}
+            ribbonText={isBedtime ? (isEn ? "Picture Book" : "Buku Bergambar") : undefined}
+            book={book}
+          />
+
+          {/* Auto-Scaled Headline + Oversized High-Contrast CTA Hook */}
           <div
             style={{
               display: "flex",
@@ -342,91 +634,74 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               gap: 14,
               textAlign: "center",
               width: "100%",
+              padding: "0 44px",
+              boxSizing: "border-box",
             }}
           >
-            {/* Title with 3D Drop Shadow */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                transform: "rotate(-1.5deg)",
-                filter: "drop-shadow(0 12px 24px rgba(0, 0, 0, 0.95))",
-              }}
-            >
+            {isBedtime ? (
               <div
                 style={{
-                  fontSize: 70,
+                  fontSize: scaleFontByLength(66, bedtimeTitle, 20, 44),
                   fontWeight: 900,
-                  lineHeight: 0.95,
-                  color: "#FFFFFF",
-                  WebkitTextStroke: "5px #000000",
-                  letterSpacing: "-0.01em",
+                  lineHeight: 1.06,
+                  maxWidth: 940,
+                  background: "linear-gradient(180deg, #FFFFFF 0%, #FEF08A 55%, #F59E0B 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  filter: "drop-shadow(0 6px 18px rgba(0, 0, 0, 0.9))",
                 }}
               >
-                {headlineTop}
+                {bedtimeTitle}
               </div>
-              <div
-                style={{
-                  fontSize: 86,
-                  fontWeight: 900,
-                  lineHeight: 0.95,
-                  color: "#FDE047",
-                  WebkitTextStroke: "6px #000000",
-                  letterSpacing: "-0.01em",
-                  textShadow: "0 8px 0 #B45309",
-                }}
-              >
-                {headlineBottom}
-              </div>
-            </div>
+            ) : (
+              <ThumbnailHeadline
+                top={headlineTop}
+                bottom={headlineBottom}
+                topSize={portTopSize}
+                bottomSize={portBottomSize}
+                maxWidth={960}
+              />
+            )}
 
-            {/* Secondary Curiosity Gap Hook Sticker */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "12px 28px",
-                borderRadius: 18,
-                backgroundColor: "#38BDF8",
-                border: "4px solid #000000",
-                boxShadow: "0 8px 0 #0284C7, 0 16px 30px rgba(0,0,0,0.6)",
-                transform: "rotate(1deg)",
-              }}
-            >
-              <span style={{ fontSize: 28 }}>{hookEmoji}</span>
-              <span
-                style={{
-                  color: "#000000",
-                  fontSize: 26,
-                  fontWeight: 900,
-                  letterSpacing: "-0.01em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {hookText}
-              </span>
-            </div>
+            <ThumbnailHookBanner
+              text={portHookText}
+              emoji={isBedtime ? "✨" : hookEmoji}
+              isBedtime={isBedtime}
+              fontSize={portHookSize}
+              maxWidth={940}
+            />
+          </div>
+        </div>
 
-            {/* Platform Banner */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 18,
-                fontWeight: 800,
-                color: "rgba(255, 255, 255, 0.85)",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                marginTop: 2,
-              }}
-            >
-              <span>▶️ Tonton di YouTube & Facebook</span>
-              <span>•</span>
-              <span style={{ color: "#FDE047" }}>@zayn.storybook</span>
-            </div>
+        {/* Bottom Edge Footer CTA */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "100%",
+            height: 150,
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            paddingTop: 18,
+            boxSizing: "border-box",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              fontSize: 18,
+              fontWeight: 800,
+              color: "rgba(255, 255, 255, 0.85)",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            <span>▶️ {isEn ? "Watch Full Story on YouTube" : "Tonton di YouTube & Facebook"}</span>
+            <span>•</span>
+            <span style={{ color: "#FDE047" }}>@zayn.storybook</span>
           </div>
         </div>
       </div>
@@ -435,8 +710,13 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
 
   // ==========================================
   // VERTICAL 9:16 THUMBNAIL (SHORTS / REELS)
+  // Core stack fits safely inside BOTH Shorts/Reels UI & Instagram 3:4 Profile Grid (Y: 255..1625)
   // ==========================================
   if (isVertical) {
+    const vertTopSize = scaleFontByLength(72, headlineTop, 14, 46);
+    const vertBottomSize = scaleFontByLength(86, headlineBottom, 13, 48);
+    const vertHookSize = scaleFontByLength(38, hookText, 24, 27);
+
     return (
       <div
         style={{
@@ -444,7 +724,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           height: 1920,
           position: "relative",
           overflow: "hidden",
-          backgroundColor: "#0B0F1A",
+          backgroundColor: "#070B14",
           fontFamily: "'Arial Black', 'Impact', 'Montserrat', -apple-system, sans-serif",
           display: "flex",
           flexDirection: "column",
@@ -458,12 +738,12 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             position: "absolute",
             inset: 0,
             transform: "scale(1.15)",
-            filter: "brightness(0.4) saturate(1.5) blur(48px)",
+            filter: "brightness(0.32) saturate(1.45) blur(48px)",
             zIndex: 1,
           }}
         >
-          {bgSrc ? (
-            <Img src={bgSrc} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          {bgSrc || heroSrc ? (
+            <Img src={(bgSrc || heroSrc)!} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <div
               style={{
@@ -481,12 +761,12 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             position: "absolute",
             inset: 0,
             background:
-              "radial-gradient(circle at center, rgba(15, 23, 42, 0.2) 0%, rgba(2, 6, 23, 0.9) 100%)",
+              "radial-gradient(circle at center, rgba(15, 23, 42, 0.16) 0%, rgba(2, 6, 23, 0.92) 100%)",
             zIndex: 2,
           }}
         />
 
-        {/* Content Container (Vertical Stack with Safe Zones for Shorts UI) */}
+        {/* Content Container: Safe for Shorts UI AND Instagram 3:4 Grid Tile (Y: 255..1625) */}
         <div
           style={{
             position: "relative",
@@ -497,29 +777,28 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "110px 36px 190px 36px",
+            padding: "255px 0 295px 0",
             boxSizing: "border-box",
           }}
         >
-          {/* Top Pill / Badge (Above Action) */}
+          {/* Single Sleek Top Category Badge */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 12,
-              padding: "14px 32px",
-              borderRadius: 20,
-              backgroundColor: "#EF4444",
-              border: "4px solid #FFFFFF",
-              boxShadow: "0 10px 30px rgba(239, 68, 68, 0.7)",
-              transform: "rotate(-2deg)",
+              padding: "11px 30px",
+              borderRadius: 999,
+              backgroundColor: "rgba(15, 23, 42, 0.92)",
+              border: "3px solid rgba(253, 224, 71, 0.88)",
+              boxShadow: "0 10px 28px rgba(0, 0, 0, 0.65)",
             }}
           >
-            <span style={{ fontSize: 32 }}>🔥</span>
+            <span style={{ fontSize: 26 }}>🔥</span>
             <span
               style={{
-                color: "#FFFFFF",
-                fontSize: 28,
+                color: "#FDE047",
+                fontSize: 24,
                 fontWeight: 900,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
@@ -529,169 +808,62 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             </span>
           </div>
 
-          {/* Centerpiece Hero Artwork with Clean Sticker Border (Maximized Size & Zero Dead Space) */}
-          <div
-            style={{
-              width: 1000,
-              height: 980,
-              position: "relative",
-              borderRadius: 48,
-              overflow: "hidden",
-              border: "14px solid #FFFFFF",
-              boxShadow:
-                "0 40px 100px rgba(0, 0, 0, 0.95), 0 0 70px rgba(253, 224, 71, 0.45)",
-              transform: "rotate(2deg)",
-              backgroundColor: "#1E293B",
-            }}
-          >
-            {heroSrc ? (
-              <Img
-                src={heroSrc}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <ProceduralIllustration
-                scene={{ index: 0, type: "cover" }}
-                book={book}
-                isVertical={false}
-                isCover={true}
-                showTitle={false}
-              />
-            )}
+          {/* Aspect-Aligned / Edge-Bleed Hero Artwork */}
+          <ThumbnailHeroCard
+            heroSrc={heroSrc}
+            backdropSrc={bgSrc}
+            heroWidth={heroWidth}
+            heroHeight={heroHeight}
+            heroAspectRatio={effectiveHeroRatio}
+            layout="vertical"
+            borderColor="#FDE047"
+            glowColor="rgba(253, 224, 71, 0.4)"
+            rotationDeg={0}
+            book={book}
+          />
 
-            {/* Inner Vignette */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                boxShadow: "inset 0 0 50px rgba(0,0,0,0.5)",
-                pointerEvents: "none",
-              }}
-            />
-
-            {/* Comic Floating Reaction Sticker on Artwork */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 24,
-                left: 24,
-                backgroundColor: "#FACC15",
-                color: "#000",
-                fontWeight: 900,
-                fontSize: 30,
-                padding: "12px 30px",
-                borderRadius: 22,
-                border: "4px solid #000",
-                boxShadow: "0 8px 0 #000",
-                transform: "rotate(-5deg)",
-              }}
-            >
-              {stickerText}
-            </div>
-          </div>
-
-          {/* Lower Section: Massive Title & Curiosity Hook */}
+          {/* Lower Section: Crisp Headline + Oversized High-Contrast Hook Banner */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 20,
+              gap: 18,
               textAlign: "center",
+              width: "100%",
+              padding: "0 44px",
+              boxSizing: "border-box",
             }}
           >
-            {/* Title with 3D Drop Shadow */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                transform: "rotate(-2deg)",
-                filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.95))",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 90,
-                  fontWeight: 900,
-                  lineHeight: 0.92,
-                  color: "#FFFFFF",
-                  WebkitTextStroke: "6px #000000",
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                {headlineTop}
-              </div>
-              <div
-                style={{
-                  fontSize: 114,
-                  fontWeight: 900,
-                  lineHeight: 0.92,
-                  color: "#FDE047",
-                  WebkitTextStroke: "7px #000000",
-                  letterSpacing: "-0.01em",
-                  textShadow: "0 10px 0 #B45309",
-                }}
-              >
-                {headlineBottom}
-              </div>
-            </div>
+            <ThumbnailHeadline
+              top={headlineTop}
+              bottom={headlineBottom}
+              topSize={vertTopSize}
+              bottomSize={vertBottomSize}
+              maxWidth={960}
+            />
 
-            {/* Secondary Curiosity Gap Hook Sticker */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 16,
-                padding: "18px 36px",
-                borderRadius: 24,
-                backgroundColor: "#38BDF8",
-                border: "5px solid #000000",
-                boxShadow: "0 12px 0 #0284C7, 0 20px 40px rgba(0,0,0,0.7)",
-                transform: "rotate(1.5deg)",
-              }}
-            >
-              <span style={{ fontSize: 38 }}>{hookEmoji}</span>
-              <span
-                style={{
-                  color: "#000000",
-                  fontSize: 36,
-                  fontWeight: 900,
-                  letterSpacing: "-0.01em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {hookText}
-              </span>
-            </div>
+            <ThumbnailHookBanner
+              text={hookText}
+              emoji={hookEmoji}
+              isBedtime={false}
+              fontSize={vertHookSize}
+              maxWidth={950}
+            />
 
-            {/* Sub-Pill Badge */}
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                marginTop: 8,
+                backgroundColor: "rgba(0, 0, 0, 0.72)",
+                backdropFilter: "blur(8px)",
+                padding: "8px 22px",
+                borderRadius: 14,
+                border: "1.5px solid rgba(255, 255, 255, 0.25)",
+                color: "#FCD34D",
+                fontSize: 20,
+                fontWeight: 800,
               }}
             >
-              <div
-                style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.75)",
-                  backdropFilter: "blur(8px)",
-                  padding: "10px 22px",
-                  borderRadius: 14,
-                  border: "2px solid rgba(255, 255, 255, 0.25)",
-                  color: "#FCD34D",
-                  fontSize: 22,
-                  fontWeight: 800,
-                }}
-              >
-                {attributionPill}
-              </div>
+              {attributionPill}
             </div>
           </div>
         </div>
@@ -818,7 +990,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             <h1
               style={{
                 margin: 0,
-                fontSize: 84,
+                fontSize: scaleFontByLength(82, bedtimeTitle, 20, 56),
                 fontWeight: 900,
                 lineHeight: 1.05,
                 letterSpacing: "-0.02em",
@@ -876,7 +1048,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             </div>
           </div>
 
-          {/* Right: Gilded Storybook Floating Centerpiece (Maximized Scale) */}
+          {/* Right: Gilded Storybook Floating Centerpiece (Aspect-Aligned) */}
           <div
             style={{
               width: "48%",
@@ -885,60 +1057,19 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
               alignItems: "center",
             }}
           >
-            <div
-              style={{
-                width: 860,
-                height: 680,
-                position: "relative",
-                borderRadius: 40,
-                overflow: "hidden",
-                boxShadow:
-                  "0 40px 105px rgba(0, 0, 0, 0.95), 0 0 75px rgba(251, 191, 36, 0.5)",
-                border: "8px solid rgba(251, 191, 36, 0.95)",
-                transform: "rotate(2deg)",
-                backgroundColor: "#0B0F19",
-              }}
-            >
-              {heroSrc ? (
-                <Img
-                  src={heroSrc}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <ProceduralIllustration
-                  scene={{ index: 0, type: "cover" }}
-                  book={book}
-                  isVertical={false}
-                  isCover={true}
-                  showTitle={false}
-                />
-              )}
-
-              {/* Gold Ribbon Seal on Picture Corner */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 20,
-                  right: 20,
-                  background: "linear-gradient(135deg, #F59E0B, #B45309)",
-                  color: "#FFF",
-                  fontWeight: 800,
-                  fontSize: 18,
-                  letterSpacing: "0.06em",
-                  padding: "8px 18px",
-                  borderRadius: 10,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
-                  border: "1px solid rgba(255, 255, 255, 0.4)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {isEn ? "Picture Book" : "Buku Bergambar"}
-              </div>
-            </div>
+            <ThumbnailHeroCard
+              heroSrc={heroSrc}
+              backdropSrc={bgSrc}
+              heroWidth={heroWidth}
+              heroHeight={heroHeight}
+              heroAspectRatio={effectiveHeroRatio}
+              layout="landscape"
+              borderColor="rgba(251, 191, 36, 0.95)"
+              glowColor="rgba(251, 191, 36, 0.45)"
+              rotationDeg={1.6}
+              ribbonText={isEn ? "Picture Book" : "Buku Bergambar"}
+              book={book}
+            />
           </div>
         </div>
       </div>
@@ -1044,27 +1175,26 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             gap: 16,
           }}
         >
-          {/* Top Pill / Badge */}
+          {/* Single Sleek Top Genre Tag */}
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
               gap: 10,
-              padding: "12px 26px",
-              borderRadius: 16,
-              backgroundColor: "#EF4444",
-              border: "3px solid #FFFFFF",
-              boxShadow: "0 8px 24px rgba(239, 68, 68, 0.7)",
-              transform: "rotate(-1.5deg)",
+              padding: "10px 26px",
+              borderRadius: 999,
+              backgroundColor: "rgba(15, 23, 42, 0.92)",
+              border: "2.5px solid rgba(253, 224, 71, 0.85)",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.65)",
             }}
           >
-            <span style={{ fontSize: 26 }}>🔥</span>
+            <span style={{ fontSize: 24 }}>🔥</span>
             <span
               style={{
-                color: "#FFFFFF",
-                fontSize: 24,
+                color: "#FDE047",
+                fontSize: 22,
                 fontWeight: 900,
-                letterSpacing: "0.05em",
+                letterSpacing: "0.06em",
                 textTransform: "uppercase",
               }}
             >
@@ -1072,69 +1202,23 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             </span>
           </div>
 
-          {/* Massive Comic Headline with 3D Drop Shadow & Dark Stroke */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              transform: "rotate(-2deg)",
-              filter: "drop-shadow(0 16px 32px rgba(0, 0, 0, 0.95))",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 90,
-                fontWeight: 900,
-                lineHeight: 0.92,
-                color: "#FFFFFF",
-                WebkitTextStroke: "6px #000000",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {headlineTop}
-            </div>
-            <div
-              style={{
-                fontSize: 116,
-                fontWeight: 900,
-                lineHeight: 0.92,
-                color: "#FDE047",
-                WebkitTextStroke: "7px #000000",
-                letterSpacing: "-0.01em",
-                textShadow: "0 10px 0 #B45309",
-              }}
-            >
-              {headlineBottom}
-            </div>
-          </div>
+          <ThumbnailHeadline
+            top={headlineTop}
+            bottom={headlineBottom}
+            topSize={scaleFontByLength(88, headlineTop, 15, 58)}
+            bottomSize={scaleFontByLength(110, headlineBottom, 15, 66)}
+            maxWidth={920}
+            align="left"
+          />
 
-          {/* Secondary Curiosity Gap Hook Sticker */}
-          <div
-            style={{
-              marginTop: 6,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 14,
-              padding: "16px 32px",
-              borderRadius: 22,
-              backgroundColor: "#38BDF8",
-              border: "4px solid #000000",
-              boxShadow: "0 10px 0 #0284C7, 0 18px 36px rgba(0,0,0,0.7)",
-              transform: "rotate(1.5deg)",
-            }}
-          >
-            <span style={{ fontSize: 36 }}>{hookEmoji}</span>
-            <span
-              style={{
-                color: "#000000",
-                fontSize: 36,
-                fontWeight: 900,
-                letterSpacing: "-0.01em",
-                textTransform: "uppercase",
-              }}
-            >
-              {hookText}
-            </span>
+          <div style={{ marginTop: 6 }}>
+            <ThumbnailHookBanner
+              text={hookText}
+              emoji={hookEmoji}
+              isBedtime={false}
+              fontSize={scaleFontByLength(38, hookText, 24, 28)}
+              maxWidth={900}
+            />
           </div>
 
           {/* Bottom Trust/Quality Pill */}
@@ -1177,7 +1261,7 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Comic Character Hero Frame with Sticker Cutout Border (Fills Right Half) */}
+        {/* Right Side: Aspect-Aligned Comic Character Hero Frame */}
         <div
           style={{
             width: "50%",
@@ -1187,70 +1271,18 @@ export const StorybookThumbnailComposition: React.FC<ThumbnailProps> = ({
             position: "relative",
           }}
         >
-          {/* Visual Sticker Badge */}
-          <div
-            style={{
-              width: 860,
-              height: 720,
-              position: "relative",
-              borderRadius: 48,
-              overflow: "hidden",
-              border: "14px solid #FFFFFF",
-              boxShadow:
-                "0 40px 105px rgba(0, 0, 0, 0.95), 0 0 80px rgba(253, 224, 71, 0.5)",
-              transform: "rotate(2.2deg)",
-              backgroundColor: "#1E293B",
-            }}
-          >
-            {heroSrc ? (
-              <Img
-                src={heroSrc}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <ProceduralIllustration
-                scene={{ index: 0, type: "cover" }}
-                book={book}
-                isVertical={true}
-                isCover={true}
-                showTitle={false}
-              />
-            )}
-
-            {/* Inner Dramatic Vignette */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                boxShadow: "inset 0 0 45px rgba(0,0,0,0.5)",
-                pointerEvents: "none",
-              }}
-            />
-
-            {/* Comic Floating Reaction Sticker */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 24,
-                left: 24,
-                backgroundColor: "#FACC15",
-                color: "#000",
-                fontWeight: 900,
-                fontSize: 28,
-                padding: "12px 28px",
-                borderRadius: 18,
-                border: "4px solid #000",
-                boxShadow: "0 8px 0 #000",
-                transform: "rotate(-5deg)",
-              }}
-            >
-              {stickerText}
-            </div>
-          </div>
+          <ThumbnailHeroCard
+            heroSrc={heroSrc}
+            backdropSrc={bgSrc}
+            heroWidth={heroWidth}
+            heroHeight={heroHeight}
+            heroAspectRatio={effectiveHeroRatio}
+            layout="landscape"
+            borderColor="#FDE047"
+            glowColor="rgba(253, 224, 71, 0.45)"
+            rotationDeg={1.8}
+            book={book}
+          />
         </div>
       </div>
     </div>

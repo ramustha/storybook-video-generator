@@ -2,6 +2,12 @@ import sharp from "sharp";
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import {
+  assessArtworkQuality,
+  classifyAspectOrientation,
+  detectTightArtworkBounds,
+  type ArtworkQualityReport,
+} from "./lib/artwork-framing";
 
 /**
  * Detect non-white content boundaries inside an illustration canvas.
@@ -213,29 +219,7 @@ export function generateAtmosphericMistSvg(options: {
 }
 
 /**
- * Generate an Organic Feathered Alpha Mask for Foreground Artwork.
- * Eliminates all straight rectangular box cuts by softly feathering all 4 edges with organic curves.
- */
-function generateFeatheredVignetteMask(width: number, height: number): string {
-  const pad = Math.round(Math.min(width, height) * 0.035);
-  const blurDev = Math.round(Math.min(width, height) * 0.024);
-  const rx = Math.round(Math.min(width, height) * 0.065);
-
-  return `
-  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="featherBlur" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="${blurDev}" />
-      </filter>
-    </defs>
-    <rect width="${width}" height="${height}" fill="black" />
-    <rect x="${pad}" y="${pad}" width="${width - pad * 2}" height="${height - pad * 2}" rx="${rx}" ry="${rx}" fill="white" filter="url(#featherBlur)" />
-  </svg>
-  `;
-}
-
-/**
- * Generate Soft Elliptical Mask for Ambient Glow Backdrop.
+ * Generate Soft Elliptical Mask for Outer Ambient Glow Backdrop (composited strictly behind foreground art).
  */
 function generateAmbientGlowMask(width: number, height: number): string {
   const blurDev = Math.round(Math.min(width, height) * 0.06);
@@ -257,54 +241,80 @@ function generateAmbientGlowMask(width: number, height: number): string {
  * Create a Clean 16:9 Organic Ambient Video Plate (No burned-in static text).
  * Perfectly prepared for Remotion's dynamic KineticSubtitles.
  */
-export async function createOrganicVideoPlate16x9(
+export async function createAlignedOrganicPlates(
   inputImagePath: string,
-  outPath: string
-): Promise<void> {
+  out16x9Path: string,
+  outPortraitPath?: string
+): Promise<ArtworkQualityReport> {
   const rawImage = await fs.readFile(inputImagePath);
   const targetW = 1920;
   const targetH = 1080;
 
-  // 1. Detect artwork bounds
-  const bounds = await getArtworkBounds(rawImage);
-  const padX = Math.round(bounds.width * 0.02);
-  const padY = Math.round(bounds.height * 0.02);
-
-  const cropL = Math.max(0, bounds.minX - padX);
-  const cropT = Math.max(0, bounds.minY - padY);
-  const cropW = Math.max(10, Math.min(bounds.imgW - cropL, bounds.width + padX * 2));
-  const cropH = Math.max(10, Math.min(bounds.imgH - cropT, bounds.height + padY * 2));
+  // 1. Detect tight artwork bounds (strips blank paper margins, hairlines, and corner pagination)
+  const bounds = await detectTightArtworkBounds(rawImage, {
+    excludeIsolatedText: true,
+    paddingRatio: 0.002,
+  });
 
   // 2. Crop active artwork
-  const cropped = await sharp(rawImage)
-    .extract({ left: cropL, top: cropT, width: cropW, height: cropH })
-    .png()
-    .toBuffer();
+  const cropped = bounds.wasCropped
+    ? await sharp(rawImage)
+        .extract({ left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height })
+        .png()
+        .toBuffer()
+    : await sharp(rawImage).png().toBuffer();
 
-  // 3. Scaled artwork inside 1680 x 800 safe zone
+  if (outPortraitPath) {
+    await fs.mkdir(path.dirname(outPortraitPath), { recursive: true });
+    await fs.writeFile(outPortraitPath, cropped);
+  }
+
+  const quality = assessArtworkQuality({
+    croppedWidth: bounds.width,
+    croppedHeight: bounds.height,
+    rawWidth: bounds.rawWidth,
+    rawHeight: bounds.rawHeight,
+    isFullBleed: bounds.isFullBleed,
+  });
+
+  // 3. Scaled crisp artwork inside 1740 x 850 safe zone (untouched original ink/watercolor pixels)
   const resizedArt = await sharp(cropped)
-    .resize({ width: 1680, height: 800, fit: "inside" })
+    .resize({ width: 1740, height: 850, fit: "inside" })
     .png()
     .toBuffer();
 
   const artMeta = await sharp(resizedArt).metadata();
-  const W = artMeta.width || 1680;
-  const H = artMeta.height || 800;
+  const W = artMeta.width || 1740;
+  const H = artMeta.height || 850;
+  const cornerRx = Math.min(22, Math.round(Math.min(W, H) * 0.03));
 
-  // 4. ORGANIC FEATHERED ALPHA MASK
-  const vignetteMaskSvg = generateFeatheredVignetteMask(W, H);
-  const featheredArt = await sharp(resizedArt)
-    .composite([{ input: Buffer.from(vignetteMaskSvg), blend: "dest-in" }])
+  // Crisp rounded-corner alpha clip ONLY (no inward blur bite over original illustration)
+  const crispClipMaskSvg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="${W}" height="${H}" rx="${cornerRx}" ry="${cornerRx}" fill="white" />
+  </svg>`;
+  const crispArt = await sharp(resizedArt)
+    .composite([{ input: Buffer.from(crispClipMaskSvg), blend: "dest-in" }])
     .png()
     .toBuffer();
 
-  // 5. AMBIENT COLOR BACKDROP (Natural watercolor glow from scene palette)
-  const ambW = Math.min(targetW, Math.round(W * 1.30));
-  const ambH = Math.min(targetH, Math.round(H * 1.25));
+  // Dead-center placement slightly above lower subtitle strip
+  const artLeft = Math.round((targetW - W) / 2);
+  const artTop = Math.max(40, Math.round((890 - H) / 2));
+
+  // 4. Outer-only Ambient Theater Backdrop & Watercolor Glow (composited STRICTLY BEHIND foreground art)
+  const baseCanvas = await sharp(cropped)
+    .resize(targetW, targetH, { fit: "cover" })
+    .blur(48)
+    .modulate({ brightness: 0.45, saturation: 1.25 })
+    .png()
+    .toBuffer();
+
+  const ambW = Math.min(targetW, Math.round(W * 1.24));
+  const ambH = Math.min(targetH, Math.round(H * 1.22));
   const ambientGlow = await sharp(cropped)
-    .resize(ambW, ambH, { fit: "fill" })
-    .blur(50)
-    .modulate({ brightness: 1.04, saturation: 0.88 })
+    .resize(ambW, ambH, { fit: "cover" })
+    .blur(44)
+    .modulate({ brightness: 1.05, saturation: 1.15 })
     .toBuffer();
 
   const ambMaskSvg = generateAmbientGlowMask(ambW, ambH);
@@ -313,86 +323,47 @@ export async function createOrganicVideoPlate16x9(
     .png()
     .toBuffer();
 
-  // Dead-center placement
-  const artLeft = Math.round((targetW - W) / 2);
-  const artTop = Math.round((840 - H) / 2) + 20;
-  const artBottom = artTop + H;
-
   const ambLeft = Math.max(0, Math.round((targetW - ambW) / 2));
   const ambTop = Math.max(0, Math.round(artTop + (H - ambH) / 2));
 
-  // 6. ADAPTIVE ATMOSPHERIC MIST & DEPTH
-  // Detect whether image is a white-page illustration (e.g. Kacamata Nenek) or full-bleed artwork (e.g. Ayo, Berayun, Momo!)
-  const cornerSample = await sharp(rawImage)
-    .extract({ left: 0, top: 0, width: Math.min(50, bounds.imgW), height: Math.min(50, bounds.imgH) })
-    .stats();
-  const bottomSample = await sharp(rawImage)
-    .extract({
-      left: Math.round(bounds.imgW * 0.2),
-      top: Math.max(0, bounds.imgH - 50),
-      width: Math.round(bounds.imgW * 0.6),
-      height: Math.min(45, bounds.imgH),
-    })
-    .stats();
-
-  const isWhiteTheme =
-    cornerSample.channels.slice(0, 3).every((c) => c.mean > 238) &&
-    bottomSample.channels.slice(0, 3).every((c) => c.mean > 238);
-
-  const mistRise = Math.min(Math.round(H * 0.08), 45);
-  const cloudStartY = artBottom - mistRise;
-  const cloudEndY = Math.min(960, artBottom + 50);
-
-  let mistSvg: string;
-  let baseCanvas: Buffer;
-
-  if (isWhiteTheme) {
-    // White Theme: Pure white canvas + delicate white cloud mist (preserves Kacamata Nenek style)
-    mistSvg = generateDelicateCloudMistSvg({
-      width: targetW,
-      height: targetH,
-      cloudStartY,
-      cloudEndY,
-      backgroundColor: "#FFFFFF",
-      seed: 42,
-      isLandscape: true,
-    });
-
-    baseCanvas = await sharp({
-      create: { width: targetW, height: targetH, channels: 4, background: "#FFFFFF" },
-    })
-      .png()
-      .toBuffer();
-  } else {
-    // Illustrated / Full-Bleed Theme: Natural atmospheric morning canopy mist + cinematic lower-third reading shadow
-    // NEVER put stark white canvas on rich forest/colored artwork!
-    mistSvg = generateAtmosphericMistSvg({
-      width: targetW,
-      height: targetH,
-      cloudStartY,
-      cloudEndY,
-      seed: 42,
-      isLandscape: true,
-    });
-
-    baseCanvas = await sharp(cropped)
-      .resize(targetW, targetH, { fit: "cover" })
-      .blur(42)
-      .modulate({ brightness: 0.90, saturation: 1.05 })
-      .png()
-      .toBuffer();
-  }
+  // Soft outer rim + theater shadow card directly behind crispArt (0px drawn over original illustration)
+  const outerBackdropSvg = `<svg width="${targetW}" height="${targetH}" viewBox="0 0 ${targetW} ${targetH}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="theaterVignette" cx="50%" cy="46%" r="65%">
+        <stop offset="0%" stop-color="#020617" stop-opacity="0" />
+        <stop offset="72%" stop-color="#020617" stop-opacity="0.38" />
+        <stop offset="100%" stop-color="#020617" stop-opacity="0.72" />
+      </radialGradient>
+      <filter id="cardDropShadow" x="-15%" y="-15%" width="130%" height="130%">
+        <feGaussianBlur stdDeviation="20" />
+      </filter>
+    </defs>
+    <rect width="${targetW}" height="${targetH}" fill="url(#theaterVignette)" />
+    <rect x="${artLeft - 4}" y="${artTop + 10}" width="${W + 8}" height="${H + 8}" rx="${cornerRx + 2}" ry="${cornerRx + 2}" fill="#000000" opacity="0.62" filter="url(#cardDropShadow)" />
+    <rect x="${artLeft - 2}" y="${artTop - 2}" width="${W + 4}" height="${H + 4}" rx="${cornerRx + 1}" ry="${cornerRx + 1}" fill="none" stroke="rgba(253, 224, 71, 0.35)" stroke-width="2" />
+  </svg>`;
 
   const finalVideoPlate = await sharp(baseCanvas)
     .composite([
       { input: softAmbient, top: ambTop, left: ambLeft },
-      { input: featheredArt, top: artTop, left: artLeft },
-      { input: Buffer.from(mistSvg), top: 0, left: 0 },
+      { input: Buffer.from(outerBackdropSvg), top: 0, left: 0 },
+      { input: crispArt, top: artTop, left: artLeft },
     ])
     .png()
     .toBuffer();
 
-  await fs.writeFile(outPath, finalVideoPlate);
+  await fs.writeFile(out16x9Path, finalVideoPlate);
+  return quality;
+}
+
+/**
+ * Create a Clean 16:9 Organic Ambient Video Plate (backward-compatible wrapper).
+ */
+export async function createOrganicVideoPlate16x9(
+  inputImagePath: string,
+  outPath: string
+): Promise<void> {
+  await createAlignedOrganicPlates(inputImagePath, outPath);
 }
 
 /**
@@ -408,6 +379,7 @@ async function main() {
   const bookSlug = getArg("--book") || "kacamata-nenek";
   const storyDir = path.resolve(`./stories/${bookSlug}`);
   const assetsDir = path.join(storyDir, "assets");
+  const portraitAssetsDir = path.join(assetsDir, "portrait");
   const backupDir = path.join(assetsDir, "raw_backup");
 
   console.log("===============================================================");
@@ -415,17 +387,49 @@ async function main() {
   console.log("===============================================================\n");
 
   await fs.mkdir(backupDir, { recursive: true });
+  await fs.mkdir(portraitAssetsDir, { recursive: true });
 
   // Read manifest
-  const manifest = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
+  const manifestPath = path.join(storyDir, "story.json");
+  const manifest = JSON.parse(await fs.readFile(manifestPath, "utf-8"));
   const scenes = manifest.scenes.filter((s: any) => s.type === "story");
 
+  // Tight-crop cover.png if needed and compute exact coverOrientation / coverAspectRatio
+  const coverPath = path.join(assetsDir, "cover.png");
+  const coverRawPath = path.join(assetsDir, "cover_raw.png");
+  if (existsSync(coverPath)) {
+    const coverInput = existsSync(coverRawPath) ? coverRawPath : coverPath;
+    const coverBuf = await fs.readFile(coverInput);
+    const coverBounds = await detectTightArtworkBounds(coverBuf, {
+      excludeIsolatedText: true,
+      paddingRatio: 0.002,
+    });
+    if (coverBounds.wasCropped) {
+      if (!existsSync(coverRawPath)) await fs.copyFile(coverPath, coverRawPath);
+      const croppedCover = await sharp(coverBuf)
+        .extract({ left: coverBounds.left, top: coverBounds.top, width: coverBounds.width, height: coverBounds.height })
+        .png()
+        .toBuffer();
+      await fs.writeFile(coverPath, croppedCover);
+    }
+    const coverMeta = await sharp(coverPath).metadata();
+    const coverClass = classifyAspectOrientation(coverMeta.width || 1200, coverMeta.height || 900);
+    manifest.coverOrientation = coverClass.orientation;
+    manifest.coverAspectRatio = coverClass.aspectRatio;
+    console.log(`🖼️  Cover normalized: ${coverMeta.width}x${coverMeta.height} (${coverClass.orientation}, ratio=${coverClass.aspectRatio})`);
+  }
+
   console.log(`📚 Found ${scenes.length} story scenes to process...`);
+
+  const smallScenes: Array<{ sceneId: string; summary: string }> = [];
+  const orientationCounts: Record<string, number> = { portrait: 0, landscape: 0, square: 0 };
 
   for (const scene of scenes) {
     const imgRel = scene.visual.imagePath;
     const origPath = path.join(storyDir, imgRel);
     const backupPath = path.join(backupDir, path.basename(imgRel));
+    const portraitRel = `assets/portrait/${scene.sceneId}.png`;
+    const portraitPath = path.join(storyDir, portraitRel);
 
     const isForce = args.includes("--force");
     // Backup if not backed up or if --force is requested
@@ -434,14 +438,62 @@ async function main() {
       console.log(`   📦 Backed up ${path.basename(imgRel)} -> raw_backup/`);
     }
 
-    // Process from backup to ensure repeatable clean input
-    const inputSource = existsSync(backupPath) ? backupPath : origPath;
-    console.log(`   🎨 Creating clean organic plate for ${scene.sceneId}...`);
-    await createOrganicVideoPlate16x9(inputSource, origPath);
-    console.log(`   ✔ Updated: ${imgRel} (Clean Organic Ambient Plate)`);
+    // Prefer already tight-cropped high-res portrait plate from hybrid prep when present, else backup/orig
+    const inputSource = existsSync(portraitPath)
+      ? portraitPath
+      : existsSync(backupPath)
+      ? backupPath
+      : origPath;
+
+    console.log(`   🎨 Creating aligned organic plates for ${scene.sceneId}...`);
+    const quality = await createAlignedOrganicPlates(
+      inputSource,
+      origPath,
+      existsSync(portraitPath) ? undefined : portraitPath
+    );
+
+    const finalPortraitMeta = existsSync(portraitPath) ? await sharp(portraitPath).metadata() : null;
+    const cls = finalPortraitMeta
+      ? classifyAspectOrientation(finalPortraitMeta.width || quality.croppedWidth, finalPortraitMeta.height || quality.croppedHeight)
+      : classifyAspectOrientation(quality.croppedWidth, quality.croppedHeight);
+
+    orientationCounts[cls.orientation] = (orientationCounts[cls.orientation] || 0) + 1;
+    if (quality.isTooSmall) {
+      smallScenes.push({ sceneId: scene.sceneId, summary: quality.summary });
+      console.warn(`   ⚠️ [${scene.sceneId}] SMALL ARTWORK WARNING: ${quality.summary}`);
+    }
+
+    scene.visual = {
+      ...(scene.visual || {}),
+      imagePath: imgRel,
+      verticalImagePath: portraitRel,
+      orientation: cls.orientation,
+      aspectRatio: cls.aspectRatio,
+      isPortrait: cls.isPortrait,
+      croppedWidth: finalPortraitMeta?.width || quality.croppedWidth,
+      croppedHeight: finalPortraitMeta?.height || quality.croppedHeight,
+      isTooSmall: quality.isTooSmall,
+      qualityWarnings: quality.warnings,
+    };
+
+    console.log(`   ✔ Updated: ${imgRel} + ${portraitRel} (${cls.orientation}, ratio=${cls.aspectRatio})`);
   }
 
-  console.log("\n🎉 All story scene plates updated with Organic Ambient Vignette & Delicate Cloud Mist!");
+  manifest.artworkQuality = {
+    ...(manifest.artworkQuality || {}),
+    coverOrientation: manifest.coverOrientation,
+    coverAspectRatio: manifest.coverAspectRatio,
+    orientationBreakdown: orientationCounts,
+    smallScenesCount: smallScenes.length,
+    smallScenes,
+    analyzedAt: new Date().toISOString(),
+  };
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), "utf-8");
+
+  console.log("\n🎉 All story scene plates updated with Tight-Cropped Portrait/Native & Organic Ambient Plates!");
+  if (smallScenes.length > 0) {
+    console.warn(`⚠️ Small-artwork alerts (${smallScenes.length} scenes): ${smallScenes.map((s) => `${s.sceneId}: ${s.summary}`).join(" | ")}`);
+  }
 }
 
 if (process.argv[1]?.endsWith("prepare-organic-video-plates.ts")) {

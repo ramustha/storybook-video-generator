@@ -11,6 +11,8 @@ import { db } from "./lib/db";
 import { DAILY_CALENDAR_MONTH_1 } from "./content-calendar";
 import { extractPdfPages } from "./prepare-plates-hybrid";
 import { extractStoryDataFromPdfPages, normalizeExtractedPackage } from "./lib/pdf-story-extractor";
+import sharp from "sharp";
+import { classifyAspectOrientation } from "./lib/artwork-framing";
 import {
   buildCuratedBookFromBudi,
   getWibDateOffsetIso,
@@ -447,6 +449,20 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     },
   });
 
+  let detectedCoverOrientation: "portrait" | "landscape" | "square" = "landscape";
+  let detectedCoverAspectRatio = 1.25;
+  const existingCoverPath = path.join(assetsDir, "cover.png");
+  if (existsSync(existingCoverPath)) {
+    try {
+      const cMeta = await sharp(existingCoverPath).metadata();
+      if (cMeta.width && cMeta.height) {
+        const cls = classifyAspectOrientation(cMeta.width, cMeta.height);
+        detectedCoverOrientation = cls.orientation;
+        detectedCoverAspectRatio = cls.aspectRatio;
+      }
+    } catch {}
+  }
+
   const fullManifest = {
     version: "1.0.0",
     id: slug,
@@ -454,8 +470,8 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     title: resolvedBook.title,
     originalTitle: resolvedBook.originalTitle,
     language: "id-ID",
-    coverOrientation: "landscape",
-    coverAspectRatio: 1.25,
+    coverOrientation: detectedCoverOrientation,
+    coverAspectRatio: detectedCoverAspectRatio,
     coverPage: resolvedBook.coverPage || 1,
     avatarPage: resolvedBook.avatarPage || 2,
     source: {
@@ -529,6 +545,21 @@ async function processSingleStory(targetBook: CuratedBook, options: IngestOption
     } catch (plateErr: any) {
       console.warn(`⚠️ Organic plate preparation warning: ${plateErr.message}`);
     }
+
+    try {
+      const updatedManifest = JSON.parse(await fs.readFile(path.join(storyDir, "story.json"), "utf-8"));
+      const aq = updatedManifest.artworkQuality;
+      if (aq) {
+        console.log(
+          `📐 Detected Artwork Proportions: cover=${aq.coverOrientation} (ratio=${aq.coverAspectRatio}) | scenes P=${aq.orientationBreakdown?.portrait ?? 0} L=${aq.orientationBreakdown?.landscape ?? 0} S=${aq.orientationBreakdown?.square ?? 0}`
+        );
+        if (aq.coverIsTooSmall || (aq.smallScenesCount ?? 0) > 0) {
+          console.warn(
+            `⚠️ SMALL ARTWORK ALERT for [${slug}]: coverTooSmall=${Boolean(aq.coverIsTooSmall)} (${(aq.coverWarnings || []).join(",")}), smallScenes=${aq.smallScenesCount ?? 0}`
+          );
+        }
+      }
+    } catch {}
   } else {
     console.log(`⏩ Skipping plates preparation (--skip-plates).`);
   }

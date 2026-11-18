@@ -3,6 +3,7 @@ import { renderStill, selectComposition } from "@remotion/renderer";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync, openSync, readSync, closeSync } from "fs";
+import sharp from "sharp";
 
 export interface ThumbnailDimension {
   width: number;
@@ -277,29 +278,52 @@ export async function renderStoryThumbnails(
 
   const generatedThumbnails: Record<string, any> = {};
 
+  const resolveHeroWithDims = async (candidates: Array<string | undefined>) => {
+    for (const rel of candidates) {
+      if (!rel) continue;
+      const abs = path.join(storyDir, rel);
+      if (existsSync(abs)) {
+        try {
+          const meta = await sharp(abs).metadata();
+          const w = meta.width || 0;
+          const h = meta.height || 0;
+          if (w > 0 && h > 0) {
+            return {
+              pathRel: rel,
+              width: w,
+              height: h,
+              aspectRatio: Number((w / h).toFixed(3)),
+            };
+          }
+        } catch {}
+        return { pathRel: rel, width: undefined, height: undefined, aspectRatio: undefined };
+      }
+    }
+    return { pathRel: undefined, width: undefined, height: undefined, aspectRatio: undefined };
+  };
+
   for (const currentLang of languages) {
     const exportLangDir = path.join(storyDir, `exports/${currentLang}`);
     if (!generatedThumbnails[currentLang]) generatedThumbnails[currentLang] = {};
 
     // 1. Render Landscape 16:9 Variants (1920x1080)
     for (const v of variants) {
-      const candidateHero =
-        heroImage ||
-        rawManifest.thumbnailConfig?.heroImage ||
-        (v === "popular" ? "assets/cover.png" : "assets/scene_02.png");
-      const resolvedHero =
-        candidateHero && existsSync(path.join(storyDir, candidateHero))
-          ? candidateHero
-          : undefined;
+      const heroPicked = await resolveHeroWithDims([
+        heroImage,
+        rawManifest.thumbnailConfig?.heroImage,
+        v === "popular" ? "assets/cover.png" : "assets/portrait/scene_02.png",
+        v === "popular" ? "assets/portrait/scene_01.png" : "assets/scene_02.png",
+        "assets/cover.png",
+      ]);
+      const resolvedHero = heroPicked.pathRel;
 
-      const candidateBg =
-        backdropImage ||
-        rawManifest.thumbnailConfig?.backdropImage ||
-        (v === "popular" ? "assets/scene_02.png" : "assets/cover.png");
-      const resolvedBackdrop =
-        candidateBg && existsSync(path.join(storyDir, candidateBg))
-          ? candidateBg
-          : undefined;
+      const bgPicked = await resolveHeroWithDims([
+        backdropImage,
+        rawManifest.thumbnailConfig?.backdropImage,
+        v === "popular" ? "assets/portrait/scene_02.png" : "assets/cover.png",
+        v === "popular" ? "assets/scene_02.png" : "assets/cover.png",
+      ]);
+      const resolvedBackdrop = bgPicked.pathRel;
 
       const inputProps = {
         book: rawManifest,
@@ -307,6 +331,9 @@ export async function renderStoryThumbnails(
         variant: v,
         heroImagePath: resolvedHero,
         backdropImagePath: resolvedBackdrop,
+        heroWidth: heroPicked.width,
+        heroHeight: heroPicked.height,
+        heroAspectRatio: heroPicked.aspectRatio,
         customHeadline,
         customHook,
       };
@@ -358,27 +385,30 @@ export async function renderStoryThumbnails(
       console.log(`\n📱 Rendering [${currentLang.toUpperCase()}] 9:16 Vertical Shorts/Reels Cover (1080x1920)...`);
     }
 
-    const candidateHeroVert =
-      heroImage || rawManifest.thumbnailConfig?.heroImage || "assets/cover.png";
-    const resolvedHeroVert =
-      candidateHeroVert && existsSync(path.join(storyDir, candidateHeroVert))
-        ? candidateHeroVert
-        : undefined;
-
-    const candidateBgVert =
-      backdropImage || rawManifest.thumbnailConfig?.backdropImage || "assets/scene_02.png";
-    const resolvedBackdropVert =
-      candidateBgVert && existsSync(path.join(storyDir, candidateBgVert))
-        ? candidateBgVert
-        : undefined;
+    const vertHeroPicked = await resolveHeroWithDims([
+      heroImage,
+      rawManifest.thumbnailConfig?.heroImage,
+      "assets/cover.png",
+      "assets/portrait/scene_01.png",
+    ]);
+    const vertBgPicked = await resolveHeroWithDims([
+      backdropImage,
+      rawManifest.thumbnailConfig?.backdropImage,
+      "assets/portrait/scene_02.png",
+      "assets/scene_02.png",
+      "assets/cover.png",
+    ]);
 
     const verticalProps = {
       book: rawManifest,
       lang: currentLang,
       variant: "popular" as const,
       orientation: "vertical" as const,
-      heroImagePath: resolvedHeroVert,
-      backdropImagePath: resolvedBackdropVert,
+      heroImagePath: vertHeroPicked.pathRel,
+      backdropImagePath: vertBgPicked.pathRel,
+      heroWidth: vertHeroPicked.width,
+      heroHeight: vertHeroPicked.height,
+      heroAspectRatio: vertHeroPicked.aspectRatio,
       customHeadline,
       customHook,
     };
@@ -408,46 +438,76 @@ export async function renderStoryThumbnails(
 
     generatedThumbnails[currentLang].vertical = `exports/${currentLang}/${verticalFileName}`;
 
-    // 3. Render 4:5 Portrait Announcement Cover for Instagram & Facebook (1080x1350)
-    if (!silent) {
-      console.log(`\n📸 Rendering [${currentLang.toUpperCase()}] 4:5 Portrait Announcement Cover (1080x1350)...`);
+    // 3. Render 4:5 Portrait Announcement Covers for Instagram & Facebook (1080x1350)
+    for (const pv of variants) {
+      const portraitHeroPicked =
+        pv === "popular"
+          ? vertHeroPicked
+          : await resolveHeroWithDims([
+              heroImage,
+              rawManifest.thumbnailConfig?.heroImage,
+              "assets/portrait/scene_02.png",
+              "assets/scene_02.png",
+              "assets/cover.png",
+            ]);
+      const portraitBgPicked =
+        pv === "popular"
+          ? vertBgPicked
+          : await resolveHeroWithDims([
+              backdropImage,
+              rawManifest.thumbnailConfig?.backdropImage,
+              "assets/cover.png",
+              "assets/portrait/scene_02.png",
+            ]);
+
+      const portraitFileName =
+        pv === "popular" ? "thumbnail-portrait.png" : "thumbnail-bedtime-portrait.png";
+      if (!silent) {
+        console.log(`\n📸 Rendering [${currentLang.toUpperCase()}] [${pv.toUpperCase()}] 4:5 Portrait (${portraitFileName}, 1080x1350)...`);
+      }
+
+      const portraitProps = {
+        book: rawManifest,
+        lang: currentLang,
+        variant: pv,
+        orientation: "portrait" as const,
+        heroImagePath: portraitHeroPicked.pathRel,
+        backdropImagePath: portraitBgPicked.pathRel,
+        heroWidth: portraitHeroPicked.width,
+        heroHeight: portraitHeroPicked.height,
+        heroAspectRatio: portraitHeroPicked.aspectRatio,
+        customHeadline,
+        customHook,
+      };
+
+      const portraitComposition = await selectComposition({
+        serveUrl,
+        id: "StorybookThumbnail-Portrait",
+        inputProps: portraitProps,
+      });
+
+      const portraitOutputPath = path.join(exportLangDir, portraitFileName);
+      const startPortrait = Date.now();
+      await renderStill({
+        composition: portraitComposition,
+        serveUrl,
+        output: portraitOutputPath,
+        inputProps: portraitProps,
+      });
+
+      const portraitElapsed = ((Date.now() - startPortrait) / 1000).toFixed(1);
+      const portraitStat = await fs.stat(portraitOutputPath);
+      const portraitSizeMb = (portraitStat.size / (1024 * 1024)).toFixed(2);
+      if (!silent) {
+        console.log(`   ✔ Rendered in ${portraitElapsed}s -> ${portraitFileName} (${portraitSizeMb} MB) [1080x1350]`);
+      }
+
+      if (pv === "popular") {
+        generatedThumbnails[currentLang].portrait = `exports/${currentLang}/${portraitFileName}`;
+      } else {
+        generatedThumbnails[currentLang].bedtimePortrait = `exports/${currentLang}/${portraitFileName}`;
+      }
     }
-
-    const portraitProps = {
-      book: rawManifest,
-      lang: currentLang,
-      variant: "popular" as const,
-      orientation: "portrait" as const,
-      heroImagePath: resolvedHeroVert,
-      backdropImagePath: resolvedBackdropVert,
-      customHeadline,
-      customHook,
-    };
-
-    const portraitComposition = await selectComposition({
-      serveUrl,
-      id: "StorybookThumbnail-Portrait",
-      inputProps: portraitProps,
-    });
-
-    const portraitFileName = "thumbnail-portrait.png";
-    const portraitOutputPath = path.join(exportLangDir, portraitFileName);
-    const startPortrait = Date.now();
-    await renderStill({
-      composition: portraitComposition,
-      serveUrl,
-      output: portraitOutputPath,
-      inputProps: portraitProps,
-    });
-
-    const portraitElapsed = ((Date.now() - startPortrait) / 1000).toFixed(1);
-    const portraitStat = await fs.stat(portraitOutputPath);
-    const portraitSizeMb = (portraitStat.size / (1024 * 1024)).toFixed(2);
-    if (!silent) {
-      console.log(`   ✔ Rendered in ${portraitElapsed}s -> ${portraitFileName} (${portraitSizeMb} MB) [1080x1350]`);
-    }
-
-    generatedThumbnails[currentLang].portrait = `exports/${currentLang}/${portraitFileName}`;
   }
 
   // Update story.json manifest
