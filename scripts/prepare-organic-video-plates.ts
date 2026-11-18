@@ -222,17 +222,16 @@ export function generateAtmosphericMistSvg(options: {
  * Generate Soft Elliptical Mask for Outer Ambient Glow Backdrop (composited strictly behind foreground art).
  */
 function generateAmbientGlowMask(width: number, height: number): string {
-  const blurDev = Math.round(Math.min(width, height) * 0.06);
-
   return `
   <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <filter id="ambBlur" x="-30%" y="-30%" width="160%" height="160%">
-        <feGaussianBlur stdDeviation="${blurDev}" />
-      </filter>
+      <radialGradient id="glowAlpha" cx="50%" cy="50%" r="48%">
+        <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.72" />
+        <stop offset="55%" stop-color="#FFFFFF" stop-opacity="0.38" />
+        <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+      </radialGradient>
     </defs>
-    <rect width="${width}" height="${height}" fill="black" />
-    <ellipse cx="${width / 2}" cy="${height / 2}" rx="${width * 0.42}" ry="${height * 0.40}" fill="white" filter="url(#ambBlur)" />
+    <rect width="${width}" height="${height}" fill="url(#glowAlpha)" />
   </svg>
   `;
 }

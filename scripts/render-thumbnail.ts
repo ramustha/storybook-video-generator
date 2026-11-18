@@ -278,9 +278,20 @@ export async function renderStoryThumbnails(
 
   const generatedThumbnails: Record<string, any> = {};
 
-  const resolveHeroWithDims = async (candidates: Array<string | undefined>) => {
+  const expandPortraitCandidates = (candidates: Array<string | undefined>): string[] => {
+    const expanded: string[] = [];
     for (const rel of candidates) {
       if (!rel) continue;
+      // Prefer tight unblurred portrait/native artwork over 16:9 pre-baked scene plates in thumbnails
+      const m = rel.match(/^assets\/(scene_[^/]+\.(?:png|jpg|jpeg|webp))$/i);
+      if (m) expanded.push(`assets/portrait/${m[1]}`);
+      expanded.push(rel);
+    }
+    return expanded;
+  };
+
+  const resolveHeroWithDims = async (candidates: Array<string | undefined>) => {
+    for (const rel of expandPortraitCandidates(candidates)) {
       const abs = path.join(storyDir, rel);
       if (existsSync(abs)) {
         try {
