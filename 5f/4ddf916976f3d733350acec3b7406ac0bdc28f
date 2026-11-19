@@ -1,0 +1,33 @@
+scripts/test-publish-announcement.ts
+  698ac31901cd73e0 18-22,303-359
+scripts/upload-meta.ts
+  698ac31901cd73e0 12-17,537,540-545,1179-1209,1252-1256
+scripts/lib/instagram-throttle.ts
+  698ac31901cd73e0 1-273
+scripts/publish-all.ts
+  698ac31901cd73e0 428-439
+scripts/publish-announcement.ts
+  698ac31901cd73e0 12,606,627,709-711,933,935,971,1474,1476,1523,1949,2163
+scripts/publish-instagram-post.ts
+  698ac31901cd73e0 7-12,221-226,286,289-294,323-328,421,424-429
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "5f4ddf916976f3d733350acec3b7406ac0bdc28f",
+  "prompts": {
+    "698ac31901cd73e0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "a4b65591-83d1-4935-8a2a-296ff3ee5e38",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 442,
+      "total_deletions": 34,
+      "accepted_lines": 442,
+      "overriden_lines": 0
+    }
+  }
+}
