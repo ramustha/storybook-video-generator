@@ -9,6 +9,12 @@ import {
   buildSocialEngagementCta,
   resolveRelatedPublishedVideos,
 } from "./lib/seo-formatter";
+import {
+  checkInstagramPublishAllowed,
+  isInstagramActionBlockedError,
+  recordInstagramActionBlock,
+  recordInstagramPublishSuccess,
+} from "./lib/instagram-throttle";
 
 interface MetaConfig {
   appId: string;
@@ -528,8 +534,15 @@ async function uploadToInstagramReels(
 
     console.log(`\n🎉 INSTAGRAM REEL LIVE!`);
     console.log(`🔗 Link: ${permalink}`);
+    await recordInstagramPublishSuccess({ kind: "reel", bookSlug, mediaId });
 
     return { mediaId, permalink };
+  } catch (err: any) {
+    if (isInstagramActionBlockedError(err)) {
+      const until = await recordInstagramActionBlock(err.message || "Meta 2207051");
+      console.warn(`🛡️ [IG COOLDOWN] Activated Instagram action-block cooldown until ${until}.`);
+    }
+    throw err;
   } finally {
     if (localCleanup) {
       await localCleanup();
@@ -1163,28 +1176,37 @@ async function main() {
 
       // 2. Instagram Reels Ingestion via same R2 URL
       if (!skipInstagram) {
-        try {
-          const igResult = await uploadToInstagramReels(
-            { publicUrl: publicVideoUrl },
-            caption,
-            config,
-            options.shareToFeed,
-            options.bookSlug,
-            options.lang,
-            thumbnailPath
-          );
+        const igThrottle = await checkInstagramPublishAllowed();
+        if (!igThrottle.allowed) {
+          console.log(`\n🛡️ [IG THROTTLE] Skipping Instagram Reel upload: ${igThrottle.message}`);
+        } else {
+          try {
+            const igResult = await uploadToInstagramReels(
+              { publicUrl: publicVideoUrl },
+              caption,
+              config,
+              options.shareToFeed,
+              options.bookSlug,
+              options.lang,
+              thumbnailPath
+            );
 
-          if (!story.publications.instagram) story.publications.instagram = {};
-          story.publications.instagram[options.lang] = {
-            id: igResult.mediaId,
-            url: igResult.permalink,
-            publishedAt: new Date().toISOString(),
-            title: title,
-            status: "published",
-          };
-        } catch (err: any) {
-          igError = err;
-          console.error("\n❌ Instagram Reels Upload Failed:", err.message);
+            if (!story.publications.instagram) story.publications.instagram = {};
+            story.publications.instagram[options.lang] = {
+              id: igResult.mediaId,
+              url: igResult.permalink,
+              publishedAt: new Date().toISOString(),
+              title: title,
+              status: "published",
+            };
+          } catch (err: any) {
+            if (isInstagramActionBlockedError(err)) {
+              console.warn("\n🛡️ [IG COOLDOWN] Instagram Reel blocked by Meta 2207051; continuing Facebook publish cleanly:", err.message);
+            } else {
+              igError = err;
+              console.error("\n❌ Instagram Reels Upload Failed:", err.message);
+            }
+          }
         }
       } else {
         const existingIgUrl = story.publications?.instagram?.[options.lang]?.url || "Instagram";
@@ -1227,6 +1249,11 @@ async function main() {
     };
   } else if (options.platform === "instagram") {
     // Standalone Instagram upload
+    const igThrottle = await checkInstagramPublishAllowed();
+    if (!igThrottle.allowed) {
+      console.log(`\n🛡️ [IG THROTTLE] Skipping standalone Instagram Reel upload: ${igThrottle.message}`);
+      return;
+    }
     const igResult = await uploadToInstagramReels(
       { localPath: videoPath },
       caption,

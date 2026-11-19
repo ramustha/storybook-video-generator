@@ -425,14 +425,18 @@ async function main() {
       console.warn("⚠️ Facebook promotion post warning:", fbErr.message);
     }
 
-    // 4B. Instagram Feed / Carousel Post
-    try {
-      console.log(`\n📸 Publishing Promotional Post to Instagram Feed...`);
-      const igArgs = ["scripts/publish-instagram-post.ts", "--book", options.bookSlug, "--lang", options.lang === "all" ? "id" : options.lang, "--carousel"];
-      if (options.dryRun) igArgs.push("--dry-run");
-      await runCommand("npx", ["tsx", ...igArgs]);
-    } catch (igErr: any) {
-      console.warn("⚠️ Instagram promotion post warning:", igErr.message);
+    // 4B. Instagram Feed / Carousel Post (throttled off by default — native IG Reel already posts to feed & grid)
+    if (process.argv.includes("--include-ig-promo")) {
+      try {
+        console.log(`\n📸 Publishing Promotional Post to Instagram Feed...`);
+        const igArgs = ["scripts/publish-instagram-post.ts", "--book", options.bookSlug, "--lang", options.lang === "all" ? "id" : options.lang, "--carousel"];
+        if (options.dryRun) igArgs.push("--dry-run");
+        await runCommand("npx", ["tsx", ...igArgs]);
+      } catch (igErr: any) {
+        console.warn("⚠️ Instagram promotion post warning:", igErr.message);
+      }
+    } else {
+      console.log(`\n🛡️ [IG THROTTLE] Skipping redundant Instagram Feed promo post (Reel already covers IG feed/grid; pass --include-ig-promo to override).`);
     }
 
     // 4C. Meta Threads Promotional Post (Image Preview Only)

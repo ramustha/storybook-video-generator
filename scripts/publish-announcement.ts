@@ -9,6 +9,7 @@ import {
   updateFacebookPostMessage,
 } from "./publish-launch-posts";
 import { publishInstagramFeedPhoto, publishInstagramCarousel } from "./publish-instagram-post";
+import { shouldAllowInstagramAnnouncement } from "./lib/instagram-throttle";
 import { publishThreadsPhotoPost, publishThreadsCarousel, publishThreadsLinkPost } from "./publish-threads";
 import {
   notifyTelegramFailure,
@@ -602,6 +603,7 @@ export async function syncAnnouncementPlatforms(params: {
     threads?: PlatformPublishResult;
   };
   allowEdit?: boolean;
+  skipInstagram?: boolean;
   dryRun?: boolean;
   clients?: SocialPlatformClients;
 }): Promise<{
@@ -622,6 +624,7 @@ export async function syncAnnouncementPlatforms(params: {
     threadsLinkUrl,
     existing = {},
     allowEdit = false,
+    skipInstagram = false,
     dryRun = false,
     clients = DEFAULT_SOCIAL_CLIENTS,
   } = params;
@@ -703,7 +706,9 @@ export async function syncAnnouncementPlatforms(params: {
   }
 
   const existingIgId = existing.instagram?.id;
-  if (existingIgId) {
+  if (skipInstagram) {
+    console.log(`\n🛡️ [2/3] Skipping Instagram Feed (${label}): throttled by INSTAGRAM_ANNOUNCEMENT_MODE to protect account health.`);
+  } else if (existingIgId) {
     if (allowEdit) {
       console.log(`\n⏭️ [2/3] Instagram post already live (${existingIgId}) — caption edit not supported by Instagram Graph API; skipping republish.`);
     } else {
@@ -925,8 +930,9 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
   console.log(`   - Instagram Feed : ${hasIg ? `✔ LIVE (${existingLineup.instagram?.id})` : "⏳ PENDING"}`);
   console.log(`   - Meta Threads   : ${hasThreads ? `✔ LIVE (${existingLineup.threads?.id || existingLineup.threads?.postId})` : "⏳ PENDING"}`);
 
+  const allowIgDaily = shouldAllowInstagramAnnouncement("dailyLineup");
   const allowUpdate = Boolean(options.force || options.edit);
-  if (hasFb && hasIg && hasThreads && !allowUpdate) {
+  if (hasFb && (!allowIgDaily || hasIg) && hasThreads && !allowUpdate) {
     console.log(`\n🛡️ [ZERO DUPLICATE GATE] Daily lineup announcement for ${targetDate} has ALREADY been published across ALL public social platforms!`);
     console.log(`   ⏩ Skipping to guarantee ZERO duplicate posts. Pass --edit to update supported platforms in-place.\n`);
     return { success: true, skipped: true, morningBook, eveningBook };
@@ -962,6 +968,7 @@ export async function publishDailyLineupAnnouncement(options: AnnouncementOption
     threadsText: captions.captionThreads,
     existing: existingLineup,
     allowEdit: allowUpdate,
+    skipInstagram: !allowIgDaily,
     dryRun: options.dryRun,
   });
   const errors = synced.errors;
@@ -1464,8 +1471,9 @@ export async function publishPostPublishWaveAnnouncement(
   console.log(`   - Instagram Feed  : ${hasIg ? `✔ LIVE (${existingWave.instagram?.id})` : "⏳ PENDING"}`);
   console.log(`   - Meta Threads    : ${hasThreads ? `✔ LIVE (${existingWave.threads?.postId || existingWave.threads?.id})` : "⏳ PENDING"}`);
 
+  const allowIgDaily = shouldAllowInstagramAnnouncement("dailyLineup");
   const allowUpdate = Boolean(options.force || options.edit);
-  if (hasFb && hasIg && hasThreads && !allowUpdate) {
+  if (hasFb && (!allowIgDaily || hasIg) && hasThreads && !allowUpdate) {
     console.log(`\n🛡️ [ZERO DUPLICATE GATE] Wave ${wave} for ${targetBook} (${targetDate}) already live across all channels. Skipping.`);
     return { success: true, skipped: true, targetBook, lang: targetLang };
   }
@@ -1512,6 +1520,7 @@ export async function publishPostPublishWaveAnnouncement(
     threadsLinkUrl: copy.threadsLinkUrl,
     existing: existingWave,
     allowEdit: allowUpdate,
+    skipInstagram: !shouldAllowInstagramAnnouncement(wave === 2 ? "wave2" : "wave3"),
     dryRun: options.dryRun,
   });
   const errors = synced.errors;
@@ -1937,6 +1946,7 @@ export async function publishFullMotionAnnouncement(
     threadsText: captionTh,
     existing,
     allowEdit: allowUpdate,
+    skipInstagram: !shouldAllowInstagramAnnouncement("motion"),
     dryRun: options.dryRun,
   });
   const errors = synced.errors;
@@ -2150,6 +2160,7 @@ export async function publishAnnouncement(options: AnnouncementOptions = {}): Pr
     threadsText: captionThreads,
     existing: existingAnn,
     allowEdit: allowUpdate,
+    skipInstagram: !shouldAllowInstagramAnnouncement("dailyLineup"),
     dryRun: options.dryRun,
   });
   const errors = synced.errors;
