@@ -15,6 +15,11 @@ import {
   isRetryableInstagramPublishError,
   publishInstagramContainerWithRetry,
 } from "./publish-instagram-post";
+import {
+  evaluateInstagramThrottle,
+  isInstagramActionBlockedError,
+  shouldAllowInstagramAnnouncement,
+} from "./lib/instagram-throttle";
 
 function assertNoStaticPortalUrl(label: string, texts: Array<string | undefined>): void {
   const combined = texts.filter(Boolean).join("\n");
@@ -295,7 +300,63 @@ async function runTests(): Promise<void> {
   assert.equal(publishAttempts, 3, "Should retry transient 9007/2207027 until media is ready");
   assert.equal(pollCalls, 2, "Should re-poll container readiness before each retry");
 
-  console.log("✅ All announcement summary/moral/social-only/edit-in-place/IG-retry unit checks passed!");
+  // Instagram frequency throttling & Meta 2207051 circuit-breaker tests
+  const policy = {
+    maxPostsPerDay: 2,
+    minIntervalMinutes: 240,
+    blockCooldownHours: 48,
+    announcementMode: "off" as const,
+  };
+  const now = new Date("2026-11-19T06:00:00.000Z"); // 13:00 WIB
+  assert.equal(evaluateInstagramThrottle({ history: [] }, policy, now).allowed, true);
+  assert.equal(
+    evaluateInstagramThrottle(
+      { blockedUntil: "2026-11-21T01:14:00.000Z", blockReason: "Meta 2207051", history: [] },
+      policy,
+      now
+    ).reason,
+    "cooldown_2207051"
+  );
+  assert.equal(
+    evaluateInstagramThrottle(
+      { history: [{ publishedAt: "2026-11-19T04:00:00.000Z", kind: "reel" }] },
+      policy,
+      now
+    ).reason,
+    "min_interval"
+  );
+  assert.equal(
+    evaluateInstagramThrottle(
+      {
+        history: [
+          { publishedAt: "2026-11-19T00:15:00.000Z", kind: "reel" },
+          { publishedAt: "2026-11-19T05:00:00.000Z", kind: "reel" },
+        ],
+      },
+      policy,
+      new Date("2026-11-19T12:00:00.000Z")
+    ).reason,
+    "daily_cap"
+  );
+  assert.equal(isInstagramActionBlockedError({ code: 4, error_subcode: 2207051 }), true);
+  assert.equal(shouldAllowInstagramAnnouncement("dailyLineup", "off"), false);
+  assert.equal(shouldAllowInstagramAnnouncement("dailyLineup", "wave1-only"), true);
+  assert.equal(shouldAllowInstagramAnnouncement("wave2", "wave1-only"), false);
+
+  const throttledRes = await syncAnnouncementPlatforms({
+    label: "ThrottleTest",
+    imagePaths: ["/tmp/dummy.png"],
+    facebookCaption: "FB OK",
+    instagramCaption: "IG Skipped",
+    threadsText: "Threads OK",
+    skipInstagram: true,
+    dryRun: false,
+    clients: mockClients,
+  });
+  assert.equal(throttledRes.errors.length, 0);
+  assert.equal(calls.igCreate, 0, "Instagram must not be called when skipInstagram is true");
+
+  console.log("✅ All announcement summary/moral/social-only/edit-in-place/IG-retry/IG-throttle unit checks passed!");
 }
 
 runTests().catch((err) => {

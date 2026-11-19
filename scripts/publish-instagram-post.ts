@@ -4,6 +4,12 @@ import path from "path";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { generateBilingualSocialKit } from "./generate-social-promo.js";
 import { buildSocialEngagementCta } from "./lib/seo-formatter";
+import {
+  checkInstagramPublishAllowed,
+  isInstagramActionBlockedError,
+  recordInstagramActionBlock,
+  recordInstagramPublishSuccess,
+} from "./lib/instagram-throttle";
 
 const META_CONFIG_PATH = path.resolve("./config/meta-config.json");
 const R2_CONFIG_PATH = path.resolve("./config/r2-config.json");
@@ -212,6 +218,12 @@ export async function publishInstagramFeedPhoto(options: {
     return { success: true, dryRun: true };
   }
 
+  const throttle = await checkInstagramPublishAllowed();
+  if (!throttle.allowed) {
+    console.log(`\n🛡️ [IG THROTTLE] Skipping Instagram Feed post: ${throttle.message}`);
+    return { success: false, skipped: true, throttleReason: throttle.reason };
+  }
+
   // 1. Upload to Cloudflare R2
   console.log(`\n☁️ Step 1: Uploading image to Cloudflare R2 CDN...`);
   const { publicUrl, cleanup } = await uploadImageToR2(options.imagePath, "ig-feed");
@@ -271,8 +283,15 @@ export async function publishInstagramFeedPhoto(options: {
 
     console.log(`\n🎉 SUCCESS! INSTAGRAM POST IS LIVE!`);
     console.log(`🔗 Link: ${permalink}\n`);
+    await recordInstagramPublishSuccess({ kind: "feed", mediaId });
 
     return { success: true, mediaId, permalink };
+  } catch (err: any) {
+    if (isInstagramActionBlockedError(err)) {
+      const until = await recordInstagramActionBlock(err.message || "Meta 2207051");
+      console.warn(`🛡️ [IG COOLDOWN] Activated Instagram action-block cooldown until ${until}.`);
+    }
+    throw err;
   } finally {
     // 6. Cleanup R2 object
     console.log(`🧹 Cleaning up temporary CDN image...`);
@@ -299,6 +318,12 @@ export async function publishInstagramCarousel(options: {
   if (options.dryRun) {
     console.log("\n[DRY RUN] Caption Preview:\n", caption);
     return { success: true, dryRun: true };
+  }
+
+  const throttle = await checkInstagramPublishAllowed();
+  if (!throttle.allowed) {
+    console.log(`\n🛡️ [IG THROTTLE] Skipping Instagram Feed post: ${throttle.message}`);
+    return { success: false, skipped: true, throttleReason: throttle.reason };
   }
 
   const cleanups: Array<() => Promise<void>> = [];
@@ -393,8 +418,15 @@ export async function publishInstagramCarousel(options: {
 
     console.log(`\n🎉 SUCCESS! INSTAGRAM CAROUSEL IS LIVE!`);
     console.log(`🔗 Link: ${permalink}\n`);
+    await recordInstagramPublishSuccess({ kind: "carousel", mediaId });
 
     return { success: true, mediaId, permalink };
+  } catch (err: any) {
+    if (isInstagramActionBlockedError(err)) {
+      const until = await recordInstagramActionBlock(err.message || "Meta 2207051");
+      console.warn(`🛡️ [IG COOLDOWN] Activated Instagram action-block cooldown until ${until}.`);
+    }
+    throw err;
   } finally {
     console.log(`🧹 Cleaning up temporary CDN images...`);
     for (const c of cleanups) {
