@@ -11,6 +11,10 @@ import {
   SocialPlatformClients,
   syncAnnouncementPlatforms,
 } from "./publish-announcement";
+import {
+  isRetryableInstagramPublishError,
+  publishInstagramContainerWithRetry,
+} from "./publish-instagram-post";
 
 function assertNoStaticPortalUrl(label: string, texts: Array<string | undefined>): void {
   const combined = texts.filter(Boolean).join("\n");
@@ -242,7 +246,56 @@ async function runTests(): Promise<void> {
   assert.equal(editRes.facebook?.status, "updated");
   assert.equal(editRes.instagram?.id, "17998049877051764");
 
-  console.log("✅ All announcement summary/moral/social-only/edit-in-place unit checks passed!");
+  // Instagram container publish retry on Meta code 9007 / subcode 2207027 readiness lag
+  assert.equal(
+    isRetryableInstagramPublishError({
+      message: "Media ID is not available",
+      code: 9007,
+      error_subcode: 2207027,
+      is_transient: false,
+    }),
+    true
+  );
+  assert.equal(isRetryableInstagramPublishError({ code: 190, message: "Invalid OAuth token" }), false);
+
+  let publishAttempts = 0;
+  let pollCalls = 0;
+  const mockFetch = (async () => {
+    publishAttempts++;
+    if (publishAttempts < 3) {
+      return {
+        json: async () => ({
+          error: {
+            message: "Media ID is not available",
+            code: 9007,
+            error_subcode: 2207027,
+            is_transient: false,
+            error_user_msg: "The media is not ready to be published. Please wait a moment.",
+          },
+        }),
+      } as any;
+    }
+    return { json: async () => ({ id: "1809999999999" }) } as any;
+  }) as typeof fetch;
+
+  const publishedId = await publishInstagramContainerWithRetry({
+    instagramUserId: "ig_user",
+    containerId: "container_123",
+    accessToken: "tok",
+    label: "Instagram Carousel",
+    maxAttempts: 4,
+    baseDelayMs: 1,
+    fetchFn: mockFetch,
+    sleepFn: async () => {},
+    pollFn: async () => {
+      pollCalls++;
+    },
+  });
+  assert.equal(publishedId, "1809999999999");
+  assert.equal(publishAttempts, 3, "Should retry transient 9007/2207027 until media is ready");
+  assert.equal(pollCalls, 2, "Should re-poll container readiness before each retry");
+
+  console.log("✅ All announcement summary/moral/social-only/edit-in-place/IG-retry unit checks passed!");
 }
 
 runTests().catch((err) => {
