@@ -100,6 +100,74 @@ async function pollInstagramContainer(containerId: string, accessToken: string):
   throw new Error(`Timed out waiting for Instagram container ${containerId}`);
 }
 
+export function isRetryableInstagramPublishError(error: any): boolean {
+  if (!error || typeof error !== "object") return false;
+  return (
+    error.code === 9007 ||
+    error.error_subcode === 2207027 ||
+    error.is_transient === true ||
+    /not ready to be published|Media ID is not available/i.test(String(error.message || "") + " " + String(error.error_user_msg || ""))
+  );
+}
+
+export async function publishInstagramContainerWithRetry(params: {
+  instagramUserId: string;
+  containerId: string;
+  accessToken: string;
+  label: string;
+  maxAttempts?: number;
+  baseDelayMs?: number;
+  fetchFn?: typeof fetch;
+  sleepFn?: (ms: number) => Promise<void>;
+  pollFn?: (containerId: string, accessToken: string) => Promise<void>;
+}): Promise<string> {
+  const {
+    instagramUserId,
+    containerId,
+    accessToken,
+    label,
+    maxAttempts = 5,
+    baseDelayMs = 4000,
+    fetchFn = fetch,
+    sleepFn = (ms) => new Promise((r) => setTimeout(r, ms)),
+    pollFn = pollInstagramContainer,
+  } = params;
+
+  let lastError: any = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const pubRes = await fetchFn(
+      `https://graph.facebook.com/v21.0/${instagramUserId}/media_publish`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creation_id: containerId,
+          access_token: accessToken,
+        }),
+      }
+    );
+
+    const pubData = await pubRes.json();
+    if (!pubData.error && pubData.id) {
+      return pubData.id;
+    }
+
+    lastError = pubData.error || pubData;
+    if (!isRetryableInstagramPublishError(pubData.error) || attempt === maxAttempts) {
+      throw new Error(`Failed to publish ${label}: ${JSON.stringify(lastError)}`);
+    }
+
+    const waitMs = baseDelayMs + (attempt - 1) * 2000;
+    console.warn(
+      `   ⚠️ Instagram container not ready on publish attempt ${attempt}/${maxAttempts} (code ${pubData.error?.code}/${pubData.error?.error_subcode}). Waiting ${(waitMs / 1000).toFixed(0)}s & re-polling...`
+    );
+    await sleepFn(waitMs);
+    await pollFn(containerId, accessToken);
+  }
+
+  throw new Error(`Failed to publish ${label}: ${JSON.stringify(lastError)}`);
+}
+
 export const DEFAULT_LAUNCH_CAPTION = `🎉 HOREEE! Rumah Dongeng @zayn.storybook resmi hadir! 🎈✨
 Tempat petualangan ceria & pengantar tidur nyenyak buat si kecil tercinta 🌙💤
 
@@ -179,24 +247,12 @@ export async function publishInstagramFeedPhoto(options: {
 
     // 4. Publish Container
     console.log(`\n📢 Step 4: Publishing to Instagram Feed...`);
-    const pubRes = await fetch(
-      `https://graph.facebook.com/v21.0/${meta.instagramUserId}/media_publish`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          creation_id: containerId,
-          access_token: meta.pageAccessToken,
-        }),
-      }
-    );
-
-    const pubData = await pubRes.json();
-    if (pubData.error) {
-      throw new Error(`Failed to publish Instagram media: ${JSON.stringify(pubData.error)}`);
-    }
-
-    const mediaId = pubData.id;
+    const mediaId = await publishInstagramContainerWithRetry({
+      instagramUserId: meta.instagramUserId,
+      containerId,
+      accessToken: meta.pageAccessToken,
+      label: "Instagram media",
+    });
     console.log(`   ✔ Published Media ID: ${mediaId}`);
 
     // 5. Query Permalink
@@ -278,7 +334,8 @@ export async function publishInstagramCarousel(options: {
       }
 
       itemContainerIds.push(itemData.id);
-      console.log(`   ✔ Slide ${i + 1} Container ID: ${itemData.id}`);
+      console.log(`   ✔ Slide ${i + 1} Container ID: ${itemData.id} — waiting for readiness...`);
+      await pollInstagramContainer(itemData.id, meta.pageAccessToken);
     }
 
     // 2. Create Carousel Container
@@ -305,30 +362,19 @@ export async function publishInstagramCarousel(options: {
     const carouselId = carouselData.id;
     console.log(`   ✔ Carousel Container ID: ${carouselId}`);
 
-    // 3. Poll Carousel Container
+    // 3. Poll Carousel Container + brief propagation settle pause
     console.log(`\n⚙️ Step 3: Waiting for Carousel container readiness...`);
     await pollInstagramContainer(carouselId, meta.pageAccessToken);
+    await new Promise((r) => setTimeout(r, 1500));
 
-    // 4. Publish Carousel
+    // 4. Publish Carousel (with automatic retry on Meta 9007/2207027 transient readiness lag)
     console.log(`\n📢 Step 4: Publishing Carousel to Instagram Feed...`);
-    const pubRes = await fetch(
-      `https://graph.facebook.com/v21.0/${meta.instagramUserId}/media_publish`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          creation_id: carouselId,
-          access_token: meta.pageAccessToken,
-        }),
-      }
-    );
-
-    const pubData = await pubRes.json();
-    if (pubData.error) {
-      throw new Error(`Failed to publish Instagram Carousel: ${JSON.stringify(pubData.error)}`);
-    }
-
-    const mediaId = pubData.id;
+    const mediaId = await publishInstagramContainerWithRetry({
+      instagramUserId: meta.instagramUserId,
+      containerId: carouselId,
+      accessToken: meta.pageAccessToken,
+      label: "Instagram Carousel",
+    });
     console.log(`   ✔ Published Carousel Media ID: ${mediaId}`);
 
     // 5. Query Permalink
