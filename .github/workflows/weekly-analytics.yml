@@ -138,11 +138,14 @@ jobs:
 
       - name: 🚨 Notify Telegram on Workflow Failure
         if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
         run: |
-          npx tsx scripts/notify-telegram.ts --failure \
+          npx --yes tsx scripts/notify-telegram.ts --failure \
             --platform "Weekly Performance Analytics CI/CD" \
             --error "Weekly performance analytics workflow failed during execution. Check GitHub Actions logs." \
-            --run-id "${{ github.run_id }}"
+            --run-id "${{ github.run_id }}" || true
 
       - name: 📝 Post Step Summary
         if: always()
