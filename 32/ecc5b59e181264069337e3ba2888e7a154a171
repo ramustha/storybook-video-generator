@@ -1,0 +1,37 @@
+.github/workflows/daily-story-ingest.yml
+  8dc412b60991b4a0 62
+.github/workflows/weekly-analytics.yml
+  8dc412b60991b4a0 141-143,145,148
+.github/workflows/daily-broadcast.yml
+  8dc412b60991b4a0 82,338-340,342,348
+.github/workflows/threads-broadcast.yml
+  8dc412b60991b4a0 77
+.github/workflows/buffer-prerender.yml
+  8dc412b60991b4a0 47
+.github/workflows/cloud-render.yml
+  8dc412b60991b4a0 65
+.github/workflows/edu-motion-preview.yml
+  8dc412b60991b4a0 89
+scripts/ci/install-ubuntu-deps.sh
+  8dc412b60991b4a0 1-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "32ecc5b59e181264069337e3ba2888e7a154a171",
+  "prompts": {
+    "8dc412b60991b4a0": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "cd4355a8-732b-4d67-af61-b0aa06d9703f",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 72,
+      "total_deletions": 22,
+      "accepted_lines": 72,
+      "overriden_lines": 0
+    }
+  }
+}
