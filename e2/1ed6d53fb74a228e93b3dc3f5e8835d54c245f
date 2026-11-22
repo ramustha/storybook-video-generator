@@ -1,0 +1,29 @@
+.github/workflows/daily-story-ingest.yml
+  081a4d99c77082cb 159,169-173,176
+scripts/notify-telegram.ts
+  081a4d99c77082cb 679,745,760,762,766-771
+scripts/check-token-health.ts
+  081a4d99c77082cb 5-56,70-74,78-81,95,99,101-106,110,121-129,138-140,142-145,161,185-194,209-212,220-221,223-228,237,243-521,525-527,529-530,532-538,541,544,551-557
+scripts/test-token-health.ts
+  081a4d99c77082cb 1-261
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "e21ed6d53fb74a228e93b3dc3f5e8835d54c245f",
+  "prompts": {
+    "081a4d99c77082cb": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "d0ce2cf6-d4d6-496c-88b0-88b745dc4c75",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 695,
+      "total_deletions": 44,
+      "accepted_lines": 694,
+      "overriden_lines": 0
+    }
+  }
+}
