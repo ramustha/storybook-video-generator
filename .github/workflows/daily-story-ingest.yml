@@ -156,7 +156,7 @@ jobs:
           npm run docs:portal || true
           npx --yes wrangler pages deploy docs --project-name storybook-catalog --branch main --commit-dirty=true || true
 
-      - name: 🔑 Check OAuth & Social Token Health
+      - name: 🔑 Check OAuth, AI & Cloudflare Token Health
         if: ${{ inputs.dry_run != true }}
         env:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
@@ -166,9 +166,14 @@ jobs:
           META_APP_ID: ${{ secrets.PERSONAL_META_APP_ID }}
           META_APP_SECRET: ${{ secrets.PERSONAL_META_APP_SECRET }}
           THREADS_ACCESS_TOKEN: ${{ secrets.PERSONAL_THREADS_ACCESS_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.PERSONAL_GEMINI_API_KEY || secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.PERSONAL_GROQ_API_KEY || secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.PERSONAL_TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.PERSONAL_TELEGRAM_CHAT_ID || secrets.TELEGRAM_CHAT_ID }}
-        run: npx tsx scripts/check-token-health.ts || true
+        run: npx tsx scripts/check-token-health.ts --strict || true
 
       - name: 🚨 Notify Telegram on Ingestion Failure
         if: failure()
