@@ -676,7 +676,7 @@ export interface IngestSummaryOptions {
 
 export interface TokenRotationIssue {
   platform: string;
-  status: "EXPIRED" | "EXPIRING_SOON" | "INVALID";
+  status: "EXPIRED" | "EXPIRING_SOON" | "INVALID" | "MISSING" | "QUOTA_EXCEEDED" | "LOW_CREDIT";
   detail: string;
   actionCommand: string;
 }
@@ -742,7 +742,7 @@ export async function notifyTelegramIngestSummary(options: IngestSummaryOptions)
 }
 
 /**
- * Alerts Telegram when any OAuth/platform token is expired, invalid, or expiring soon.
+ * Alerts Telegram when any OAuth/social token, AI provider key, or Cloudflare API token is missing, invalid, expired, expiring soon, or low on quota/credit.
  */
 export async function notifyTelegramTokenRotation(
   issues: TokenRotationIssue[],
@@ -757,13 +757,18 @@ export async function notifyTelegramTokenRotation(
 
   const wibTime = formatWibTimestamp(new Date(), "id");
   const lines: string[] = [
-    `🔑 <b>Zayn Storybook: Rotasi Token Diperlukan!</b> ⚠️\n`,
+    `🔑 <b>Zayn Storybook: Rotasi Token / AI Key Diperlukan!</b> ⚠️\n`,
     `⏰ <b>Waktu Cek:</b> ${wibTime}`,
-    `Ditemukan kredensial API yang kedaluwarsa atau akan segera habis masa berlakunya:\n`,
+    `Ditemukan kredensial API/AI yang hilang, tidak valid, kedaluwarsa, atau hampir habis kuota/masa berlakunya:\n`,
   ];
 
   for (const issue of issues) {
-    const icon = issue.status === "EXPIRING_SOON" ? "⏳" : "🚨";
+    const icon =
+      issue.status === "EXPIRING_SOON" || issue.status === "LOW_CREDIT"
+        ? "⏳"
+        : issue.status === "MISSING"
+        ? "⚠️"
+        : "🚨";
     const safeDetail = issue.detail.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     lines.push(`${icon} <b>${issue.platform}</b> [${issue.status}]`);
     lines.push(`   • Info: ${safeDetail}`);
