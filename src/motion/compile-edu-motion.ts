@@ -521,6 +521,7 @@ async function synthesizeUniversalChapters(
     .createHash("sha256")
     .update(
       JSON.stringify({
+        syncEngineVersion: 2,
         formatMode,
         lang,
         pacing,
@@ -599,6 +600,7 @@ async function synthesizeUniversalChapters(
         outputMp3Path: rawMp3Path,
         outputWordsPath: wordsPath,
         rateOverride: pacing.rateOverride,
+        trimSilence: true,
       });
 
       const rawDurSec = probeDurationSec(ffprobe, rawMp3Path);
@@ -853,10 +855,11 @@ function buildAlt1StageCss(options: {
   .sub-word {
     display: inline-block; padding: 2px 6px; border-radius: 9px;
     font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-    font-size: 34px; font-weight: 800; line-height: 1.24; color: #F8FAFC;
-    transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+    font-size: 34px; font-weight: 800; line-height: 1.24; color: rgba(248, 250, 252, 0.76);
+    transition: background-color 90ms ease, color 90ms ease, transform 90ms ease;
   }
   body.landscape .sub-word { font-size: 38px; padding: 2px 8px; }
+  .sub-word.past { color: #FFFFFF; }
   .sub-word.active {
     background: var(--yellow); color: #03045E; transform: scale(1.06);
   }
@@ -1014,16 +1017,55 @@ const CHAPTERS = TIMELINE_DATA.chapters;
 const DUR = TIMELINE_DATA.totalDuration;
 const ALL_WORDS = [];
 const CHUNKS = [];
+function isTerminalWord(txt) {
+  return /[.!?…]+["'”’)\]]*$/.test(String(txt || "").trim());
+}
 for (const c of CHAPTERS) {
-  const ws = c.words || [];
-  ALL_WORDS.push(...ws);
-  const maxPerChunk = IS_LANDSCAPE ? 8 : 6;
-  const numChunks = Math.max(1, Math.ceil(ws.length / maxPerChunk));
-  const chunkSize = Math.ceil(ws.length / numChunks);
-  for (let i = 0; i < ws.length; i += chunkSize) {
-    const slice = ws.slice(i, i + chunkSize);
+  const rawWs = (c.words || []).map((w) => ({
+    word: w.word,
+    start: Number(w.start) || 0,
+    end: Math.max((Number(w.start) || 0) + 0.04, Number(w.end) || 0),
+    activeEnd: Math.max((Number(w.start) || 0) + 0.095, Number(w.end) || 0),
+  }));
+  for (let i = 0; i < rawWs.length; i++) {
+    const cur = rawWs[i];
+    const nxt = i + 1 < rawWs.length ? rawWs[i + 1] : null;
+    if (!nxt) {
+      cur.activeEnd = Math.max(cur.end + 0.2, cur.start + 0.095);
+    } else {
+      const gap = Math.max(0, nxt.start - cur.end);
+      if (!isTerminalWord(cur.word) && gap <= 0.32) {
+        cur.activeEnd = nxt.start;
+      } else {
+        cur.activeEnd = Math.min(nxt.start, Math.max(cur.end + 0.2, cur.start + 0.095));
+      }
+    }
+  }
+  ALL_WORDS.push(...rawWs);
+  const maxPerChunk = IS_LANDSCAPE ? 9 : 7;
+  const sentences = [];
+  let curSent = [];
+  for (let i = 0; i < rawWs.length; i++) {
+    curSent.push(rawWs[i]);
+    const nxt = i + 1 < rawWs.length ? rawWs[i + 1] : null;
+    if (!nxt || (isTerminalWord(rawWs[i].word) && (curSent.length >= 2 || nxt.start - rawWs[i].end >= 0.24))) {
+      sentences.push(curSent);
+      curSent = [];
+    }
+  }
+  const slices = [];
+  for (const sent of sentences) {
+    const numSub = Math.max(1, Math.ceil(sent.length / maxPerChunk));
+    const subSize = Math.ceil(sent.length / numSub);
+    for (let i = 0; i < sent.length; i += subSize) {
+      slices.push(sent.slice(i, i + subSize));
+    }
+  }
+  for (let sIdx = 0; sIdx < slices.length; sIdx++) {
+    const slice = slices[sIdx];
+    const nextSlice = sIdx + 1 < slices.length ? slices[sIdx + 1] : null;
     const start = Math.max(0, slice[0].start - 0.05);
-    const end = i + chunkSize < ws.length ? ws[i + chunkSize].start : c.end;
+    const end = nextSlice ? Math.max(slice[slice.length - 1].activeEnd, nextSlice[0].start - 0.02) : c.end;
     CHUNKS.push({ start, end, rows: [slice] });
   }
 }
@@ -1124,7 +1166,7 @@ function updateHostAndBubble(t) {
     if (hostPoses[key]) hostPoses[key].setAttribute("opacity", key === targetPose ? "1" : "0");
   }
 
-  const speaking = ALL_WORDS.some((w) => t >= w.start - 0.03 && t <= w.end + 0.04);
+  const speaking = ALL_WORDS.some((w) => t >= w.start - 0.02 && t <= w.activeEnd);
   const nodY = (speaking ? Math.sin(t * 5.2) * 3.2 : Math.sin(t * 2.1) * 1.4).toFixed(2);
   const nodR = (speaking ? Math.sin(t * 2.4) * 2.6 : Math.sin(t * 1.4) * 1.1).toFixed(2);
   hostHead.setAttribute("transform", "translate(0," + nodY + ") rotate(" + nodR + ")");
@@ -1154,8 +1196,10 @@ function updateHostAndBubble(t) {
   for (const row of chunk.rows) {
     html += '<div class="sub-row">';
     for (const w of row) {
-      const isAct = t >= w.start - 0.04 && t <= w.end + 0.1;
-      html += '<span class="sub-word' + (isAct ? ' active' : '') + '">' + esc(w.word) + '</span>';
+      const isAct = t >= w.start - 0.02 && t < w.activeEnd;
+      const isPast = !isAct && t >= w.end;
+      const cls = isAct ? " active" : (isPast ? " past" : "");
+      html += '<span class="sub-word' + cls + '">' + esc(w.word) + '</span>';
     }
     html += '</div>';
   }

@@ -3,6 +3,7 @@ import path from "path";
 import os from "os";
 import { execSync } from "child_process";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { alignRawWordsToManuscript } from "../src/subtitles/sync-timings";
 
 export interface WordTiming {
   word: string;
@@ -11,23 +12,6 @@ export interface WordTiming {
   speaker: string;
   speakerName: string;
   speakerColor: string;
-}
-
-function attachPunctuation(azureWords: string[], originalText: string): string[] {
-  const originalTokens = originalText.trim().split(/\s+/);
-  const clean = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9-]/g, "");
-
-  let tokenIdx = 0;
-  return azureWords.map((azWord) => {
-    for (let i = tokenIdx; i < originalTokens.length; i++) {
-      const orig = originalTokens[i];
-      if (clean(orig).includes(clean(azWord)) || clean(azWord).includes(clean(orig))) {
-        tokenIdx = i + 1;
-        return orig;
-      }
-    }
-    return azWord;
-  });
 }
 
 function assignSpeaker(bookSlug: string, lang: "id" | "en", sceneId: string, word: string, wordIndex: number, totalWords: number): {
@@ -216,24 +200,23 @@ async function synthesizeSceneAudio(bookSlug: string, storyDir: string, scene: a
       const metaItems: any[] = parsed.Metadata || [];
 
       const wordItems = metaItems.filter((item) => item.Type === "WordBoundary");
-      const totalWords = wordItems.length;
-      const rawWordTexts = wordItems.map((item) => item.Data?.text?.Text || "");
-      const punctuatedWords = attachPunctuation(rawWordTexts, text);
-
-      wordItems.forEach((item, idx) => {
-        const rawText = punctuatedWords[idx] || item.Data?.text?.Text || "";
+      const rawBoundary = wordItems.map((item) => {
         const offsetTicks = item.Data?.Offset || 0;
         const durTicks = item.Data?.Duration || 0;
+        return {
+          word: item.Data?.text?.Text || "",
+          start: Math.round((offsetTicks / 10_000_000) * 1000) / 1000,
+          end: Math.round(((offsetTicks + durTicks) / 10_000_000) * 1000) / 1000,
+        };
+      });
+      const aligned = alignRawWordsToManuscript(rawBoundary, text);
 
-        const startSec = parseFloat((offsetTicks / 10_000_000).toFixed(2));
-        const endSec = parseFloat(((offsetTicks + durTicks) / 10_000_000).toFixed(2));
-
-        const speakerMeta = assignSpeaker(bookSlug, lang, scene.sceneId, rawText, idx, totalWords);
-
+      aligned.forEach((item, idx) => {
+        const speakerMeta = assignSpeaker(bookSlug, lang, scene.sceneId, item.word, idx, aligned.length);
         words.push({
-          word: rawText,
-          start: startSec,
-          end: endSec,
+          word: item.word,
+          start: item.start,
+          end: item.end,
           ...speakerMeta,
         });
       });

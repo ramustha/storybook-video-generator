@@ -1,11 +1,16 @@
 import fs from "fs/promises";
-import { existsSync, createReadStream, createWriteStream } from "fs";
+import { existsSync } from "fs";
 import { execSync } from "child_process";
 import path from "path";
 import os from "os";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { VoiceActorRole, getVoiceActor } from "./voice-actors";
 import { resolveFfmpegBinaries } from "../motion/render-motion-stage";
+import {
+  RawBoundaryWord,
+  AlignedBoundaryWord,
+  alignRawWordsToManuscript,
+} from "../subtitles/sync-timings";
 
 export interface DialogueLine {
   speakerRole: VoiceActorRole;
@@ -30,6 +35,8 @@ export interface SceneSynthesisInput {
   outputWordsPath: string;
   /** Optional Edge TTS speaking rate override (e.g. "+0%" or "-6%") for gentler child-friendly pacing. */
   rateOverride?: string;
+  /** Trims leading and trailing Edge TTS silence for tight sentence-level assembly (e.g. Edu-Motion). */
+  trimSilence?: boolean;
 }
 
 export interface SynthesisResult {
@@ -41,24 +48,20 @@ export interface SynthesisResult {
   outputWordsPath: string;
 }
 
+function round3(val: number): number {
+  return Math.round(val * 1000) / 1000;
+}
+
 /**
- * Re-attaches punctuation marks (?, !, ., ,, ...) stripped by Azure TTS word boundary telemetry.
+ * Re-attaches manuscript punctuation and merges split hyphenated/contracted sub-words from Azure TTS word boundaries.
  */
 export function attachPunctuation(azureWords: string[], originalText: string): string[] {
-  const originalTokens = originalText.trim().split(/\s+/);
-  const clean = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9-]/g, "");
-
-  let tokenIdx = 0;
-  return azureWords.map((azWord) => {
-    for (let i = tokenIdx; i < originalTokens.length; i++) {
-      const orig = originalTokens[i];
-      if (clean(orig).includes(clean(azWord)) || clean(azWord).includes(clean(orig))) {
-        tokenIdx = i + 1;
-        return orig;
-      }
-    }
-    return azWord;
-  });
+  const dummyRaw: RawBoundaryWord[] = azureWords.map((word, idx) => ({
+    word,
+    start: idx * 0.3,
+    end: (idx + 1) * 0.3,
+  }));
+  return alignRawWordsToManuscript(dummyRaw, originalText).map((w) => w.word);
 }
 
 /**
@@ -73,42 +76,135 @@ function applyFormantScale(inputMp3Path: string, outputMp3Path: string, formantS
 }
 
 /**
- * Probes exact audio duration in seconds across macOS (`afinfo`) and Linux (`ffprobe`).
+ * Probes exact audio duration in seconds via ffprobe with macOS afinfo fallback.
  */
 function measureAudioDurationSec(audioFilePath: string, fallbackDuration: number): number {
+  try {
+    const { ffprobe } = resolveFfmpegBinaries();
+    const probeOut = execSync(
+      `${ffprobe} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioFilePath}" 2>/dev/null`
+    )
+      .toString()
+      .trim();
+    const parsedDur = parseFloat(probeOut);
+    if (Number.isFinite(parsedDur) && parsedDur > 0) {
+      return parsedDur;
+    }
+  } catch {}
   try {
     if (process.platform === "darwin") {
       const afOut = execSync(`afinfo "${audioFilePath}" 2>/dev/null`).toString();
       const m = afOut.match(/estimated duration:\s*([\d.]+)\s*sec/);
       if (m) return parseFloat(m[1]);
-    } else {
-      const { ffprobe } = resolveFfmpegBinaries();
-      const probeOut = execSync(
-        `${ffprobe} -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${audioFilePath}" 2>/dev/null`
-      )
-        .toString()
-        .trim();
-      const parsedDur = parseFloat(probeOut);
-      if (Number.isFinite(parsedDur) && parsedDur > 0) {
-        return parsedDur;
-      }
     }
   } catch {}
   return fallbackDuration;
 }
 
+function detectSpeechBoundsSec(audioFilePath: string): {
+  speechStartSec: number;
+  speechEndSec: number;
+  totalSec: number;
+} | null {
+  try {
+    const { ffmpeg } = resolveFfmpegBinaries();
+    const pcmBuf = execSync(
+      `${ffmpeg} -v error -i "${audioFilePath}" -f s16le -ac 1 -ar 16000 -`,
+      { maxBuffer: 64 * 1024 * 1024 }
+    );
+    const sampleCount = Math.floor(pcmBuf.byteLength / 2);
+    if (sampleCount < 160) return null;
+
+    const samples = new Int16Array(pcmBuf.buffer, pcmBuf.byteOffset, sampleCount);
+    const win = 80;
+    const rmsDb: number[] = [];
+    let peakDb = -100;
+
+    for (let i = 0; i + win <= sampleCount; i += win) {
+      let sumSq = 0;
+      for (let j = 0; j < win; j++) {
+        const v = samples[i + j] / 32768;
+        sumSq += v * v;
+      }
+      const db = sumSq > 1e-12 ? 20 * Math.log10(Math.sqrt(sumSq / win)) : -100;
+      rmsDb.push(db);
+      if (db > peakDb) peakDb = db;
+    }
+
+    if (peakDb < -55) return null;
+    const threshold = Math.max(-42, peakDb - 28);
+    const firstIdx = rmsDb.findIndex((d) => d >= threshold);
+    let lastIdx = -1;
+    for (let i = rmsDb.length - 1; i >= 0; i--) {
+      if (rmsDb[i] >= threshold) {
+        lastIdx = i;
+        break;
+      }
+    }
+    if (firstIdx < 0 || lastIdx < firstIdx) return null;
+
+    const totalSec = sampleCount / 16000;
+    const speechStartSec = Math.max(0, firstIdx * 0.005 - 0.01);
+    const speechEndSec = Math.min(totalSec, (lastIdx + 1) * 0.005 + 0.015);
+    return { speechStartSec, speechEndSec, totalSec };
+  } catch {
+    return null;
+  }
+}
+
+function calibrateWordsToSpeechEnvelope(
+  words: AlignedBoundaryWord[],
+  speechStartSec: number,
+  speechEndSec: number,
+  totalSec: number
+): AlignedBoundaryWord[] {
+  if (words.length === 0) return words;
+  if (words.length === 1) {
+    const s = round3(Math.max(0, speechStartSec));
+    const e = round3(Math.min(totalSec, Math.max(s + 0.09, speechEndSec)));
+    return [{ word: words[0].word, start: s, end: e }];
+  }
+
+  const origStart = words[0].start;
+  const origEnd = words[words.length - 1].end;
+  const origSpan = origEnd - origStart;
+  const targetSpan = speechEndSec - speechStartSec;
+
+  if (origSpan < 0.08 || targetSpan < 0.08) return words;
+
+  const rawShift = speechStartSec - origStart;
+  const clampedShift = Math.max(-0.22, Math.min(0.35, rawShift));
+  const targetStart = Math.max(0, origStart + clampedShift);
+
+  const rawScale = targetSpan / origSpan;
+  const clampedScale = Math.max(0.84, Math.min(1.16, rawScale));
+
+  return words.map((w) => {
+    const mappedStart = targetStart + (w.start - origStart) * clampedScale;
+    const mappedEnd = targetStart + (w.end - origStart) * clampedScale;
+    const safeStart = round3(Math.max(0, Math.min(totalSec - 0.02, mappedStart)));
+    const safeEnd = round3(Math.min(totalSec, Math.max(safeStart + 0.03, mappedEnd)));
+    return {
+      word: w.word,
+      start: safeStart,
+      end: safeEnd,
+    };
+  });
+}
+
 /**
- * Synthesizes a single dialogue line for a given speaker role with telemetry.
+ * Synthesizes a single dialogue line for a given speaker role with acoustic-calibrated word telemetry.
  */
 async function synthesizeLine(
   line: DialogueLine,
   lang: "id" | "en",
   tempDir: string,
   lineIndex: number,
-  rateOverride?: string
+  rateOverride?: string,
+  trimSilence?: boolean
 ): Promise<{
   audioPath: string;
-  durationSec: number;
+  clipDurationSec: number;
   words: WordTimingItem[];
 }> {
   const actor = getVoiceActor(line.speakerRole);
@@ -149,8 +245,8 @@ async function synthesizeLine(
         audioFilePath = shapedPath;
       }
 
-      const words: WordTimingItem[] = [];
-      let durationSec = 2.0;
+      let rawBoundaryWords: RawBoundaryWord[] = [];
+      let fallbackEndSec = 1.5;
 
       if (metadataFilePath && existsSync(metadataFilePath)) {
         try {
@@ -158,40 +254,66 @@ async function synthesizeLine(
           const parsed = JSON.parse(metaRaw);
           const metaItems: any[] = parsed.Metadata || [];
           const wordItems = metaItems.filter((m) => m.Type === "WordBoundary");
-          const rawWords = wordItems.map((m) => m.Data?.text?.Text || "");
-          const punctuated = attachPunctuation(rawWords, line.text);
-
-          wordItems.forEach((m, idx) => {
-            const rawText = punctuated[idx] || m.Data?.text?.Text || "";
+          rawBoundaryWords = wordItems.map((m) => {
             const offsetTicks = m.Data?.Offset || 0;
             const durTicks = m.Data?.Duration || 0;
-            const startSec = parseFloat((offsetTicks / 10_000_000).toFixed(2));
-            const endSec = parseFloat(((offsetTicks + durTicks) / 10_000_000).toFixed(2));
-
-            words.push({
-              word: rawText,
+            const startSec = round3(offsetTicks / 10_000_000);
+            const endSec = round3((offsetTicks + durTicks) / 10_000_000);
+            if (endSec > fallbackEndSec) fallbackEndSec = endSec;
+            return {
+              word: m.Data?.text?.Text || "",
               start: startSec,
               end: endSec,
-              speaker: actor.role,
-              speakerName,
-              speakerColor,
-            });
-
-            if (endSec > durationSec) {
-              durationSec = endSec;
-            }
+            };
           });
         } catch (e) {
           console.warn("Telemetry parse error:", e);
         }
       }
 
-      const actualAudioSec = measureAudioDurationSec(audioFilePath, durationSec + 0.5);
-      durationSec = parseFloat((actualAudioSec + 0.8).toFixed(2));
+      let alignedWords = alignRawWordsToManuscript(rawBoundaryWords, line.text);
+      let clipDurationSec = measureAudioDurationSec(audioFilePath, fallbackEndSec + 0.5);
+      let bounds = detectSpeechBoundsSec(audioFilePath);
+
+      if (trimSilence && bounds) {
+        const { ffmpeg } = resolveFfmpegBinaries();
+        const trimStart = Math.max(0, bounds.speechStartSec - 0.03);
+        const trimEnd = Math.min(bounds.totalSec, Math.max(trimStart + 0.12, bounds.speechEndSec + 0.06));
+        const trimmedPath = path.join(lineTempDir, "trimmed.mp3");
+        execSync(
+          `${ffmpeg} -y -v error -ss ${trimStart.toFixed(3)} -to ${trimEnd.toFixed(3)} -i "${audioFilePath}" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${trimmedPath}"`
+        );
+        alignedWords = alignedWords.map((w) => ({
+          word: w.word,
+          start: round3(Math.max(0, w.start - trimStart)),
+          end: round3(Math.max(0.04, w.end - trimStart)),
+        }));
+        audioFilePath = trimmedPath;
+        clipDurationSec = measureAudioDurationSec(audioFilePath, trimEnd - trimStart);
+        bounds = detectSpeechBoundsSec(audioFilePath);
+      }
+
+      if (bounds && alignedWords.length > 0) {
+        alignedWords = calibrateWordsToSpeechEnvelope(
+          alignedWords,
+          bounds.speechStartSec,
+          bounds.speechEndSec,
+          clipDurationSec
+        );
+      }
+
+      const words: WordTimingItem[] = alignedWords.map((w) => ({
+        word: w.word,
+        start: w.start,
+        end: w.end,
+        speaker: actor.role,
+        speakerName,
+        speakerColor,
+      }));
 
       return {
         audioPath: audioFilePath,
-        durationSec,
+        clipDurationSec,
         words,
       };
     } catch (err: any) {
@@ -207,20 +329,42 @@ async function synthesizeLine(
 }
 
 /**
- * Combines multiple MP3 files sequentially.
+ * Concatenates multiple MP3 dialogue lines via FFmpeg with a natural inter-speaker breath pause.
  */
-async function concatenateMp3Files(inputPaths: string[], outputPath: string): Promise<void> {
-  const writeStream = createWriteStream(outputPath);
-  for (const p of inputPaths) {
-    const data = await fs.readFile(p);
-    writeStream.write(data);
+async function concatenateMp3FilesWithPause(
+  inputPaths: string[],
+  outputPath: string,
+  tempDir: string,
+  pauseSec: number
+): Promise<number> {
+  const { ffmpeg } = resolveFfmpegBinaries();
+  const pauseMp3 = path.join(tempDir, "inter_line_pause.mp3");
+  execSync(
+    `${ffmpeg} -y -v error -f lavfi -i anullsrc=r=24000:cl=mono -t ${pauseSec.toFixed(3)} -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${pauseMp3}"`
+  );
+  const actualPauseSec = measureAudioDurationSec(pauseMp3, pauseSec);
+
+  const concatEntries: string[] = [];
+  for (let i = 0; i < inputPaths.length; i++) {
+    const escaped = inputPaths[i].replace(/'/g, "'\\''");
+    concatEntries.push(`file '${escaped}'`);
+    if (i < inputPaths.length - 1) {
+      const escapedPause = pauseMp3.replace(/'/g, "'\\''");
+      concatEntries.push(`file '${escapedPause}'`);
+    }
   }
-  await new Promise((resolve) => writeStream.end(resolve));
+
+  const listPath = path.join(tempDir, "dialogue_concat.txt");
+  await fs.writeFile(listPath, concatEntries.join("\n"), "utf-8");
+  execSync(
+    `${ffmpeg} -y -v error -f concat -safe 0 -i "${listPath}" -ar 24000 -ac 1 -c:a libmp3lame -b:a 96k "${outputPath}"`
+  );
+  return actualPauseSec;
 }
 
 /**
  * Synthesizes a scene with one or multiple dialogue lines across different voice actors.
- * Automatically aligns word boundaries and merges audio segments.
+ * Automatically aligns word boundaries to acoustic speech bounds and merges audio segments without drift.
  */
 export async function synthesizeSceneVoice(input: SceneSynthesisInput): Promise<SynthesisResult> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), `tts-scene-${input.sceneId}-`));
@@ -228,41 +372,53 @@ export async function synthesizeSceneVoice(input: SceneSynthesisInput): Promise<
   try {
     const segmentResults = [];
     for (let i = 0; i < input.lines.length; i++) {
-      const lineRes = await synthesizeLine(input.lines[i], input.lang, tempDir, i, input.rateOverride);
+      const lineRes = await synthesizeLine(
+        input.lines[i],
+        input.lang,
+        tempDir,
+        i,
+        input.rateOverride,
+        input.trimSilence
+      );
       segmentResults.push(lineRes);
     }
 
-    // Merge word timings with sequential time offsets
-    const mergedWords: WordTimingItem[] = [];
-    let currentOffset = 0;
-
-    for (const seg of segmentResults) {
-      for (const w of seg.words) {
-        mergedWords.push({
-          ...w,
-          start: parseFloat((w.start + currentOffset).toFixed(2)),
-          end: parseFloat((w.end + currentOffset).toFixed(2)),
-        });
-      }
-      currentOffset += seg.durationSec;
-    }
-
-    const totalDuration = parseFloat(currentOffset.toFixed(2));
-
-    // Ensure output directories exist
     await fs.mkdir(path.dirname(input.outputMp3Path), { recursive: true });
     await fs.mkdir(path.dirname(input.outputWordsPath), { recursive: true });
 
+    let interLinePauseSec = 0;
     if (segmentResults.length === 1) {
-      // Single line direct copy
       await fs.copyFile(segmentResults[0].audioPath, input.outputMp3Path);
     } else {
-      // Multi-speaker dialogue concatenation
       const audioFiles = segmentResults.map((s) => s.audioPath);
-      await concatenateMp3Files(audioFiles, input.outputMp3Path);
+      interLinePauseSec = await concatenateMp3FilesWithPause(
+        audioFiles,
+        input.outputMp3Path,
+        tempDir,
+        0.26
+      );
     }
 
-    // Write merged word timings
+    const mergedWords: WordTimingItem[] = [];
+    let currentOffset = 0;
+
+    for (let i = 0; i < segmentResults.length; i++) {
+      const seg = segmentResults[i];
+      for (const w of seg.words) {
+        mergedWords.push({
+          ...w,
+          start: round3(w.start + currentOffset),
+          end: round3(w.end + currentOffset),
+        });
+      }
+      currentOffset += seg.clipDurationSec + (i < segmentResults.length - 1 ? interLinePauseSec : 0);
+    }
+
+    const finalClipDur = measureAudioDurationSec(input.outputMp3Path, currentOffset);
+    const totalDuration = input.trimSilence
+      ? round3(finalClipDur)
+      : parseFloat((finalClipDur + 0.8).toFixed(2));
+
     await fs.writeFile(input.outputWordsPath, JSON.stringify({ words: mergedWords }, null, 2));
 
     return {
@@ -274,7 +430,6 @@ export async function synthesizeSceneVoice(input: SceneSynthesisInput): Promise<
       outputWordsPath: input.outputWordsPath,
     };
   } finally {
-    // Cleanup temp directory
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
     } catch {}

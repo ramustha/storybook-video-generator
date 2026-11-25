@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
+import { alignRawWordsToManuscript } from "../src/subtitles/sync-timings";
 
 export interface WordTiming {
   word: string;
@@ -10,23 +11,6 @@ export interface WordTiming {
   speaker: "guru" | "budi" | "narator";
   speakerName: string;
   speakerColor: string;
-}
-
-function attachPunctuation(azureWords: string[], originalText: string): string[] {
-  const originalTokens = originalText.trim().split(/\s+/);
-  const clean = (s: string) => s.toLowerCase().replace(/[^a-zA-Z0-9-]/g, "");
-
-  let tokenIdx = 0;
-  return azureWords.map((azWord) => {
-    for (let i = tokenIdx; i < originalTokens.length; i++) {
-      const orig = originalTokens[i];
-      if (clean(orig).includes(clean(azWord)) || clean(azWord).includes(clean(orig))) {
-        tokenIdx = i + 1;
-        return orig;
-      }
-    }
-    return azWord;
-  });
 }
 
 function assignSpeaker(sceneId: string, word: string, wordIndex: number): {
@@ -139,21 +123,23 @@ async function main() {
         const metaItems: any[] = parsed.Metadata || [];
 
         const wordItems = metaItems.filter((m) => m.Type === "WordBoundary");
-        const rawWordTexts = wordItems.map((m) => m.Data?.text?.Text || "");
-        const punctuatedWords = attachPunctuation(rawWordTexts, item.text);
-
-        wordItems.forEach((m, idx) => {
-          const rawText = punctuatedWords[idx] || m.Data?.text?.Text || "";
+        const rawBoundary = wordItems.map((m) => {
           const offsetTicks = m.Data?.Offset || 0;
           const durTicks = m.Data?.Duration || 0;
-          const startSec = parseFloat((offsetTicks / 10_000_000).toFixed(2));
-          const endSec = parseFloat(((offsetTicks + durTicks) / 10_000_000).toFixed(2));
-          const speakerMeta = assignSpeaker(item.sceneId, rawText, idx);
+          return {
+            word: m.Data?.text?.Text || "",
+            start: Math.round((offsetTicks / 10_000_000) * 1000) / 1000,
+            end: Math.round(((offsetTicks + durTicks) / 10_000_000) * 1000) / 1000,
+          };
+        });
+        const aligned = alignRawWordsToManuscript(rawBoundary, item.text);
 
+        aligned.forEach((w, idx) => {
+          const speakerMeta = assignSpeaker(item.sceneId, w.word, idx);
           words.push({
-            word: rawText,
-            start: startSec,
-            end: endSec,
+            word: w.word,
+            start: w.start,
+            end: w.end,
             ...speakerMeta,
           });
         });
