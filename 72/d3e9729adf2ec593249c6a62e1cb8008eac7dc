@@ -1,0 +1,41 @@
+scripts/synthesize-english.ts
+  6bcdcc9d34e6dd81 5,126,129-135,137-138,140-142
+scripts/manage-story.ts
+  6bcdcc9d34e6dd81 6,203,206-212,214-215,217-219
+src/audio/tts-engine.ts
+  6bcdcc9d34e6dd81 2,9-13,38-39,51-54,56,59-64,79,82-93,104-192,196,203-204,207,248-249,257,260-264,267,274-302,305-312,316,332,334-354,356-362,367,375-382,386-399,405-406,410-411,414,417-420
+scripts/synthesize-pisang.ts
+  6bcdcc9d34e6dd81 7,266,269-275,277,279-281
+src/motion/compile-edu-motion.ts
+  6bcdcc9d34e6dd81 524,603,858-859,862,1020-1022,1024-1066,1068,1169,1199-1202
+scripts/render-book.ts
+  6bcdcc9d34e6dd81 10,137-160
+src/subtitles/sync-timings.ts
+  6bcdcc9d34e6dd81 1-518
+scripts/test-subtitle-sync.ts
+  6bcdcc9d34e6dd81 1-267
+src/remotion/components/KineticSubtitles.tsx
+  6bcdcc9d34e6dd81 3-7,77-81,83,85-91,99-101,103-105,114-115,168-169,176-179,191,199
+src/remotion/components/MoralScene.tsx
+  6bcdcc9d34e6dd81 4,56-57,298-301,306-308,312,314-315,319,327
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "72d3e9729adf2ec593249c6a62e1cb8008eac7dc",
+  "prompts": {
+    "6bcdcc9d34e6dd81": {
+      "agent_id": {
+        "tool": "gemini",
+        "id": "e0a569cb-5526-4ef0-86ee-937e120adf4e",
+        "model": "unknown"
+      },
+      "human_author": "ramustha <ramusthanest@gmail.com>",
+      "messages": [],
+      "total_additions": 1200,
+      "total_deletions": 295,
+      "accepted_lines": 1200,
+      "overriden_lines": 0
+    }
+  }
+}
