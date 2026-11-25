@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { WordTiming } from "./KineticSubtitles";
+import { normalizeKaraokeWords, resolveActiveWordState } from "../../subtitles/sync-timings";
 
 interface MoralSceneProps {
   scene: any;
@@ -52,8 +53,8 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
     ? "💖 Thank you for watching! See you in the next adventure! ✨"
     : "💖 Terima kasih sudah menonton! Sampai jumpa di dongeng seru berikutnya! ✨";
 
-  // Active word detection for kinetic karaoke text highlight
-  const activeWordIdx = words.findIndex((w) => currentTime >= w.start && currentTime <= w.end);
+  const normalizedWords = useMemo(() => normalizeKaraokeWords(words || []), [words]);
+  const wordState = resolveActiveWordState(normalizedWords, currentTime);
 
   return (
     <div
@@ -294,29 +295,28 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
                 marginBottom: "18px",
               }}
             >
-              {words && words.length > 0 ? (
-                words.map((item, idx) => {
-                  const isActive = currentTime >= item.start && currentTime <= item.end;
-                  const isPast = currentTime > item.end;
+              {normalizedWords.length > 0 ? (
+                normalizedWords.map((item, idx) => {
+                  const isActive = wordState.isSpeakingNow && wordState.activeWord === item;
+                  const isPast = !isActive && currentTime >= item.phoneticEnd;
 
                   let bounceY = 0;
                   let wordScale = 1.0;
                   if (isActive) {
-                    const wordDuration = Math.max(0.08, item.end - item.start);
-                    const progress = Math.min(1, Math.max(0, (currentTime - item.start) / wordDuration));
-                    bounceY = -Math.sin(progress * Math.PI) * 6;
-                    wordScale = 1.0 + Math.sin(progress * Math.PI) * 0.16;
+                    const wave = Math.sin(wordState.wordProgress * Math.PI);
+                    bounceY = -wave * 6;
+                    wordScale = 1.0 + wave * 0.16;
                   }
 
                   const wordColor = isActive
-                    ? "#B45309" // Rich warm amber when spoken
+                    ? "#B45309"
                     : isPast
-                    ? "#0F172A" // Solid crisp slate when already spoken
-                    : "#475569"; // Readable slate for upcoming words
+                    ? "#0F172A"
+                    : "#475569";
 
                   return (
                     <span
-                      key={`${item.word}-${idx}`}
+                      key={`${item.word}-${item.start}-${idx}`}
                       style={{
                         fontSize: isVertical ? "32px" : "34px",
                         fontWeight: isActive ? 900 : isPast ? 800 : 700,
@@ -324,7 +324,7 @@ export const MoralScene: React.FC<MoralSceneProps> = ({ scene, book, isVertical,
                         color: wordColor,
                         transform: `translateY(${bounceY}px) scale(${wordScale})`,
                         display: "inline-block",
-                        transition: "transform 0.05s ease-out, color 0.1s ease",
+                        transition: "transform 0.05s ease-out, color 0.08s ease",
                         textShadow: isActive ? "0 0 12px rgba(245, 158, 11, 0.45)" : "none",
                       }}
                     >

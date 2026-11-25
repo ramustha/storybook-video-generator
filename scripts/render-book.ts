@@ -7,6 +7,7 @@ import { execSync } from "child_process";
 import { db } from "./lib/db";
 import { getOptimalRenderOptions } from "./lib/render-options";
 import { renderEduMotionVideo, resolveFfmpegBinaries } from "../src/motion/render-motion-stage";
+import { alignRawWordsToManuscript } from "../src/subtitles/sync-timings";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -133,7 +134,30 @@ async function main() {
         }
       }
 
-      // If no aligned words file exists, synthesize word timings from narration text so subtitles NEVER disappear
+      if (loadedWords.length > 0 && scene.audio?.text && !scene.audio?.lines) {
+        const cleanTarget = String(scene.audio.text).trim().replace(/\s+/g, " ");
+        const currentJoined = loadedWords.map((w: any) => String(w.word || "").trim()).join(" ");
+        if (cleanTarget && currentJoined !== cleanTarget) {
+          const baseMeta = loadedWords[0] || {};
+          const realigned = alignRawWordsToManuscript(
+            loadedWords.map((w: any) => ({
+              word: String(w.word || ""),
+              start: Number(w.start) || 0,
+              end: Number(w.end) || 0,
+            })),
+            cleanTarget
+          );
+          loadedWords = realigned.map((rw) => ({
+            word: rw.word,
+            start: rw.start,
+            end: rw.end,
+            speaker: baseMeta.speaker || "narator",
+            speakerName: baseMeta.speakerName || (lang === "en" ? "Narrator" : "Narator"),
+            speakerColor: baseMeta.speakerColor || "#FDE047",
+          }));
+        }
+      }
+
       if (loadedWords.length === 0 && scene.audio?.text) {
         const textWords = scene.audio.text.trim().split(/\s+/).filter(Boolean);
         const duration = scene.durationSeconds || scene.audio?.durationSeconds || 6.0;
